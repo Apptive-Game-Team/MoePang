@@ -5,11 +5,8 @@ public class FriendlyUnit : Unit
     protected override void Init()
     {
         base.Init();
+        direction = 1f;
         spriteRenderer.flipX = true;
-    }
-
-    protected override void MoveState()
-    {
-        transform.position += Vector3.right * moveSpeed * Time.deltaTime;
+        targetLayer = LayerMask.GetMask("Enemy");
     }
 }

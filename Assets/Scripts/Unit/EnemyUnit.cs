@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class EnemyUnit : Unit
 {
-    protected override void MoveState()
+    protected override void Init()
     {
-        transform.position += Vector3.left * moveSpeed * Time.deltaTime;
+        base.Init();
+        direction = -1f;
+        targetLayer = LayerMask.GetMask("Friendly");
     }
 }

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 유닛의 상태 목록
+/// </summary>
 public enum UnitState
 {
     Move,
@@ -20,6 +23,10 @@ public class Unit : MonoBehaviour
     [SerializeField] protected float bassMoveSpeed;
     [SerializeField] protected float speedModifier;
     [SerializeField] protected float attackRange;
+    [SerializeField] protected float direction;
+
+    [Header("탐색 설정")]
+    [SerializeField] protected LayerMask targetLayer;
 
     [Header("현재 상태")]
     [SerializeField] public UnitState currentState; 
@@ -72,7 +79,13 @@ public class Unit : MonoBehaviour
     /// </summary>
     protected virtual void MoveState()
     {
-        
+        if (IsOtherInRange())
+        {
+            currentState = UnitState.Attack;
+            return;
+        }
+
+        transform.position += Vector3.right * direction * moveSpeed * Time.deltaTime;
     }
     /// <summary>
     /// 상대를 공격하는 상태
@@ -87,5 +100,16 @@ public class Unit : MonoBehaviour
     protected virtual void DieState()
     {
 
+    }
+
+    /// <summary>
+    /// 상대방이 공격범위에 들어왔는지 판별
+    /// </summary>
+    /// <returns></returns>
+    protected virtual bool IsOtherInRange()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
+
+        return hit.collider != null;
     }
 }
