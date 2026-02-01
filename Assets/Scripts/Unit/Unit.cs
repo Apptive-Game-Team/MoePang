@@ -19,13 +19,22 @@ public class Unit : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float bassMoveSpeed;
     [SerializeField] private float speedModifier;
+    [SerializeField] private float attackRange;
 
     [Header("현재 상태")]
     [SerializeField] public UnitState currentState; 
 
+    //참조
+    protected SpriteRenderer spriteRenderer;
+
     //프로퍼티
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
+
+    protected virtual void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     protected virtual void Start()
     {
