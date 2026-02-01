@@ -7,4 +7,9 @@ public class FriendlyUnit : Unit
         base.Init();
         spriteRenderer.flipX = true;
     }
+
+    protected override void MoveState()
+    {
+        transform.position += Vector3.right * moveSpeed * Time.deltaTime;
+    }
 }

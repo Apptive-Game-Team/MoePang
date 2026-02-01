@@ -14,12 +14,12 @@ public enum UnitState
 public class Unit : MonoBehaviour
 {
     [Header("스탯")]
-    [SerializeField] private float maxHp;
-    [SerializeField] private float currentHp;
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float bassMoveSpeed;
-    [SerializeField] private float speedModifier;
-    [SerializeField] private float attackRange;
+    [SerializeField] protected float maxHp;
+    [SerializeField] protected float currentHp;
+    [SerializeField] protected float moveSpeed;
+    [SerializeField] protected float bassMoveSpeed;
+    [SerializeField] protected float speedModifier;
+    [SerializeField] protected float attackRange;
 
     [Header("현재 상태")]
     [SerializeField] public UnitState currentState; 
@@ -42,6 +42,9 @@ public class Unit : MonoBehaviour
         currentState = UnitState.Move;
     }
 
+    /// <summary>
+    /// Unit 생성 시 초기화 함수
+    /// </summary>
     protected virtual void Init()
     {
         currentHp = maxHp;
@@ -64,14 +67,23 @@ public class Unit : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 상대를 향해 이동하는 상태
+    /// </summary>
     protected virtual void MoveState()
     {
-        transform.position += Vector3.right * moveSpeed * Time.deltaTime;
+        
     }
+    /// <summary>
+    /// 상대를 공격하는 상태
+    /// </summary>
     protected virtual void AttackState()
     {
 
     }
+    /// <summary>
+    /// 죽은 상태
+    /// </summary>
     protected virtual void DieState()
     {
 
