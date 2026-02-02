@@ -6,9 +6,11 @@ using System.Collections.Generic;
 /// </summary>
 public class UnitPool : MonoBehaviour
 {
+    [Header("풀 설정")]
     [SerializeField] private Unit unitPrefab;
     [SerializeField] private int poolCount = 10;
 
+    //오브젝트 풀링할 큐
     private Queue<Unit> pool = new Queue<Unit>();
 
     private void Awake()
@@ -19,6 +21,10 @@ public class UnitPool : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 풀에 유닛 생성
+    /// </summary>
+    /// <returns></returns>
     private Unit CreateUnit()
     {
         Unit unit = Instantiate(unitPrefab, transform);
@@ -27,6 +33,11 @@ public class UnitPool : MonoBehaviour
         pool.Enqueue(unit);
         return unit;
     }
+    /// <summary>
+    /// 풀에서 유닛 꺼내오기
+    /// </summary>
+    /// <param name="spawnPos"></param>
+    /// <returns></returns>
     public Unit SpawnUnit (Transform spawnPos)
     {
         if (pool.Count == 0)
@@ -39,6 +50,10 @@ public class UnitPool : MonoBehaviour
         unit.gameObject.SetActive(true);
         return unit;
     }
+    /// <summary>
+    /// 풀에 유닛 반환
+    /// </summary>
+    /// <param name="unit"></param>
     public void ReturnUnit(Unit unit)
     {
         unit.gameObject.SetActive(false);

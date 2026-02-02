@@ -120,6 +120,6 @@ public class Unit : MonoBehaviour
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
 
-        return hit.collider != null;
+        return hit.collider != (null);
     }
 }

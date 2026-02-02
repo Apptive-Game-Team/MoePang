@@ -5,13 +5,16 @@ using UnityEngine;
 /// </summary>
 public class UnitSpawner : MonoBehaviour
 {
-    [Header("참조")]
-    [SerializeField] private UnitPool unitPool;
+    [Header("유닛 풀")]
+    [SerializeField] private UnitPool friendlyPool;
+    [SerializeField] private UnitPool enemyPool;
 
-    [Header("설정")]
-    [SerializeField] private Transform spawnPosition;
+    [Header("스폰 설정")]
+    [SerializeField] private Transform friendlySpawnPosition;
+    [SerializeField] private Transform enemySpawnPosition;
     [SerializeField] private float spawnInterval = 10.0f;
 
+    //참조
     private float timer;
 
     private void Update()
@@ -30,7 +33,8 @@ public class UnitSpawner : MonoBehaviour
     /// </summary>
     private void Spawn()
     {
-        unitPool.SpawnUnit(spawnPosition);
+        friendlyPool.SpawnUnit(friendlySpawnPosition);
+        enemyPool.SpawnUnit(enemySpawnPosition);
     }
 
 }
