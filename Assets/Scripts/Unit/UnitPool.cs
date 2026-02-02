@@ -27,7 +27,7 @@ public class UnitPool : MonoBehaviour
         pool.Enqueue(unit);
         return unit;
     }
-    public Unit SpawnUnit (Vector3 position)
+    public Unit SpawnUnit (Transform spawnPos)
     {
         if (pool.Count == 0)
         {
@@ -35,7 +35,7 @@ public class UnitPool : MonoBehaviour
         }
 
         Unit unit = pool.Dequeue();
-        unit.transform.position = position;
+        unit.transform.position = spawnPos.position;
         unit.gameObject.SetActive(true);
         return unit;
     }

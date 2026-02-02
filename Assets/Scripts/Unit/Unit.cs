@@ -29,7 +29,7 @@ public class Unit : MonoBehaviour
     [SerializeField] protected LayerMask targetLayer;
 
     [Header("현재 상태")]
-    [SerializeField] public UnitState currentState; 
+    [SerializeField] public UnitState currentState;
 
     //참조
     protected SpriteRenderer spriteRenderer;
@@ -44,7 +44,7 @@ public class Unit : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    protected virtual void Start()
+    protected virtual void OnEnable()
     {
         Init();
         currentState = UnitState.Move;
@@ -59,6 +59,10 @@ public class Unit : MonoBehaviour
         moveSpeed = bassMoveSpeed;
     }
 
+    /// <summary>
+    /// 풀 지정
+    /// </summary>
+    /// <param name="pool"></param>
     public void SetPool(UnitPool pool)
     {
         this.ownerPool = pool;
