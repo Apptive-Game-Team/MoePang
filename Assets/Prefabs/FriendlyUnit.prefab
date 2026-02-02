@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6865d618c3d4f634d9f3f3596e6fa978, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 100
+  maxHp: 20
   currentHp: 0
   moveSpeed: 0
   bassMoveSpeed: 1
@@ -112,6 +112,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   currentState: 0
+  attackPrefab: {fileID: 3139363802915687209, guid: 6ac21166a7243354c80b0608cbe96656, type: 3}
 --- !u!58 &3634941712577553398
 CircleCollider2D:
   m_ObjectHideFlags: 0

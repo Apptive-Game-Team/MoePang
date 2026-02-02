@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -31,9 +32,12 @@ public class Unit : MonoBehaviour
     [Header("현재 상태")]
     [SerializeField] public UnitState currentState;
 
-    //참조
+    [Header("참조")]
+    [SerializeField] protected GameObject attackPrefab;
     protected SpriteRenderer spriteRenderer;
     protected UnitPool ownerPool;
+    protected bool isAttacking;
+    protected float attackDelayTime = 0.5f;
 
     //프로퍼티
     public float CurrentHp => currentHp;
@@ -47,6 +51,7 @@ public class Unit : MonoBehaviour
     protected virtual void OnEnable()
     {
         Init();
+        isAttacking = false;
         currentState = UnitState.Move;
     }
 
@@ -102,15 +107,47 @@ public class Unit : MonoBehaviour
     /// </summary>
     protected virtual void AttackState()
     {
+        if (!IsOtherInRange())
+        {
+            currentState = UnitState.Move;
+            return;
+        }
 
+        if (isAttacking) return;
+
+        if (!isAttacking)
+        {
+            StartCoroutine(AttackCoroutine());
+        }
     }
     /// <summary>
     /// 죽은 상태
     /// </summary>
     protected virtual void DieState()
     {
+        StopAllCoroutines();
         ownerPool.ReturnUnit(this);
+        return;
     }   
+
+    /// <summary>
+    /// 상대를 마주친 유닛이 공격하는 로직
+    /// </summary>
+    /// <returns></returns>
+    protected virtual IEnumerator AttackCoroutine()
+    {
+        isAttacking = true;
+
+        yield return new WaitForSeconds(attackDelayTime);
+
+        GameObject go = Instantiate(attackPrefab, transform.position, Quaternion.identity);
+        Weapon weapon = go.GetComponent<Weapon>();
+        weapon.SetWeapon(this.direction, this.targetLayer);
+
+        yield return new WaitForSeconds(attackDelayTime);
+
+        isAttacking = false;
+    }
 
     /// <summary>
     /// 상대방이 공격범위에 들어왔는지 판별
@@ -121,5 +158,14 @@ public class Unit : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
 
         return hit.collider != (null);
+    }
+
+    public virtual void TakeDamage(float damage)
+    {
+        currentHp -= damage;
+        if (currentHp < 0)
+        {
+            currentState = UnitState.Die;
+        }
     }
 }
