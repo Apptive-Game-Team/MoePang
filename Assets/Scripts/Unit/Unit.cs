@@ -33,6 +33,7 @@ public class Unit : MonoBehaviour
 
     //참조
     protected SpriteRenderer spriteRenderer;
+    protected UnitPool ownerPool;
 
     //프로퍼티
     public float CurrentHp => currentHp;
@@ -56,6 +57,11 @@ public class Unit : MonoBehaviour
     {
         currentHp = maxHp;
         moveSpeed = bassMoveSpeed;
+    }
+
+    public void SetPool(UnitPool pool)
+    {
+        this.ownerPool = pool;
     }
 
     private void Update()
@@ -99,8 +105,8 @@ public class Unit : MonoBehaviour
     /// </summary>
     protected virtual void DieState()
     {
-
-    }
+        ownerPool.ReturnUnit(this);
+    }   
 
     /// <summary>
     /// 상대방이 공격범위에 들어왔는지 판별
