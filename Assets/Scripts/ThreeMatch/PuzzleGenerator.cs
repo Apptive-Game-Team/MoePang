@@ -130,7 +130,7 @@ namespace ThreeMatch
             
             if (CheckAnyMatches())
             {
-                StartCoroutine(MatchPuzzle());
+                yield return MatchPuzzle();
             }
             else
             {
@@ -213,7 +213,7 @@ namespace ThreeMatch
             }
             yield return new WaitForSeconds(0.2f);
             
-            yield return StartCoroutine(DropBlocks());
+            yield return DropBlocks();
         }
         
         private IEnumerator DropBlocks()
@@ -243,7 +243,7 @@ namespace ThreeMatch
             }
             yield return new WaitForSeconds(0.2f);
             
-            yield return StartCoroutine(RefillBlocks());
+            yield return RefillBlocks();
         }
         
         private IEnumerator RefillBlocks()
@@ -271,7 +271,7 @@ namespace ThreeMatch
             
             if (CheckAnyMatches())
             {
-                yield return StartCoroutine(MatchPuzzle());
+                yield return MatchPuzzle();
             }
         }
     }
