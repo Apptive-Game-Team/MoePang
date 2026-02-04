@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 using Random = UnityEngine.Random;
+using DG.Tweening;
 
 namespace ThreeMatch
 {
@@ -33,28 +32,39 @@ namespace ThreeMatch
 
         private void Start()
         {
-            GenerateBoard();
+            StartCoroutine(GenerateBoard());
         }
 
-        private void GenerateBoard()
+        private IEnumerator GenerateBoard()
         {
+            _isProcessing = true;
+            
             _puzzles = new PuzzleObject[x, y];
             
             for (int i = 0; i < y; i++)
             {
+                Sequence seq = DOTween.Sequence();
+                
                 for (int j = 0; j < x; j++)
                 {
                     int randomType = (int)GetValidRandomType(j, i);
                     
-                    GameObject puzzle = Instantiate(puzzlePrefabs[randomType], puzzleFrame);
-                    PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                    GameObject puzzle = Instantiate(puzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
                     
-                    po.Init(this, j, i);
-                    puzzle.transform.localPosition = CalculatePos(j, i);
+                    PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                     puzzle.name = $"Puzzle({j},{i})";
                     _puzzles[j, i] = po;
+                    
+                    Tween t = puzzle.transform.DOMove(CalculatePos(j, i), 0.3f);
+                    seq.Join(t);
+                    
+                    po.Init(this, j, i);
                 }
             }
+
+            yield return null;
+            
+            _isProcessing = false;
         }
 
         private PuzzleType GetValidRandomType(int curX, int curY)
@@ -93,12 +103,20 @@ namespace ThreeMatch
             return false;
         }
         
-        private Vector3 CalculatePos(int i, int j)
+        private Vector3 CalculatePos(int col, int row)
         {
             float offsetX = (x - 1) * space / 2f;
             float offsetY = (y - 1) * space / 2f;
             
-            return new Vector3(i * space - offsetX, j * space - offsetY, 0f);
+            return new Vector3(col * space - offsetX, row * space - offsetY, 0f);
+        }
+
+        private Vector3 CalculateDropPos(int col, int row)
+        {
+            float offsetX = (x - 1) * space / 2f;
+            float offsetY = (y + 3) * space / 2f;
+
+            return new Vector3(col * space - offsetX, row * space + offsetY, 0f);
         }
         
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
@@ -119,11 +137,16 @@ namespace ThreeMatch
             _puzzles[x1, y1] = p2;
             _puzzles[x2, y2] = p1;
             
-            // todo : 부드러운 움직임 추가
             Vector3 pos1 = p1.transform.localPosition;
             Vector3 pos2 = p2.transform.localPosition;
-            p1.transform.localPosition = pos2;
-            p2.transform.localPosition = pos1;
+            
+            Sequence seq1 = DOTween.Sequence();
+            Tween t1 = p1.transform.DOMove(pos2, 0.2f);
+            Tween t2 = p2.transform.DOMove(pos1, 0.2f);
+            seq1.Append(t1);
+            seq1.Join(t2);
+            
+            yield return seq1.WaitForCompletion();
             
             p1.Init(this, x2, y2);
             p2.Init(this, x1, y1);
@@ -134,11 +157,18 @@ namespace ThreeMatch
             }
             else
             {
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.2f);
                 _puzzles[x1, y1] = p1;
                 _puzzles[x2, y2] = p2;
-                p1.transform.localPosition = pos1;
-                p2.transform.localPosition = pos2;
+                
+                Sequence seq2 = DOTween.Sequence();
+                Tween t3 = p1.transform.DOMove(pos1, 0.2f);
+                Tween t4 = p2.transform.DOMove(pos2, 0.2f);
+                seq2.Append(t3);
+                seq2.Join(t4);
+                
+                yield return seq2.WaitForCompletion();
+                
                 p1.Init(this, x1, y1);
                 p2.Init(this, x2, y2);
             }
@@ -200,17 +230,29 @@ namespace ThreeMatch
 
         private IEnumerator MatchPuzzle()
         {
+            Sequence seq = DOTween.Sequence();
+            
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
                 {
                     if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
                     {
-                        Destroy(_puzzles[i, j].gameObject);
-                        _puzzles[i, j] = null;
+                        int row = i, col = j;
+                        
+                        Tween t = _puzzles[row, col].transform.DOScale(0, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                // todo : 매치 시 유닛 소환 효과 함수 추가
+                                Destroy(_puzzles[row, col].gameObject);
+                                _puzzles[row, col] = null;
+                            });
+                        seq.Join(t);
                     }
                 }
             }
+            
+            yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.2f);
             
             yield return DropBlocks();
@@ -218,6 +260,8 @@ namespace ThreeMatch
         
         private IEnumerator DropBlocks()
         {
+            Sequence seq = DOTween.Sequence();
+
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -230,17 +274,20 @@ namespace ThreeMatch
                             {
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
-                                
-                                _puzzles[i, j].transform.localPosition = CalculatePos(i, j);
-                                
+
+                                Tween t = _puzzles[i, j].transform.DOMove(CalculatePos(i, j), 0.3f);
+                                seq.Join(t);
+
                                 _puzzles[i, j].Init(this, i, j);
-                                
+
                                 break;
                             }
                         }
                     }
                 }
             }
+            
+            yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.2f);
             
             yield return RefillBlocks();
@@ -248,6 +295,8 @@ namespace ThreeMatch
         
         private IEnumerator RefillBlocks()
         {
+            Sequence seq = DOTween.Sequence();
+            
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -256,17 +305,21 @@ namespace ThreeMatch
                     {
                         int randomType = Random.Range(0, puzzlePrefabs.Length);
                         
-                        GameObject puzzle = Instantiate(puzzlePrefabs[randomType], puzzleFrame);
-                        PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                        GameObject puzzle = Instantiate(puzzlePrefabs[randomType], CalculateDropPos(i, j), Quaternion.identity, puzzleFrame);
                         
-                        po.Init(this, i, j);
-                        po.transform.localPosition = CalculatePos(i, j);
+                        PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                         puzzle.name = $"Puzzle({i},{j})";
                         _puzzles[i, j] = po;
+
+                        Tween t = po.transform.DOMove(CalculatePos(i, j), 0.3f);
+                        seq.Join(t);
+                        
+                        po.Init(this, i, j);
                     }
                 }
             }
 
+            yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.2f);
             
             if (CheckAnyMatches())

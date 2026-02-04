@@ -324,6 +324,7 @@ GameObject:
   - component: {fileID: 1322066641}
   - component: {fileID: 1322066643}
   - component: {fileID: 1322066642}
+  - component: {fileID: 1322066644}
   m_Layer: 5
   m_Name: PuzzleFrame
   m_TagString: Untagged
@@ -388,6 +389,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1322066640}
   m_CullTransparentMesh: 1
+--- !u!114 &1322066644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322066640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &1798430324
 GameObject:
   m_ObjectHideFlags: 0
@@ -437,12 +451,12 @@ MonoBehaviour:
   y: 9
   space: 1
   puzzlePrefabs:
-  - {fileID: 1607273433559853273, guid: 62dd01cd4683e56468d11912965aa0cd, type: 3}
-  - {fileID: 7347801778267707668, guid: 8b82efca8c35c21499836835c787f7ec, type: 3}
+  - {fileID: 2857731521102525544, guid: 060c10bf6e317334890b69ac17dd404d, type: 3}
+  - {fileID: 2857731521102525544, guid: 4e60a5a53bc316a44b148d176d921ebc, type: 3}
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
-  - {fileID: 6578802151208723123, guid: e82ce05a738707840a5490ec3844967c, type: 3}
-  - {fileID: 7856445860012336951, guid: 1befb9ff96257b54692c6f36dd5f82d6, type: 3}
-  - {fileID: 990564424265381752, guid: 1d41ee8960ff24d43bb20d52b08fb4cf, type: 3}
+  - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
+  - {fileID: 2857731521102525544, guid: 858fa37a2b22e7242a5d761800dc4683, type: 3}
+  - {fileID: 2857731521102525544, guid: 400736967337fd64a918ce571888ff5c, type: 3}
 --- !u!1 &2059293714
 GameObject:
   m_ObjectHideFlags: 0
