@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5089521197111415638}
   - component: {fileID: 3020771313939166508}
   m_Layer: 0
-  m_Name: Purple
+  m_Name: Leaf
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52,14 +52,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.7324152, g: 0, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7482667652216324306, guid: db750325989564987a34393247d883b4, type: 3}
+  m_Sprite: {fileID: -862775087636167547, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -81,7 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75446977667e7ed4fa2918300143338d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 4
+  puzzleType: 1
   isMatched: 0
   column: 0
   row: 0

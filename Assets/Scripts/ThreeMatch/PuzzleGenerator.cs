@@ -10,12 +10,11 @@ namespace ThreeMatch
     {
         public enum PuzzleType
         {
-            White,
-            Red,
-            Blue,
-            Green,
-            Purple,
-            Yellow,
+            Flower,
+            Leaf,
+            Sand,
+            Snow,
+            Water,
         }
         
         [Header("Puzzle Settings")]

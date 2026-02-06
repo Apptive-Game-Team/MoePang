@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5089521197111415638}
   - component: {fileID: 3020771313939166508}
   m_Layer: 0
-  m_Name: White
+  m_Name: Snow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7482667652216324306, guid: db750325989564987a34393247d883b4, type: 3}
+  m_Sprite: {fileID: 810494766280951130, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -81,7 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75446977667e7ed4fa2918300143338d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 0
+  puzzleType: 3
   isMatched: 0
   column: 0
   row: 0
