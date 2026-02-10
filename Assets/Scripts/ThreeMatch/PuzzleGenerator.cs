@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using DG.Tweening;
@@ -33,17 +34,28 @@ namespace ThreeMatch
         {
             StartCoroutine(GenerateBoard());
         }
-
+        
+        /// <summary>
+        /// 시작 퍼즐 관련 메서드 (시작 시 매치가 안 일어나게 설정)
+        /// </summary>
+        /// <returns></returns>
+        #region StartPuzzle
         private IEnumerator GenerateBoard()
         {
             _isProcessing = true;
             
             _puzzles = new PuzzleObject[x, y];
+            yield return SetStartPuzzle();
+            
+            _isProcessing = false;
+        }
+        
+        private IEnumerator SetStartPuzzle()
+        {
+            Sequence seq = DOTween.Sequence();
             
             for (int i = 0; i < y; i++)
             {
-                Sequence seq = DOTween.Sequence();
-                
                 for (int j = 0; j < x; j++)
                 {
                     int randomType = (int)GetValidRandomType(j, i);
@@ -61,9 +73,7 @@ namespace ThreeMatch
                 }
             }
 
-            yield return null;
-            
-            _isProcessing = false;
+            yield return seq.WaitForCompletion();
         }
 
         private PuzzleType GetValidRandomType(int curX, int curY)
@@ -101,7 +111,15 @@ namespace ThreeMatch
 
             return false;
         }
+        #endregion
         
+        /// <summary>
+        /// 실제 퍼즐 위치, 떨어지기 전의 퍼즐 위치 계산
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="row"></param>
+        /// <returns></returns>
+        #region PuzzlePosition
         private Vector3 CalculatePos(int col, int row)
         {
             float offsetX = (x - 1) * space / 2f;
@@ -117,7 +135,16 @@ namespace ThreeMatch
 
             return new Vector3(col * space - offsetX, row * space + offsetY, 0f);
         }
+        #endregion
         
+        /// <summary>
+        /// 퍼즐을 옮겼을 때 완성 되는지 확인하는 메서드 및 퍼즐을 맞추고, 퍼즐이 사라지고, 내려오고, 채워지는 메서드
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        #region SwapAndMatchPuzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
             if (_isProcessing) return;
@@ -226,7 +253,7 @@ namespace ThreeMatch
 
             return hasMatch;
         }
-
+        
         private IEnumerator MatchPuzzle()
         {
             Sequence seq = DOTween.Sequence();
@@ -307,9 +334,9 @@ namespace ThreeMatch
                         GameObject puzzle = Instantiate(puzzlePrefabs[randomType], CalculateDropPos(i, j), Quaternion.identity, puzzleFrame);
                         
                         PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                        puzzle.name = $"Puzzle({i},{j})";
+                        puzzle.name = $"Puzzle({j},{i})";
                         _puzzles[i, j] = po;
-
+                        
                         Tween t = po.transform.DOMove(CalculatePos(i, j), 0.3f);
                         seq.Join(t);
                         
@@ -320,11 +347,12 @@ namespace ThreeMatch
 
             yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.2f);
-            
+    
             if (CheckAnyMatches())
             {
                 yield return MatchPuzzle();
             }
         }
+        #endregion
     }
 }
