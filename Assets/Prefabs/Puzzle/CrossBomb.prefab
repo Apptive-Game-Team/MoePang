@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5089521197111415638}
   - component: {fileID: 3020771313939166508}
   m_Layer: 0
-  m_Name: Sand
+  m_Name: CrossBomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2081581688970004608, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4a0aca3a5f2effb41b43cc0a1661d845, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -81,11 +81,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75446977667e7ed4fa2918300143338d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 3
-  specialPuzzleType: 0
-  isMatched: 0
+  puzzleType: 0
   column: 0
   row: 0
+  isMatched: 0
 --- !u!61 &5089521197111415638
 BoxCollider2D:
   m_ObjectHideFlags: 0

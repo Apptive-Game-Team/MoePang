@@ -81,7 +81,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75446977667e7ed4fa2918300143338d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleType: 4
+  puzzleType: 5
+  specialPuzzleType: 0
   isMatched: 0
   column: 0
   row: 0

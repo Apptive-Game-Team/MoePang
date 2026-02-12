@@ -450,12 +450,26 @@ MonoBehaviour:
   x: 9
   y: 9
   space: 1
-  puzzlePrefabs:
+  normalProbability: 96
+  specialProbability: 50
+  normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
   - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
   - {fileID: 2857731521102525544, guid: 858fa37a2b22e7242a5d761800dc4683, type: 3}
   - {fileID: 2857731521102525544, guid: 4e60a5a53bc316a44b148d176d921ebc, type: 3}
   - {fileID: 2857731521102525544, guid: 060c10bf6e317334890b69ac17dd404d, type: 3}
+  specialPuzzlePrefabs:
+  - {fileID: 2857731521102525544, guid: 9fb90e3d43ae1d341916c097dc861caa, type: 3}
+  - {fileID: 2857731521102525544, guid: 669fc956b998def4e9b25bf7d35ed4be, type: 3}
+  obstaclePuzzlePrefabs:
+  - {fileID: 2857731521102525544, guid: 644aa0087807ddd4d91aef22c9df1c2e, type: 3}
+  - {fileID: 2857731521102525544, guid: 3078c7d34f980f744bd38f948248da48, type: 3}
+  normalPuzzleImages:
+  - {fileID: -3072705626550885748, guid: dee434639a2262e48b5065c75b9f7d44, type: 3}
+  - {fileID: -862775087636167547, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
+  - {fileID: -2081581688970004608, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
+  - {fileID: 810494766280951130, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
+  - {fileID: -6545081411632747473, guid: b1bdf607f3102e54bac670741b98d44e, type: 3}
 --- !u!1 &2059293714
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,28 +4,57 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using DG.Tweening;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace ThreeMatch
 {
+    public enum PuzzleType
+    {
+        Normal,
+        Special,
+        Obstacle,
+    }
+
+    public enum NormalPuzzleType
+    {
+        Flower,
+        Leaf,
+        Sand,
+        Snow,
+        Water,
+    }
+
+    public enum SpecialPuzzleType
+    {
+        Bomb3X3,
+        CrossBomb,
+        RowBomb,
+        ColumnBomb,
+        ColorBomb,
+    }
+
+    public enum ObstaclePuzzleType
+    {
+        DeActivated,
+        Fixed,
+    }
+    
     public class PuzzleGenerator : MonoBehaviour
     {
-        public enum PuzzleType
-        {
-            Flower,
-            Leaf,
-            Sand,
-            Snow,
-            Water,
-        }
-        
         [Header("Puzzle Settings")]
         [SerializeField] private RectTransform puzzleFrame;
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
-
+        [Range(0, 100)] [SerializeField] private float normalProbability;
+        [Range(0, 100)] [SerializeField] private float specialProbability;
+        
         [Header("Puzzle Prefabs")]
-        [SerializeField] private GameObject[] puzzlePrefabs;
+        [SerializeField] private GameObject[] normalPuzzlePrefabs;
+        [SerializeField] private GameObject[] specialPuzzlePrefabs;
+        [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
+        [SerializeField] private Sprite[] normalPuzzleImages;
         
         private PuzzleObject[,] _puzzles;
         private bool _isProcessing;
@@ -58,9 +87,27 @@ namespace ThreeMatch
             {
                 for (int j = 0; j < x; j++)
                 {
-                    int randomType = (int)GetValidRandomType(j, i);
+                    GameObject puzzle;
                     
-                    GameObject puzzle = Instantiate(puzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
+                    if (Random.Range(0, 100) < normalProbability)
+                    {
+                        if (Random.Range(0, 100) < specialProbability)
+                        {
+                            int randomType = Random.Range(0, specialPuzzlePrefabs.Length);
+                            puzzle = Instantiate(specialPuzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
+                        }
+                        else
+                        {
+                            int randomType = Random.Range(0, obstaclePuzzlePrefabs.Length);
+                            puzzle = Instantiate(obstaclePuzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
+                        }
+                    }
+                    else
+                    {
+                        int randomType = (int)GetValidRandomType(j, i);
+                        puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
+                    }
+                    
                     
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                     puzzle.name = $"Puzzle({j},{i})";
@@ -79,11 +126,11 @@ namespace ThreeMatch
         private PuzzleType GetValidRandomType(int curX, int curY)
         {
             var types = Enum.GetValues(typeof(PuzzleType));
-            var randomType = (PuzzleType)types.GetValue(Random.Range(0, types.Length));
+            var randomType = (PuzzleType)types.GetValue(Random.Range(1, types.Length));
 
             while (IsStartingMatch(curX, curY, randomType))
             {
-                randomType = (PuzzleType)types.GetValue(Random.Range(0, types.Length));
+                randomType = (PuzzleType)types.GetValue(Random.Range(1, types.Length));
             }
 
             return randomType;
@@ -223,7 +270,7 @@ namespace ThreeMatch
                 {
                     PuzzleType currentType = _puzzles[i, j].puzzleType;
                     
-                    if (_puzzles[i + 1, j].puzzleType == currentType && 
+                    if (_puzzles[i + 1, j].puzzleType == currentType &&
                         _puzzles[i + 2, j].puzzleType == currentType)
                     {
                         _puzzles[i, j].isMatched = true;
@@ -246,12 +293,35 @@ namespace ThreeMatch
                         _puzzles[i, j].isMatched = true;
                         _puzzles[i, j + 1].isMatched = true;
                         _puzzles[i, j + 2].isMatched = true;
+                        CheckAnySpecialPuzzle(i, j);
+                        CheckAnySpecialPuzzle(i, j + 1);
+                        CheckAnySpecialPuzzle(i, j + 2);
                         hasMatch = true;
                     }
                 }
             }
 
             return hasMatch;
+        }
+        
+        private void CheckAnySpecialPuzzle(int i, int j)
+        {
+            int[] dx = { 0, 0, -1, 1 };
+            int[] dy = { 1, -1, 0, 0 };
+
+            for (int d = 0; d < 4; d++)
+            {
+                int ni = i + dx[d];
+                int nj = j + dy[d];
+                
+                if (ni >= 0 && ni < x && nj >= 0 && nj < y)
+                {
+                    if (_puzzles[ni, nj].puzzleType != PuzzleType.Normal)
+                    {
+                        _puzzles[ni, nj].isMatched = true;
+                    }
+                }
+            }
         }
         
         private IEnumerator MatchPuzzle()
@@ -329,9 +399,9 @@ namespace ThreeMatch
                 {
                     if (_puzzles[i, j] == null)
                     {
-                        int randomType = Random.Range(0, puzzlePrefabs.Length);
+                        int randomType = Random.Range(0, normalPuzzlePrefabs.Length);
                         
-                        GameObject puzzle = Instantiate(puzzlePrefabs[randomType], CalculateDropPos(i, j), Quaternion.identity, puzzleFrame);
+                        GameObject puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(i, j), Quaternion.identity, puzzleFrame);
                         
                         PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                         puzzle.name = $"Puzzle({j},{i})";
