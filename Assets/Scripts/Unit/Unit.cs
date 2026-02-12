@@ -1,3 +1,4 @@
+using NUnit.Framework.Constraints;
 using System.Collections;
 using UnityEngine;
 
@@ -9,6 +10,15 @@ public enum UnitState
     Move,
     Attack,
     Die,
+}
+
+/// <summary>
+/// 아군진영, 적진영 타입
+/// </summary>
+public enum TeamType
+{
+    Friendly,
+    Enemy
 }
 
 /// <summary>
@@ -30,7 +40,8 @@ public class Unit : MonoBehaviour
     [SerializeField] protected LayerMask targetLayer;
 
     [Header("현재 상태")]
-    [SerializeField] public UnitState currentState;
+    [SerializeField] protected UnitState currentState;
+    [SerializeField] protected TeamType team;
 
     [Header("참조")]
     [SerializeField] protected GameObject attackPrefab;
@@ -38,6 +49,8 @@ public class Unit : MonoBehaviour
     protected UnitPool ownerPool;
     protected bool isAttacking;
     protected float attackDelayTime = 0.5f;
+
+    protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
 
     //프로퍼티
     public float CurrentHp => currentHp;
@@ -96,7 +109,25 @@ public class Unit : MonoBehaviour
     {
         if (IsOtherInRange())
         {
-            //if (UnitTransformQueue)
+            if (UTQ.IsEmpty(team))
+                UTQ.Enqueue(team, this);
+
+            else
+            {
+                Unit firstUnit = UTQ.Peek(team);
+                float firstX = firstUnit.transform.position.x;
+                float thisX = transform.position.x;
+
+                if (IsInFrontOf(firstX))
+                {
+                    UTQ.Clear(team);
+                    UTQ.Enqueue(team, this);
+                }
+                else if (Mathf.Abs(firstX - transform.position.x) < 0.001f)
+                {
+                    UTQ.Enqueue(team, this);
+                }
+            }
 
             currentState = UnitState.Attack;
             return;
@@ -160,6 +191,11 @@ public class Unit : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
 
         return hit.collider != (null);
+    }
+
+    protected bool IsInFrontOf(float otherX)
+    {
+        return (transform.position.x * direction) > (otherX * direction);
     }
 
     public virtual void TakeDamage(float damage)
