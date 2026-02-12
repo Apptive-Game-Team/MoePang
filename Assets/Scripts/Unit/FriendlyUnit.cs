@@ -7,7 +7,6 @@ public class FriendlyUnit : Unit
         base.Init();
         team = TeamType.Friendly;
         direction = 1f;
-        spriteRenderer.flipX = true;
         targetLayer = LayerMask.GetMask("Enemy");
     }
 }
