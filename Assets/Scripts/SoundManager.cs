@@ -23,7 +23,11 @@ public enum SFX
 }
 
 //사운드 추가 시 위 Enum에 추가 할 것
-
+/// <summary>
+/// 사용 예시
+/// 원하는 부분에 SoundManager.Instance.PlaySFX(SFX.원하는 enum); 혹은 SoundManager.Instance.PlayBGM(BGM.원하는 enum, loop여부);
+/// 브금 교체 시 굳이 기존 브금 중지하지 않아도 새로운 브금 재생 시 자동 중지됨
+/// </summary>
 public class SoundManager : SingletonObject<SoundManager>
 {
     public AudioMixer Mixer { get; private set; }
