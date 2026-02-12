@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using DG.Tweening;
@@ -68,7 +69,7 @@ namespace ThreeMatch
         /// 시작 퍼즐 관련 메서드 (시작 시 매치가 안 일어나게 설정)
         /// </summary>
         /// <returns></returns>
-        #region StartPuzzle
+        #region Start Puzzle
         private IEnumerator GenerateBoard()
         {
             _isProcessing = true;
@@ -87,27 +88,7 @@ namespace ThreeMatch
             {
                 for (int j = 0; j < x; j++)
                 {
-                    GameObject puzzle;
-                    
-                    if (Random.Range(0, 100) < normalProbability)
-                    {
-                        if (Random.Range(0, 100) < specialProbability)
-                        {
-                            int randomType = Random.Range(0, specialPuzzlePrefabs.Length);
-                            puzzle = Instantiate(specialPuzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
-                        }
-                        else
-                        {
-                            int randomType = Random.Range(0, obstaclePuzzlePrefabs.Length);
-                            puzzle = Instantiate(obstaclePuzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
-                        }
-                    }
-                    else
-                    {
-                        int randomType = (int)GetValidRandomType(j, i);
-                        puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(j, i), Quaternion.identity, puzzleFrame);
-                    }
-                    
+                    GameObject puzzle = SetRandomPuzzle(j, i);
                     
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                     puzzle.name = $"Puzzle({j},{i})";
@@ -123,25 +104,58 @@ namespace ThreeMatch
             yield return seq.WaitForCompletion();
         }
 
-        private PuzzleType GetValidRandomType(int curX, int curY)
+        private GameObject SetRandomPuzzle(int col, int row)
         {
-            var types = Enum.GetValues(typeof(PuzzleType));
-            var randomType = (PuzzleType)types.GetValue(Random.Range(1, types.Length));
+            GameObject puzzle;
+            
+            if (Random.Range(0, 100) > normalProbability)
+            {
+                if (Random.Range(0, 100) < specialProbability)
+                {
+                    var values = Enum.GetValues(typeof(SpecialPuzzleType));
+                    var randomType = (SpecialPuzzleType)values.GetValue(Random.Range(0, values.Length));
+                    puzzle = Instantiate(specialPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                    if (randomType == SpecialPuzzleType.ColorBomb)
+                    {
+                        var idx = Enum.GetValues(typeof(NormalPuzzleType)).GetValue(Random.Range(0, values.Length));
+                        puzzle.GetComponent<SpecialPuzzleObject>().colorBombType = (NormalPuzzleType)idx;
+                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)idx];
+                    }
+                }
+                else
+                {
+                    int randomType = Random.Range(0, obstaclePuzzlePrefabs.Length);
+                    puzzle = Instantiate(obstaclePuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                }
+            }
+            else
+            {
+                int randomType = (int)GetValidRandomType(col, row);
+                puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+            }
+
+            return puzzle;
+        }
+
+        private NormalPuzzleType GetValidRandomType(int curX, int curY)
+        {
+            var types = Enum.GetValues(typeof(NormalPuzzleType));
+            var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
 
             while (IsStartingMatch(curX, curY, randomType))
             {
-                randomType = (PuzzleType)types.GetValue(Random.Range(1, types.Length));
+                randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
             }
 
             return randomType;
         }
 
-        private bool IsStartingMatch(int curX, int curY, PuzzleType type)
+        private bool IsStartingMatch(int curX, int curY, NormalPuzzleType type)
         {
             if (curX > 1)
             {
-                if (_puzzles[curX - 1, curY].puzzleType == type && 
-                    _puzzles[curX - 2, curY].puzzleType == type)
+                if (CheckNormalType(_puzzles[curX - 1, curY], type) && 
+                    CheckNormalType(_puzzles[curX - 2, curY], type))
                 {
                     return true;
                 }
@@ -149,13 +163,37 @@ namespace ThreeMatch
             
             if (curY > 1)
             {
-                if (_puzzles[curX, curY - 1].puzzleType == type && 
-                    _puzzles[curX, curY - 2].puzzleType == type)
+                if (CheckNormalType(_puzzles[curX, curY - 1], type) && 
+                    CheckNormalType(_puzzles[curX, curY - 2], type))
                 {
                     return true;
                 }
             }
 
+            return false;
+        }
+        
+        private bool CheckType(PuzzleObject p1, PuzzleObject p2)
+        {
+            if (p1.puzzleType == p2.puzzleType)
+            {
+                if (p1.GetPuzzleSubType() == p2.GetPuzzleSubType())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool CheckNormalType(PuzzleObject p, NormalPuzzleType type)
+        {
+            if (p.puzzleType == PuzzleType.Normal)
+            {
+                if ((NormalPuzzleType)p.GetPuzzleSubType() == type)
+                {
+                    return true;
+                }
+            }
             return false;
         }
         #endregion
@@ -166,7 +204,7 @@ namespace ThreeMatch
         /// <param name="col"></param>
         /// <param name="row"></param>
         /// <returns></returns>
-        #region PuzzlePosition
+        #region Puzzle Position
         private Vector3 CalculatePos(int col, int row)
         {
             float offsetX = (x - 1) * space / 2f;
@@ -191,7 +229,7 @@ namespace ThreeMatch
         /// <param name="y1"></param>
         /// <param name="x2"></param>
         /// <param name="y2"></param>
-        #region SwapAndMatchPuzzle
+        #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
             if (_isProcessing) return;
@@ -268,14 +306,15 @@ namespace ThreeMatch
             {
                 for (int i = 0; i < x - 2; i++)
                 {
-                    PuzzleType currentType = _puzzles[i, j].puzzleType;
-                    
-                    if (_puzzles[i + 1, j].puzzleType == currentType &&
-                        _puzzles[i + 2, j].puzzleType == currentType)
+                    if (CheckType(_puzzles[i, j], _puzzles[i + 1, j]) &&
+                        CheckType(_puzzles[i, j], _puzzles[i + 2, j]))
                     {
                         _puzzles[i, j].isMatched = true;
                         _puzzles[i + 1, j].isMatched = true;
                         _puzzles[i + 2, j].isMatched = true;
+                        CheckAnySpecialPuzzle(i, j);
+                        CheckAnySpecialPuzzle(i + 1, j);
+                        CheckAnySpecialPuzzle(i + 2, j);
                         hasMatch = true;
                     }
                 }
@@ -285,10 +324,8 @@ namespace ThreeMatch
             {
                 for (int j = 0; j < y - 2; j++)
                 {
-                    PuzzleType currentType = _puzzles[i, j].puzzleType;
-                    
-                    if (_puzzles[i, j + 1].puzzleType == currentType && 
-                        _puzzles[i, j + 2].puzzleType == currentType)
+                    if (CheckType(_puzzles[i, j], _puzzles[i, j + 1]) &&
+                        CheckType(_puzzles[i, j], _puzzles[i, j + 2]))
                     {
                         _puzzles[i, j].isMatched = true;
                         _puzzles[i, j + 1].isMatched = true;
@@ -334,8 +371,21 @@ namespace ThreeMatch
                 {
                     if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
                     {
+                        if (_puzzles[i, j] is SpecialPuzzleObject sp)
+                        {
+                            SpecialMatch(i, j, sp.specialPuzzleType);
+                        }
+                    }
+                }
+            }
+            
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
+                    {
                         int row = i, col = j;
-                        
                         Tween t = _puzzles[row, col].transform.DOScale(0, 0.2f)
                             .OnComplete(() =>
                             {
@@ -399,9 +449,7 @@ namespace ThreeMatch
                 {
                     if (_puzzles[i, j] == null)
                     {
-                        int randomType = Random.Range(0, normalPuzzlePrefabs.Length);
-                        
-                        GameObject puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(i, j), Quaternion.identity, puzzleFrame);
+                        GameObject puzzle = SetRandomPuzzle(i, j);
                         
                         PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                         puzzle.name = $"Puzzle({j},{i})";
@@ -422,6 +470,114 @@ namespace ThreeMatch
             {
                 yield return MatchPuzzle();
             }
+        }
+        #endregion
+        
+        #region Abnormal Puzzle Effect
+        private void SpecialMatch(int curX, int curY, SpecialPuzzleType type)
+        {
+            switch(type)
+            {
+                case SpecialPuzzleType.Bomb3X3:
+                    Bomb3X3Match(curX, curY);
+                    break;
+                case SpecialPuzzleType.ColumnBomb:
+                    ColumnBombMatch(curX);
+                    break;
+                case SpecialPuzzleType.RowBomb:
+                    RowBombMatch(curY);
+                    break;
+                case SpecialPuzzleType.CrossBomb:
+                    CrossBombMatch(curX, curY);
+                    break;
+                case SpecialPuzzleType.ColorBomb:
+                    ColorBombMatch(curX, curY);
+                    break;
+            }
+        }
+
+        private void Bomb3X3Match(int curX, int curY)
+        {
+            int startX = Mathf.Max(0, curX - 1);
+            int endX = Mathf.Min(x - 1, curX + 1);
+    
+            int startY = Mathf.Max(0, curY - 1);
+            int endY = Mathf.Min(y - 1, curY + 1);
+            
+            for (int i = startX; i <= endX; i++)
+            {
+                for (int j = startY; j <= endY; j++)
+                {
+                    if (_puzzles[i, j] != null && !_puzzles[i, j].isMatched)
+                    {
+                        _puzzles[i, j].isMatched = true;
+                    }
+                }
+            }
+        }
+
+        private void ColumnBombMatch(int curX)
+        {
+            for (int j = 0; j < y; j++)
+            {
+                if (_puzzles[curX, j] != null && !_puzzles[curX, j].isMatched)
+                {
+                    _puzzles[curX, j].isMatched = true;
+                }
+            }
+        }
+
+        private void RowBombMatch(int curY)
+        {
+            for (int i = 0; i < x; i++)
+            {
+                if (_puzzles[i, curY] != null && !_puzzles[i, curY].isMatched)
+                {
+                    _puzzles[i, curY].isMatched = true;
+                }
+            }
+        }
+
+        private void CrossBombMatch(int curX, int curY)
+        {
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (i != curX && j != curY)
+                    {
+                        continue;
+                    }
+                    
+                    if (_puzzles[i, j] != null && !_puzzles[i, j].isMatched)
+                    {
+                        _puzzles[i, j].isMatched = true;
+                    }
+                }
+            }
+        }
+
+        private void ColorBombMatch(int curX, int curY)
+        {
+            var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
+
+            for (int i = 0; i < x - 1; i++)
+            {
+                for (int j = 0; j < y - 1; j++)
+                {
+                    if (_puzzles[i, j] != null && !_puzzles[i, j].isMatched &&
+                        _puzzles[i, j].puzzleType == PuzzleType.Normal && 
+                        (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
+                    {
+                        _puzzles[i, j].isMatched = true;
+                    }
+                }
+            }
+        }
+
+        private void ObstacleMatch(ObstaclePuzzleType type)
+        {
+            
         }
         #endregion
     }

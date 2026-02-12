@@ -450,8 +450,8 @@ MonoBehaviour:
   x: 9
   y: 9
   space: 1
-  normalProbability: 96
-  specialProbability: 50
+  normalProbability: 98
+  specialProbability: 100
   normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
   - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
@@ -461,6 +461,9 @@ MonoBehaviour:
   specialPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: 9fb90e3d43ae1d341916c097dc861caa, type: 3}
   - {fileID: 2857731521102525544, guid: 669fc956b998def4e9b25bf7d35ed4be, type: 3}
+  - {fileID: 2857731521102525544, guid: f4825f795e10dd54f8d4318d445884a6, type: 3}
+  - {fileID: 2857731521102525544, guid: 3907e40d5358d3d448cba0ee654ab37a, type: 3}
+  - {fileID: 2857731521102525544, guid: ff403b042a5280c47a7f8f2ca59bf5ca, type: 3}
   obstaclePuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: 644aa0087807ddd4d91aef22c9df1c2e, type: 3}
   - {fileID: 2857731521102525544, guid: 3078c7d34f980f744bd38f948248da48, type: 3}

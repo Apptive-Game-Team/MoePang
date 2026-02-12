@@ -8,6 +8,8 @@ namespace ThreeMatch
         
         private Vector2 _firstTouchPos;
         private Vector2 _lastTouchPos;
+
+        public override int GetPuzzleSubType() => (int)normalPuzzleType;
         
         private void OnMouseDown()
         {

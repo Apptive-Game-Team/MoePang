@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1306466862306359307}
   - component: {fileID: 7024483505736919048}
-  - component: {fileID: -7993323167093096303}
   - component: {fileID: 5089521197111415638}
   - component: {fileID: 3020771313939166508}
+  - component: {fileID: 5074456913737877456}
   m_Layer: 0
   m_Name: Leaf
   m_TagString: Untagged
@@ -69,23 +69,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &-7993323167093096303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2857731521102525544}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75446977667e7ed4fa2918300143338d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puzzleType: 2
-  specialPuzzleType: 0
-  isMatched: 0
-  column: 0
-  row: 0
 --- !u!61 &5089521197111415638
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -140,3 +123,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2857731521102525544}
   m_CullTransparentMesh: 1
+--- !u!114 &5074456913737877456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2857731521102525544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3dfd94b24f4ab48a5f0941b59a4d38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  puzzleType: 0
+  column: 0
+  row: 0
+  isMatched: 0
+  normalPuzzleType: 1

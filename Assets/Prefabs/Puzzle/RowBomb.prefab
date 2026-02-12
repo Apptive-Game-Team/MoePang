@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7024483505736919048}
   - component: {fileID: 5089521197111415638}
   - component: {fileID: 3020771313939166508}
-  - component: {fileID: 6430614780440285489}
+  - component: {fileID: 2144645170347388148}
   m_Layer: 0
-  m_Name: CrossBomb
+  m_Name: RowBomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4a0aca3a5f2effb41b43cc0a1661d845, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4ff71d806d58fd041be6e55d1d1ca70e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -123,7 +123,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2857731521102525544}
   m_CullTransparentMesh: 1
---- !u!114 &6430614780440285489
+--- !u!114 &2144645170347388148
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -139,5 +139,5 @@ MonoBehaviour:
   column: 0
   row: 0
   isMatched: 0
-  specialPuzzleType: 1
+  specialPuzzleType: 2
   colorBombType: 0

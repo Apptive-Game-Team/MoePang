@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ThreeMatch
 {
-    public class PuzzleObject : MonoBehaviour
+    public abstract class PuzzleObject : MonoBehaviour
     {
         public PuzzleType puzzleType;
         public int column, row;
@@ -10,6 +10,8 @@ namespace ThreeMatch
         
         protected PuzzleGenerator Generator;
 
+        public abstract int GetPuzzleSubType();
+        
         public void Init(PuzzleGenerator generator, int c, int r)
         {
             Generator = generator;
