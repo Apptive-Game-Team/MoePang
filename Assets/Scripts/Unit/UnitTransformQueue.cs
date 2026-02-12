@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// 공격 우선순위 설정 큐
+/// </summary>
 public class UnitTransformQueue : MonoBehaviour
 {
     public static UnitTransformQueue Instance { get; private set; }
@@ -54,4 +57,23 @@ public class UnitTransformQueue : MonoBehaviour
     {
         teamQueues[team].Clear();
     }
+
+    /// <summary>
+    /// 유닛 순서 큐 기즈모
+    /// </summary>
+    private void OnDrawGizmos()
+    {
+        if (teamQueues == null) return;
+
+        foreach (var team in teamQueues.Keys)
+        {
+            Unit firstUnit = Peek(team);
+            if (firstUnit != null)
+            {
+                Gizmos.color = (team == TeamType.Friendly) ? Color.blue : Color.red;
+                Gizmos.DrawWireSphere(firstUnit.transform.position + Vector3.up * 1.5f, 0.3f);
+            }
+        }
+    }
+
 }

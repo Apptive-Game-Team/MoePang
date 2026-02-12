@@ -31,32 +31,30 @@ public class Unit : MonoBehaviour
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float bassMoveSpeed;
-    [SerializeField] protected float speedModifier;
-    [SerializeField] protected float attackRange;
-    [SerializeField] protected float attackDamage;
-    [SerializeField] protected float attackDelay;
-    [SerializeField] protected float direction;
-
-    [Header("탐색 설정")]
-    [SerializeField] protected LayerMask targetLayer;
+    [SerializeField] protected float bassMoveSpeed; //초기 MoveSpeed
+    [SerializeField] protected float speedModifier; //스피드 가중치
+    [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
+    [SerializeField] protected float attackDamage; //공격 데미지
+    [SerializeField] protected float attackDelay; //공격 속도
+    [SerializeField] protected float direction; //이동, 투사체 발사 방향
 
     [Header("현재 상태")]
     [SerializeField] protected UnitState currentState;
     [SerializeField] protected TeamType team;
 
-    [Header("참조")]
-    [SerializeField] protected GameObject attackPrefab;
+    [Header("탐색 설정")]
+    [SerializeField] protected LayerMask targetLayer;
+
+    //참조 & 프로퍼티
+    protected GameObject attackPrefab;
     protected SpriteRenderer spriteRenderer;
     protected UnitPool ownerPool;
     protected bool isAttacking;
-
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
-
-    //프로퍼티
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
 
+    #region 시작 설정
     protected virtual void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -79,13 +77,13 @@ public class Unit : MonoBehaviour
     }
 
     /// <summary>
-    /// 풀 지정
+    /// 오브젝트 풀 지정
     /// </summary>
-    /// <param name="pool"></param>
     public void SetPool(UnitPool pool)
     {
         this.ownerPool = pool;
     }
+    #endregion
 
     private void Update()
     {
@@ -205,6 +203,9 @@ public class Unit : MonoBehaviour
         return (transform.position.x * direction) > (otherX * direction);
     }
 
+    /// <summary>
+    /// 피격 시
+    /// </summary>
     public virtual void TakeDamage(float damage)
     {
         currentHp -= damage;
