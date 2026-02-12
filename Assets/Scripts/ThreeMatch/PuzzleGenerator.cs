@@ -66,7 +66,7 @@ namespace ThreeMatch
         }
         
         /// <summary>
-        /// 시작 퍼즐 관련 메서드 (시작 시 매치가 안 일어나게 설정)
+        /// 시작 퍼즐 관련 함수 (시작 시 매치가 안 일어나게 설정)
         /// </summary>
         /// <returns></returns>
         #region Start Puzzle
@@ -115,6 +115,7 @@ namespace ThreeMatch
                     var values = Enum.GetValues(typeof(SpecialPuzzleType));
                     var randomType = (SpecialPuzzleType)values.GetValue(Random.Range(0, values.Length));
                     puzzle = Instantiate(specialPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                    
                     if (randomType == SpecialPuzzleType.ColorBomb)
                     {
                         var idx = Enum.GetValues(typeof(NormalPuzzleType)).GetValue(Random.Range(0, values.Length));
@@ -124,8 +125,17 @@ namespace ThreeMatch
                 }
                 else
                 {
-                    int randomType = Random.Range(0, obstaclePuzzlePrefabs.Length);
-                    puzzle = Instantiate(obstaclePuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                    var values = Enum.GetValues(typeof(ObstaclePuzzleType));
+                    var randomType = (ObstaclePuzzleType)values.GetValue(Random.Range(0, values.Length));
+                    puzzle = Instantiate(obstaclePuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                    
+                    var randomNormalType = (NormalPuzzleType)Enum.GetValues(typeof(NormalPuzzleType)).GetValue(Random.Range(0, Enum.GetValues(typeof(NormalPuzzleType)).Length));
+                    puzzle.GetComponent<ObstaclePuzzleObject>().normalPuzzleType = randomNormalType;
+
+                    if (randomType == ObstaclePuzzleType.Fixed)
+                    {
+                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomNormalType];
+                    }
                 }
             }
             else
@@ -175,6 +185,7 @@ namespace ThreeMatch
         
         private bool CheckType(PuzzleObject p1, PuzzleObject p2)
         {
+            // normal <-> normal
             if (p1.puzzleType == p2.puzzleType)
             {
                 if (p1.GetPuzzleSubType() == p2.GetPuzzleSubType())
@@ -182,6 +193,33 @@ namespace ThreeMatch
                     return true;
                 }
             }
+
+            // (fixed or normal) <-> (fixed or normal)
+            int t1 = -1, t2 = -1;
+            
+            if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op1)
+            {
+                t1 = (int)op1.normalPuzzleType;
+            }
+            else if (p1.puzzleType == PuzzleType.Normal)
+            {
+                t1 = p1.GetPuzzleSubType();
+            }
+
+            if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op2)
+            {
+                t2 = (int)op2.normalPuzzleType;
+            }
+            else if (p2.puzzleType == PuzzleType.Normal)
+            {
+                t2 = p2.GetPuzzleSubType();
+            }
+
+            if (t1 != -1 && t2 != -1 && t1 == t2)
+            {
+                return true;
+            }
+            
             return false;
         }
 
@@ -190,6 +228,13 @@ namespace ThreeMatch
             if (p.puzzleType == PuzzleType.Normal)
             {
                 if ((NormalPuzzleType)p.GetPuzzleSubType() == type)
+                {
+                    return true;
+                }
+            }
+            else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
+            {
+                if (op.normalPuzzleType == type)
                 {
                     return true;
                 }
@@ -223,7 +268,7 @@ namespace ThreeMatch
         #endregion
         
         /// <summary>
-        /// 퍼즐을 옮겼을 때 완성 되는지 확인하는 메서드 및 퍼즐을 맞추고, 퍼즐이 사라지고, 내려오고, 채워지는 메서드
+        /// 퍼즐을 옮겼을 때 완성 되는지 확인하는 함수 및 퍼즐을 맞추고, 퍼즐이 사라지고, 내려오고, 채워지는 함수
         /// </summary>
         /// <param name="x1"></param>
         /// <param name="y1"></param>
@@ -234,6 +279,12 @@ namespace ThreeMatch
         {
             if (_isProcessing) return;
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
+            
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } ||
+                _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+            {
+                return;
+            }
 
             StartCoroutine(SwapAndCheck(x1, y1, x2, y2));
         }
@@ -353,7 +404,8 @@ namespace ThreeMatch
                 
                 if (ni >= 0 && ni < x && nj >= 0 && nj < y)
                 {
-                    if (_puzzles[ni, nj].puzzleType != PuzzleType.Normal)
+                    if (_puzzles[ni, nj].puzzleType != PuzzleType.Normal &&
+                        _puzzles[ni, nj] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
                     {
                         _puzzles[ni, nj].isMatched = true;
                     }
@@ -371,6 +423,11 @@ namespace ThreeMatch
                 {
                     if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
                     {
+                        if (_puzzles[i, j] is ObstaclePuzzleObject op)
+                        {
+                            ObstacleMatch(i, j, op.obstaclePuzzleType);
+                        }
+                        
                         if (_puzzles[i, j] is SpecialPuzzleObject sp)
                         {
                             SpecialMatch(i, j, sp.specialPuzzleType);
@@ -416,7 +473,8 @@ namespace ThreeMatch
                     {
                         for (int k = j + 1; k < y; k++)
                         {
-                            if (_puzzles[i, k] != null)
+                            if (_puzzles[i, k] != null && 
+                                _puzzles[i, k] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
                             {
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
@@ -424,6 +482,7 @@ namespace ThreeMatch
                                 Tween t = _puzzles[i, j].transform.DOMove(CalculatePos(i, j), 0.3f);
                                 seq.Join(t);
 
+                                _puzzles[i, j].gameObject.name = $"Puzzle({i},{j})";
                                 _puzzles[i, j].Init(this, i, j);
 
                                 break;
@@ -452,7 +511,7 @@ namespace ThreeMatch
                         GameObject puzzle = SetRandomPuzzle(i, j);
                         
                         PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                        puzzle.name = $"Puzzle({j},{i})";
+                        puzzle.name = $"Puzzle({i},{j})";
                         _puzzles[i, j] = po;
                         
                         Tween t = po.transform.DOMove(CalculatePos(i, j), 0.3f);
@@ -575,9 +634,37 @@ namespace ThreeMatch
             }
         }
 
-        private void ObstacleMatch(ObstaclePuzzleType type)
+        private void ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
         {
+            switch (type)
+            {
+                case ObstaclePuzzleType.DeActivated:
+                    DeActivatedMatch(curX, curY);
+                    break;
+            }
+        }
+
+        private void DeActivatedMatch(int curX, int curY)
+        {
+            var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
+            NormalPuzzleType targetType = obstacleObj.normalPuzzleType;
+            Vector3 currentPos = _puzzles[curX, curY].transform.localPosition;
             
+            GameObject oldObject = _puzzles[curX, curY].gameObject;
+            _puzzles[curX, curY] = null;
+            Destroy(oldObject);
+            
+            GameObject newPuzzle = Instantiate(normalPuzzlePrefabs[(int)targetType], puzzleFrame);
+            newPuzzle.transform.localPosition = currentPos;
+            newPuzzle.name = $"Puzzle({curX},{curY})";
+            newPuzzle.transform.localScale = Vector3.zero;
+            
+            PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
+            _puzzles[curX, curY] = po;
+            po.Init(this, curX, curY);
+            po.isMatched = false;
+            
+            newPuzzle.transform.DOScale(0.8f, 0.2f);
         }
         #endregion
     }
