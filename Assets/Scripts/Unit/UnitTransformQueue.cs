@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class UnitTransfromQueue : MonoBehaviour
+public class UnitTransformQueue : MonoBehaviour
 {
-    public static UnitTransfromQueue Instance { get; private set; }
+    public static UnitTransformQueue Instance { get; private set; }
 
     public Queue<Unit> queue = new Queue<Unit>();
 

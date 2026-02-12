@@ -96,6 +96,8 @@ public class Unit : MonoBehaviour
     {
         if (IsOtherInRange())
         {
+            //if (UnitTransformQueue)
+
             currentState = UnitState.Attack;
             return;
         }
