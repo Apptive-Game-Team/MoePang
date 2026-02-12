@@ -34,6 +34,8 @@ public class Unit : MonoBehaviour
     [SerializeField] protected float bassMoveSpeed;
     [SerializeField] protected float speedModifier;
     [SerializeField] protected float attackRange;
+    [SerializeField] protected float attackDamage;
+    [SerializeField] protected float attackDelay;
     [SerializeField] protected float direction;
 
     [Header("탐색 설정")]
@@ -48,7 +50,6 @@ public class Unit : MonoBehaviour
     protected SpriteRenderer spriteRenderer;
     protected UnitPool ownerPool;
     protected bool isAttacking;
-    protected float attackDelayTime = 0.5f;
 
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
 
@@ -159,25 +160,32 @@ public class Unit : MonoBehaviour
     protected virtual void DieState()
     {
         StopAllCoroutines();
+
+        if (UTQ.Peek(team) == this)
+        {
+            UTQ.Dequeue(team);
+        }
+
         ownerPool.ReturnUnit(this);
-        return;
     }   
 
     /// <summary>
     /// 상대를 마주친 유닛이 공격하는 로직
     /// </summary>
-    /// <returns></returns>
     protected virtual IEnumerator AttackCoroutine()
     {
         isAttacking = true;
 
-        yield return new WaitForSeconds(attackDelayTime);
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        Unit target = UTQ.Peek(enemyTeam);
 
-        GameObject go = Instantiate(attackPrefab, transform.position, Quaternion.identity);
-        Weapon weapon = go.GetComponent<Weapon>();
-        weapon.SetWeapon(this.direction, this.targetLayer);
+        //나중에 여기 애니메이션 넣기
+        yield return new WaitForSeconds(attackDelay);
 
-        yield return new WaitForSeconds(attackDelayTime);
+        if (target != null)
+        {
+            target.TakeDamage(attackDamage);
+        }
 
         isAttacking = false;
     }
@@ -185,7 +193,6 @@ public class Unit : MonoBehaviour
     /// <summary>
     /// 상대방이 공격범위에 들어왔는지 판별
     /// </summary>
-    /// <returns></returns>
     protected virtual bool IsOtherInRange()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
