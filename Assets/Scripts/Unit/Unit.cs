@@ -149,6 +149,7 @@ public class Unit : MonoBehaviour
 
         if (isAttacking) return;
 
+        if (animator != null) animator.SetBool("isWalking", false);
         if (!isAttacking)
         {
             StartCoroutine(AttackCoroutine());
@@ -179,14 +180,15 @@ public class Unit : MonoBehaviour
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         Unit target = UTQ.Peek(enemyTeam);
 
-        if (animator != null) animator.SetBool("isWalking", false);
-        //나중에 여기 애니메이션 넣기
+        if (animator != null) animator.SetBool("isAttacking", true);
         yield return new WaitForSeconds(attackDelay);
 
         if (target != null)
         {
             target.TakeDamage(attackDamage);
         }
+        
+        if (animator != null) animator.SetBool("isAttacking", false);
 
         isAttacking = false;
     }

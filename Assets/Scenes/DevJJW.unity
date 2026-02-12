@@ -423,7 +423,7 @@ MonoBehaviour:
   enemyPool: {fileID: 1670257768}
   friendlySpawnPosition: {fileID: 1534845411}
   enemySpawnPosition: {fileID: 1011821216}
-  spawnInterval: 10
+  spawnInterval: 3
 --- !u!4 &1011821216 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
