@@ -47,7 +47,7 @@ public class Unit : MonoBehaviour
 
     //참조 & 프로퍼티
     protected GameObject attackPrefab;
-    protected SpriteRenderer spriteRenderer;
+    protected Animator animator;
     protected UnitPool ownerPool;
     protected bool isAttacking;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
@@ -57,13 +57,14 @@ public class Unit : MonoBehaviour
     #region 시작 설정
     protected virtual void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     protected virtual void OnEnable()
     {
         Init();
         isAttacking = false;
+        if (animator != null) animator.SetBool("isWalking", true);
         currentState = UnitState.Move;
     }
 
@@ -141,6 +142,7 @@ public class Unit : MonoBehaviour
     {
         if (!IsOtherInRange())
         {
+            if (animator != null) animator.SetBool("isWalking", true);
             currentState = UnitState.Move;
             return;
         }
@@ -177,6 +179,7 @@ public class Unit : MonoBehaviour
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         Unit target = UTQ.Peek(enemyTeam);
 
+        if (animator != null) animator.SetBool("isWalking", false);
         //나중에 여기 애니메이션 넣기
         yield return new WaitForSeconds(attackDelay);
 
