@@ -29,8 +29,16 @@ public class Weapon : MonoBehaviour
             return;
 
         Unit unit = collision.gameObject.GetComponent<Unit>();
+        Castle castle = collision.gameObject.GetComponent<Castle>();
+        if (unit != null)
+        {
+            unit.TakeDamage(attackDamage);
+        }
 
-        unit.TakeDamage(attackDamage);
+        if (castle  != null)
+        {
+            castle.TakeDamage (attackDamage);
+        }
 
         Destroy(gameObject);
     }
