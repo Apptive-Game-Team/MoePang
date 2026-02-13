@@ -1,3 +1,4 @@
+using NUnit.Framework.Constraints;
 using System.Collections;
 using UnityEngine;
 
@@ -12,6 +13,15 @@ public enum UnitState
 }
 
 /// <summary>
+/// 아군진영, 적진영 타입
+/// </summary>
+public enum TeamType
+{
+    Friendly,
+    Enemy
+}
+
+/// <summary>
 /// Unit의 최상위 클래스
 /// <para>기본적인 스탯, 로직 포함</para>
 /// </summary>
@@ -21,37 +31,40 @@ public class Unit : MonoBehaviour
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float bassMoveSpeed;
-    [SerializeField] protected float speedModifier;
-    [SerializeField] protected float attackRange;
-    [SerializeField] protected float direction;
+    [SerializeField] protected float bassMoveSpeed; //초기 MoveSpeed
+    [SerializeField] protected float speedModifier; //스피드 가중치
+    [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
+    [SerializeField] protected float attackDamage; //공격 데미지
+    [SerializeField] protected float attackDelay; //공격 속도
+    [SerializeField] protected float direction; //이동, 투사체 발사 방향
+
+    [Header("현재 상태")]
+    [SerializeField] protected UnitState currentState;
+    [SerializeField] protected TeamType team;
 
     [Header("탐색 설정")]
     [SerializeField] protected LayerMask targetLayer;
 
-    [Header("현재 상태")]
-    [SerializeField] public UnitState currentState;
-
-    [Header("참조")]
-    [SerializeField] protected GameObject attackPrefab;
-    protected SpriteRenderer spriteRenderer;
+    //참조 & 프로퍼티
+    protected GameObject attackPrefab;
+    protected Animator animator;
     protected UnitPool ownerPool;
     protected bool isAttacking;
-    protected float attackDelayTime = 0.5f;
-
-    //프로퍼티
+    protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
 
+    #region 시작 설정
     protected virtual void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     protected virtual void OnEnable()
     {
         Init();
         isAttacking = false;
+        if (animator != null) animator.SetBool("isWalking", true);
         currentState = UnitState.Move;
     }
 
@@ -65,13 +78,13 @@ public class Unit : MonoBehaviour
     }
 
     /// <summary>
-    /// 풀 지정
+    /// 오브젝트 풀 지정
     /// </summary>
-    /// <param name="pool"></param>
     public void SetPool(UnitPool pool)
     {
         this.ownerPool = pool;
     }
+    #endregion
 
     private void Update()
     {
@@ -96,6 +109,26 @@ public class Unit : MonoBehaviour
     {
         if (IsOtherInRange())
         {
+            if (UTQ.IsEmpty(team))
+                UTQ.Enqueue(team, this);
+
+            else
+            {
+                Unit firstUnit = UTQ.Peek(team);
+                float firstX = firstUnit.transform.position.x;
+                float thisX = transform.position.x;
+
+                if (IsInFrontOf(firstX))
+                {
+                    UTQ.Clear(team);
+                    UTQ.Enqueue(team, this);
+                }
+                else if (Mathf.Abs(firstX - transform.position.x) < 0.001f)
+                {
+                    UTQ.Enqueue(team, this);
+                }
+            }
+
             currentState = UnitState.Attack;
             return;
         }
@@ -109,12 +142,14 @@ public class Unit : MonoBehaviour
     {
         if (!IsOtherInRange())
         {
+            if (animator != null) animator.SetBool("isWalking", true);
             currentState = UnitState.Move;
             return;
         }
 
         if (isAttacking) return;
 
+        if (animator != null) animator.SetBool("isWalking", false);
         if (!isAttacking)
         {
             StartCoroutine(AttackCoroutine());
@@ -126,25 +161,34 @@ public class Unit : MonoBehaviour
     protected virtual void DieState()
     {
         StopAllCoroutines();
+
+        if (UTQ.Peek(team) == this)
+        {
+            UTQ.Dequeue(team);
+        }
+
         ownerPool.ReturnUnit(this);
-        return;
     }   
 
     /// <summary>
     /// 상대를 마주친 유닛이 공격하는 로직
     /// </summary>
-    /// <returns></returns>
     protected virtual IEnumerator AttackCoroutine()
     {
         isAttacking = true;
 
-        yield return new WaitForSeconds(attackDelayTime);
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        Unit target = UTQ.Peek(enemyTeam);
 
-        GameObject go = Instantiate(attackPrefab, transform.position, Quaternion.identity);
-        Weapon weapon = go.GetComponent<Weapon>();
-        weapon.SetWeapon(this.direction, this.targetLayer);
+        if (animator != null) animator.SetBool("isAttacking", true);
+        yield return new WaitForSeconds(attackDelay);
 
-        yield return new WaitForSeconds(attackDelayTime);
+        if (target != null)
+        {
+            target.TakeDamage(attackDamage);
+        }
+        
+        if (animator != null) animator.SetBool("isAttacking", false);
 
         isAttacking = false;
     }
@@ -152,7 +196,6 @@ public class Unit : MonoBehaviour
     /// <summary>
     /// 상대방이 공격범위에 들어왔는지 판별
     /// </summary>
-    /// <returns></returns>
     protected virtual bool IsOtherInRange()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
@@ -160,6 +203,14 @@ public class Unit : MonoBehaviour
         return hit.collider != (null);
     }
 
+    protected bool IsInFrontOf(float otherX)
+    {
+        return (transform.position.x * direction) > (otherX * direction);
+    }
+
+    /// <summary>
+    /// 피격 시
+    /// </summary>
     public virtual void TakeDamage(float damage)
     {
         currentHp -= damage;
