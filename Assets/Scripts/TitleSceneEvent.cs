@@ -1,16 +1,18 @@
+using TMPro;
 using UnityEngine;
 
 public class TitleSceneEvent : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("타이틀 텍스트")]
+    [SerializeField] private TextMeshProUGUI textComponent;
+    [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
 
-    // Update is called once per frame
     void Update()
     {
-        
+        float alpha = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
+
+        Color color = textComponent.color;
+        color.a = alpha;
+        textComponent.color = color;
     }
 }
