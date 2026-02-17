@@ -6,28 +6,27 @@ using UnityEngine;
 /// </summary>
 public class MainButtonManager : MonoBehaviour
 {
-    [Header("참조")]
-    [SerializeField] private StageManager stageManager;
-
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI stageText;
+    [SerializeField] private TextMeshProUGUI goldtext;
 
 
     private void Start()
     {
-        stageText.text = $"Stage : {stageManager.CurrentStage}";
+        stageText.text = $"Stage : {StageManager.Instance.CurrentStage}";
+        goldtext.text = $"Gold : {GoldManager.Instance.Gold}";
     }
     /// <summary>
     /// 다음 스테이지 선택
     /// </summary>
     public void OnClickNextStage()
     {
-        if (stageManager != null)
+        if (StageManager.Instance != null)
         {
-            stageManager.SetStage(1);
+            StageManager.Instance.SetStage(1);
         }
 
-        stageText.text = $"Stage : {stageManager.CurrentStage}";
+        stageText.text = $"Stage : {StageManager.Instance.CurrentStage}";
     }
 
     /// <summary>
@@ -35,13 +34,13 @@ public class MainButtonManager : MonoBehaviour
     /// </summary>
     public void OnClickPrevStage()
     {
-        if (stageManager.CurrentStage == 1) return;
+        if (StageManager.Instance.CurrentStage == 1) return;
 
-        if (stageManager != null)
+        if (StageManager.Instance != null)
         {
-            stageManager.SetStage(-1);
+            StageManager.Instance.SetStage(-1);
         }
 
-        stageText.text = $"Stage : {stageManager.CurrentStage}";
+        stageText.text = $"Stage : {StageManager.Instance.CurrentStage}";
     }
 }

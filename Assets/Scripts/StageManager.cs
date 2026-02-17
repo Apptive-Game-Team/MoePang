@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StageManager : MonoBehaviour
+public class StageManager : SingletonObject<StageManager>
 {
     [Header("스테이지 설정")]
     [SerializeField] private int currentStage;
