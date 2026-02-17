@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 메인화면 버튼, 텍스트 관리 스크립트
@@ -10,12 +11,21 @@ public class MainButtonManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI stageText;
     [SerializeField] private TextMeshProUGUI goldtext;
 
+    [Header("씬")]
+    [SerializeField] private string nextScene;
+
 
     private void Start()
     {
         stageText.text = $"Stage : {StageManager.Instance.CurrentStage}";
         goldtext.text = $"Gold : {GoldManager.Instance.Gold}";
     }
+
+    public void OnClickPlay()
+    {
+        SceneManager.LoadScene(nextScene);
+    }
+
     /// <summary>
     /// 다음 스테이지 선택
     /// </summary>
