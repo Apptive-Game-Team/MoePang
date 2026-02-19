@@ -56,7 +56,20 @@ namespace ThreeMatch
         [SerializeField] private Sprite[] normalPuzzleImages;
         
         private PuzzleObject[,] _puzzles;
+        
         private bool _isProcessing;
+        public bool IsProcessing => _isProcessing;
+            
+        private Vector2Int _lastMovePos;
+        private List<MatchGroup> _currentMatchGroups = new();
+        
+        private class MatchGroup
+        {
+            public List<Vector2Int> positions = new();
+            public Vector2Int spawnPos; 
+            public SpecialPuzzleType? resultType = null;
+            public NormalPuzzleType color;
+        }
 
         private void Start()
         {
@@ -104,44 +117,9 @@ namespace ThreeMatch
 
         private GameObject SetRandomPuzzle(int col, int row)
         {
-            GameObject puzzle;
+            int randomType = (int)GetValidRandomType(col, row);
+            GameObject puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
             
-            if (Random.Range(0, 100) > normalProbability)
-            {
-                if (Random.Range(0, 100) < specialProbability)
-                {
-                    var values = Enum.GetValues(typeof(SpecialPuzzleType));
-                    var randomType = (SpecialPuzzleType)values.GetValue(Random.Range(0, values.Length));
-                    puzzle = Instantiate(specialPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
-                    
-                    if (randomType == SpecialPuzzleType.ColorBomb)
-                    {
-                        var idx = Enum.GetValues(typeof(NormalPuzzleType)).GetValue(Random.Range(0, values.Length));
-                        puzzle.GetComponent<SpecialPuzzleObject>().colorBombType = (NormalPuzzleType)idx;
-                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)idx];
-                    }
-                }
-                else
-                {
-                    var values = Enum.GetValues(typeof(ObstaclePuzzleType));
-                    var randomType = (ObstaclePuzzleType)values.GetValue(Random.Range(0, values.Length));
-                    puzzle = Instantiate(obstaclePuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
-                    
-                    var randomNormalType = (NormalPuzzleType)Enum.GetValues(typeof(NormalPuzzleType)).GetValue(Random.Range(0, Enum.GetValues(typeof(NormalPuzzleType)).Length));
-                    puzzle.GetComponent<ObstaclePuzzleObject>().normalPuzzleType = randomNormalType;
-
-                    if (randomType == ObstaclePuzzleType.Fixed)
-                    {
-                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomNormalType];
-                    }
-                }
-            }
-            else
-            {
-                int randomType = (int)GetValidRandomType(col, row);
-                puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
-            }
-
             return puzzle;
         }
 
@@ -283,7 +261,8 @@ namespace ThreeMatch
             {
                 return;
             }
-
+            
+            _lastMovePos = new Vector2Int(x2, y2);
             StartCoroutine(SwapAndCheck(x1, y1, x2, y2));
         }
 
@@ -338,6 +317,7 @@ namespace ThreeMatch
 
         private bool CheckAnyMatches()
         {
+            _currentMatchGroups.Clear();
             bool hasMatch = false;
             
             for (int i = 0; i < x; i++)
@@ -359,11 +339,11 @@ namespace ThreeMatch
                         CheckType(_puzzles[i, j], _puzzles[i + 2, j]))
                     {
                         _puzzles[i, j].isMatched = true;
+                        CheckAnyObstaclePuzzle(i, j);
                         _puzzles[i + 1, j].isMatched = true;
+                        CheckAnyObstaclePuzzle(i + 1, j);
                         _puzzles[i + 2, j].isMatched = true;
-                        CheckAnySpecialPuzzle(i, j);
-                        CheckAnySpecialPuzzle(i + 1, j);
-                        CheckAnySpecialPuzzle(i + 2, j);
+                        CheckAnyObstaclePuzzle(i + 2, j);
                         hasMatch = true;
                     }
                 }
@@ -377,20 +357,44 @@ namespace ThreeMatch
                         CheckType(_puzzles[i, j], _puzzles[i, j + 2]))
                     {
                         _puzzles[i, j].isMatched = true;
+                        CheckAnyObstaclePuzzle(i, j);
                         _puzzles[i, j + 1].isMatched = true;
+                        CheckAnyObstaclePuzzle(i, j + 1);
                         _puzzles[i, j + 2].isMatched = true;
-                        CheckAnySpecialPuzzle(i, j);
-                        CheckAnySpecialPuzzle(i, j + 1);
-                        CheckAnySpecialPuzzle(i, j + 2);
+                        CheckAnyObstaclePuzzle(i, j + 2);
                         hasMatch = true;
                     }
                 }
             }
 
-            return hasMatch;
+            if (!hasMatch) return false;
+            
+            bool[,] visited = new bool[x, y];
+
+            for (int j = 0; j < y; j++)
+            {
+                for (int i = 0; i < x; i++)
+                {
+                    if (_puzzles[i, j] != null && _puzzles[i, j].isMatched && !visited[i, j])
+                    {
+                        MatchGroup group = GetMatchGroupBfs(i, j, visited);
+                
+                        if (group.positions.Count >= 3)
+                        {
+                            if (group.positions.Count >= 4)
+                            {
+                                DetermineSpecialType(group);
+                            }
+                            _currentMatchGroups.Add(group);
+                        }
+                    }
+                }
+            }
+
+            return true;
         }
-        
-        private void CheckAnySpecialPuzzle(int i, int j)
+
+        private void CheckAnyObstaclePuzzle(int i, int j)
         {
             int[] dx = { 0, 0, -1, 1 };
             int[] dy = { 1, -1, 0, 0 };
@@ -399,10 +403,10 @@ namespace ThreeMatch
             {
                 int ni = i + dx[d];
                 int nj = j + dy[d];
-                
+
                 if (ni >= 0 && ni < x && nj >= 0 && nj < y)
                 {
-                    if (_puzzles[ni, nj].puzzleType != PuzzleType.Normal &&
+                    if (_puzzles[ni, nj].puzzleType == PuzzleType.Obstacle &&
                         _puzzles[ni, nj] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
                     {
                         _puzzles[ni, nj].isMatched = true;
@@ -411,10 +415,91 @@ namespace ThreeMatch
             }
         }
         
+        private MatchGroup GetMatchGroupBfs(int startX, int startY, bool[,] visited)
+        {
+            MatchGroup group = new();
+            NormalPuzzleType color = (NormalPuzzleType)_puzzles[startX, startY].GetPuzzleSubType();
+            group.color = color;
+
+            Queue<Vector2Int> queue = new();
+            queue.Enqueue(new Vector2Int(startX, startY));
+            visited[startX, startY] = true;
+
+            Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
+            while (queue.Count > 0)
+            {
+                Vector2Int curr = queue.Dequeue();
+                group.positions.Add(curr);
+
+                foreach (var dir in dirs)
+                {
+                    int nx = curr.x + dir.x;
+                    int ny = curr.y + dir.y;
+
+                    if (nx >= 0 && nx < x && ny >= 0 && ny < y && !visited[nx, ny])
+                    {
+                        if (_puzzles[nx, ny] != null && _puzzles[nx, ny].isMatched && 
+                            CheckNormalType(_puzzles[nx, ny], color))
+                        {
+                            visited[nx, ny] = true;
+                            queue.Enqueue(new Vector2Int(nx, ny));
+                        }
+                    }
+                }
+            }
+            return group;
+        }
+        
+        private void DetermineSpecialType(MatchGroup group)
+        {
+            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 첫 번째 타일 위치
+            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[0];
+            
+            int maxH = 0;
+            int maxV = 0;
+
+            foreach (var pos in group.positions)
+            {
+                int h = 1 + GetLength(group, pos, Vector2Int.left) + GetLength(group, pos, Vector2Int.right);
+                int v = 1 + GetLength(group, pos, Vector2Int.up) + GetLength(group, pos, Vector2Int.down);
+        
+                maxH = Mathf.Max(maxH, h);
+                maxV = Mathf.Max(maxV, v);
+            }
+            
+            if (maxH >= 5 || maxV >= 5 || (maxH >= 3 && maxV >= 3))
+            {
+                // 5개 이상 일렬이거나, 가로/세로가 교차(T, L자)하는 경우
+                group.resultType = SpecialPuzzleType.CircleBomb;
+            }
+            else if (maxH == 4)
+            {
+                // 가로로 4개 -> 세로 폭탄 (Column)
+                group.resultType = SpecialPuzzleType.ColumnBomb;
+            }
+            else if (maxV == 4)
+            {
+                // 세로로 4개 -> 가로 폭탄 (Row)
+                group.resultType = SpecialPuzzleType.RowBomb;
+            }
+            // todo : CrossBomb, ColorBomb 조건 추가
+        }
+        
+        private int GetLength(MatchGroup group, Vector2Int start, Vector2Int dir)
+        {
+            int count = 0;
+            Vector2Int next = start + dir;
+            while (group.positions.Contains(next))
+            {
+                count++;
+                next += dir;
+            }
+            return count;
+        }
+        
         private IEnumerator MatchPuzzle()
         {
-            Sequence seq = DOTween.Sequence();
-            
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -424,41 +509,49 @@ namespace ThreeMatch
                         if (_puzzles[i, j] is ObstaclePuzzleObject op)
                         {
                             ObstacleMatch(i, j, op.obstaclePuzzleType);
-
-                            if (op is not { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
-                            {
-                                continue;
-                            }
                         }
-                        
-                        int row = i, col = j;
-                        Tween t = _puzzles[row, col].transform.DOScale(0, 0.2f)
-                            .OnComplete(() =>
-                            {
-                                // todo : 매치 시 유닛 소환 효과 함수 추가
-                                Destroy(_puzzles[row, col].gameObject);
-                                _puzzles[row, col] = null;
-                            });
-                        seq.Join(t);
                     }
                 }
             }
             
-            for (int i = 0; i < x; i++)
+            foreach (var group in _currentMatchGroups)
             {
-                for (int j = 0; j < y; j++)
+                Vector3 destination = CalculatePos(group.spawnPos.x, group.spawnPos.y);
+                
+                Sequence seq = DOTween.Sequence();
+                foreach (var pos in group.positions)
                 {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
+                    if (group.resultType != null)
                     {
-                        if (_puzzles[i, j] is SpecialPuzzleObject sp)
-                        {
-                            yield return SpecialMatch(i, j, sp.specialPuzzleType);
-                        }
+                        Tween t1 = _puzzles[pos.x, pos.y].transform.DOMove(destination, 0.2f);
+                        seq.Join(t1);
                     }
+                    Tween t2 = _puzzles[pos.x, pos.y].transform.DOScale(0, 0.2f)
+                        .OnComplete(() =>
+                        {
+                            Destroy(_puzzles[pos.x, pos.y].gameObject);
+                            _puzzles[pos.x, pos.y] = null;
+                        });
+                    seq.Join(t2);
+                }
+                yield return seq.WaitForCompletion();
+                
+                if (group.resultType != null)
+                {
+                    GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
+                    newPuzzle.transform.localPosition = destination;
+                    newPuzzle.name = $"Puzzle({destination.x},{destination.y})";
+                    newPuzzle.transform.localScale = Vector3.zero;
+            
+                    PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
+                    _puzzles[group.spawnPos.x, group.spawnPos.y] = po;
+                    po.Init(this, group.spawnPos.x, group.spawnPos.y);
+                    po.isMatched = false;
+            
+                    newPuzzle.transform.DOScale(0.8f, 0.2f);
                 }
             }
             
-            yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.2f);
             
             yield return DropBlocks();
@@ -536,10 +629,27 @@ namespace ThreeMatch
         #endregion
         
         #region Abnormal Puzzle Match
-        private IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
+        public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type)
         {
-            if (_puzzles[curX, curY] == null) yield break;
+            if (_isProcessing) yield break;
+            _isProcessing = true;
             
+            yield return SpecialMatch(curX, curY, type);
+            
+            yield return new WaitForSeconds(0.2f);
+            
+            yield return DropBlocks();
+
+            _isProcessing = false;
+        }
+        
+        public IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
+        {
+            if (_puzzles[curX, curY] == null)
+            {
+                yield break;
+            }
+
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
             
             GameObject self = _puzzles[curX, curY].gameObject;
@@ -562,6 +672,8 @@ namespace ThreeMatch
                     targetPuzzle.transform.DOScale(0, 0.15f).OnComplete(() => Destroy(targetPuzzle.gameObject));
                 }
             }
+            
+            yield return new WaitForSeconds(0.2f);
         }
 
         private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.2f)
@@ -649,9 +761,9 @@ namespace ThreeMatch
         {
             var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
 
-            for (int i = 0; i < x - 1; i++)
+            for (int i = 0; i < x; i++)
             {
-                for (int j = 0; j < y - 1; j++)
+                for (int j = 0; j < y; j++)
                 {
                     if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
                         (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
