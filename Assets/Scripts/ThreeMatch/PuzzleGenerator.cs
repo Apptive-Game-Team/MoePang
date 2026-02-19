@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using DG.Tweening;
-using UnityEngine.Serialization;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 namespace ThreeMatch
@@ -28,7 +26,7 @@ namespace ThreeMatch
 
     public enum SpecialPuzzleType
     {
-        Bomb3X3,
+        CircleBomb,
         CrossBomb,
         RowBomb,
         ColumnBomb,
@@ -426,12 +424,22 @@ namespace ThreeMatch
                         if (_puzzles[i, j] is ObstaclePuzzleObject op)
                         {
                             ObstacleMatch(i, j, op.obstaclePuzzleType);
+
+                            if (op is not { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+                            {
+                                continue;
+                            }
                         }
                         
-                        if (_puzzles[i, j] is SpecialPuzzleObject sp)
-                        {
-                            SpecialMatch(i, j, sp.specialPuzzleType);
-                        }
+                        int row = i, col = j;
+                        Tween t = _puzzles[row, col].transform.DOScale(0, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                // todo : 매치 시 유닛 소환 효과 함수 추가
+                                Destroy(_puzzles[row, col].gameObject);
+                                _puzzles[row, col] = null;
+                            });
+                        seq.Join(t);
                     }
                 }
             }
@@ -442,15 +450,10 @@ namespace ThreeMatch
                 {
                     if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
                     {
-                        int row = i, col = j;
-                        Tween t = _puzzles[row, col].transform.DOScale(0, 0.2f)
-                            .OnComplete(() =>
-                            {
-                                // todo : 매치 시 유닛 소환 효과 함수 추가
-                                Destroy(_puzzles[row, col].gameObject);
-                                _puzzles[row, col] = null;
-                            });
-                        seq.Join(t);
+                        if (_puzzles[i, j] is SpecialPuzzleObject sp)
+                        {
+                            yield return SpecialMatch(i, j, sp.specialPuzzleType);
+                        }
                     }
                 }
             }
@@ -532,72 +535,101 @@ namespace ThreeMatch
         }
         #endregion
         
-        #region Abnormal Puzzle Effect
-        private void SpecialMatch(int curX, int curY, SpecialPuzzleType type)
+        #region Abnormal Puzzle Match
+        private IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
         {
-            switch(type)
+            if (_puzzles[curX, curY] == null) yield break;
+            
+            List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
+            
+            GameObject self = _puzzles[curX, curY].gameObject;
+            _puzzles[curX, curY] = null; 
+            self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
+            
+            foreach (var pos in targets)
             {
-                case SpecialPuzzleType.Bomb3X3:
-                    Bomb3X3Match(curX, curY);
-                    break;
-                case SpecialPuzzleType.ColumnBomb:
-                    ColumnBombMatch(curX);
-                    break;
-                case SpecialPuzzleType.RowBomb:
-                    RowBombMatch(curY);
-                    break;
-                case SpecialPuzzleType.CrossBomb:
-                    CrossBombMatch(curX, curY);
-                    break;
-                case SpecialPuzzleType.ColorBomb:
-                    ColorBombMatch(curX, curY);
-                    break;
+                if (_puzzles[pos.x, pos.y] == null) continue;
+
+                PuzzleObject targetPuzzle = _puzzles[pos.x, pos.y];
+                
+                if (targetPuzzle is SpecialPuzzleObject nextSp)
+                {
+                    yield return StartCoroutine(DelayedSpecialMatch(pos.x, pos.y, nextSp.specialPuzzleType));
+                }
+                else
+                {
+                    _puzzles[pos.x, pos.y] = null;
+                    targetPuzzle.transform.DOScale(0, 0.15f).OnComplete(() => Destroy(targetPuzzle.gameObject));
+                }
             }
         }
 
-        private void Bomb3X3Match(int curX, int curY)
+        private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.2f)
         {
-            int startX = Mathf.Max(0, curX - 1);
-            int endX = Mathf.Min(x - 1, curX + 1);
-    
-            int startY = Mathf.Max(0, curY - 1);
-            int endY = Mathf.Min(y - 1, curY + 1);
-            
-            for (int i = startX; i <= endX; i++)
+            yield return new WaitForSeconds(delay);
+            yield return StartCoroutine(SpecialMatch(curX, curY, type));
+        }
+        
+        private List<Vector2Int> GetExplosionRange(int curX, int curY, SpecialPuzzleType type)
+        {
+            List<Vector2Int> range = new();
+
+            switch (type)
             {
-                for (int j = startY; j <= endY; j++)
+                case SpecialPuzzleType.CircleBomb:
+                    CircleBombMatch(curX, curY, range);
+                    break;
+                case SpecialPuzzleType.ColumnBomb:
+                    ColumnBombMatch(curX,range);
+                    break;
+                case SpecialPuzzleType.RowBomb:
+                    RowBombMatch(curY, range);
+                    break;
+                case SpecialPuzzleType.CrossBomb:
+                    CrossBombMatch(curX, curY, range);
+                    break;
+                case SpecialPuzzleType.ColorBomb:
+                    ColorBombMatch(curX, curY, range);
+                    break;
+            }
+            return range;
+        }
+
+        private void CircleBombMatch(int curX, int curY, List<Vector2Int> list)
+        {
+            for (int i = curX - 2; i <= curX + 2; i++)
+            {
+                for (int j = curY - 2; j <= curY + 2; j++)
                 {
-                    if (_puzzles[i, j] != null && !_puzzles[i, j].isMatched)
+                    if (i < 0 || i >= x || j < 0 || j >= y) continue;
+                    
+                    bool isCorner = (i == curX - 2 || i == curX + 2) && (j == curY - 2 || j == curY + 2);
+            
+                    if (!isCorner)
                     {
-                        _puzzles[i, j].isMatched = true;
+                        list.Add(new Vector2Int(i, j));
                     }
                 }
             }
         }
 
-        private void ColumnBombMatch(int curX)
+        private void ColumnBombMatch(int curX, List<Vector2Int> list)
         {
             for (int j = 0; j < y; j++)
             {
-                if (_puzzles[curX, j] != null && !_puzzles[curX, j].isMatched)
-                {
-                    _puzzles[curX, j].isMatched = true;
-                }
+                list.Add(new Vector2Int(curX, j));
             }
         }
 
-        private void RowBombMatch(int curY)
+        private void RowBombMatch(int curY, List<Vector2Int> list)
         {
             for (int i = 0; i < x; i++)
             {
-                if (_puzzles[i, curY] != null && !_puzzles[i, curY].isMatched)
-                {
-                    _puzzles[i, curY].isMatched = true;
-                }
+                list.Add(new Vector2Int(i, curY));
             }
         }
 
-        private void CrossBombMatch(int curX, int curY)
+        private void CrossBombMatch(int curX, int curY, List<Vector2Int> list)
         {
             for (int i = 0; i < x; i++)
             {
@@ -608,15 +640,12 @@ namespace ThreeMatch
                         continue;
                     }
                     
-                    if (_puzzles[i, j] != null && !_puzzles[i, j].isMatched)
-                    {
-                        _puzzles[i, j].isMatched = true;
-                    }
+                    list.Add(new Vector2Int(i, j));
                 }
             }
         }
 
-        private void ColorBombMatch(int curX, int curY)
+        private void ColorBombMatch(int curX, int curY, List<Vector2Int> list)
         {
             var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
 
@@ -624,11 +653,10 @@ namespace ThreeMatch
             {
                 for (int j = 0; j < y - 1; j++)
                 {
-                    if (_puzzles[i, j] != null && !_puzzles[i, j].isMatched &&
-                        _puzzles[i, j].puzzleType == PuzzleType.Normal && 
+                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
                         (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
                     {
-                        _puzzles[i, j].isMatched = true;
+                        list.Add(new Vector2Int(i, j));
                     }
                 }
             }
