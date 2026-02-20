@@ -37,4 +37,8 @@ public class UnitSpawner : MonoBehaviour
         enemyPool.SpawnUnit(enemySpawnPosition);
     }
 
+    public void FriendlySpawn()
+    {
+        friendlyPool.SpawnUnit(friendlySpawnPosition);
+    }
 }

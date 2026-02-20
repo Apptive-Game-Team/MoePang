@@ -55,6 +55,9 @@ namespace ThreeMatch
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
         [SerializeField] private Sprite[] normalPuzzleImages;
         
+        [Header("Spawn Settings")]
+        [SerializeField] private UnitSpawner unitSpawner;
+        
         private PuzzleObject[,] _puzzles;
         
         private bool _isProcessing;
@@ -552,6 +555,8 @@ namespace ThreeMatch
             
                     newPuzzle.transform.DOScale(0.8f, 0.2f);
                 }
+
+                unitSpawner.FriendlySpawn();
             }
             
             yield return new WaitForSeconds(0.3f);
@@ -681,6 +686,8 @@ namespace ThreeMatch
             }
             
             yield return seq.WaitForCompletion();
+            
+            unitSpawner.FriendlySpawn();
 
             while (q.Count > 0)
             {
