@@ -120,7 +120,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1323630228476265917}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6378824187419292933}
+        m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
+        m_MethodName: OnClickPrevStage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &906841164288587309
 GameObject:
   m_ObjectHideFlags: 0
@@ -564,7 +576,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 300, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3052710882380344760
 CanvasRenderer:
@@ -629,7 +641,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -1024,6 +1036,7 @@ GameObject:
   - component: {fileID: 2605984931310122156}
   - component: {fileID: 4481808211114824286}
   - component: {fileID: 8086936944830857009}
+  - component: {fileID: 4811684221229974478}
   m_Layer: 5
   m_Name: OptionButton
   m_TagString: Untagged
@@ -1132,7 +1145,31 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4481808211114824286}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4811684221229974478}
+        m_TargetAssemblyTypeName: OptionButton, Assembly-CSharp
+        m_MethodName: OpenOptions
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &4811684221229974478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4279235881149678992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7996101f73330f14abc60bb8e1d2d98a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4450994962045406732
 GameObject:
   m_ObjectHideFlags: 0
@@ -1541,7 +1578,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4226523971079229872}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6378824187419292933}
+        m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
+        m_MethodName: OnClickShop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6481898658058813667
 GameObject:
   m_ObjectHideFlags: 0
@@ -1662,7 +1711,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4743738252384460532}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6378824187419292933}
+        m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
+        m_MethodName: OnClickPlay
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7245613241033527601
 GameObject:
   m_ObjectHideFlags: 0
@@ -1783,7 +1844,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5517012315184185251}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6378824187419292933}
+        m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
+        m_MethodName: OnClickNextStage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8015015317037895730
 GameObject:
   m_ObjectHideFlags: 0
@@ -1796,6 +1869,7 @@ GameObject:
   - component: {fileID: 393786986145155569}
   - component: {fileID: 3803190221158713970}
   - component: {fileID: 2032402270175861870}
+  - component: {fileID: 6378824187419292933}
   m_Layer: 5
   m_Name: MainCanvas
   m_TagString: Untagged
@@ -1841,7 +1915,7 @@ Canvas:
   m_GameObject: {fileID: 8015015317037895730}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -1895,6 +1969,22 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &6378824187419292933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8015015317037895730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8c7ffb28b81dca46a3fb3868875aa80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageText: {fileID: 2554064629757971998}
+  goldtext: {fileID: 1400679329804759272}
+  playScene: DevJJW
+  shopScene: Shop
 --- !u!1 &8383404407027416024
 GameObject:
   m_ObjectHideFlags: 0
