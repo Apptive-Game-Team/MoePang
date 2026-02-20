@@ -848,6 +848,7 @@ namespace ThreeMatch
 
             Vector3 currentPos = target.transform.localPosition;
             int col = target.column, row = target.row;
+            var type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
             _puzzles[col, row] = null;
             Destroy(target.gameObject);
 
@@ -866,11 +867,8 @@ namespace ThreeMatch
 
             if (po is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
             {
-                var values2 = Enum.GetValues(typeof(NormalPuzzleType));
-                var randomType = (NormalPuzzleType)values2.GetValue(Random.Range(0, values2.Length));
-                
-                op.normalPuzzleType = randomType;
-                newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                op.normalPuzzleType = type;
+                newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
             }
             
             newPuzzle.transform.DOScale(0.6f, 0.2f);
