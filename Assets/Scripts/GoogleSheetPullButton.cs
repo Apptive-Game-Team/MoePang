@@ -11,7 +11,7 @@ public class GoogleSheetPullButton : Editor
 
     static GoogleSheetPullButton()
     {
-        googleSheetCollection = LocalizationEditorSettings.GetStringTableCollection("Localization");
+        googleSheetCollection = LocalizationEditorSettings.GetStringTableCollection("LocalizationDataTable");
     }
 
     [MenuItem("Debug Tool/Pull Google Sheets Localization Data")]

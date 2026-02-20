@@ -19,59 +19,54 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5ffc64944115f8d4faa514abb80a410f, type: 2}
   - {fileID: 11400000, guid: d4c1ee809f2da7c449df1dc4f6e79725, type: 2}
   m_Extensions:
-  - rid: 1522650348558221337
+  - rid: 1522650348558221595
   m_Group: String Table
   references:
     version: 2
     RefIds:
-    - rid: 1522650348558221337
-      type: {class: CsvExtension, ns: UnityEditor.Localization.Plugins.CSV, asm: Unity.Localization.Editor}
+    - rid: 1522650348558221595
+      type: {class: GoogleSheetsExtension, ns: UnityEditor.Localization.Plugins.Google, asm: Unity.Localization.Editor}
       data:
         m_Collection: {fileID: 11400000}
-        m_ColumnsList:
-        - rid: 1522650348558221338
-        - rid: 1522650348558221339
-        - rid: 1522650348558221340
-        - rid: 1522650348558221341
-        - rid: 1522650348558221342
-        m_ConnectedFile: Assets/Localization/LocalizationDataTable.csv
-    - rid: 1522650348558221338
-      type: {class: KeyIdColumns, ns: UnityEditor.Localization.Plugins.CSV.Columns, asm: Unity.Localization.Editor}
+        m_SheetsServiceProvider: {fileID: 11400000, guid: 30689dc2ec7d239439cbc06a49ad9712, type: 2}
+        m_SpreadsheetId: 1ZEEW6Ewfb3ZhXxWb_SBc5xYrLa18W_2ePGkHj0LJB20
+        m_SheetId: 2075239041
+        m_Columns:
+        - rid: 1522650348558221597
+        - rid: 1522650348558221602
+        - rid: 1522650348558221603
+        - rid: 1522650348558221604
+        - rid: 1522650348558221605
+        m_RemoveMissingPulledKeys: 1
+    - rid: 1522650348558221597
+      type: {class: KeyColumn, ns: UnityEditor.Localization.Plugins.Google.Columns, asm: Unity.Localization.Editor}
       data:
-        m_IncludeId: 1
-        m_IncludeSharedComments: 1
-        m_KeyFieldName: Key
-        m_IdFieldName: Id
-        m_CommentFieldName: Shared Comments
-    - rid: 1522650348558221339
-      type: {class: LocaleColumns, ns: UnityEditor.Localization.Plugins.CSV.Columns, asm: Unity.Localization.Editor}
+        m_Column: A
+    - rid: 1522650348558221602
+      type: {class: LocaleColumn, ns: UnityEditor.Localization.Plugins.Google.Columns, asm: Unity.Localization.Editor}
       data:
-        m_LocaleIdentifier:
-          m_Code: zh-Hans
-        m_FieldName: Chinese (Simplified)(zh-Hans)
-        m_CommentFieldName: Chinese (Simplified)(zh-Hans) Comments
-        m_IncludeComments: 1
-    - rid: 1522650348558221340
-      type: {class: LocaleColumns, ns: UnityEditor.Localization.Plugins.CSV.Columns, asm: Unity.Localization.Editor}
-      data:
+        m_Column: B
         m_LocaleIdentifier:
           m_Code: en
-        m_FieldName: English(en)
-        m_CommentFieldName: English(en) Comments
-        m_IncludeComments: 1
-    - rid: 1522650348558221341
-      type: {class: LocaleColumns, ns: UnityEditor.Localization.Plugins.CSV.Columns, asm: Unity.Localization.Editor}
+        m_IncludeComments: 0
+    - rid: 1522650348558221603
+      type: {class: LocaleColumn, ns: UnityEditor.Localization.Plugins.Google.Columns, asm: Unity.Localization.Editor}
       data:
-        m_LocaleIdentifier:
-          m_Code: ja
-        m_FieldName: Japanese(ja)
-        m_CommentFieldName: Japanese(ja) Comments
-        m_IncludeComments: 1
-    - rid: 1522650348558221342
-      type: {class: LocaleColumns, ns: UnityEditor.Localization.Plugins.CSV.Columns, asm: Unity.Localization.Editor}
-      data:
+        m_Column: C
         m_LocaleIdentifier:
           m_Code: ko
-        m_FieldName: Korean(ko)
-        m_CommentFieldName: Korean(ko) Comments
-        m_IncludeComments: 1
+        m_IncludeComments: 0
+    - rid: 1522650348558221604
+      type: {class: LocaleColumn, ns: UnityEditor.Localization.Plugins.Google.Columns, asm: Unity.Localization.Editor}
+      data:
+        m_Column: D
+        m_LocaleIdentifier:
+          m_Code: ja
+        m_IncludeComments: 0
+    - rid: 1522650348558221605
+      type: {class: LocaleColumn, ns: UnityEditor.Localization.Plugins.Google.Columns, asm: Unity.Localization.Editor}
+      data:
+        m_Column: E
+        m_LocaleIdentifier:
+          m_Code: zh-Hans
+        m_IncludeComments: 0
