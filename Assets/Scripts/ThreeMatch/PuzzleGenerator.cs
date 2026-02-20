@@ -292,6 +292,22 @@ namespace ThreeMatch
             
             p1.Init(this, x2, y2);
             p2.Init(this, x1, y1);
+
+            _isProcessing = false;
+            
+            bool isSpecialPuzzleExist = false;
+            if (_puzzles[x1, y1] is SpecialPuzzleObject sp1)
+            {
+                isSpecialPuzzleExist = true;
+                yield return ActivateSpecialBomb(x1, y1, sp1.specialPuzzleType);
+            }
+            if (_puzzles[x2, y2] is SpecialPuzzleObject sp2)
+            {
+                isSpecialPuzzleExist = true;
+                yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType);
+            }
+
+            _isProcessing = true;
             
             if (CheckAnyMatches())
             {
@@ -299,20 +315,23 @@ namespace ThreeMatch
             }
             else
             {
-                yield return new WaitForSeconds(0.2f);
-                _puzzles[x1, y1] = p1;
-                _puzzles[x2, y2] = p2;
+                if (!isSpecialPuzzleExist)
+                {
+                    yield return new WaitForSeconds(0.2f);
+                    _puzzles[x1, y1] = p1;
+                    _puzzles[x2, y2] = p2;
                 
-                Sequence seq2 = DOTween.Sequence();
-                Tween t3 = p1.transform.DOMove(pos1, 0.2f);
-                Tween t4 = p2.transform.DOMove(pos2, 0.2f);
-                seq2.Append(t3);
-                seq2.Join(t4);
+                    Sequence seq2 = DOTween.Sequence();
+                    Tween t3 = p1.transform.DOMove(pos1, 0.2f);
+                    Tween t4 = p2.transform.DOMove(pos2, 0.2f);
+                    seq2.Append(t3);
+                    seq2.Join(t4);
                 
-                yield return seq2.WaitForCompletion();
+                    yield return seq2.WaitForCompletion();
                 
-                p1.Init(this, x1, y1);
-                p2.Init(this, x2, y2);
+                    p1.Init(this, x1, y1);
+                    p2.Init(this, x2, y2);
+                }
             }
 
             _isProcessing = false;
