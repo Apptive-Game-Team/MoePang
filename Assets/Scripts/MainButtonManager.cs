@@ -12,7 +12,8 @@ public class MainButtonManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI goldtext;
 
     [Header("씬")]
-    [SerializeField] private string nextScene;
+    [SerializeField] private string playScene;
+    [SerializeField] private string shopScene;
 
 
     private void Start()
@@ -23,7 +24,12 @@ public class MainButtonManager : MonoBehaviour
 
     public void OnClickPlay()
     {
-        SceneManager.LoadScene(nextScene);
+        SceneManager.LoadScene(playScene);
+    }
+
+    public void OnClickShop()
+    {
+        SceneManager.LoadScene(shopScene);
     }
 
     /// <summary>
