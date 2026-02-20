@@ -74,6 +74,14 @@ namespace ThreeMatch
             public NormalPuzzleType color;
         }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                SpawnObstaclePuzzle();
+            }
+        }
+
         private void Start()
         {
             StartCoroutine(GenerateBoard());
@@ -105,7 +113,7 @@ namespace ThreeMatch
                     GameObject puzzle = SetRandomPuzzle(j, i);
                     
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                    puzzle.name = $"Puzzle({j},{i})";
+                    puzzle.name = $"Puzzle({j + 1},{i + 1})";
                     _puzzles[j, i] = po;
                     
                     Tween t = puzzle.transform.DOMove(CalculatePos(j, i), 0.3f);
@@ -564,7 +572,7 @@ namespace ThreeMatch
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
                     newPuzzle.transform.localPosition = destination;
-                    newPuzzle.name = $"Puzzle({destination.x},{destination.y})";
+                    newPuzzle.name = $"Puzzle({destination.x + 1},{destination.y + 1})";
                     newPuzzle.transform.localScale = Vector3.zero;
             
                     PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
@@ -604,7 +612,7 @@ namespace ThreeMatch
                                 Tween t = _puzzles[i, j].transform.DOMove(CalculatePos(i, j), 0.3f);
                                 seq.Join(t);
 
-                                _puzzles[i, j].gameObject.name = $"Puzzle({i},{j})";
+                                _puzzles[i, j].gameObject.name = $"Puzzle({i + 1},{j + 1})";
                                 _puzzles[i, j].Init(this, i, j);
 
                                 break;
@@ -633,7 +641,7 @@ namespace ThreeMatch
                         GameObject puzzle = SetRandomPuzzle(i, j);
                         
                         PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                        puzzle.name = $"Puzzle({i},{j})";
+                        puzzle.name = $"Puzzle({i + 1},{j + 1})";
                         _puzzles[i, j] = po;
                         
                         Tween t = po.transform.DOMove(CalculatePos(i, j), 0.3f);
@@ -654,7 +662,7 @@ namespace ThreeMatch
         }
         #endregion
         
-        #region Abnormal Puzzle Match
+        #region Abnormal Puzzle
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type)
         {
             if (_isProcessing) yield break;
@@ -813,6 +821,63 @@ namespace ThreeMatch
             }
         }
 
+        public void SpawnObstaclePuzzle()
+        {
+            StartCoroutine(SpawnObstaclePuzzleCoroutine());
+        }
+        
+        private IEnumerator SpawnObstaclePuzzleCoroutine()
+        {
+            yield return new WaitUntil(() => !_isProcessing);
+            _isProcessing = true;
+
+            List<PuzzleObject> list = new();
+            
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (_puzzles[i, j].puzzleType == PuzzleType.Normal)
+                    {
+                        list.Add(_puzzles[i, j]);
+                    }
+                }
+            }
+            
+            var target = list[Random.Range(0, list.Count)];
+
+            Vector3 currentPos = target.transform.localPosition;
+            int col = target.column, row = target.row;
+            _puzzles[col, row] = null;
+            Destroy(target.gameObject);
+
+            var values = Enum.GetValues(typeof(ObstaclePuzzleType));
+            int idx = (int)values.GetValue(Random.Range(0, values.Length));
+            
+            GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[idx], puzzleFrame);
+            newPuzzle.transform.localPosition = currentPos;
+            newPuzzle.name = $"Puzzle({col + 1},{row + 1})";
+            newPuzzle.transform.localScale = Vector3.zero;
+            
+            PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
+            _puzzles[col, row] = po;
+            po.Init(this, col, row);
+            po.isMatched = false;
+
+            if (po is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
+            {
+                var values2 = Enum.GetValues(typeof(NormalPuzzleType));
+                var randomType = (NormalPuzzleType)values2.GetValue(Random.Range(0, values2.Length));
+                
+                op.normalPuzzleType = randomType;
+                newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+            }
+            
+            newPuzzle.transform.DOScale(0.6f, 0.2f);
+            
+            _isProcessing = false;
+        }
+
         private void ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
         {
             switch (type)
@@ -835,7 +900,7 @@ namespace ThreeMatch
             
             GameObject newPuzzle = Instantiate(normalPuzzlePrefabs[(int)targetType], puzzleFrame);
             newPuzzle.transform.localPosition = currentPos;
-            newPuzzle.name = $"Puzzle({curX},{curY})";
+            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
             
             PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
@@ -843,7 +908,7 @@ namespace ThreeMatch
             po.Init(this, curX, curY);
             po.isMatched = false;
             
-            newPuzzle.transform.DOScale(0.8f, 0.2f);
+            newPuzzle.transform.DOScale(0.6f, 0.2f);
         }
         #endregion
     }
