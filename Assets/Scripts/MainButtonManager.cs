@@ -9,7 +9,7 @@ public class MainButtonManager : MonoBehaviour
 {
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI stageText;
-    [SerializeField] private TextMeshProUGUI goldtext;
+    [SerializeField] private TextMeshProUGUI goldText;
 
     [Header("씬")]
     [SerializeField] private string playScene;
@@ -19,7 +19,7 @@ public class MainButtonManager : MonoBehaviour
     private void Start()
     {
         stageText.text = $"Stage : {StageManager.Instance.CurrentStage}";
-        goldtext.text = $"Gold : {GoldManager.Instance.Gold}";
+        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
     }
 
     public void OnClickPlay()
