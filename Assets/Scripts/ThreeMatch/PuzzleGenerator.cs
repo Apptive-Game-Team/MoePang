@@ -526,6 +526,7 @@ namespace ThreeMatch
                         Tween t1 = _puzzles[pos.x, pos.y].transform.DOMove(destination, 0.2f);
                         seq.Join(t1);
                     }
+
                     Tween t2 = _puzzles[pos.x, pos.y].transform.DOScale(0, 0.2f)
                         .OnComplete(() =>
                         {
@@ -534,8 +535,9 @@ namespace ThreeMatch
                         });
                     seq.Join(t2);
                 }
-                yield return seq.WaitForCompletion();
                 
+                yield return seq.WaitForCompletion();
+
                 if (group.resultType != null)
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
@@ -552,7 +554,7 @@ namespace ThreeMatch
                 }
             }
             
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.3f);
             
             yield return DropBlocks();
         }
@@ -643,7 +645,7 @@ namespace ThreeMatch
             _isProcessing = false;
         }
         
-        public IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
+        private IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
         {
             if (_puzzles[curX, curY] == null)
             {
@@ -655,6 +657,9 @@ namespace ThreeMatch
             GameObject self = _puzzles[curX, curY].gameObject;
             _puzzles[curX, curY] = null; 
             self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
+
+            Sequence seq = DOTween.Sequence();
+            Queue<(SpecialPuzzleObject, Vector2Int)> q = new();
             
             foreach (var pos in targets)
             {
@@ -664,16 +669,24 @@ namespace ThreeMatch
                 
                 if (targetPuzzle is SpecialPuzzleObject nextSp)
                 {
-                    yield return StartCoroutine(DelayedSpecialMatch(pos.x, pos.y, nextSp.specialPuzzleType));
+                    q.Enqueue((nextSp, new Vector2Int(pos.x, pos.y)));
                 }
                 else
                 {
                     _puzzles[pos.x, pos.y] = null;
-                    targetPuzzle.transform.DOScale(0, 0.15f).OnComplete(() => Destroy(targetPuzzle.gameObject));
+                    Tween t = targetPuzzle.transform.DOScale(0, 0.15f)
+                        .OnComplete(() => Destroy(targetPuzzle.gameObject));
+                    seq.Join(t);
                 }
             }
             
-            yield return new WaitForSeconds(0.2f);
+            yield return seq.WaitForCompletion();
+
+            while (q.Count > 0)
+            {
+                var sp = q.Dequeue();
+                yield return DelayedSpecialMatch(sp.Item2.x, sp.Item2.y, sp.Item1.specialPuzzleType);
+            }
         }
 
         private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.2f)
