@@ -347,6 +347,10 @@ PrefabInstance:
       propertyPath: goldText
       value: 
       objectReference: {fileID: 1219572057516926060}
+    - target: {fileID: 6378824187419292933, guid: 6a8c4e0b4e0f7c5418fd172b20cb6810, type: 3}
+      propertyPath: shopScene
+      value: 02.ShopScene
+      objectReference: {fileID: 0}
     - target: {fileID: 6850882236390372397, guid: 6a8c4e0b4e0f7c5418fd172b20cb6810, type: 3}
       propertyPath: m_Pivot.x
       value: 0

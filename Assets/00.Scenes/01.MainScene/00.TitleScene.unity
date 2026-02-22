@@ -440,7 +440,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gold: 0
-  firstGold: 100
 --- !u!1001 &1288509635
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -766,7 +765,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textComponent: {fileID: 7583510352471268236}
   blinkSpeed: 2
-  nextSceneName: Main
+  nextSceneName: 01.MainScene
 --- !u!114 &5021672212065652841
 MonoBehaviour:
   m_ObjectHideFlags: 0

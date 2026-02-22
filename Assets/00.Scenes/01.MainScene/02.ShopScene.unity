@@ -538,6 +538,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6196075797540199672, guid: 7b105029e61b0b04cab22c6145a90e48, type: 3}
+      propertyPath: prevScene
+      value: 01.MainScene
+      objectReference: {fileID: 0}
     - target: {fileID: 7064208523491065991, guid: 7b105029e61b0b04cab22c6145a90e48, type: 3}
       propertyPath: m_Name
       value: ShopCanvas
