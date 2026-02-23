@@ -66,6 +66,9 @@ public class Unit : MonoBehaviour
         isAttacking = false;
         if (animator != null) animator.SetBool("isWalking", true);
         currentState = UnitState.Move;
+
+        //디버그용 이름 설정
+        gameObject.name = $"{team}_{GetInstanceID()}";
     }
 
     /// <summary>
@@ -185,9 +188,22 @@ public class Unit : MonoBehaviour
 
         if (target != null)
         {
+            Debug.Log(
+                $"[{team}] {name} -> {target.name} 공격 " +
+                $"Damage: {attackDamage} | HP Before: {target.CurrentHp}"
+            );
+
             target.TakeDamage(attackDamage);
+
+            Debug.Log(
+                $"[{target.team}] {target.name} HP After: {target.CurrentHp}"
+            );
         }
-        
+        else
+        {
+            Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
+        }
+
         if (animator != null) animator.SetBool("isAttacking", false);
 
         isAttacking = false;

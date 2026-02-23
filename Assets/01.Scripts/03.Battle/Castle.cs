@@ -14,13 +14,13 @@ public class Castle : MonoBehaviour
 
     private void Start()
     {
-        maxHp = currentHp;
+        currentHp = maxHp;
     }
 
     public void TakeDamage(float damage)
     {
         currentHp -= damage;
-        if (currentHp < 0)
+        if (currentHp <= 0)
         {
             Die();
         }
