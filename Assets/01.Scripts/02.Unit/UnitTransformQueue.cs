@@ -8,7 +8,8 @@ public class UnitTransformQueue : MonoBehaviour
 {
     public static UnitTransformQueue Instance { get; private set; }
 
-    private Dictionary<TeamType, Queue<Unit>> teamQueues;
+    private Dictionary<TeamType, Queue<IDamageable>> teamQueues;
+    private Dictionary<TeamType, IDamageable> teamCastles;
 
     private void Awake()
     {
@@ -21,14 +22,16 @@ public class UnitTransformQueue : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        teamQueues = new Dictionary<TeamType, Queue<Unit>>()
-        {
-            { TeamType.Friendly, new Queue<Unit>() },
-            { TeamType.Enemy, new Queue<Unit>() }
+        teamQueues = new Dictionary<TeamType, Queue<IDamageable>>()
+        {   
+            { TeamType.Friendly, new Queue<IDamageable>() },
+            { TeamType.Enemy, new Queue<IDamageable>() }
         };
+
+        teamCastles = new Dictionary<TeamType, IDamageable>();
     }
 
-    public void Enqueue(TeamType team, Unit unit)
+    public void Enqueue(TeamType team, IDamageable unit)
     {
         teamQueues[team].Enqueue(unit);
     }
@@ -45,10 +48,13 @@ public class UnitTransformQueue : MonoBehaviour
 
     }
 
-    public Unit Peek(TeamType team)
+    public IDamageable Peek(TeamType team)
     {
         if (teamQueues[team].Count > 0)
             return teamQueues[team].Peek();
+
+        if (teamCastles.ContainsKey(team))
+            return teamCastles[team];
 
         return null;
     }
@@ -57,6 +63,11 @@ public class UnitTransformQueue : MonoBehaviour
     {
         teamQueues[team].Clear();
     }
+    public void RegisterCastle(TeamType team, IDamageable castle)
+    {
+        teamCastles[team] = castle;
+    }
+
 
     /// <summary>
     /// 유닛 순서 큐 기즈모
@@ -67,11 +78,13 @@ public class UnitTransformQueue : MonoBehaviour
 
         foreach (var team in teamQueues.Keys)
         {
-            Unit firstUnit = Peek(team);
+            IDamageable firstUnit = Peek(team);
             if (firstUnit != null)
             {
                 Gizmos.color = (team == TeamType.Friendly) ? Color.blue : Color.red;
-                Gizmos.DrawWireSphere(firstUnit.transform.position + Vector3.up * 1.5f, 0.3f);
+
+                Vector3 pos = firstUnit.GetTransform().position;
+                Gizmos.DrawWireSphere(pos + Vector3.up * 1.5f, 0.3f);
             }
         }
     }

@@ -25,7 +25,7 @@ public enum TeamType
 /// Unit의 최상위 클래스
 /// <para>기본적인 스탯, 로직 포함</para>
 /// </summary>
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, IDamageable
 {
     [Header("스탯")]
     [SerializeField] protected float maxHp;
@@ -53,6 +53,10 @@ public class Unit : MonoBehaviour
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
+
+    public Transform GetTransform() => transform;
+    public string GetName() => name;
+    public TeamType GetTeam() => team;
 
     #region 시작 설정
     protected virtual void Awake()
@@ -117,8 +121,9 @@ public class Unit : MonoBehaviour
 
             else
             {
-                Unit firstUnit = UTQ.Peek(team);
-                float firstX = firstUnit.transform.position.x;
+                IDamageable firstUnit = UTQ.Peek(team);
+
+                float firstX = firstUnit.GetTransform().position.x;
                 float thisX = transform.position.x;
 
                 if (IsInFrontOf(firstX))
@@ -181,7 +186,7 @@ public class Unit : MonoBehaviour
         isAttacking = true;
 
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
-        Unit target = UTQ.Peek(enemyTeam);
+        IDamageable target = UTQ.Peek(enemyTeam);
 
         if (animator != null) animator.SetBool("isAttacking", true);
         yield return new WaitForSeconds(attackDelay);
@@ -189,14 +194,14 @@ public class Unit : MonoBehaviour
         if (target != null)
         {
             Debug.Log(
-                $"[{team}] {name} -> {target.name} 공격 " +
+                $"[{team}] {name} -> {target.GetName()} 공격 " +
                 $"Damage: {attackDamage} | HP Before: {target.CurrentHp}"
             );
 
             target.TakeDamage(attackDamage);
 
             Debug.Log(
-                $"[{target.team}] {target.name} HP After: {target.CurrentHp}"
+                $"[{target.GetTeam()}] {target.GetName()} HP After: {target.CurrentHp}"
             );
         }
         else
