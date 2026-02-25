@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-namespace ThreeMatch
+namespace _01.Scripts._01.ThreeMatch
 {
     public class SpecialPuzzleObject : PuzzleObject
     {

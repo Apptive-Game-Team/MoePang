@@ -1,12 +1,12 @@
+using DG.Tweening;
 using System;
 using System.Collections;
-using UnityEngine;
-using Random = UnityEngine.Random;
-using DG.Tweening;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
-namespace ThreeMatch
+namespace _01.Scripts._01.ThreeMatch
 {
     public enum PuzzleType
     {
@@ -172,6 +172,11 @@ namespace ThreeMatch
         
         private bool CheckType(PuzzleObject p1, PuzzleObject p2)
         {
+            if (p1 == null || p2 == null)
+            {
+                return false;
+            }
+            
             // normal <-> normal
             if (p1.puzzleType == p2.puzzleType)
             {
@@ -304,42 +309,42 @@ namespace ThreeMatch
             _isProcessing = false;
             
             bool isSpecialPuzzleExist = false;
-            if (_puzzles[x1, y1] is SpecialPuzzleObject sp1)
+            Vector2Int? delayedBombPos = null;
+            
+            if (_puzzles[x1, y1] is SpecialPuzzleObject)
             {
                 isSpecialPuzzleExist = true;
-                yield return ActivateSpecialBomb(x1, y1, sp1.specialPuzzleType);
+                delayedBombPos = new Vector2Int(x1, y1);
             }
+            
             if (_puzzles[x2, y2] is SpecialPuzzleObject sp2)
             {
                 isSpecialPuzzleExist = true;
-                yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType);
+                yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType, !delayedBombPos.HasValue);
             }
 
             _isProcessing = true;
             
-            if (CheckAnyMatches())
+            if (CheckAnyMatches() || isSpecialPuzzleExist)
             {
-                yield return MatchPuzzle();
+                yield return MatchPuzzle(delayedBombPos);
             }
             else
             {
-                if (!isSpecialPuzzleExist)
-                {
-                    yield return new WaitForSeconds(0.2f);
-                    _puzzles[x1, y1] = p1;
-                    _puzzles[x2, y2] = p2;
-                
-                    Sequence seq2 = DOTween.Sequence();
-                    Tween t3 = p1.transform.DOMove(pos1, 0.2f);
-                    Tween t4 = p2.transform.DOMove(pos2, 0.2f);
-                    seq2.Append(t3);
-                    seq2.Join(t4);
-                
-                    yield return seq2.WaitForCompletion();
-                
-                    p1.Init(this, x1, y1);
-                    p2.Init(this, x2, y2);
-                }
+                yield return new WaitForSeconds(0.2f);
+                _puzzles[x1, y1] = p1;
+                _puzzles[x2, y2] = p2;
+            
+                Sequence seq2 = DOTween.Sequence();
+                Tween t3 = p1.transform.DOMove(pos1, 0.2f);
+                Tween t4 = p2.transform.DOMove(pos2, 0.2f);
+                seq2.Append(t3);
+                seq2.Join(t4);
+            
+                yield return seq2.WaitForCompletion();
+            
+                p1.Init(this, x1, y1);
+                p2.Init(this, x2, y2);
             }
 
             _isProcessing = false;
@@ -528,7 +533,7 @@ namespace ThreeMatch
             return count;
         }
         
-        private IEnumerator MatchPuzzle()
+        private IEnumerator MatchPuzzle(Vector2Int? delayedBombPos = null)
         {
             for (int i = 0; i < x; i++)
             {
@@ -572,7 +577,7 @@ namespace ThreeMatch
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
                     newPuzzle.transform.localPosition = destination;
-                    newPuzzle.name = $"Puzzle({destination.x + 1},{destination.y + 1})";
+                    newPuzzle.name = $"Puzzle({group.spawnPos.x + 1},{group.spawnPos.y + 1})";
                     newPuzzle.transform.localScale = Vector3.zero;
             
                     PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
@@ -580,13 +585,24 @@ namespace ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    newPuzzle.transform.DOScale(0.8f, 0.2f);
+                    yield return newPuzzle.transform.DOScale(0.8f, 0.2f).WaitForCompletion();
                 }
 
                 unitSpawner.FriendlySpawn();
             }
             
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.1f);
+
+            if (delayedBombPos.HasValue)
+            {
+                int bx = delayedBombPos.Value.x;
+                int by = delayedBombPos.Value.y;
+
+                if (_puzzles[bx, by] is SpecialPuzzleObject sp)
+                {
+                    yield return StartCoroutine(SpecialMatch(bx, by, sp.specialPuzzleType));
+                }
+            }
             
             yield return DropBlocks();
         }
@@ -663,7 +679,7 @@ namespace ThreeMatch
         #endregion
         
         #region Abnormal Puzzle
-        public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type)
+        public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
             if (_isProcessing) yield break;
             _isProcessing = true;
@@ -671,8 +687,11 @@ namespace ThreeMatch
             yield return SpecialMatch(curX, curY, type);
             
             yield return new WaitForSeconds(0.2f);
-            
-            yield return DropBlocks();
+
+            if (dropAfter)
+            {
+                yield return DropBlocks();
+            }
 
             _isProcessing = false;
         }
@@ -687,7 +706,7 @@ namespace ThreeMatch
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
             
             GameObject self = _puzzles[curX, curY].gameObject;
-            _puzzles[curX, curY] = null; 
+            _puzzles[curX, curY] = null;
             self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
 
             Sequence seq = DOTween.Sequence();
