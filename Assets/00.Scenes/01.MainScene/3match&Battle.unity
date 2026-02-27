@@ -513,6 +513,8 @@ MonoBehaviour:
   - {fileID: 810494766280951130, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
   - {fileID: -6545081411632747473, guid: b1bdf607f3102e54bac670741b98d44e, type: 3}
   unitSpawner: {fileID: 268232358}
+  normalEffect: {fileID: 3475157618999507326, guid: a8d00f2cf750c9a46b69d8c3078589cc, type: 3}
+  circleBombEffect: {fileID: 2742193639010511216, guid: 7e2c4defc9ac8014b9d1c2dd90390a43, type: 3}
 --- !u!4 &1669581475
 Transform:
   m_ObjectHideFlags: 0

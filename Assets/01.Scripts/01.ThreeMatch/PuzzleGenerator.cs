@@ -57,6 +57,10 @@ namespace ThreeMatch
         
         [Header("Spawn Settings")]
         [SerializeField] private UnitSpawner unitSpawner;
+
+        [Header("Effect Settings")] 
+        [SerializeField] private GameObject normalEffect;
+        [SerializeField] private GameObject circleBombEffect;
         
         private PuzzleObject[,] _puzzles;
         
@@ -557,6 +561,8 @@ namespace ThreeMatch
                         seq.Join(t1);
                     }
 
+                    SetEffect(_puzzles[pos.x, pos.y].transform.position, normalEffect);
+                    
                     Tween t2 = _puzzles[pos.x, pos.y].transform.DOScale(0, 0.2f)
                         .OnComplete(() =>
                         {
@@ -662,6 +668,13 @@ namespace ThreeMatch
         }
         #endregion
         
+        /// <summary>
+        /// 스페셜, 장애물 퍼즐들의 매치, 발동 로직 함수들
+        /// </summary>
+        /// <param name="curX"></param>
+        /// <param name="curY"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         #region Abnormal Puzzle
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type)
         {
@@ -686,8 +699,15 @@ namespace ThreeMatch
 
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
             
+            if (_puzzles[curX, curY] is SpecialPuzzleObject { specialPuzzleType: SpecialPuzzleType.CircleBomb })
+            {
+                Debug.Log("Bomb");
+                SetEffect(_puzzles[curX, curY].transform.position, circleBombEffect);
+            }
+            
             GameObject self = _puzzles[curX, curY].gameObject;
-            _puzzles[curX, curY] = null; 
+            _puzzles[curX, curY] = null;
+            
             self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
 
             Sequence seq = DOTween.Sequence();
@@ -705,6 +725,7 @@ namespace ThreeMatch
                 }
                 else
                 {
+                    SetEffect(_puzzles[pos.x, pos.y].transform.position, normalEffect);
                     _puzzles[pos.x, pos.y] = null;
                     Tween t = targetPuzzle.transform.DOScale(0, 0.15f)
                         .OnComplete(() => Destroy(targetPuzzle.gameObject));
@@ -909,5 +930,16 @@ namespace ThreeMatch
             newPuzzle.transform.DOScale(0.6f, 0.2f);
         }
         #endregion
+        
+        private void SetEffect(Vector3 pos, GameObject effect)
+        {
+            GameObject go = Instantiate(effect, pos,  Quaternion.identity);
+            var effects = go.GetComponentsInChildren<ParticleSystem>();
+            foreach (var e in effects)
+            {
+                e.Play();
+            }
+            Destroy(go, 0.7f);
+        }
     }
 }
