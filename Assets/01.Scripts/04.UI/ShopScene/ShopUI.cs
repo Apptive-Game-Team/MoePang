@@ -12,12 +12,30 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Image unlockImage;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private bool isSelected = false;
+    [SerializeField] private Habitat habitat;
+    [SerializeField] private UnitType unitType;
 
     private ShopManager shopManager;
 
     public bool IsSelected => isSelected;
     public bool IsUnlocked => isUnlocked;
     public int UnitCost => unitCost;
+    public Habitat Habitat => habitat;
+    public UnitType UnitType => unitType;
+
+    private void Start()
+    {
+        RefreshUnlockState();
+    }
+
+    public void RefreshUnlockState()
+    {
+        bool unlocked = HabitatManager.Instance.IsUnlocked(habitat, unitType);
+
+        isUnlocked = unlocked;
+
+        unlockImage.gameObject.SetActive(!unlocked);
+    }
 
     public void SetManager(ShopManager manager)
     {

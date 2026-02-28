@@ -20,11 +20,11 @@ public class HabitatManager : SingletonObject<HabitatManager>
     [SerializeField]
     private List<HabitatData> habitats = new List<HabitatData>();
 
-    // 🔥 실제 게임에서 사용하는 런타임 Dictionary
     private Dictionary<Habitat, Dictionary<UnitType, UnitData>> habitatDict;
 
     private void Awake()
     {
+        base.Awake();
         InitializeDictionary();
     }
 
