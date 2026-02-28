@@ -906,6 +906,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prevScene: 01.MainScene
   goldText: {fileID: 6691328616528975497}
+  buyButtonText: {fileID: 5718454712997086583}
   panels:
   - {fileID: 7632786144364906145}
   - {fileID: 8004761118412397564}
@@ -1521,6 +1522,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3842156122096890558}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -1631,6 +1636,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3722667092720087011}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -1737,6 +1746,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3722667092720087011}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -1843,6 +1856,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3722667092720087011}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 200
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -1949,6 +1966,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3722667092720087011}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 400
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -2055,6 +2076,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3722667092720087011}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -2161,6 +2186,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3842156122096890558}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 6455912200993425627, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Name
       value: ElephantImage
@@ -2267,6 +2296,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3842156122096890558}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -2728,6 +2761,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3842156122096890558}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -2838,6 +2875,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3842156122096890558}
     m_Modifications:
+    - target: {fileID: 5455294332496308038, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
+      propertyPath: unitCost
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 6171963334323506393, guid: c9fb37744ec794a4c86baabf42ea73a5, type: 3}
       propertyPath: m_Sprite
       value: 
