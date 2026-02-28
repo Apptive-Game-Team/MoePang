@@ -42,11 +42,6 @@ public class ShopUI : MonoBehaviour
         shopManager = manager;
     }
 
-    private void UnlockUnit()
-    {
-        unlockImage.sprite = null;
-    }
-
     public void OnClick()
     {
         shopManager.OnClickUnit(this);

@@ -67,4 +67,23 @@ public class HabitatManager : SingletonObject<HabitatManager>
             }
         }
     }
+
+    public bool CanUnlock(Habitat habitat, UnitType unitType)
+    {
+        if (!habitatDict.TryGetValue(habitat, out var unitDict))
+            return false;
+
+        var unitList = habitats.Find(h => h.habitatType == habitat)?.units;
+        if (unitList == null)
+            return false;
+
+        int index = unitList.FindIndex(u => u.unitType == unitType);
+        if (index == -1)
+            return false;
+
+        if (index == 0)
+            return true;
+
+        return unitList[index - 1].isUnlocked;
+    }
 }

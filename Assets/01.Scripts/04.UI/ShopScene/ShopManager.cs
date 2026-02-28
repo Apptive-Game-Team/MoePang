@@ -11,6 +11,7 @@ public class ShopManager : MonoBehaviour
 
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TextMeshProUGUI buyButtonText;
 
     [Header("패널")]
     [SerializeField] private List<GameObject> panels;
@@ -39,6 +40,7 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        UpdateBuyButtonText();
     }
     public void OnClickBack()
     {
@@ -51,6 +53,7 @@ public class ShopManager : MonoBehaviour
         {
             currentSelected.Deselect();
             currentSelected = null;
+            UpdateBuyButtonText();
             return;
         }
 
@@ -61,5 +64,69 @@ public class ShopManager : MonoBehaviour
 
         currentSelected = clickedUI;
         currentSelected.Select();
+
+        UpdateBuyButtonText();
+    }
+
+    private void UpdateBuyButtonText()
+    {
+        if (currentSelected == null)
+        {
+            buyButtonText.text = "골라주세용";
+        }
+        if (currentSelected.IsUnlocked)
+        {
+            buyButtonText.text = "OwO";
+        }
+
+        if (!HabitatManager.Instance.CanUnlock(
+            currentSelected.Habitat,
+            currentSelected.UnitType))
+        {
+            buyButtonText.text = "잠겨있음";
+            return;
+        }
+        else
+        {
+            buyButtonText.text = $"비용 : {currentSelected.UnitCost}G";
+        }
+    }
+
+    public void OnClickBuy()
+    {
+        if (currentSelected == null)
+            return;
+
+        if (currentSelected.IsUnlocked)
+        {
+            buyButtonText.text = "OwO";
+            return;
+        }
+
+        if (!HabitatManager.Instance.CanUnlock(
+            currentSelected.Habitat,
+            currentSelected.UnitType))
+        {
+            buyButtonText.text = "앞에꺼사.";
+            return;
+        }
+
+        float cost = currentSelected.UnitCost;
+
+        if (!GoldManager.Instance.TrySpendGold(cost))
+        {
+            buyButtonText.text = "돈없엉";
+            return;
+        }
+
+        HabitatManager.Instance.UnlockUnit(
+            currentSelected.Habitat,
+            currentSelected.UnitType);
+
+        currentSelected.RefreshUnlockState();
+
+        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+
+        buyButtonText.text = "굿굿";
     }
 }
