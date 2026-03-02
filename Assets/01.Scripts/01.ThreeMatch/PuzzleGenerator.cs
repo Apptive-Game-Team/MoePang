@@ -543,7 +543,7 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         if (_puzzles[i, j] is ObstaclePuzzleObject op)
                         {
-                            ObstacleMatch(i, j, op.obstaclePuzzleType);
+                            yield return ObstacleMatch(i, j, op.obstaclePuzzleType);
                         }
                     }
                 }
@@ -863,15 +863,15 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
             
-            var target = list[Random.Range(0, list.Count)];
+            PuzzleObject target = list[Random.Range(0, list.Count)];
 
             Vector3 currentPos = target.transform.localPosition;
             int col = target.column, row = target.row;
-            var type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
+            NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
             _puzzles[col, row] = null;
             Destroy(target.gameObject);
 
-            var values = Enum.GetValues(typeof(ObstaclePuzzleType));
+            Array values = Enum.GetValues(typeof(ObstaclePuzzleType));
             int idx = (int)values.GetValue(Random.Range(0, values.Length));
             
             GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[idx], puzzleFrame);
@@ -884,28 +884,34 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, col, row);
             po.isMatched = false;
 
-            if (po is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
+            switch (po)
             {
-                op.normalPuzzleType = type;
-                newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
+                    Array normalValues = Enum.GetValues(typeof(NormalPuzzleType));
+                    op.normalPuzzleType = (NormalPuzzleType)normalValues.GetValue(Random.Range(0, normalValues.Length));
+                    break;
+                case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
+                    op.normalPuzzleType = type;
+                    newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    break;
             }
             
-            newPuzzle.transform.DOScale(0.6f, 0.2f);
+            yield return newPuzzle.transform.DOScale(0.6f, 0.2f).WaitForCompletion();
             
             _isProcessing = false;
         }
 
-        private void ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
+        private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
         {
             switch (type)
             {
                 case ObstaclePuzzleType.DeActivated:
-                    DeActivatedMatch(curX, curY);
+                    yield return DeActivatedMatch(curX, curY);
                     break;
             }
         }
 
-        private void DeActivatedMatch(int curX, int curY)
+        private IEnumerator DeActivatedMatch(int curX, int curY)
         {
             var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
             NormalPuzzleType targetType = obstacleObj.normalPuzzleType;
@@ -926,6 +932,8 @@ namespace _01.Scripts._01.ThreeMatch
             po.isMatched = false;
             
             newPuzzle.transform.DOScale(0.6f, 0.2f);
+
+            yield return null;
         }
         #endregion
     }
