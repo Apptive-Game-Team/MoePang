@@ -59,12 +59,14 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private UnitSpawner unitSpawner;
         
         private PuzzleObject[,] _puzzles;
-        
+
+        private bool _isTaskRunning;
         private bool _isProcessing;
         public bool IsProcessing => _isProcessing;
             
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
+        private Queue<Func<IEnumerator>> _taskQueue = new();
         
         private class MatchGroup
         {
@@ -84,7 +86,40 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void Start()
         {
-            StartCoroutine(GenerateBoard());
+            AddTask(GenerateBoard);
+        }
+        
+        /// <summary>
+        /// 작업 큐 함수
+        /// </summary>
+        /// <param name="task"></param>
+        public void AddTask(Func<IEnumerator> task)
+        {
+            _taskQueue.Enqueue(task);
+            if (!_isTaskRunning)
+            {
+                StartCoroutine(ProcessQueue());
+            }
+        }
+        
+        private IEnumerator ProcessQueue()
+        {
+            try
+            {
+                _isTaskRunning = true;
+                _isProcessing = true;
+
+                while (_taskQueue.Count > 0)
+                {
+                    Func<IEnumerator> task = _taskQueue.Dequeue();
+                    yield return StartCoroutine(task());
+                }
+            }
+            finally
+            {
+                _isTaskRunning = false;
+                _isProcessing = false;
+            }
         }
         
         /// <summary>
@@ -269,7 +304,7 @@ namespace _01.Scripts._01.ThreeMatch
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
-            if (_isProcessing) return;
+            if (_taskQueue.Count > 0 || _isTaskRunning || _isProcessing) return;
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
             
             if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } ||
@@ -279,13 +314,11 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             _lastMovePos = new Vector2Int(x2, y2);
-            StartCoroutine(SwapAndCheck(x1, y1, x2, y2));
+            AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
 
         private IEnumerator SwapAndCheck(int x1, int y1, int x2, int y2)
         {
-            _isProcessing = true;
-            
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
     
@@ -305,8 +338,6 @@ namespace _01.Scripts._01.ThreeMatch
             
             p1.Init(this, x2, y2);
             p2.Init(this, x1, y1);
-
-            _isProcessing = false;
             
             bool isSpecialPuzzleExist = false;
             Vector2Int? delayedBombPos = null;
@@ -322,8 +353,6 @@ namespace _01.Scripts._01.ThreeMatch
                 isSpecialPuzzleExist = true;
                 yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType, !delayedBombPos.HasValue);
             }
-
-            _isProcessing = true;
             
             if (CheckAnyMatches() || isSpecialPuzzleExist)
             {
@@ -346,8 +375,6 @@ namespace _01.Scripts._01.ThreeMatch
                 p1.Init(this, x1, y1);
                 p2.Init(this, x2, y2);
             }
-
-            _isProcessing = false;
         }
 
         private bool CheckAnyMatches()
@@ -426,7 +453,7 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
 
-            return true;
+            return _currentMatchGroups.Count > 0;
         }
 
         private void CheckAnyObstaclePuzzle(int i, int j)
@@ -441,10 +468,10 @@ namespace _01.Scripts._01.ThreeMatch
 
                 if (ni >= 0 && ni < x && nj >= 0 && nj < y)
                 {
-                    if (_puzzles[ni, nj].puzzleType == PuzzleType.Obstacle &&
+                    if (_puzzles[ni, nj] is ObstaclePuzzleObject op &&
                         _puzzles[ni, nj] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
                     {
-                        _puzzles[ni, nj].isMatched = true;
+                        op.isTriggered = true;
                     }
                 }
             }
@@ -453,7 +480,8 @@ namespace _01.Scripts._01.ThreeMatch
         private MatchGroup GetMatchGroupBfs(int startX, int startY, bool[,] visited)
         {
             MatchGroup group = new();
-            NormalPuzzleType color = (NormalPuzzleType)_puzzles[startX, startY].GetPuzzleSubType();
+            NormalPuzzleType color = _puzzles[startX, startY] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op ?
+                op.normalPuzzleType : (NormalPuzzleType)_puzzles[startX, startY].GetPuzzleSubType();
             group.color = color;
 
             Queue<Vector2Int> queue = new();
@@ -488,8 +516,8 @@ namespace _01.Scripts._01.ThreeMatch
         
         private void DetermineSpecialType(MatchGroup group)
         {
-            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 첫 번째 타일 위치
-            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[0];
+            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 중간 위치
+            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[group.positions.Count / 2];
             
             int maxH = 0;
             int maxV = 0;
@@ -539,9 +567,9 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
+                    if (_puzzles[i, j] != null)
                     {
-                        if (_puzzles[i, j] is ObstaclePuzzleObject op)
+                        if (_puzzles[i, j] is ObstaclePuzzleObject { isTriggered: true } op)
                         {
                             yield return ObstacleMatch(i, j, op.obstaclePuzzleType);
                         }
@@ -556,6 +584,11 @@ namespace _01.Scripts._01.ThreeMatch
                 Sequence seq = DOTween.Sequence();
                 foreach (var pos in group.positions)
                 {
+                    if (_puzzles[pos.x, pos.y] == null)
+                    {
+                        continue;
+                    }
+                    
                     if (group.resultType != null)
                     {
                         Tween t1 = _puzzles[pos.x, pos.y].transform.DOMove(destination, 0.2f);
@@ -681,9 +714,6 @@ namespace _01.Scripts._01.ThreeMatch
         #region Abnormal Puzzle
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
-            if (_isProcessing) yield break;
-            _isProcessing = true;
-            
             yield return SpecialMatch(curX, curY, type);
             
             yield return new WaitForSeconds(0.2f);
@@ -692,8 +722,6 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 yield return DropBlocks();
             }
-
-            _isProcessing = false;
         }
         
         private IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
@@ -842,21 +870,18 @@ namespace _01.Scripts._01.ThreeMatch
 
         public void SpawnObstaclePuzzle()
         {
-            StartCoroutine(SpawnObstaclePuzzleCoroutine());
+            AddTask(SpawnObstaclePuzzleCoroutine);
         }
         
         private IEnumerator SpawnObstaclePuzzleCoroutine()
         {
-            yield return new WaitUntil(() => !_isProcessing);
-            _isProcessing = true;
-
             List<PuzzleObject> list = new();
             
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j].puzzleType == PuzzleType.Normal)
+                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal)
                     {
                         list.Add(_puzzles[i, j]);
                     }
@@ -896,9 +921,8 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
             }
             
-            yield return newPuzzle.transform.DOScale(0.6f, 0.2f).WaitForCompletion();
-            
-            _isProcessing = false;
+            Tween t =  newPuzzle.transform.DOScale(0.6f, 0.2f);
+            yield return t.WaitForCompletion();
         }
 
         private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
@@ -907,6 +931,8 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 case ObstaclePuzzleType.DeActivated:
                     yield return DeActivatedMatch(curX, curY);
+                    break;
+                case ObstaclePuzzleType.Fixed:
                     break;
             }
         }

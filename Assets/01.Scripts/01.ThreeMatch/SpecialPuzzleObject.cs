@@ -28,7 +28,7 @@ namespace _01.Scripts._01.ThreeMatch
             if (timeSinceLastClick <= DoubleClickThreshold && !_progressing)
             {
                 _progressing = true;
-                Generator.StartCoroutine(Generator.ActivateSpecialBomb(column, row, specialPuzzleType));
+                Generator.AddTask(() => Generator.ActivateSpecialBomb(column, row, specialPuzzleType));
             }
             _lastClickTime = Time.time;
         }
