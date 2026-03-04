@@ -59,8 +59,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private UnitSpawner unitSpawner;
         
         private PuzzleObject[,] _puzzles;
-
-        private bool _isTaskRunning;
+        
         private bool _isProcessing;
         public bool IsProcessing => _isProcessing;
             
@@ -93,10 +92,11 @@ namespace _01.Scripts._01.ThreeMatch
         /// 작업 큐 함수
         /// </summary>
         /// <param name="task"></param>
+        #region Task Queue
         public void AddTask(Func<IEnumerator> task)
         {
             _taskQueue.Enqueue(task);
-            if (!_isTaskRunning)
+            if (!_isProcessing)
             {
                 StartCoroutine(ProcessQueue());
             }
@@ -106,7 +106,6 @@ namespace _01.Scripts._01.ThreeMatch
         {
             try
             {
-                _isTaskRunning = true;
                 _isProcessing = true;
 
                 while (_taskQueue.Count > 0)
@@ -117,10 +116,10 @@ namespace _01.Scripts._01.ThreeMatch
             }
             finally
             {
-                _isTaskRunning = false;
                 _isProcessing = false;
             }
         }
+        #endregion
         
         /// <summary>
         /// 시작 퍼즐 관련 함수 (시작 시 매치가 안 일어나게 설정)
@@ -304,7 +303,7 @@ namespace _01.Scripts._01.ThreeMatch
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
-            if (_taskQueue.Count > 0 || _isTaskRunning || _isProcessing) return;
+            if (_taskQueue.Count > 0 || _isProcessing) return;
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
             
             if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } ||
