@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b5649da6e9629f47bb251f0f8f97e60, type: 3}
+  m_Name: Tiger
+  m_EditorClassIdentifier: 
+  habitat: 0
+  unitType: 0
+  psdFile: {fileID: -8653719598885068355, guid: 9e33482299270c34d85878e8418f7f75, type: 3}
+  animatorController: {fileID: 9100000, guid: 209f2c79426f3884589e82d72b31fecc, type: 2}
+  teamType: 0
+  maxHp: 20
+  baseMoveSpeed: 1
+  attackRange: 3
+  attackDamage: 5
+  attackDelay: 2
