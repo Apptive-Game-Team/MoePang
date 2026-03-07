@@ -31,7 +31,7 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float bassMoveSpeed; //초기 MoveSpeed
+    [SerializeField] protected float baseMoveSpeed; //초기 MoveSpeed
     [SerializeField] protected float speedModifier; //스피드 가중치
     [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
     [SerializeField] protected float attackDamage; //공격 데미지
@@ -81,7 +81,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected virtual void Init()
     {
         currentHp = maxHp;
-        moveSpeed = bassMoveSpeed;
+        moveSpeed = baseMoveSpeed;
     }
 
     /// <summary>
