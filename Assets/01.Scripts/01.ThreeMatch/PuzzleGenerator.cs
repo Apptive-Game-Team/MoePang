@@ -1,12 +1,12 @@
+using DG.Tweening;
 using System;
 using System.Collections;
-using UnityEngine;
-using Random = UnityEngine.Random;
-using DG.Tweening;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
-namespace ThreeMatch
+namespace _01.Scripts._01.ThreeMatch
 {
     public enum PuzzleType
     {
@@ -65,6 +65,7 @@ namespace ThreeMatch
             
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
+        private Queue<Func<IEnumerator>> _taskQueue = new();
         
         private class MatchGroup
         {
@@ -84,8 +85,41 @@ namespace ThreeMatch
 
         private void Start()
         {
-            StartCoroutine(GenerateBoard());
+            AddTask(GenerateBoard);
         }
+        
+        /// <summary>
+        /// 작업 큐 함수
+        /// </summary>
+        /// <param name="task"></param>
+        #region Task Queue
+        public void AddTask(Func<IEnumerator> task)
+        {
+            _taskQueue.Enqueue(task);
+            if (!_isProcessing)
+            {
+                StartCoroutine(ProcessQueue());
+            }
+        }
+        
+        private IEnumerator ProcessQueue()
+        {
+            try
+            {
+                _isProcessing = true;
+
+                while (_taskQueue.Count > 0)
+                {
+                    Func<IEnumerator> task = _taskQueue.Dequeue();
+                    yield return StartCoroutine(task());
+                }
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
+        }
+        #endregion
         
         /// <summary>
         /// 시작 퍼즐 관련 함수 (시작 시 매치가 안 일어나게 설정)
@@ -172,6 +206,11 @@ namespace ThreeMatch
         
         private bool CheckType(PuzzleObject p1, PuzzleObject p2)
         {
+            if (p1 == null || p2 == null)
+            {
+                return false;
+            }
+            
             // normal <-> normal
             if (p1.puzzleType == p2.puzzleType)
             {
@@ -264,7 +303,7 @@ namespace ThreeMatch
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
-            if (_isProcessing) return;
+            if (_taskQueue.Count > 0 || _isProcessing) return;
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
             
             if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } ||
@@ -274,13 +313,11 @@ namespace ThreeMatch
             }
             
             _lastMovePos = new Vector2Int(x2, y2);
-            StartCoroutine(SwapAndCheck(x1, y1, x2, y2));
+            AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
 
         private IEnumerator SwapAndCheck(int x1, int y1, int x2, int y2)
         {
-            _isProcessing = true;
-            
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
     
@@ -300,49 +337,43 @@ namespace ThreeMatch
             
             p1.Init(this, x2, y2);
             p2.Init(this, x1, y1);
-
-            _isProcessing = false;
             
             bool isSpecialPuzzleExist = false;
-            if (_puzzles[x1, y1] is SpecialPuzzleObject sp1)
+            Vector2Int? delayedBombPos = null;
+            
+            if (_puzzles[x1, y1] is SpecialPuzzleObject)
             {
                 isSpecialPuzzleExist = true;
-                yield return ActivateSpecialBomb(x1, y1, sp1.specialPuzzleType);
+                delayedBombPos = new Vector2Int(x1, y1);
             }
+            
             if (_puzzles[x2, y2] is SpecialPuzzleObject sp2)
             {
                 isSpecialPuzzleExist = true;
-                yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType);
+                yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType, !delayedBombPos.HasValue);
             }
-
-            _isProcessing = true;
             
-            if (CheckAnyMatches())
+            if (CheckAnyMatches() || isSpecialPuzzleExist)
             {
-                yield return MatchPuzzle();
+                yield return MatchPuzzle(delayedBombPos);
             }
             else
             {
-                if (!isSpecialPuzzleExist)
-                {
-                    yield return new WaitForSeconds(0.2f);
-                    _puzzles[x1, y1] = p1;
-                    _puzzles[x2, y2] = p2;
-                
-                    Sequence seq2 = DOTween.Sequence();
-                    Tween t3 = p1.transform.DOMove(pos1, 0.2f);
-                    Tween t4 = p2.transform.DOMove(pos2, 0.2f);
-                    seq2.Append(t3);
-                    seq2.Join(t4);
-                
-                    yield return seq2.WaitForCompletion();
-                
-                    p1.Init(this, x1, y1);
-                    p2.Init(this, x2, y2);
-                }
+                yield return new WaitForSeconds(0.2f);
+                _puzzles[x1, y1] = p1;
+                _puzzles[x2, y2] = p2;
+            
+                Sequence seq2 = DOTween.Sequence();
+                Tween t3 = p1.transform.DOMove(pos1, 0.2f);
+                Tween t4 = p2.transform.DOMove(pos2, 0.2f);
+                seq2.Append(t3);
+                seq2.Join(t4);
+            
+                yield return seq2.WaitForCompletion();
+            
+                p1.Init(this, x1, y1);
+                p2.Init(this, x2, y2);
             }
-
-            _isProcessing = false;
         }
 
         private bool CheckAnyMatches()
@@ -421,7 +452,7 @@ namespace ThreeMatch
                 }
             }
 
-            return true;
+            return _currentMatchGroups.Count > 0;
         }
 
         private void CheckAnyObstaclePuzzle(int i, int j)
@@ -436,10 +467,10 @@ namespace ThreeMatch
 
                 if (ni >= 0 && ni < x && nj >= 0 && nj < y)
                 {
-                    if (_puzzles[ni, nj].puzzleType == PuzzleType.Obstacle &&
+                    if (_puzzles[ni, nj] is ObstaclePuzzleObject op &&
                         _puzzles[ni, nj] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
                     {
-                        _puzzles[ni, nj].isMatched = true;
+                        op.isTriggered = true;
                     }
                 }
             }
@@ -448,7 +479,8 @@ namespace ThreeMatch
         private MatchGroup GetMatchGroupBfs(int startX, int startY, bool[,] visited)
         {
             MatchGroup group = new();
-            NormalPuzzleType color = (NormalPuzzleType)_puzzles[startX, startY].GetPuzzleSubType();
+            NormalPuzzleType color = _puzzles[startX, startY] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op ?
+                op.normalPuzzleType : (NormalPuzzleType)_puzzles[startX, startY].GetPuzzleSubType();
             group.color = color;
 
             Queue<Vector2Int> queue = new();
@@ -483,8 +515,8 @@ namespace ThreeMatch
         
         private void DetermineSpecialType(MatchGroup group)
         {
-            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 첫 번째 타일 위치
-            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[0];
+            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 중간 위치
+            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[group.positions.Count / 2];
             
             int maxH = 0;
             int maxV = 0;
@@ -528,17 +560,17 @@ namespace ThreeMatch
             return count;
         }
         
-        private IEnumerator MatchPuzzle()
+        private IEnumerator MatchPuzzle(Vector2Int? delayedBombPos = null)
         {
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].isMatched)
+                    if (_puzzles[i, j] != null)
                     {
-                        if (_puzzles[i, j] is ObstaclePuzzleObject op)
+                        if (_puzzles[i, j] is ObstaclePuzzleObject { isTriggered: true } op)
                         {
-                            ObstacleMatch(i, j, op.obstaclePuzzleType);
+                            yield return ObstacleMatch(i, j, op.obstaclePuzzleType);
                         }
                     }
                 }
@@ -551,6 +583,11 @@ namespace ThreeMatch
                 Sequence seq = DOTween.Sequence();
                 foreach (var pos in group.positions)
                 {
+                    if (_puzzles[pos.x, pos.y] == null)
+                    {
+                        continue;
+                    }
+                    
                     if (group.resultType != null)
                     {
                         Tween t1 = _puzzles[pos.x, pos.y].transform.DOMove(destination, 0.2f);
@@ -572,7 +609,7 @@ namespace ThreeMatch
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
                     newPuzzle.transform.localPosition = destination;
-                    newPuzzle.name = $"Puzzle({destination.x + 1},{destination.y + 1})";
+                    newPuzzle.name = $"Puzzle({group.spawnPos.x + 1},{group.spawnPos.y + 1})";
                     newPuzzle.transform.localScale = Vector3.zero;
             
                     PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
@@ -580,13 +617,24 @@ namespace ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    newPuzzle.transform.DOScale(0.8f, 0.2f);
+                    yield return newPuzzle.transform.DOScale(0.8f, 0.2f).WaitForCompletion();
                 }
 
                 unitSpawner.FriendlySpawn();
             }
             
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.1f);
+
+            if (delayedBombPos.HasValue)
+            {
+                int bx = delayedBombPos.Value.x;
+                int by = delayedBombPos.Value.y;
+
+                if (_puzzles[bx, by] is SpecialPuzzleObject sp)
+                {
+                    yield return StartCoroutine(SpecialMatch(bx, by, sp.specialPuzzleType));
+                }
+            }
             
             yield return DropBlocks();
         }
@@ -663,18 +711,16 @@ namespace ThreeMatch
         #endregion
         
         #region Abnormal Puzzle
-        public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type)
+        public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
-            if (_isProcessing) yield break;
-            _isProcessing = true;
-            
             yield return SpecialMatch(curX, curY, type);
             
             yield return new WaitForSeconds(0.2f);
-            
-            yield return DropBlocks();
 
-            _isProcessing = false;
+            if (dropAfter)
+            {
+                yield return DropBlocks();
+            }
         }
         
         private IEnumerator SpecialMatch(int curX, int curY, SpecialPuzzleType type)
@@ -687,7 +733,7 @@ namespace ThreeMatch
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
             
             GameObject self = _puzzles[curX, curY].gameObject;
-            _puzzles[curX, curY] = null; 
+            _puzzles[curX, curY] = null;
             self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
 
             Sequence seq = DOTween.Sequence();
@@ -823,36 +869,33 @@ namespace ThreeMatch
 
         public void SpawnObstaclePuzzle()
         {
-            StartCoroutine(SpawnObstaclePuzzleCoroutine());
+            AddTask(SpawnObstaclePuzzleCoroutine);
         }
         
         private IEnumerator SpawnObstaclePuzzleCoroutine()
         {
-            yield return new WaitUntil(() => !_isProcessing);
-            _isProcessing = true;
-
             List<PuzzleObject> list = new();
             
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j].puzzleType == PuzzleType.Normal)
+                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal)
                     {
                         list.Add(_puzzles[i, j]);
                     }
                 }
             }
             
-            var target = list[Random.Range(0, list.Count)];
+            PuzzleObject target = list[Random.Range(0, list.Count)];
 
             Vector3 currentPos = target.transform.localPosition;
             int col = target.column, row = target.row;
-            var type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
+            NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
             _puzzles[col, row] = null;
             Destroy(target.gameObject);
 
-            var values = Enum.GetValues(typeof(ObstaclePuzzleType));
+            Array values = Enum.GetValues(typeof(ObstaclePuzzleType));
             int idx = (int)values.GetValue(Random.Range(0, values.Length));
             
             GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[idx], puzzleFrame);
@@ -865,28 +908,35 @@ namespace ThreeMatch
             po.Init(this, col, row);
             po.isMatched = false;
 
-            if (po is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
+            switch (po)
             {
-                op.normalPuzzleType = type;
-                newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
+                    Array normalValues = Enum.GetValues(typeof(NormalPuzzleType));
+                    op.normalPuzzleType = (NormalPuzzleType)normalValues.GetValue(Random.Range(0, normalValues.Length));
+                    break;
+                case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
+                    op.normalPuzzleType = type;
+                    newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    break;
             }
             
-            newPuzzle.transform.DOScale(0.6f, 0.2f);
-            
-            _isProcessing = false;
+            Tween t =  newPuzzle.transform.DOScale(0.6f, 0.2f);
+            yield return t.WaitForCompletion();
         }
 
-        private void ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
+        private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
         {
             switch (type)
             {
                 case ObstaclePuzzleType.DeActivated:
-                    DeActivatedMatch(curX, curY);
+                    yield return DeActivatedMatch(curX, curY);
+                    break;
+                case ObstaclePuzzleType.Fixed:
                     break;
             }
         }
 
-        private void DeActivatedMatch(int curX, int curY)
+        private IEnumerator DeActivatedMatch(int curX, int curY)
         {
             var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
             NormalPuzzleType targetType = obstacleObj.normalPuzzleType;
@@ -907,6 +957,8 @@ namespace ThreeMatch
             po.isMatched = false;
             
             newPuzzle.transform.DOScale(0.6f, 0.2f);
+
+            yield return null;
         }
         #endregion
     }
