@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-namespace ThreeMatch
+namespace _01.Scripts._01.ThreeMatch
 {
     public class SpecialPuzzleObject : PuzzleObject
     {
@@ -29,7 +28,7 @@ namespace ThreeMatch
             if (timeSinceLastClick <= DoubleClickThreshold && !_progressing)
             {
                 _progressing = true;
-                Generator.StartCoroutine(Generator.ActivateSpecialBomb(column, row, specialPuzzleType));
+                Generator.AddTask(() => Generator.ActivateSpecialBomb(column, row, specialPuzzleType));
             }
             _lastClickTime = Time.time;
         }

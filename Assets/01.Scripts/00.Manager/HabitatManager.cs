@@ -1,0 +1,89 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+[System.Serializable]
+public class UnitData
+{
+    public UnitType unitType;
+    public bool isUnlocked;
+}
+
+[System.Serializable]
+public class HabitatData
+{
+    public Habitat habitatType;
+    public List<UnitData> units = new List<UnitData>();
+}
+
+public class HabitatManager : SingletonObject<HabitatManager>
+{
+    [SerializeField]
+    private List<HabitatData> habitats = new List<HabitatData>();
+
+    private Dictionary<Habitat, Dictionary<UnitType, UnitData>> habitatDict;
+
+    private void Awake()
+    {
+        base.Awake();
+        InitializeDictionary();
+    }
+
+    private void InitializeDictionary()
+    {
+        habitatDict = new Dictionary<Habitat, Dictionary<UnitType, UnitData>>();
+
+        foreach (var habitatData in habitats)
+        {
+            var unitDict = new Dictionary<UnitType, UnitData>();
+
+            foreach (var unit in habitatData.units)
+            {
+                unitDict[unit.unitType] = unit;
+            }
+
+            habitatDict[habitatData.habitatType] = unitDict;
+        }
+    }
+    public bool IsUnlocked(Habitat habitat, UnitType unitType)
+    {
+        if (habitatDict.TryGetValue(habitat, out var unitDict))
+        {
+            if (unitDict.TryGetValue(unitType, out var unit))
+            {
+                return unit.isUnlocked;
+            }
+        }
+
+        return false;
+    }
+
+    public void UnlockUnit(Habitat habitat, UnitType unitType)
+    {
+        if (habitatDict.TryGetValue(habitat, out var unitDict))
+        {
+            if (unitDict.TryGetValue(unitType, out var unit))
+            {
+                unit.isUnlocked = true;
+            }
+        }
+    }
+
+    public bool CanUnlock(Habitat habitat, UnitType unitType)
+    {
+        if (!habitatDict.TryGetValue(habitat, out var unitDict))
+            return false;
+
+        var unitList = habitats.Find(h => h.habitatType == habitat)?.units;
+        if (unitList == null)
+            return false;
+
+        int index = unitList.FindIndex(u => u.unitType == unitType);
+        if (index == -1)
+            return false;
+
+        if (index == 0)
+            return true;
+
+        return unitList[index - 1].isUnlocked;
+    }
+}
