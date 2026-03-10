@@ -743,6 +743,14 @@ namespace _01.Scripts._01.ThreeMatch
         }
         #endregion
         
+        /// <summary>
+        /// 특수 및 장애물 타일 관련 함수
+        /// </summary>
+        /// <param name="curX"></param>
+        /// <param name="curY"></param>
+        /// <param name="type"></param>
+        /// <param name="dropAfter"></param>
+        /// <returns></returns>
         #region Abnormal Puzzle
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
@@ -944,8 +952,7 @@ namespace _01.Scripts._01.ThreeMatch
             switch (po)
             {
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
-                    Array normalValues = Enum.GetValues(typeof(NormalPuzzleType));
-                    op.normalPuzzleType = (NormalPuzzleType)normalValues.GetValue(Random.Range(0, normalValues.Length));
+                    op.normalPuzzleType = type;
                     break;
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                     op.normalPuzzleType = type;
