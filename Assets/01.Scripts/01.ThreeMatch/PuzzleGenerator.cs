@@ -307,8 +307,8 @@ namespace _01.Scripts._01.ThreeMatch
             if (_taskQueue.Count > 0 || _isProcessing) return;
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } ||
-                _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject ||
+                _puzzles[x2, y2] is ObstaclePuzzleObject)
             {
                 return;
             }
