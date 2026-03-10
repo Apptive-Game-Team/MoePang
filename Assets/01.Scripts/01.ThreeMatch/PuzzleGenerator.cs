@@ -66,6 +66,7 @@ namespace _01.Scripts._01.ThreeMatch
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
+        private HashSet<Vector2Int> _movedPositions = new();
         
         private class MatchGroup
         {
@@ -318,6 +319,10 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator SwapAndCheck(int x1, int y1, int x2, int y2)
         {
+            _movedPositions.Clear();
+            _movedPositions.Add(new Vector2Int(x1, y1));
+            _movedPositions.Add(new Vector2Int(x2, y2));
+            
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
     
@@ -515,8 +520,31 @@ namespace _01.Scripts._01.ThreeMatch
         
         private void DetermineSpecialType(MatchGroup group)
         {
-            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 중간 위치
-            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[group.positions.Count / 2];
+            // 유저가 이동시키거나 옮겨진 타일이 포함되면 우선으로 생성위치 부여(그 중에서 왼쪽 아래 우선)
+            List<Vector2Int> movedCandidates = new();
+            foreach (var pos in group.positions)
+            {
+                if (_movedPositions.Contains(pos))
+                {
+                    movedCandidates.Add(pos);
+                }
+            }
+            
+            if (movedCandidates.Count == 0)
+            {
+                movedCandidates = group.positions;
+            }
+            
+            Vector2Int bestPos = movedCandidates[0];
+            foreach (var pos in movedCandidates)
+            {
+                if (pos.y < bestPos.y || (pos.y == bestPos.y && pos.x < bestPos.x))
+                {
+                    bestPos = pos;
+                }
+            }
+
+            group.spawnPos = bestPos;
             
             int maxH = 0;
             int maxV = 0;
@@ -641,6 +669,8 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator DropBlocks()
         {
+            _movedPositions.Clear();
+            
             Sequence seq = DOTween.Sequence();
 
             for (int i = 0; i < x; i++)
@@ -662,6 +692,8 @@ namespace _01.Scripts._01.ThreeMatch
 
                                 _puzzles[i, j].gameObject.name = $"Puzzle({i + 1},{j + 1})";
                                 _puzzles[i, j].Init(this, i, j);
+
+                                _movedPositions.Add(new Vector2Int(i, j));
 
                                 break;
                             }
@@ -696,6 +728,8 @@ namespace _01.Scripts._01.ThreeMatch
                         seq.Join(t);
                         
                         po.Init(this, i, j);
+                        
+                        _movedPositions.Add(new Vector2Int(i, j));
                     }
                 }
             }
