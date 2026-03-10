@@ -537,13 +537,13 @@ namespace _01.Scripts._01.ThreeMatch
             }
             else if (maxH == 4)
             {
-                // 가로로 4개 -> 세로 폭탄 (Column)
-                group.resultType = SpecialPuzzleType.ColumnBomb;
+                // 가로로 4개 -> 가로 폭탄 (Column)
+                group.resultType = SpecialPuzzleType.RowBomb;
             }
             else if (maxV == 4)
             {
-                // 세로로 4개 -> 가로 폭탄 (Row)
-                group.resultType = SpecialPuzzleType.RowBomb;
+                // 세로로 4개 -> 세로 폭탄 (Row)
+                group.resultType = SpecialPuzzleType.ColumnBomb;
             }
             // todo : CrossBomb, ColorBomb 조건 추가
         }
