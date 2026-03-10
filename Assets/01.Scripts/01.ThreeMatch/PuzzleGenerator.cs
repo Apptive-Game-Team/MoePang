@@ -46,9 +46,8 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
-        [Range(0, 100)] [SerializeField] private float normalProbability;
-        [Range(0, 100)] [SerializeField] private float specialProbability;
         [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
+        [SerializeField] private List<ObstacleWeight> obstacleWeights;
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
@@ -90,6 +89,13 @@ namespace _01.Scripts._01.ThreeMatch
         {
             public ObstaclePuzzleType type;
             public Vector2Int pos;
+        }
+
+        [Serializable]
+        private struct ObstacleWeight
+        {
+            public ObstaclePuzzleType type;
+            [Range(0, 100)] public int weight;
         }
 
         private void Start()
@@ -189,8 +195,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
                 PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                var types = Enum.GetValues(typeof(NormalPuzzleType));
-                var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+                NormalPuzzleType randomType = GetValidRandomType(col, row);
                 switch (po)
                 {
                     case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
@@ -204,8 +209,8 @@ namespace _01.Scripts._01.ThreeMatch
             }
             else
             {
-                int randomType = (int)GetValidRandomType(col, row);
-                puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                NormalPuzzleType randomType = GetValidRandomType(col, row);
+                puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
             }
             
             return puzzle;
@@ -989,11 +994,8 @@ namespace _01.Scripts._01.ThreeMatch
             NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
             _puzzles[col, row] = null;
             Destroy(target.gameObject);
-
-            Array values = Enum.GetValues(typeof(ObstaclePuzzleType));
-            int idx = (int)values.GetValue(Random.Range(0, values.Length));
             
-            GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[idx], puzzleFrame);
+            GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[(int)GetWeightedRandomObstacle()], puzzleFrame);
             newPuzzle.transform.localPosition = currentPos;
             newPuzzle.name = $"Puzzle({col + 1},{row + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
@@ -1016,6 +1018,29 @@ namespace _01.Scripts._01.ThreeMatch
             
             Tween t =  newPuzzle.transform.DOScale(0.6f, 0.2f);
             yield return t.WaitForCompletion();
+        }
+        
+        private ObstaclePuzzleType GetWeightedRandomObstacle()
+        {
+            int totalWeight = 0;
+            foreach (var obstacle in obstacleWeights)
+            {
+                totalWeight += obstacle.weight;
+            }
+            
+            int randomValue = Random.Range(0, totalWeight);
+            
+            int currentSum = 0;
+            foreach (var obstacle in obstacleWeights)
+            {
+                currentSum += obstacle.weight;
+                if (randomValue < currentSum)
+                {
+                    return obstacle.type;
+                }
+            }
+            
+            return ObstaclePuzzleType.DeActivated;
         }
 
         private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
