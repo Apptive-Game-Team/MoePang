@@ -681,8 +681,7 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         for (int k = j + 1; k < y; k++)
                         {
-                            if (_puzzles[i, k] != null && 
-                                _puzzles[i, k] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+                            if (_puzzles[i, k] != null)
                             {
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
