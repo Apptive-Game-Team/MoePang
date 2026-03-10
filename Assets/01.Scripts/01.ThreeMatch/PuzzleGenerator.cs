@@ -48,6 +48,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private float space;
         [Range(0, 100)] [SerializeField] private float normalProbability;
         [Range(0, 100)] [SerializeField] private float specialProbability;
+        [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
@@ -67,7 +68,9 @@ namespace _01.Scripts._01.ThreeMatch
         private List<MatchGroup> _currentMatchGroups = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
-        
+
+        private const float ObstacleSpawnDelay = 10f;
+
         private class MatchGroup
         {
             public List<Vector2Int> positions = new();
@@ -76,17 +79,23 @@ namespace _01.Scripts._01.ThreeMatch
             public NormalPuzzleType color;
         }
 
-        private void Update()
+        [Serializable]
+        private struct ObstacleSpawnGroup
         {
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                SpawnObstaclePuzzle();
-            }
+            public List<ObstacleSpawnData> obstacles;
+        }
+
+        [Serializable]
+        private struct ObstacleSpawnData
+        {
+            public ObstaclePuzzleType type;
+            public Vector2Int pos;
         }
 
         private void Start()
         {
             AddTask(GenerateBoard);
+            StartCoroutine(SpawnObstaclePuzzle());
         }
         
         /// <summary>
@@ -145,7 +154,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < x; j++)
                 {
-                    GameObject puzzle = SetRandomPuzzle(j, i);
+                    GameObject puzzle = SetStartRandomPuzzle(j, i);
                     
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                     puzzle.name = $"Puzzle({j + 1},{i + 1})";
@@ -161,11 +170,52 @@ namespace _01.Scripts._01.ThreeMatch
             yield return seq.WaitForCompletion();
         }
 
+        private GameObject SetStartRandomPuzzle(int col, int row)
+        {
+            bool isObstacle = false;
+            ObstaclePuzzleType obstacleType = ObstaclePuzzleType.DeActivated;
+
+            foreach (var data in startObstacles[0].obstacles)
+            {
+                if (data.pos.x == col && data.pos.y == row)
+                {
+                    isObstacle = true;
+                    obstacleType = data.type;
+                }
+            }
+
+            GameObject puzzle;
+            if (isObstacle)
+            {
+                puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                var types = Enum.GetValues(typeof(NormalPuzzleType));
+                var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+                switch (po)
+                {
+                    case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
+                        op.normalPuzzleType = randomType;
+                        break;
+                    case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
+                        op.normalPuzzleType = randomType;
+                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        break;
+                }
+            }
+            else
+            {
+                int randomType = (int)GetValidRandomType(col, row);
+                puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+            }
+            
+            return puzzle;
+        }
+
         private GameObject SetRandomPuzzle(int col, int row)
         {
-            int randomType = (int)GetValidRandomType(col, row);
-            GameObject puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
-            
+            var types = Enum.GetValues(typeof(NormalPuzzleType));
+            var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
             return puzzle;
         }
 
@@ -908,12 +958,16 @@ namespace _01.Scripts._01.ThreeMatch
             }
         }
 
-        public void SpawnObstaclePuzzle()
+        private IEnumerator SpawnObstaclePuzzle()
         {
-            AddTask(SpawnObstaclePuzzleCoroutine);
+            while (true)
+            {
+                yield return new WaitForSeconds(ObstacleSpawnDelay);
+                AddTask(SpawnRandomObstaclePuzzleCoroutine);
+            }
         }
         
-        private IEnumerator SpawnObstaclePuzzleCoroutine()
+        private IEnumerator SpawnRandomObstaclePuzzleCoroutine()
         {
             List<PuzzleObject> list = new();
             
