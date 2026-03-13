@@ -46,8 +46,8 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
-        [Range(0, 100)] [SerializeField] private float normalProbability;
-        [Range(0, 100)] [SerializeField] private float specialProbability;
+        [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
+        [SerializeField] private List<ObstacleWeight> obstacleWeights;
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
@@ -66,7 +66,10 @@ namespace _01.Scripts._01.ThreeMatch
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
-        
+        private HashSet<Vector2Int> _movedPositions = new();
+
+        private const float ObstacleSpawnDelay = 10f;
+
         private class MatchGroup
         {
             public List<Vector2Int> positions = new();
@@ -75,17 +78,30 @@ namespace _01.Scripts._01.ThreeMatch
             public NormalPuzzleType color;
         }
 
-        private void Update()
+        [Serializable]
+        private struct ObstacleSpawnGroup
         {
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                SpawnObstaclePuzzle();
-            }
+            public List<ObstacleSpawnData> obstacles;
+        }
+
+        [Serializable]
+        private struct ObstacleSpawnData
+        {
+            public ObstaclePuzzleType type;
+            public Vector2Int pos;
+        }
+
+        [Serializable]
+        private struct ObstacleWeight
+        {
+            public ObstaclePuzzleType type;
+            [Range(0, 100)] public int weight;
         }
 
         private void Start()
         {
             AddTask(GenerateBoard);
+            StartCoroutine(SpawnObstaclePuzzle());
         }
         
         /// <summary>
@@ -144,7 +160,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < x; j++)
                 {
-                    GameObject puzzle = SetRandomPuzzle(j, i);
+                    GameObject puzzle = SetStartRandomPuzzle(j, i);
                     
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                     puzzle.name = $"Puzzle({j + 1},{i + 1})";
@@ -160,11 +176,51 @@ namespace _01.Scripts._01.ThreeMatch
             yield return seq.WaitForCompletion();
         }
 
+        private GameObject SetStartRandomPuzzle(int col, int row)
+        {
+            bool isObstacle = false;
+            ObstaclePuzzleType obstacleType = ObstaclePuzzleType.DeActivated;
+
+            foreach (var data in startObstacles[0].obstacles)
+            {
+                if (data.pos.x == col && data.pos.y == row)
+                {
+                    isObstacle = true;
+                    obstacleType = data.type;
+                }
+            }
+
+            GameObject puzzle;
+            if (isObstacle)
+            {
+                puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                NormalPuzzleType randomType = GetValidRandomType(col, row);
+                switch (po)
+                {
+                    case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
+                        op.normalPuzzleType = randomType;
+                        break;
+                    case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
+                        op.normalPuzzleType = randomType;
+                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        break;
+                }
+            }
+            else
+            {
+                NormalPuzzleType randomType = GetValidRandomType(col, row);
+                puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+            }
+            
+            return puzzle;
+        }
+
         private GameObject SetRandomPuzzle(int col, int row)
         {
-            int randomType = (int)GetValidRandomType(col, row);
-            GameObject puzzle = Instantiate(normalPuzzlePrefabs[randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
-            
+            var types = Enum.GetValues(typeof(NormalPuzzleType));
+            var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
             return puzzle;
         }
 
@@ -306,8 +362,8 @@ namespace _01.Scripts._01.ThreeMatch
             if (_taskQueue.Count > 0 || _isProcessing) return;
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } ||
-                _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject ||
+                _puzzles[x2, y2] is ObstaclePuzzleObject)
             {
                 return;
             }
@@ -318,6 +374,10 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator SwapAndCheck(int x1, int y1, int x2, int y2)
         {
+            _movedPositions.Clear();
+            _movedPositions.Add(new Vector2Int(x1, y1));
+            _movedPositions.Add(new Vector2Int(x2, y2));
+            
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
     
@@ -515,8 +575,31 @@ namespace _01.Scripts._01.ThreeMatch
         
         private void DetermineSpecialType(MatchGroup group)
         {
-            // 유저가 마지막으로 옮긴 위치가 그룹에 포함되면 그곳에서 생성, 아니면 그룹의 중간 위치
-            group.spawnPos = group.positions.Contains(_lastMovePos) ? _lastMovePos : group.positions[group.positions.Count / 2];
+            // 유저가 이동시키거나 옮겨진 타일이 포함되면 우선으로 생성위치 부여(그 중에서 왼쪽 아래 우선)
+            List<Vector2Int> movedCandidates = new();
+            foreach (var pos in group.positions)
+            {
+                if (_movedPositions.Contains(pos))
+                {
+                    movedCandidates.Add(pos);
+                }
+            }
+            
+            if (movedCandidates.Count == 0)
+            {
+                movedCandidates = group.positions;
+            }
+            
+            Vector2Int bestPos = movedCandidates[0];
+            foreach (var pos in movedCandidates)
+            {
+                if (pos.y < bestPos.y || (pos.y == bestPos.y && pos.x < bestPos.x))
+                {
+                    bestPos = pos;
+                }
+            }
+
+            group.spawnPos = bestPos;
             
             int maxH = 0;
             int maxV = 0;
@@ -537,13 +620,13 @@ namespace _01.Scripts._01.ThreeMatch
             }
             else if (maxH == 4)
             {
-                // 가로로 4개 -> 세로 폭탄 (Column)
-                group.resultType = SpecialPuzzleType.ColumnBomb;
+                // 가로로 4개 -> 가로 폭탄 (Column)
+                group.resultType = SpecialPuzzleType.RowBomb;
             }
             else if (maxV == 4)
             {
-                // 세로로 4개 -> 가로 폭탄 (Row)
-                group.resultType = SpecialPuzzleType.RowBomb;
+                // 세로로 4개 -> 세로 폭탄 (Row)
+                group.resultType = SpecialPuzzleType.ColumnBomb;
             }
             // todo : CrossBomb, ColorBomb 조건 추가
         }
@@ -641,6 +724,8 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator DropBlocks()
         {
+            _movedPositions.Clear();
+            
             Sequence seq = DOTween.Sequence();
 
             for (int i = 0; i < x; i++)
@@ -651,8 +736,7 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         for (int k = j + 1; k < y; k++)
                         {
-                            if (_puzzles[i, k] != null && 
-                                _puzzles[i, k] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+                            if (_puzzles[i, k] != null)
                             {
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
@@ -662,6 +746,8 @@ namespace _01.Scripts._01.ThreeMatch
 
                                 _puzzles[i, j].gameObject.name = $"Puzzle({i + 1},{j + 1})";
                                 _puzzles[i, j].Init(this, i, j);
+
+                                _movedPositions.Add(new Vector2Int(i, j));
 
                                 break;
                             }
@@ -696,6 +782,8 @@ namespace _01.Scripts._01.ThreeMatch
                         seq.Join(t);
                         
                         po.Init(this, i, j);
+                        
+                        _movedPositions.Add(new Vector2Int(i, j));
                     }
                 }
             }
@@ -710,6 +798,14 @@ namespace _01.Scripts._01.ThreeMatch
         }
         #endregion
         
+        /// <summary>
+        /// 특수 및 장애물 타일 관련 함수
+        /// </summary>
+        /// <param name="curX"></param>
+        /// <param name="curY"></param>
+        /// <param name="type"></param>
+        /// <param name="dropAfter"></param>
+        /// <returns></returns>
         #region Abnormal Puzzle
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
@@ -867,12 +963,16 @@ namespace _01.Scripts._01.ThreeMatch
             }
         }
 
-        public void SpawnObstaclePuzzle()
+        private IEnumerator SpawnObstaclePuzzle()
         {
-            AddTask(SpawnObstaclePuzzleCoroutine);
+            while (true)
+            {
+                yield return new WaitForSeconds(ObstacleSpawnDelay);
+                AddTask(SpawnRandomObstaclePuzzleCoroutine);
+            }
         }
         
-        private IEnumerator SpawnObstaclePuzzleCoroutine()
+        private IEnumerator SpawnRandomObstaclePuzzleCoroutine()
         {
             List<PuzzleObject> list = new();
             
@@ -894,11 +994,8 @@ namespace _01.Scripts._01.ThreeMatch
             NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
             _puzzles[col, row] = null;
             Destroy(target.gameObject);
-
-            Array values = Enum.GetValues(typeof(ObstaclePuzzleType));
-            int idx = (int)values.GetValue(Random.Range(0, values.Length));
             
-            GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[idx], puzzleFrame);
+            GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[(int)GetWeightedRandomObstacle()], puzzleFrame);
             newPuzzle.transform.localPosition = currentPos;
             newPuzzle.name = $"Puzzle({col + 1},{row + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
@@ -911,8 +1008,7 @@ namespace _01.Scripts._01.ThreeMatch
             switch (po)
             {
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
-                    Array normalValues = Enum.GetValues(typeof(NormalPuzzleType));
-                    op.normalPuzzleType = (NormalPuzzleType)normalValues.GetValue(Random.Range(0, normalValues.Length));
+                    op.normalPuzzleType = type;
                     break;
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                     op.normalPuzzleType = type;
@@ -922,6 +1018,29 @@ namespace _01.Scripts._01.ThreeMatch
             
             Tween t =  newPuzzle.transform.DOScale(0.6f, 0.2f);
             yield return t.WaitForCompletion();
+        }
+        
+        private ObstaclePuzzleType GetWeightedRandomObstacle()
+        {
+            int totalWeight = 0;
+            foreach (var obstacle in obstacleWeights)
+            {
+                totalWeight += obstacle.weight;
+            }
+            
+            int randomValue = Random.Range(0, totalWeight);
+            
+            int currentSum = 0;
+            foreach (var obstacle in obstacleWeights)
+            {
+                currentSum += obstacle.weight;
+                if (randomValue < currentSum)
+                {
+                    return obstacle.type;
+                }
+            }
+            
+            return ObstaclePuzzleType.DeActivated;
         }
 
         private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
