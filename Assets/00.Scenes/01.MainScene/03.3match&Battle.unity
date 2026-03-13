@@ -526,11 +526,11 @@ MonoBehaviour:
   - {fileID: 2857731521102525544, guid: 644aa0087807ddd4d91aef22c9df1c2e, type: 3}
   - {fileID: 2857731521102525544, guid: 3078c7d34f980f744bd38f948248da48, type: 3}
   normalPuzzleImages:
-  - {fileID: -3072705626550885748, guid: dee434639a2262e48b5065c75b9f7d44, type: 3}
-  - {fileID: -862775087636167547, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
-  - {fileID: -2081581688970004608, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
-  - {fileID: 810494766280951130, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
-  - {fileID: -6545081411632747473, guid: b1bdf607f3102e54bac670741b98d44e, type: 3}
+  - {fileID: 21300000, guid: dee434639a2262e48b5065c75b9f7d44, type: 3}
+  - {fileID: 21300000, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
+  - {fileID: 21300000, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
+  - {fileID: 21300000, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
+  - {fileID: 21300000, guid: b1bdf607f3102e54bac670741b98d44e, type: 3}
   unitSpawner: {fileID: 268232358}
 --- !u!4 &1669581475
 Transform:
@@ -661,6 +661,7 @@ GameObject:
   - component: {fileID: 1766497326}
   - component: {fileID: 1766497325}
   - component: {fileID: 1766497328}
+  - component: {fileID: 1766497329}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -765,7 +766,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -786,6 +787,23 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &1766497329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1766497324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: b9bf50ace2783c645b5bed068bfda12b, type: 2}
 --- !u!1 &1953625087
 GameObject:
   m_ObjectHideFlags: 0

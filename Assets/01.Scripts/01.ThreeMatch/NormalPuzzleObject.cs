@@ -1,4 +1,7 @@
+using DG.Tweening;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace _01.Scripts._01.ThreeMatch
 {
@@ -10,7 +13,20 @@ namespace _01.Scripts._01.ThreeMatch
         private Vector2 _lastTouchPos;
         private bool _isSwapped;
 
+        private Material _material;
+        private static readonly int HighlightAlphaId = Shader.PropertyToID("_Highlight");
+
         public override int GetPuzzleSubType() => (int)normalPuzzleType;
+
+        private void Start()
+        {
+            Image img = GetComponent<Image>();
+            if (img.material != null)
+            {
+                _material = new Material(img.material);
+                img.material = _material;
+            }
+        }
         
         private void OnMouseDown()
         {
@@ -61,6 +77,13 @@ namespace _01.Scripts._01.ThreeMatch
         private void Swap(int dirX, int dirY)
         {
             Generator.TrySwapPuzzles(column, row, column + dirX, row + dirY);
+        }
+
+        public Tween HighlightEffect()
+        {
+            return DOTween.To(() => 0f, x => _material.SetFloat(HighlightAlphaId, x), 1f, 0.1f)
+                .SetLoops(2, LoopType.Yoyo)
+                .SetEase(Ease.OutCubic);
         }
     }
 }

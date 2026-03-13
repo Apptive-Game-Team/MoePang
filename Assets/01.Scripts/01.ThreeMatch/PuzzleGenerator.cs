@@ -68,6 +68,7 @@ namespace _01.Scripts._01.ThreeMatch
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
 
+        private const float TileScale = 0.6f;
         private const float ObstacleSpawnDelay = 10f;
 
         private class MatchGroup
@@ -663,30 +664,41 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 Vector3 destination = CalculatePos(group.spawnPos.x, group.spawnPos.y);
                 
-                Sequence seq = DOTween.Sequence();
+                Sequence seq1 = DOTween.Sequence();
                 foreach (var pos in group.positions)
                 {
-                    if (_puzzles[pos.x, pos.y] == null)
+                    if (_puzzles[pos.x, pos.y] is NormalPuzzleObject no)
                     {
-                        continue;
+                        seq1.Join(no.HighlightEffect());
                     }
+                }
+                yield return seq1.WaitForCompletion();
+                
+                Sequence seq2 = DOTween.Sequence();
+                foreach (var pos in group.positions)
+                {
+                    var targetPuzzle = _puzzles[pos.x, pos.y];
+                    if (targetPuzzle == null) continue;
                     
+                    _puzzles[pos.x, pos.y] = null;
+
                     if (group.resultType != null)
                     {
-                        Tween t1 = _puzzles[pos.x, pos.y].transform.DOMove(destination, 0.2f);
-                        seq.Join(t1);
+                        Tween t1 = targetPuzzle.transform.DOMove(destination, 0.2f);
+                        seq2.Join(t1);
                     }
-
-                    Tween t2 = _puzzles[pos.x, pos.y].transform.DOScale(0, 0.2f)
+                    
+                    Tween t2 = targetPuzzle.transform.DOScale(TileScale / 3, 0.2f)
                         .OnComplete(() =>
                         {
-                            Destroy(_puzzles[pos.x, pos.y].gameObject);
-                            _puzzles[pos.x, pos.y] = null;
+                            if (targetPuzzle != null)
+                            {
+                                Destroy(targetPuzzle.gameObject);
+                            }
                         });
-                    seq.Join(t2);
+                    seq2.Join(t2);
                 }
-                
-                yield return seq.WaitForCompletion();
+                yield return seq2.WaitForCompletion();
 
                 if (group.resultType != null)
                 {
@@ -700,7 +712,7 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    yield return newPuzzle.transform.DOScale(0.8f, 0.2f).WaitForCompletion();
+                    yield return newPuzzle.transform.DOScale(TileScale, 0.2f).WaitForCompletion();
                 }
 
                 unitSpawner.FriendlySpawn();
@@ -848,7 +860,7 @@ namespace _01.Scripts._01.ThreeMatch
                 else
                 {
                     _puzzles[pos.x, pos.y] = null;
-                    Tween t = targetPuzzle.transform.DOScale(0, 0.15f)
+                    Tween t = targetPuzzle.transform.DOScale(TileScale / 3, 0.15f)
                         .OnComplete(() => Destroy(targetPuzzle.gameObject));
                     seq.Join(t);
                 }
@@ -1016,7 +1028,7 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
             }
             
-            Tween t =  newPuzzle.transform.DOScale(0.6f, 0.2f);
+            Tween t =  newPuzzle.transform.DOScale(TileScale, 0.2f);
             yield return t.WaitForCompletion();
         }
         
@@ -1075,7 +1087,7 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, curX, curY);
             po.isMatched = false;
             
-            newPuzzle.transform.DOScale(0.6f, 0.2f);
+            newPuzzle.transform.DOScale(TileScale, 0.2f);
 
             yield return null;
         }
