@@ -59,13 +59,22 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlurAmount: 0
-    - _GlowAmount: 0.37
+    - _ColorMask: 15
+    - _GlowAmount: 0.1
     - _Highlight: 0
-    - _OutlineThickness: 0.02
+    - _OutlineThickness: 0.07
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
     - _Trigger: 0
+    - _UIMaskSoftnessX: 1
+    - _UIMaskSoftnessY: 1
     m_Colors:
+    - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 5.3403134, g: 5.3403134, b: 5.3403134, a: 0}
-    - _GlowColor: {r: 2.2191389, g: 2.2191389, b: 2.2191389, a: 0}
+    - _GlowColor: {r: 1.8894355, g: 1.8894355, b: 1.8894355, a: 0}
     - _OutlineColor: {r: 1, g: 0.9363469, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
