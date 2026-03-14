@@ -490,6 +490,10 @@ MonoBehaviour:
   x: 7
   y: 7
   space: 0.8
+  rowDropDelay: 0.01
+  columnDropDelay: 0.03
+  dropSpeed: 10
+  tileScale: 0.7
   startObstacles:
   - obstacles:
     - type: 1
@@ -511,6 +515,7 @@ MonoBehaviour:
     weight: 30
   - type: 1
     weight: 70
+  obstacleSpawnDelay: 10
   normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
   - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}

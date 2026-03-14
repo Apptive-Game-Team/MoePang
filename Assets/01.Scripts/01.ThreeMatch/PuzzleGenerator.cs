@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -46,8 +47,14 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
+        [SerializeField] private float rowDropDelay = 0.01f;
+        [SerializeField] private float columnDropDelay = 0.02f;
+        [SerializeField] private float dropSpeed = 10f;
+        [SerializeField] private float tileScale = 0.6f;
         [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
         [SerializeField] private List<ObstacleWeight> obstacleWeights;
+        [SerializeField] private float obstacleSpawnDelay = 10f;
+        
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
@@ -68,8 +75,7 @@ namespace _01.Scripts._01.ThreeMatch
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
 
-        private const float TileScale = 0.6f;
-        private const float ObstacleSpawnDelay = 10f;
+        
 
         private class MatchGroup
         {
@@ -157,21 +163,35 @@ namespace _01.Scripts._01.ThreeMatch
         {
             Sequence seq = DOTween.Sequence();
             
-            for (int i = 0; i < y; i++)
+            for (int i = 0; i < x; i++)
             {
-                for (int j = 0; j < x; j++)
+                for (int j = 0; j < y; j++)
                 {
-                    GameObject puzzle = SetStartRandomPuzzle(j, i);
+                    GameObject puzzle = SetStartRandomPuzzle(i, j);
                     
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                    puzzle.name = $"Puzzle({j + 1},{i + 1})";
-                    _puzzles[j, i] = po;
+                    puzzle.name = $"Puzzle({i + 1},{j + 1})";
+                    _puzzles[i, j] = po;
                     
-                    Tween t = puzzle.transform.DOMove(CalculatePos(j, i), 0.3f);
-                    seq.Join(t);
+                    Vector3 targetPos = CalculatePos(i, j);
+                            
+                    float distance = Vector3.Distance(po.transform.position, targetPos);
+                    float duration = distance / dropSpeed;
+                            
+                    Tween fallTween = po.transform.DOMove(targetPos, duration)
+                        .SetEase(Ease.InQuad)
+                        .SetDelay(rowDropDelay)
+                        .OnComplete(() => 
+                        {
+                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1);
+                        });
+
+                    seq.Join(fallTween);
                     
-                    po.Init(this, j, i);
+                    po.Init(this, i, j);
                 }
+
+                seq.SetDelay(columnDropDelay);
             }
 
             yield return seq.WaitForCompletion();
@@ -217,11 +237,14 @@ namespace _01.Scripts._01.ThreeMatch
             return puzzle;
         }
 
-        private GameObject SetRandomPuzzle(int col, int row)
+        private GameObject SetRandomPuzzle(int col, int row, int spawnOrder)
         {
             var types = Enum.GetValues(typeof(NormalPuzzleType));
             var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
-            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+            
+            Vector3 startPos = CalculateDropPos(col, spawnOrder);
+            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], startPos, Quaternion.identity, puzzleFrame);
+            puzzle.name = $"Puzzle({col + 1}, {row + 1})"; 
             return puzzle;
         }
 
@@ -341,12 +364,14 @@ namespace _01.Scripts._01.ThreeMatch
             return new Vector3(col * space - offsetX, row * space - offsetY, 0f);
         }
 
-        private Vector3 CalculateDropPos(int col, int row)
+        private Vector3 CalculateDropPos(int col, int spawnOrder)
         {
             float offsetX = (x - 1) * space / 2f;
-            float offsetY = (y + 3) * space / 2f;
+            float offsetY = (y - 1) * space / 2f;
+            
+            float spawnY = (y + spawnOrder) * space - offsetY;
 
-            return new Vector3(col * space - offsetX, row * space + offsetY, 0f);
+            return new Vector3(col * space - offsetX, spawnY, 0f);
         }
         #endregion
         
@@ -688,7 +713,7 @@ namespace _01.Scripts._01.ThreeMatch
                         seq2.Join(t1);
                     }
                     
-                    Tween t2 = targetPuzzle.transform.DOScale(TileScale / 3, 0.2f)
+                    Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f)
                         .OnComplete(() =>
                         {
                             if (targetPuzzle != null)
@@ -712,13 +737,11 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    yield return newPuzzle.transform.DOScale(TileScale, 0.2f).WaitForCompletion();
+                    yield return newPuzzle.transform.DOScale(tileScale, 0.2f).WaitForCompletion();
                 }
 
                 unitSpawner.FriendlySpawn();
             }
-            
-            yield return new WaitForSeconds(0.1f);
 
             if (delayedBombPos.HasValue)
             {
@@ -733,76 +756,74 @@ namespace _01.Scripts._01.ThreeMatch
             
             yield return DropBlocks();
         }
-        
+
         private IEnumerator DropBlocks()
         {
             _movedPositions.Clear();
-            
             Sequence seq = DOTween.Sequence();
 
             for (int i = 0; i < x; i++)
             {
+                int spawnOrder = 0;
+
                 for (int j = 0; j < y; j++)
                 {
                     if (_puzzles[i, j] == null)
                     {
+                        PuzzleObject targetPo = null;
+                        bool foundUpperTile = false;
+                        
                         for (int k = j + 1; k < y; k++)
                         {
                             if (_puzzles[i, k] != null)
                             {
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
-
-                                Tween t = _puzzles[i, j].transform.DOMove(CalculatePos(i, j), 0.3f);
-                                seq.Join(t);
-
-                                _puzzles[i, j].gameObject.name = $"Puzzle({i + 1},{j + 1})";
-                                _puzzles[i, j].Init(this, i, j);
-
-                                _movedPositions.Add(new Vector2Int(i, j));
-
+                                targetPo = _puzzles[i, j];
+                                foundUpperTile = true;
                                 break;
                             }
                         }
+                        
+                        if (!foundUpperTile)
+                        {
+                            GameObject puzzle = SetRandomPuzzle(i, j, spawnOrder);
+                            spawnOrder++;
+                            targetPo = puzzle.GetComponent<PuzzleObject>();
+                            _puzzles[i, j] = targetPo;
+                        }
+
+                        if (targetPo != null)
+                        {
+                            targetPo.gameObject.name = $"Puzzle({i + 1},{j + 1})";
+                            targetPo.Init(this, i, j);
+                            _movedPositions.Add(new Vector2Int(i, j));
+
+                            Vector3 targetPos = CalculatePos(i, j);
+                            
+                            float distance = Vector3.Distance(targetPo.transform.position, targetPos);
+                            float duration = distance / dropSpeed;
+                            
+                            Tween fallTween = targetPo.transform.DOMove(targetPos, duration)
+                                .SetEase(Ease.InQuad)
+                                .SetDelay(rowDropDelay)
+                                .OnComplete(() => 
+                                {
+                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1);
+                                });
+
+                            seq.Join(fallTween);
+                        }
                     }
                 }
-            }
-            
-            yield return seq.WaitForCompletion();
-            yield return new WaitForSeconds(0.2f);
-            
-            yield return RefillBlocks();
-        }
-        
-        private IEnumerator RefillBlocks()
-        {
-            Sequence seq = DOTween.Sequence();
-            
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < y; j++)
-                {
-                    if (_puzzles[i, j] == null)
-                    {
-                        GameObject puzzle = SetRandomPuzzle(i, j);
-                        
-                        PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                        puzzle.name = $"Puzzle({i + 1},{j + 1})";
-                        _puzzles[i, j] = po;
-                        
-                        Tween t = po.transform.DOMove(CalculatePos(i, j), 0.3f);
-                        seq.Join(t);
-                        
-                        po.Init(this, i, j);
-                        
-                        _movedPositions.Add(new Vector2Int(i, j));
-                    }
-                }
+
+                seq.SetDelay(columnDropDelay);
             }
 
+            // Sequence가 유효한지 체크 후 대기
             yield return seq.WaitForCompletion();
-            yield return new WaitForSeconds(0.2f);
-    
+            yield return new WaitForSeconds(0.1f);
+
             if (CheckAnyMatches())
             {
                 yield return MatchPuzzle();
@@ -860,7 +881,7 @@ namespace _01.Scripts._01.ThreeMatch
                 else
                 {
                     _puzzles[pos.x, pos.y] = null;
-                    Tween t = targetPuzzle.transform.DOScale(TileScale / 3, 0.15f)
+                    Tween t = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f)
                         .OnComplete(() => Destroy(targetPuzzle.gameObject));
                     seq.Join(t);
                 }
@@ -979,7 +1000,7 @@ namespace _01.Scripts._01.ThreeMatch
         {
             while (true)
             {
-                yield return new WaitForSeconds(ObstacleSpawnDelay);
+                yield return new WaitForSeconds(obstacleSpawnDelay);
                 AddTask(SpawnRandomObstaclePuzzleCoroutine);
             }
         }
@@ -1028,7 +1049,7 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
             }
             
-            Tween t =  newPuzzle.transform.DOScale(TileScale, 0.2f);
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f);
             yield return t.WaitForCompletion();
         }
         
@@ -1087,7 +1108,7 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, curX, curY);
             po.isMatched = false;
             
-            newPuzzle.transform.DOScale(TileScale, 0.2f);
+            newPuzzle.transform.DOScale(tileScale, 0.2f);
 
             yield return null;
         }
