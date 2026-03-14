@@ -168,30 +168,27 @@ namespace _01.Scripts._01.ThreeMatch
                 for (int j = 0; j < y; j++)
                 {
                     GameObject puzzle = SetStartRandomPuzzle(i, j);
-                    
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                     puzzle.name = $"Puzzle({i + 1},{j + 1})";
                     _puzzles[i, j] = po;
                     
                     Vector3 targetPos = CalculatePos(i, j);
-                            
+                    
                     float distance = Vector3.Distance(po.transform.position, targetPos);
                     float duration = distance / dropSpeed;
-                            
+                    float startAt = columnDropDelay * i + rowDropDelay * j;
+                    
                     Tween fallTween = po.transform.DOMove(targetPos, duration)
-                        .SetEase(Ease.InQuad)
-                        .SetDelay(rowDropDelay)
-                        .OnComplete(() => 
+                        .SetEase(Ease.InSine)
+                        .OnComplete(() =>
                         {
                             po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1);
                         });
 
-                    seq.Join(fallTween);
+                    seq.Insert(startAt, fallTween);
                     
                     po.Init(this, i, j);
                 }
-
-                seq.SetDelay(columnDropDelay);
             }
 
             yield return seq.WaitForCompletion();
@@ -714,6 +711,7 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                     
                     Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f)
+                        .SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
                             if (targetPuzzle != null)
@@ -737,7 +735,9 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    yield return newPuzzle.transform.DOScale(tileScale, 0.2f).WaitForCompletion();
+                    yield return newPuzzle.transform.DOScale(tileScale, 0.2f)
+                        .SetEase(Ease.InSine)
+                        .WaitForCompletion();
                 }
 
                 unitSpawner.FriendlySpawn();
@@ -803,24 +803,21 @@ namespace _01.Scripts._01.ThreeMatch
                             
                             float distance = Vector3.Distance(targetPo.transform.position, targetPos);
                             float duration = distance / dropSpeed;
+                            float startAt = columnDropDelay * i + rowDropDelay * j;
                             
                             Tween fallTween = targetPo.transform.DOMove(targetPos, duration)
-                                .SetEase(Ease.InQuad)
-                                .SetDelay(rowDropDelay)
+                                .SetEase(Ease.InSine)
                                 .OnComplete(() => 
                                 {
                                     targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1);
                                 });
 
-                            seq.Join(fallTween);
+                            seq.Insert(startAt, fallTween);
                         }
                     }
                 }
-
-                seq.SetDelay(columnDropDelay);
             }
-
-            // Sequence가 유효한지 체크 후 대기
+            
             yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.1f);
 
@@ -882,6 +879,7 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     _puzzles[pos.x, pos.y] = null;
                     Tween t = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f)
+                        .SetEase(Ease.InSine)
                         .OnComplete(() => Destroy(targetPuzzle.gameObject));
                     seq.Join(t);
                 }
@@ -1049,7 +1047,8 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
             }
             
-            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f);
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
             yield return t.WaitForCompletion();
         }
         
@@ -1108,7 +1107,8 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, curX, curY);
             po.isMatched = false;
             
-            newPuzzle.transform.DOScale(tileScale, 0.2f);
+            newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
 
             yield return null;
         }
