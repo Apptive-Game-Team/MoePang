@@ -1,5 +1,6 @@
 using NUnit.Framework.Constraints;
 using System.Collections;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 /// <summary>
@@ -46,10 +47,12 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected LayerMask targetLayer;
 
     //참조 & 프로퍼티
+    protected UnitInFo data;
     protected GameObject attackPrefab;
     protected Animator animator;
     protected UnitPool ownerPool;
     protected bool isAttacking;
+    public UnitInFo Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
@@ -82,6 +85,19 @@ public class Unit : MonoBehaviour, IDamageable
     {
         currentHp = maxHp;
         moveSpeed = baseMoveSpeed;
+    }
+
+    public void SetData(UnitInFo data)
+    {
+        this.data = data;
+
+        maxHp = data.MaxHp;
+        baseMoveSpeed = data.BaseMoveSpeed;
+        attackRange = data.AttackRange;
+        attackDamage = data.AttackDamage;
+        attackDelay = data.AttackDelay;
+
+        team = data.Team;
     }
 
     /// <summary>

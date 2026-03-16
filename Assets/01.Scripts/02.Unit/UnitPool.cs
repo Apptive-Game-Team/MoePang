@@ -1,62 +1,72 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// 유닛 오브젝트 풀
+/// Unit Object Pool
 /// </summary>
 public class UnitPool : MonoBehaviour
 {
-    [Header("풀 설정")]
-    [SerializeField] private Unit unitPrefab;
-    [SerializeField] private int poolCount = 10;
+    public static UnitPool Instance;
 
-    //오브젝트 풀링할 큐
-    private Queue<Unit> pool = new Queue<Unit>();
+    [Header("Pool Setting")]
+    [SerializeField] private Unit unitPrefab;
+
+    private Dictionary<UnitInFo, Queue<Unit>> pools = new();
 
     private void Awake()
     {
-        for (int i = 0; i < poolCount; i++)
+        if (Instance != null && Instance != this)
         {
-            CreateUnit();
+            Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
     }
 
     /// <summary>
-    /// 풀에 유닛 생성
+    /// Unit 가져오기
     /// </summary>
-    /// <returns></returns>
-    private Unit CreateUnit()
+    public Unit Get(UnitInFo data, Transform spawnPos)
     {
-        Unit unit = Instantiate(unitPrefab, transform);
-        unit.gameObject.SetActive(false);
-        unit.SetPool(this);
-        pool.Enqueue(unit);
-        return unit;
-    }
-    /// <summary>
-    /// 풀에서 유닛 꺼내오기
-    /// </summary>
-    /// <param name="spawnPos"></param>
-    /// <returns></returns>
-    public Unit SpawnUnit (Transform spawnPos)
-    {
-        if (pool.Count == 0)
+        if (!pools.ContainsKey(data))
         {
-            CreateUnit();
+            pools.Add(data, new Queue<Unit>());
         }
 
-        Unit unit = pool.Dequeue();
+        Unit unit;
+
+        if (pools[data].Count > 0)
+        {
+            unit = pools[data].Dequeue();
+        }
+        else
+        {
+            unit = Instantiate(unitPrefab, transform);
+            unit.SetPool(this);
+        }
+
         unit.transform.position = spawnPos.position;
+        unit.SetData(data);
         unit.gameObject.SetActive(true);
+
         return unit;
     }
+
     /// <summary>
-    /// 풀에 유닛 반환
+    /// Unit 반환
     /// </summary>
-    /// <param name="unit"></param>
     public void ReturnUnit(Unit unit)
     {
         unit.gameObject.SetActive(false);
-        pool.Enqueue(unit);
+
+        UnitInFo data = unit.Data;
+
+        if (!pools.ContainsKey(data))
+        {
+            pools.Add(data, new Queue<Unit>());
+        }
+
+        pools[data].Enqueue(unit);
     }
 }

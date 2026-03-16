@@ -6,39 +6,31 @@ using UnityEngine;
 public class UnitSpawner : MonoBehaviour
 {
     [Header("유닛 풀")]
-    [SerializeField] private UnitPool friendlyPool;
-    [SerializeField] private UnitPool enemyPool;
+    [SerializeField] private UnitPool unitPool;
 
-    [Header("스폰 설정")]
+    [Header("스폰 유닛 데이터")]
+    [SerializeField] private UnitInFo friendlyUnitData;
+    [SerializeField] private UnitInFo enemyUnitData;
+
+    [Header("스폰 위치")]
     [SerializeField] private Transform friendlySpawnPosition;
     [SerializeField] private Transform enemySpawnPosition;
-    [SerializeField] private float spawnInterval = 10.0f;
 
-    //참조
-    private float timer;
+    [Header("스폰 설정")]
+    [SerializeField] private float spawnInterval = 10f;
 
-    private void Update()
-    {
-        timer += Time.deltaTime;
-
-        if (timer >= spawnInterval)
-        {
-            Spawn();
-            timer = 0f;
-        }
-    }
-
+    [ContextMenu("Spawn")]
     /// <summary>
-    /// 유닛 소환
+    /// 자동 스폰
     /// </summary>
     private void Spawn()
     {
-        friendlyPool.SpawnUnit(friendlySpawnPosition);
-        enemyPool.SpawnUnit(enemySpawnPosition);
+        unitPool.Get(friendlyUnitData, friendlySpawnPosition);
+        //unitPool.Get(enemyUnitData, enemySpawnPosition);
     }
 
     public void FriendlySpawn()
     {
-        friendlyPool.SpawnUnit(friendlySpawnPosition);
+        unitPool.Get(friendlyUnitData, friendlySpawnPosition);
     }
 }
