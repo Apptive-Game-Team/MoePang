@@ -75,8 +75,6 @@ namespace _01.Scripts._01.ThreeMatch
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
 
-        
-
         private class MatchGroup
         {
             public List<Vector2Int> positions = new();
@@ -358,7 +356,8 @@ namespace _01.Scripts._01.ThreeMatch
             float offsetX = (x - 1) * space / 2f;
             float offsetY = (y - 1) * space / 2f;
             
-            return new Vector3(col * space - offsetX, row * space - offsetY, 0f);
+            return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
+                ,puzzleFrame.transform.position.y + row * space - offsetY, 0f);
         }
 
         private Vector3 CalculateDropPos(int col, int spawnOrder)
@@ -368,7 +367,8 @@ namespace _01.Scripts._01.ThreeMatch
             
             float spawnY = (y + spawnOrder) * space - offsetY;
 
-            return new Vector3(col * space - offsetX, spawnY, 0f);
+            return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
+                ,puzzleFrame.transform.position.y + spawnY, 0f);
         }
         #endregion
         
@@ -407,8 +407,8 @@ namespace _01.Scripts._01.ThreeMatch
             _puzzles[x1, y1] = p2;
             _puzzles[x2, y2] = p1;
             
-            Vector3 pos1 = p1.transform.localPosition;
-            Vector3 pos2 = p2.transform.localPosition;
+            Vector3 pos1 = p1.transform.position;
+            Vector3 pos2 = p2.transform.position;
             
             Sequence seq1 = DOTween.Sequence();
             Tween t1 = p1.transform.DOMove(pos2, 0.2f);
@@ -726,7 +726,7 @@ namespace _01.Scripts._01.ThreeMatch
                 if (group.resultType != null)
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
-                    newPuzzle.transform.localPosition = destination;
+                    newPuzzle.transform.position = destination;
                     newPuzzle.name = $"Puzzle({group.spawnPos.x + 1},{group.spawnPos.y + 1})";
                     newPuzzle.transform.localScale = Vector3.zero;
             
@@ -1020,14 +1020,14 @@ namespace _01.Scripts._01.ThreeMatch
             
             PuzzleObject target = list[Random.Range(0, list.Count)];
 
-            Vector3 currentPos = target.transform.localPosition;
+            Vector3 currentPos = target.transform.position;
             int col = target.column, row = target.row;
             NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
             _puzzles[col, row] = null;
             Destroy(target.gameObject);
             
             GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[(int)GetWeightedRandomObstacle()], puzzleFrame);
-            newPuzzle.transform.localPosition = currentPos;
+            newPuzzle.transform.position = currentPos;
             newPuzzle.name = $"Puzzle({col + 1},{row + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
             
@@ -1091,14 +1091,14 @@ namespace _01.Scripts._01.ThreeMatch
         {
             var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
             NormalPuzzleType targetType = obstacleObj.normalPuzzleType;
-            Vector3 currentPos = _puzzles[curX, curY].transform.localPosition;
+            Vector3 currentPos = _puzzles[curX, curY].transform.position;
             
             GameObject oldObject = _puzzles[curX, curY].gameObject;
             _puzzles[curX, curY] = null;
             Destroy(oldObject);
             
             GameObject newPuzzle = Instantiate(normalPuzzlePrefabs[(int)targetType], puzzleFrame);
-            newPuzzle.transform.localPosition = currentPos;
+            newPuzzle.transform.position = currentPos;
             newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
             
