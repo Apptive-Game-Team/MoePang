@@ -989,6 +989,7 @@ GameObject:
   - component: {fileID: 869903350}
   - component: {fileID: 869903352}
   - component: {fileID: 869903351}
+  - component: {fileID: 869903353}
   m_Layer: 5
   m_Name: Snow
   m_TagString: Untagged
@@ -1056,6 +1057,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 869903349}
   m_CullTransparentMesh: 1
+--- !u!114 &869903353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 869903349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e9f1d3fda244946a1a92b938c053ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stacks:
+  - {fileID: 1128227080}
+  - {fileID: 2078394235}
+  - {fileID: 653744683}
 --- !u!1 &968554133
 GameObject:
   m_ObjectHideFlags: 0
@@ -1067,6 +1084,7 @@ GameObject:
   - component: {fileID: 968554134}
   - component: {fileID: 968554136}
   - component: {fileID: 968554135}
+  - component: {fileID: 968554137}
   m_Layer: 5
   m_Name: Flower
   m_TagString: Untagged
@@ -1134,6 +1152,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 968554133}
   m_CullTransparentMesh: 1
+--- !u!114 &968554137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968554133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e9f1d3fda244946a1a92b938c053ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stacks:
+  - {fileID: 1114176557}
+  - {fileID: 394134026}
+  - {fileID: 1273829780}
 --- !u!1 &1114176557
 GameObject:
   m_ObjectHideFlags: 0
@@ -1295,6 +1329,7 @@ GameObject:
   - component: {fileID: 1195533397}
   - component: {fileID: 1195533399}
   - component: {fileID: 1195533398}
+  - component: {fileID: 1195533400}
   m_Layer: 5
   m_Name: SpawnStack
   m_TagString: Untagged
@@ -1364,6 +1399,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1195533396}
   m_CullTransparentMesh: 1
+--- !u!114 &1195533400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195533396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16d3538d8bf843d40ab6b5cf2f9fa295, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stacks:
+  - {fileID: 968554137}
+  - {fileID: 1261480035}
+  - {fileID: 1269356620}
+  - {fileID: 869903353}
+  - {fileID: 1405368199}
+  unitSpawner: {fileID: 268232358}
 --- !u!1 &1261480031
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,6 +1429,7 @@ GameObject:
   - component: {fileID: 1261480032}
   - component: {fileID: 1261480034}
   - component: {fileID: 1261480033}
+  - component: {fileID: 1261480035}
   m_Layer: 5
   m_Name: Leaf
   m_TagString: Untagged
@@ -1442,6 +1497,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1261480031}
   m_CullTransparentMesh: 1
+--- !u!114 &1261480035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261480031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e9f1d3fda244946a1a92b938c053ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stacks:
+  - {fileID: 53174964}
+  - {fileID: 289694234}
+  - {fileID: 1315105281}
 --- !u!1 &1269356616
 GameObject:
   m_ObjectHideFlags: 0
@@ -1453,6 +1524,7 @@ GameObject:
   - component: {fileID: 1269356617}
   - component: {fileID: 1269356619}
   - component: {fileID: 1269356618}
+  - component: {fileID: 1269356620}
   m_Layer: 5
   m_Name: Sand
   m_TagString: Untagged
@@ -1520,6 +1592,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1269356616}
   m_CullTransparentMesh: 1
+--- !u!114 &1269356620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269356616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e9f1d3fda244946a1a92b938c053ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stacks:
+  - {fileID: 1986912997}
+  - {fileID: 54667241}
+  - {fileID: 536350783}
 --- !u!1 &1273829780
 GameObject:
   m_ObjectHideFlags: 0
@@ -1681,6 +1769,7 @@ GameObject:
   - component: {fileID: 1405368196}
   - component: {fileID: 1405368198}
   - component: {fileID: 1405368197}
+  - component: {fileID: 1405368199}
   m_Layer: 5
   m_Name: Water
   m_TagString: Untagged
@@ -1748,6 +1837,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1405368195}
   m_CullTransparentMesh: 1
+--- !u!114 &1405368199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405368195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e9f1d3fda244946a1a92b938c053ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stacks:
+  - {fileID: 730784418}
+  - {fileID: 1578950480}
+  - {fileID: 811447004}
 --- !u!1 &1578950480
 GameObject:
   m_ObjectHideFlags: 0
@@ -1982,7 +2087,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
   - {fileID: 21300000, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
   - {fileID: 21300000, guid: b1bdf607f3102e54bac670741b98d44e, type: 3}
-  unitSpawner: {fileID: 268232358}
+  spawnStackManager: {fileID: 1195533400}
 --- !u!4 &1669581475
 Transform:
   m_ObjectHideFlags: 0

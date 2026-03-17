@@ -61,9 +61,9 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private GameObject[] specialPuzzlePrefabs;
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
         [SerializeField] private Sprite[] normalPuzzleImages;
-        
-        [Header("Spawn Settings")]
-        [SerializeField] private UnitSpawner unitSpawner;
+
+        [Header("Spawn Settings")] 
+        [SerializeField] private SpawnStackManager spawnStackManager;
         
         private PuzzleObject[,] _puzzles;
         
@@ -78,7 +78,7 @@ namespace _01.Scripts._01.ThreeMatch
         private class MatchGroup
         {
             public List<Vector2Int> positions = new();
-            public Vector2Int spawnPos; 
+            public Vector2Int spawnPos;  
             public SpecialPuzzleType? resultType = null;
             public NormalPuzzleType color;
         }
@@ -697,9 +697,11 @@ namespace _01.Scripts._01.ThreeMatch
                 yield return seq1.WaitForCompletion();
                 
                 Sequence seq2 = DOTween.Sequence();
+                List<PuzzleObject> targets = new();
                 foreach (var pos in group.positions)
                 {
                     var targetPuzzle = _puzzles[pos.x, pos.y];
+                    targets.Add(targetPuzzle);
                     if (targetPuzzle == null) continue;
                     
                     _puzzles[pos.x, pos.y] = null;
@@ -710,18 +712,24 @@ namespace _01.Scripts._01.ThreeMatch
                         seq2.Join(t1);
                     }
                     
-                    Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f)
-                        .SetEase(Ease.InSine)
-                        .OnComplete(() =>
-                        {
-                            if (targetPuzzle != null)
-                            {
-                                Destroy(targetPuzzle.gameObject);
-                            }
-                        });
+                    Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f).SetEase(Ease.InSine);
                     seq2.Join(t2);
                 }
                 yield return seq2.WaitForCompletion();
+
+                Sequence seq3 = DOTween.Sequence();
+                foreach (PuzzleObject targetPuzzle in targets)
+                {
+                    targetPuzzle.transform.SetParent(puzzleFrame.parent);
+                    Tween t3 = targetPuzzle.transform.DOMove(
+                            spawnStackManager.SetStack(group.color).transform.position, 0.2f)
+                        .OnComplete(() =>
+                        {
+                            spawnStackManager.AddStack(group.color, 1);
+                            Destroy(targetPuzzle.gameObject);
+                        });
+                    seq3.Join(t3);
+                }
 
                 if (group.resultType != null)
                 {
@@ -739,8 +747,6 @@ namespace _01.Scripts._01.ThreeMatch
                         .SetEase(Ease.InSine)
                         .WaitForCompletion();
                 }
-
-                unitSpawner.FriendlySpawn();
             }
 
             if (delayedBombPos.HasValue)
@@ -862,8 +868,9 @@ namespace _01.Scripts._01.ThreeMatch
             _puzzles[curX, curY] = null;
             self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
 
-            Sequence seq = DOTween.Sequence();
+            Sequence seq1 = DOTween.Sequence();
             Queue<(SpecialPuzzleObject, Vector2Int)> q = new();
+            List<PuzzleObject> targetPuzzles = new();
             
             foreach (var pos in targets)
             {
@@ -877,17 +884,35 @@ namespace _01.Scripts._01.ThreeMatch
                 }
                 else
                 {
+                    targetPuzzles.Add(targetPuzzle);
                     _puzzles[pos.x, pos.y] = null;
-                    Tween t = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f)
-                        .SetEase(Ease.InSine)
-                        .OnComplete(() => Destroy(targetPuzzle.gameObject));
-                    seq.Join(t);
+                    Tween t1 = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f).SetEase(Ease.InSine);
+                    seq1.Join(t1);
                 }
             }
             
-            yield return seq.WaitForCompletion();
-            
-            unitSpawner.FriendlySpawn();
+            yield return seq1.WaitForCompletion();
+
+            Sequence seq2 = DOTween.Sequence();
+            foreach (PuzzleObject targetPuzzle in targetPuzzles)
+            {
+                if (targetPuzzle is NormalPuzzleObject no)
+                {
+                    targetPuzzle.transform.SetParent(puzzleFrame.parent);
+                    Tween t2 = targetPuzzle.transform.DOMove(
+                            spawnStackManager.SetStack(no.normalPuzzleType).transform.position, 0.2f)
+                        .OnComplete(() =>
+                        {
+                            spawnStackManager.AddStack(no.normalPuzzleType, 1);
+                            Destroy(targetPuzzle.gameObject);
+                        });
+                    seq2.Join(t2);
+                }
+                else
+                {
+                    Destroy(targetPuzzle.gameObject);
+                }
+            }
 
             while (q.Count > 0)
             {
