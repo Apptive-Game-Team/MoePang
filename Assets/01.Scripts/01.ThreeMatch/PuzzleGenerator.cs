@@ -50,6 +50,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private float rowDropDelay = 0.01f;
         [SerializeField] private float columnDropDelay = 0.02f;
         [SerializeField] private float dropSpeed = 10f;
+        [SerializeField] private float moveSpeed = 10f;
         [SerializeField] private float tileScale = 0.6f;
         [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
         [SerializeField] private List<ObstacleWeight> obstacleWeights;
@@ -716,19 +717,38 @@ namespace _01.Scripts._01.ThreeMatch
                     seq2.Join(t2);
                 }
                 yield return seq2.WaitForCompletion();
-
-                Sequence seq3 = DOTween.Sequence();
+                
                 foreach (PuzzleObject targetPuzzle in targets)
                 {
                     targetPuzzle.transform.SetParent(puzzleFrame.parent);
-                    Tween t3 = targetPuzzle.transform.DOMove(
-                            spawnStackManager.SetStack(group.color).transform.position, 0.2f)
-                        .OnComplete(() =>
-                        {
-                            spawnStackManager.AddStack(group.color, 1);
-                            Destroy(targetPuzzle.gameObject);
-                        });
-                    seq3.Join(t3);
+                    
+                    Vector3 startPos = targetPuzzle.transform.position;
+                    Vector3 endPos = spawnStackManager.SetStack(group.color).transform.position;
+
+                    float distance = Vector3.Distance(startPos, endPos);
+                    float speed = 7.5f;
+                    float duration = distance / speed;
+                    float jumpPower = distance * 0.3f;
+                    
+                    Sequence seq = DOTween.Sequence();
+
+                    seq.Append(DOTween.To(
+                        () => 0f,
+                        t => {
+                            Vector3 pos = Vector3.Lerp(startPos, endPos, t);
+
+                            float height = Mathf.Sin(t * Mathf.PI) * jumpPower;
+
+                            targetPuzzle.transform.position = pos + Vector3.up * height;
+                        },
+                        1f,
+                        duration
+                    ).SetEase(Ease.InSine)
+                    .OnComplete(() =>
+                    {
+                        spawnStackManager.AddStack(group.color, 1);
+                        Destroy(targetPuzzle.gameObject);
+                    }));
                 }
 
                 if (group.resultType != null)
@@ -892,21 +912,40 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             yield return seq1.WaitForCompletion();
-
-            Sequence seq2 = DOTween.Sequence();
+            
             foreach (PuzzleObject targetPuzzle in targetPuzzles)
             {
                 if (targetPuzzle is NormalPuzzleObject no)
                 {
                     targetPuzzle.transform.SetParent(puzzleFrame.parent);
-                    Tween t2 = targetPuzzle.transform.DOMove(
-                            spawnStackManager.SetStack(no.normalPuzzleType).transform.position, 0.2f)
+                    
+                    Vector3 startPos = targetPuzzle.transform.position;
+                    Vector3 endPos = spawnStackManager.SetStack(no.normalPuzzleType).transform.position;
+
+                    float distance = Vector3.Distance(startPos, endPos);
+                    float speed = 7.5f;
+                    float duration = distance / speed;
+                    float jumpPower = distance * 0.3f;
+                    
+                    Sequence seq = DOTween.Sequence();
+
+                    seq.Append(DOTween.To(
+                            () => 0f,
+                            t => {
+                                Vector3 pos = Vector3.Lerp(startPos, endPos, t);
+
+                                float height = Mathf.Sin(t * Mathf.PI) * jumpPower;
+
+                                targetPuzzle.transform.position = pos + Vector3.up * height;
+                            },
+                            1f,
+                            duration
+                        ).SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
                             spawnStackManager.AddStack(no.normalPuzzleType, 1);
                             Destroy(targetPuzzle.gameObject);
-                        });
-                    seq2.Join(t2);
+                        }));
                 }
                 else
                 {
