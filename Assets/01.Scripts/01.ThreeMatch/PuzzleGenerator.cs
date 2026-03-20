@@ -44,6 +44,7 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [Header("Puzzle Settings")]
         [SerializeField] private RectTransform puzzleFrame;
+        [SerializeField] private GameObject particleFrame;
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
@@ -62,6 +63,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private GameObject[] specialPuzzlePrefabs;
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
         [SerializeField] private Sprite[] normalPuzzleImages;
+        [SerializeField] private GameObject[] specialPuzzleParticlePrefabs;
 
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
@@ -885,8 +887,16 @@ namespace _01.Scripts._01.ThreeMatch
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
             
             GameObject self = _puzzles[curX, curY].gameObject;
+            Vector2 center = new (self.transform.position.x, self.transform.position.y);
             _puzzles[curX, curY] = null;
-            self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
+
+            yield return self.transform.DOScale(tileScale * 1.2f, 0.1f)
+                .SetLoops(2, LoopType.Yoyo)
+                .OnComplete(() =>
+                {
+                    Destroy(self);
+                })
+                .WaitForCompletion();
 
             Sequence seq1 = DOTween.Sequence();
             Queue<(SpecialPuzzleObject, Vector2Int)> q = new();
@@ -906,52 +916,14 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     targetPuzzles.Add(targetPuzzle);
                     _puzzles[pos.x, pos.y] = null;
-                    Tween t1 = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f).SetEase(Ease.InSine);
-                    seq1.Join(t1);
+                    // Tween t1 = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f).SetEase(Ease.InSine);
+                    // seq1.Join(t1);
                 }
             }
             
-            yield return seq1.WaitForCompletion();
-            
-            foreach (PuzzleObject targetPuzzle in targetPuzzles)
-            {
-                if (targetPuzzle is NormalPuzzleObject no)
-                {
-                    targetPuzzle.transform.SetParent(puzzleFrame.parent);
-                    
-                    Vector3 startPos = targetPuzzle.transform.position;
-                    Vector3 endPos = spawnStackManager.SetStack(no.normalPuzzleType).transform.position;
+            //yield return seq1.WaitForCompletion();
 
-                    float distance = Vector3.Distance(startPos, endPos);
-                    float speed = 7.5f;
-                    float duration = distance / speed;
-                    float jumpPower = distance * 0.3f;
-                    
-                    Sequence seq = DOTween.Sequence();
-
-                    seq.Append(DOTween.To(
-                            () => 0f,
-                            t => {
-                                Vector3 pos = Vector3.Lerp(startPos, endPos, t);
-
-                                float height = Mathf.Sin(t * Mathf.PI) * jumpPower;
-
-                                targetPuzzle.transform.position = pos + Vector3.up * height;
-                            },
-                            1f,
-                            duration
-                        ).SetEase(Ease.InSine)
-                        .OnComplete(() =>
-                        {
-                            spawnStackManager.AddStack(no.normalPuzzleType, 1);
-                            Destroy(targetPuzzle.gameObject);
-                        }));
-                }
-                else
-                {
-                    Destroy(targetPuzzle.gameObject);
-                }
-            }
+            yield return SetExplosionEffect(center.x, center.y, targetPuzzles, type);
 
             while (q.Count > 0)
             {
@@ -960,7 +932,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
         }
 
-        private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.2f)
+        private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.1f)
         {
             yield return new WaitForSeconds(delay);
             yield return StartCoroutine(SpecialMatch(curX, curY, type));
@@ -973,88 +945,188 @@ namespace _01.Scripts._01.ThreeMatch
             switch (type)
             {
                 case SpecialPuzzleType.CircleBomb:
-                    CircleBombMatch(curX, curY, range);
+                    for (int i = curX - 2; i <= curX + 2; i++)
+                    {
+                        for (int j = curY - 2; j <= curY + 2; j++)
+                        {
+                            if (i < 0 || i >= x || j < 0 || j >= y) continue;
+                    
+                            bool isCorner = (i == curX - 2 || i == curX + 2) && (j == curY - 2 || j == curY + 2);
+            
+                            if (!isCorner)
+                            {
+                                range.Add(new Vector2Int(i, j));
+                            }
+                        }
+                    }
                     break;
                 case SpecialPuzzleType.ColumnBomb:
-                    ColumnBombMatch(curX,range);
+                    for (int j = 0; j < y; j++)
+                    {
+                        range.Add(new Vector2Int(curX, j));
+                    }
                     break;
                 case SpecialPuzzleType.RowBomb:
-                    RowBombMatch(curY, range);
+                    for (int i = 0; i < x; i++)
+                    {
+                        range.Add(new Vector2Int(i, curY));
+                    }
                     break;
                 case SpecialPuzzleType.CrossBomb:
-                    CrossBombMatch(curX, curY, range);
+                    for (int i = 0; i < x; i++)
+                    {
+                        for (int j = 0; j < y; j++)
+                        {
+                            if (i != curX && j != curY)
+                            {
+                                continue;
+                            }
+                    
+                            range.Add(new Vector2Int(i, j));
+                        }
+                    }
                     break;
                 case SpecialPuzzleType.ColorBomb:
-                    ColorBombMatch(curX, curY, range);
+                    var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
+
+                    for (int i = 0; i < x; i++)
+                    {
+                        for (int j = 0; j < y; j++)
+                        {
+                            if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
+                                (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
+                            {
+                                range.Add(new Vector2Int(i, j));
+                            }
+                        }
+                    }
                     break;
             }
             return range;
         }
 
-        private void CircleBombMatch(int curX, int curY, List<Vector2Int> list)
+        private IEnumerator SetExplosionEffect(float posX, float posY, List<PuzzleObject> list, SpecialPuzzleType type)
         {
-            for (int i = curX - 2; i <= curX + 2; i++)
+            GameObject effect = Instantiate(specialPuzzleParticlePrefabs[(int)type], new Vector2(posX, posY), Quaternion.identity, particleFrame.transform);
+            PlayParticleEffect(effect);
+            ParticleSystem ps = effect.GetComponentInChildren<ParticleSystem>();
+            float totalDuration = ps.main.duration + ps.main.startLifetime.constantMax;
+            Destroy(ps.gameObject, totalDuration);
+            switch (type)
             {
-                for (int j = curY - 2; j <= curY + 2; j++)
-                {
-                    if (i < 0 || i >= x || j < 0 || j >= y) continue;
-                    
-                    bool isCorner = (i == curX - 2 || i == curX + 2) && (j == curY - 2 || j == curY + 2);
+                case SpecialPuzzleType.CircleBomb:
+                    if (ps != null)
+                    {
+                        float maxLifetime = ps.main.startLifetime.constant;
+                        Vector2 centerPos = new(posX, posY);
+                        
+                        foreach (PuzzleObject po in list)
+                        {
+                            float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
+                            
+                            float maxRadius = 3f;
+                            float delayRatio = Mathf.Clamp01(distance / maxRadius);
+                            float finalDelay = delayRatio * maxLifetime;
+                            
+                            StartCoroutine(DelayedTileEffect(po, finalDelay));
+                        }
+                    }
+                    break;
+                case SpecialPuzzleType.CrossBomb:
+                    foreach (PuzzleObject po in list)
+                    {
+                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                StartCoroutine(DelayedTileEffect(po, 0f));
+                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
+                            });
+                    }
+                    break;
+                case SpecialPuzzleType.RowBomb:
+                    foreach (PuzzleObject po in list)
+                    {
+                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                StartCoroutine(DelayedTileEffect(po, 0f));
+                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
+                            });
+                    }
+                    break;
+                case SpecialPuzzleType.ColumnBomb:
+                    foreach (PuzzleObject po in list)
+                    {
+                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                StartCoroutine(DelayedTileEffect(po, 0f));
+                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
+                            });
+                    }
+                    break;
+
+                    yield return new WaitForSeconds(0.2f);
+            }
+        }
+
+        private void PlayParticleEffect(GameObject effect)
+        {
+            ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>();
+            foreach (var particle in particles)
+            {
+                particle.Play();
+            }
+        }
+
+        private IEnumerator DelayedTileEffect(PuzzleObject po, float delay)
+        {
+            yield return new WaitForSeconds(delay);
             
-                    if (!isCorner)
-                    {
-                        list.Add(new Vector2Int(i, j));
-                    }
-                }
+            if (po is NormalPuzzleObject no)
+            {
+                yield return no.HighlightEffect().WaitForCompletion();
             }
+            yield return po.transform.DOScale(tileScale / 3f, 0.2f).WaitForCompletion();
+
+            FlyingTileEffect(po);
         }
 
-        private void ColumnBombMatch(int curX, List<Vector2Int> list)
+        private void FlyingTileEffect(PuzzleObject targetPuzzle)
         {
-            for (int j = 0; j < y; j++)
+            if (targetPuzzle is NormalPuzzleObject no)
             {
-                list.Add(new Vector2Int(curX, j));
-            }
-        }
-
-        private void RowBombMatch(int curY, List<Vector2Int> list)
-        {
-            for (int i = 0; i < x; i++)
-            {
-                list.Add(new Vector2Int(i, curY));
-            }
-        }
-
-        private void CrossBombMatch(int curX, int curY, List<Vector2Int> list)
-        {
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < y; j++)
-                {
-                    if (i != curX && j != curY)
-                    {
-                        continue;
-                    }
+                targetPuzzle.transform.SetParent(puzzleFrame.parent);
                     
-                    list.Add(new Vector2Int(i, j));
-                }
-            }
-        }
+                Vector3 startPos = targetPuzzle.transform.position;
+                Vector3 endPos = spawnStackManager.SetStack(no.normalPuzzleType).transform.position;
 
-        private void ColorBombMatch(int curX, int curY, List<Vector2Int> list)
-        {
-            var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
+                float distance = Vector3.Distance(startPos, endPos);
+                float speed = 7.5f;
+                float duration = distance / speed;
+                float jumpPower = distance * 0.3f;
+                    
+                Tween t = DOTween.To(
+                        () => 0f,
+                        t => {
+                            Vector3 pos = Vector3.Lerp(startPos, endPos, t);
 
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < y; j++)
-                {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
-                        (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
+                            float height = Mathf.Sin(t * Mathf.PI) * jumpPower;
+
+                            targetPuzzle.transform.position = pos + Vector3.up * height;
+                        },
+                        1f,
+                        duration
+                    ).SetEase(Ease.InSine)
+                    .OnComplete(() =>
                     {
-                        list.Add(new Vector2Int(i, j));
-                    }
-                }
+                        spawnStackManager.AddStack(no.normalPuzzleType, 1);
+                        Destroy(targetPuzzle.gameObject);
+                    });
+            }
+            else
+            {
+                Destroy(targetPuzzle.gameObject);
             }
         }
 
