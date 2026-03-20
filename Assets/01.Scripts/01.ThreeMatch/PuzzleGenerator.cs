@@ -1011,7 +1011,7 @@ namespace _01.Scripts._01.ThreeMatch
             PlayParticleEffect(effect);
             ParticleSystem ps = effect.GetComponentInChildren<ParticleSystem>();
             float totalDuration = ps.main.duration + ps.main.startLifetime.constantMax;
-            Destroy(ps.gameObject, totalDuration);
+            Destroy(effect, totalDuration);
             switch (type)
             {
                 case SpecialPuzzleType.CircleBomb:
@@ -1064,10 +1064,9 @@ namespace _01.Scripts._01.ThreeMatch
                                 po.transform.DOMove(new Vector2(posX, posY), 0.2f);
                             });
                     }
-                    break;
-
-                    yield return new WaitForSeconds(0.2f);
+                    break; 
             }
+            yield return new WaitForSeconds(0.1f);
         }
 
         private void PlayParticleEffect(GameObject effect)
