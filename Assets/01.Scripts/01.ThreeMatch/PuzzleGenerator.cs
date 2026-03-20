@@ -745,7 +745,7 @@ namespace _01.Scripts._01.ThreeMatch
                         },
                         1f,
                         duration
-                    ).SetEase(Ease.InSine)
+                    ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(group.color, 1);
@@ -1116,7 +1116,7 @@ namespace _01.Scripts._01.ThreeMatch
                         },
                         1f,
                         duration
-                    ).SetEase(Ease.InSine)
+                    ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(no.normalPuzzleType, 1);
