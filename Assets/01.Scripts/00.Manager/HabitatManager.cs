@@ -7,10 +7,10 @@ using UnityEngine;
 public class HabitatManager : SingletonObject<HabitatManager>
 {
     [Header("유닛 리스트")]
-    [SerializeField] private UnitList unitList;
+    [SerializeField] private FriendlyUnitList unitList;
 
     //참조
-    private Dictionary<UnitData, bool> unlockDict = new Dictionary<UnitData, bool>();
+    private Dictionary<FriendlyUnitData, bool> unlockDict = new();
 
     private void Awake()
     {
@@ -44,7 +44,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
     /// <summary>
     /// 유닛 해금여부 판별
     /// </summary>
-    public bool IsUnlocked(UnitData unit)
+    public bool IsUnlocked(FriendlyUnitData unit)
     {
         return unlockDict.TryGetValue(unit, out var unlocked) && unlocked;
     }
@@ -52,7 +52,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
     /// <summary>
     /// 유닛 해금
     /// </summary>
-    public void Unlock(UnitData unit)
+    public void Unlock(FriendlyUnitData unit)
     {
         if (unlockDict.ContainsKey(unit))
         {
@@ -63,7 +63,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
     /// <summary>
     /// 해금 가능 여부 (이전 유닛의 해금 체크
     /// </summary>
-    public bool CanUnlock(UnitData unit)
+    public bool CanUnlock(FriendlyUnitData unit)
     {
         var list = unitList.GetUnits(unit.Habitat);
 

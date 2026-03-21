@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class ShopUI : MonoBehaviour
 {
     [Header("Unit Data")]
-    [SerializeField] private UnitData unitData;
+    [SerializeField] private FriendlyUnitData unitData;
 
     [Header("UI 정보")]
     [SerializeField] private Image unlockImage;
@@ -18,7 +18,7 @@ public class ShopUI : MonoBehaviour
     private bool isSelected = false;
 
     //프로퍼티
-    public UnitData UnitData => unitData;
+    public FriendlyUnitData UnitData => unitData;
     public bool IsSelected => isSelected;
     public bool IsUnlocked => HabitatManager.Instance.IsUnlocked(unitData);
     public float UnitCost => unitData.UnitCost;

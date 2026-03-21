@@ -4,29 +4,23 @@ using UnityEngine;
 /// <summary>
 /// 유닛 설정 데이터
 /// </summary>
-[CreateAssetMenu(fileName = "UnitData", menuName = "Scriptable Objects/UnitData")]
-public class UnitData : ScriptableObject
+public abstract class UnitData : ScriptableObject
 {
-    [Header("Unit Setting")]
-    [SerializeField] private TeamType team;
-    [SerializeField] private Habitat habitat;
-    [SerializeField] private UnitName unitName;
-    [SerializeField] private GameObject psdFile;
-    [SerializeField] private float unitCost;
+    [Header("Common")]
+    [SerializeField] protected TeamType team;
+    [SerializeField] protected UnitName unitName;
+    [SerializeField] protected GameObject psdFile;
 
-    [Header("유닛 설정")]
-    [SerializeField] private float maxHp;
-    [SerializeField] private float baseMoveSpeed; //초기 MoveSpeed
-    [SerializeField] private float attackRange; //공격 사거리(근접 유닛)
-    [SerializeField] private float attackDamage; //공격 데미지
-    [SerializeField] private float attackDelay; //공격 속도
+    [Header("Stats")]
+    [SerializeField] protected float maxHp;
+    [SerializeField] protected float baseMoveSpeed;
+    [SerializeField] protected float attackRange;
+    [SerializeField] protected float attackDamage;
+    [SerializeField] protected float attackDelay;
 
-    //프로퍼티
     public TeamType Team => team;
-    public Habitat Habitat => habitat;
     public UnitName UnitName => unitName;
     public GameObject PsdFile => psdFile;
-    public float UnitCost => unitCost;
     public float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
     public float AttackRange => attackRange;
