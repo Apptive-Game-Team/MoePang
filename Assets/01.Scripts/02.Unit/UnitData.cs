@@ -12,6 +12,7 @@ public class UnitData : ScriptableObject
     [SerializeField] private Habitat habitat;
     [SerializeField] private UnitName unitName;
     [SerializeField] private GameObject psdFile;
+    [SerializeField] private float unitCost;
 
     [Header("유닛 설정")]
     [SerializeField] private float maxHp;
@@ -25,6 +26,7 @@ public class UnitData : ScriptableObject
     public Habitat Habitat => habitat;
     public UnitName UnitName => unitName;
     public GameObject PsdFile => psdFile;
+    public float UnitCost => unitCost;
     public float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
     public float AttackRange => attackRange;

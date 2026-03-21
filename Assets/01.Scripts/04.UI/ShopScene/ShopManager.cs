@@ -73,19 +73,21 @@ public class ShopManager : MonoBehaviour
         if (currentSelected == null)
         {
             buyButtonText.text = "골라주세용";
+            return;
         }
+
         if (currentSelected.IsUnlocked)
         {
             buyButtonText.text = "OwO";
+            return;
         }
 
-        if (!HabitatManager.Instance.CanUnlock(
-            currentSelected.Habitat,
-            currentSelected.UnitType))
+        if (!HabitatManager.Instance.CanUnlock(currentSelected.UnitData))
         {
             buyButtonText.text = "잠겨있음";
             return;
         }
+
         else
         {
             buyButtonText.text = $"비용 : {currentSelected.UnitCost}G";
@@ -97,15 +99,15 @@ public class ShopManager : MonoBehaviour
         if (currentSelected == null)
             return;
 
+        var unit = currentSelected.UnitData;
+
         if (currentSelected.IsUnlocked)
         {
             buyButtonText.text = "OwO";
             return;
         }
 
-        if (!HabitatManager.Instance.CanUnlock(
-            currentSelected.Habitat,
-            currentSelected.UnitType))
+        if (!HabitatManager.Instance.CanUnlock(unit))
         {
             buyButtonText.text = "앞에꺼사.";
             return;
@@ -119,9 +121,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        HabitatManager.Instance.UnlockUnit(
-            currentSelected.Habitat,
-            currentSelected.UnitType);
+        HabitatManager.Instance.Unlock(unit);
 
         currentSelected.RefreshUnlockState();
 
