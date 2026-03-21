@@ -43,4 +43,15 @@ public enum UnitName
     ArticWolf,
     Reindeer,
     PolarBear,
+
+    //Enemy
+    Farmer,
+    SlingShot,
+    Axe,
+    Chainsaw,
+    Shotgun,
+    Forklift,
+    Excavator,
+    Logger,
+    HeavyEquipment,
 }
