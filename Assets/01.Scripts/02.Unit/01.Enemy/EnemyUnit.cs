@@ -9,11 +9,6 @@ public class EnemyUnit : Unit
         base.SetData(data);
 
         enemyData = data as EnemyUnitData;
-
-        if (enemyData == null)
-        {
-            Debug.LogError("EnemyUnit에 EnemyUnitData가 아닌 데이터가 들어옴!");
-        }
     }
 
     protected override void Init()

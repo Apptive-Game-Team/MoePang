@@ -47,6 +47,7 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected LayerMask targetLayer;
 
     //참조 & 프로퍼티
+    protected Unit originPrefab;
     protected UnitData data;
     protected GameObject visualInstance;
     protected GameObject attackPrefab;
@@ -68,18 +69,6 @@ public class Unit : MonoBehaviour, IDamageable
         Init();
         isAttacking = false;
         currentState = UnitState.Move;
-
-        //디버그용 이름 설정
-        gameObject.name = $"{team}_{GetInstanceID()}";
-    }
-
-    /// <summary>
-    /// Unit 생성 시 초기화 함수
-    /// </summary>
-    protected virtual void Init()
-    {
-        currentHp = maxHp;
-        moveSpeed = baseMoveSpeed;
     }
 
     public virtual void SetData(UnitData data)
@@ -91,11 +80,10 @@ public class Unit : MonoBehaviour, IDamageable
         attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
         attackDelay = data.AttackDelay;
-
         team = data.Team;
 
         moveSpeed = baseMoveSpeed;
-        
+
         SetupVisual();
     }
     protected virtual void SetupVisual()
@@ -116,7 +104,17 @@ public class Unit : MonoBehaviour, IDamageable
 
         animator = GetComponentInChildren<Animator>();
 
-        if (animator != null) animator.SetBool("isWalking", true);
+        if (animator != null)
+            animator.SetBool("isWalking", true);
+    }
+
+    /// <summary>
+    /// Unit 생성 시 초기화 함수
+    /// </summary>
+    protected virtual void Init()
+    {
+        currentHp = maxHp;
+        moveSpeed = baseMoveSpeed;
     }
 
 
@@ -271,9 +269,19 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void TakeDamage(float damage)
     {
         currentHp -= damage;
-        if (currentHp < 0)
+        if (currentHp <= 0)
         {
             currentState = UnitState.Die;
         }
+    }
+
+    public void SetOriginPrefab(Unit prefab)
+    {
+        originPrefab = prefab;
+    }
+
+    public Unit GetOriginPrefab()
+    {
+        return originPrefab;
     }
 }

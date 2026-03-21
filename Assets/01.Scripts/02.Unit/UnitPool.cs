@@ -42,6 +42,7 @@ public class UnitPool : MonoBehaviour
         {
             unit = Instantiate(prefab, transform);
             unit.SetPool(this);
+            unit.SetOriginPrefab(prefab);
         }
 
         unit.transform.position = spawnPos.position;
@@ -58,19 +59,19 @@ public class UnitPool : MonoBehaviour
     {
         unit.gameObject.SetActive(false);
 
-        Unit prefab = unit.gameObject.GetComponent<Unit>().GetType() == typeof(FriendlyUnit)
-            ? friendlyPrefabCache
-            : enemyPrefabCache;
+        Unit prefab = unit.GetOriginPrefab();
+
+        if (prefab == null)
+        {
+            Debug.LogError("originPrefab null임!");
+            return;
+        }
+
+        if (!pools.ContainsKey(prefab))
+        {
+            pools[prefab] = new Queue<Unit>();
+        }
 
         pools[prefab].Enqueue(unit);
-    }
-
-    private Unit friendlyPrefabCache;
-    private Unit enemyPrefabCache;
-
-    public void SetPrefabs(Unit friendly, Unit enemy)
-    {
-        friendlyPrefabCache = friendly;
-        enemyPrefabCache = enemy;
     }
 }

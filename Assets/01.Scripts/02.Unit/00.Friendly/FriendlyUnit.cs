@@ -9,11 +9,6 @@ public class FriendlyUnit : Unit
         base.SetData(data);
 
         friendlyData = data as FriendlyUnitData;
-
-        if (friendlyData == null)
-        {
-            Debug.LogError("FriendlyUnit에 FriendlyUnitData가 아닌 데이터가 들어옴!");
-        }
     }
 
     protected override void Init()
@@ -21,7 +16,11 @@ public class FriendlyUnit : Unit
         base.Init();
         team = TeamType.Friendly;
         direction = 1f;
-        transform.localScale = Vector3.Scale(transform.localScale, new Vector3(-1f, 1f, 1f));
+
+        Vector3 scale = transform.localScale;
+        scale.x = -Mathf.Abs(scale.x);
+        transform.localScale = scale;
+
         targetLayer = LayerMask.GetMask("Enemy");
     }
 }
