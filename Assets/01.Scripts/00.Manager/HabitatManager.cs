@@ -1,89 +1,80 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public class UnitData
-{
-    public UnitType unitType;
-    public bool isUnlocked;
-}
-
-[System.Serializable]
-public class HabitatData
-{
-    public Habitat habitatType;
-    public List<UnitData> units = new List<UnitData>();
-}
-
+/// <summary>
+/// Lock/Unlock 관리 클래스
+/// </summary>
 public class HabitatManager : SingletonObject<HabitatManager>
 {
-    [SerializeField]
-    private List<HabitatData> habitats = new List<HabitatData>();
+    [Header("유닛 리스트")]
+    [SerializeField] private UnitList unitList;
 
-    private Dictionary<Habitat, Dictionary<UnitType, UnitData>> habitatDict;
+    //참조
+    private Dictionary<UnitData, bool> unlockDict = new Dictionary<UnitData, bool>();
 
     private void Awake()
     {
         base.Awake();
-        InitializeDictionary();
+        Initialize();
     }
 
-    private void InitializeDictionary()
+    private void Initialize()
     {
-        habitatDict = new Dictionary<Habitat, Dictionary<UnitType, UnitData>>();
+        unlockDict.Clear();
 
-        foreach (var habitatData in habitats)
+        foreach (Habitat habitat in System.Enum.GetValues(typeof(Habitat)))
         {
-            var unitDict = new Dictionary<UnitType, UnitData>();
+            var units = unitList.GetUnits(habitat);
 
-            foreach (var unit in habitatData.units)
+            if (units == null) continue;
+
+            foreach (var unit in units)
             {
-                unitDict[unit.unitType] = unit;
+                unlockDict[unit] = false;
             }
 
-            habitatDict[habitatData.habitatType] = unitDict;
-        }
-    }
-    public bool IsUnlocked(Habitat habitat, UnitType unitType)
-    {
-        if (habitatDict.TryGetValue(habitat, out var unitDict))
-        {
-            if (unitDict.TryGetValue(unitType, out var unit))
+            //첫 유닛은 기본 해금
+            if (units.Count > 0)
             {
-                return unit.isUnlocked;
-            }
-        }
-
-        return false;
-    }
-
-    public void UnlockUnit(Habitat habitat, UnitType unitType)
-    {
-        if (habitatDict.TryGetValue(habitat, out var unitDict))
-        {
-            if (unitDict.TryGetValue(unitType, out var unit))
-            {
-                unit.isUnlocked = true;
+                unlockDict[units[0]] = true;
             }
         }
     }
 
-    public bool CanUnlock(Habitat habitat, UnitType unitType)
+    /// <summary>
+    /// 유닛 해금여부 판별
+    /// </summary>
+    public bool IsUnlocked(UnitData unit)
     {
-        if (!habitatDict.TryGetValue(habitat, out var unitDict))
-            return false;
+        return unlockDict.TryGetValue(unit, out var unlocked) && unlocked;
+    }
 
-        var unitList = habitats.Find(h => h.habitatType == habitat)?.units;
-        if (unitList == null)
-            return false;
+    /// <summary>
+    /// 유닛 해금
+    /// </summary>
+    public void Unlock(UnitData unit)
+    {
+        if (unlockDict.ContainsKey(unit))
+        {
+            unlockDict[unit] = true;
+        }
+    }
 
-        int index = unitList.FindIndex(u => u.unitType == unitType);
-        if (index == -1)
-            return false;
+    /// <summary>
+    /// 해금 가능 여부 (이전 유닛의 해금 체크
+    /// </summary>
+    public bool CanUnlock(UnitData unit)
+    {
+        var list = unitList.GetUnits(unit.Habitat);
 
-        if (index == 0)
-            return true;
+        if (list == null) return false;
 
-        return unitList[index - 1].isUnlocked;
+        int index = list.IndexOf(unit);
+
+        if (index == -1) return false;
+
+        if (index == 0) return true;
+
+        return IsUnlocked(list[index - 1]);
     }
 }
