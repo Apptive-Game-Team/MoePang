@@ -242,25 +242,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 964073c49240a604cb5f412962cf66a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  habitats:
-  - habitatType: 0
-    units:
-    - unitType: 0
-      isUnlocked: 0
-    - unitType: 4
-      isUnlocked: 0
-    - unitType: 1
-      isUnlocked: 0
-    - unitType: 3
-      isUnlocked: 0
-    - unitType: 2
-      isUnlocked: 0
-  - habitatType: 1
-    units:
-    - unitType: 5
-      isUnlocked: 0
-    - unitType: 6
-      isUnlocked: 0
+  unitList: {fileID: 11400000, guid: a690e71f1ceeae645b7507526b7a3702, type: 2}
 --- !u!1 &830249567
 GameObject:
   m_ObjectHideFlags: 0
