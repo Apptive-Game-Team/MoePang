@@ -55,7 +55,8 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private float tileScale = 0.6f;
         [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
         [SerializeField] private List<ObstacleWeight> obstacleWeights;
-        [SerializeField] private float obstacleSpawnDelay = 10f;
+        [SerializeField] private float obstacleSpawnDelay = 2f;
+        [SerializeField] private float obstacleSpawnInterval = 10f;
         
         
         [Header("Puzzle Prefabs")]
@@ -64,7 +65,8 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
         [SerializeField] private Sprite[] normalPuzzleImages;
         [SerializeField] private GameObject[] specialPuzzleParticlePrefabs;
-
+        [SerializeField] private GameObject obstacleWarningPrefab;
+        
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
         
@@ -1133,12 +1135,14 @@ namespace _01.Scripts._01.ThreeMatch
         {
             while (true)
             {
-                yield return new WaitForSeconds(obstacleSpawnDelay);
-                AddTask(SpawnRandomObstaclePuzzleCoroutine);
+                yield return new WaitForSeconds(obstacleSpawnInterval);
+                Vector2Int pos = SetObstacleSpawnPos();
+                yield return SpawnObstacleWarning(pos.x, pos.y);
+                AddTask(() => SpawnRandomObstaclePuzzleCoroutine(pos.x,pos.y));
             }
         }
-        
-        private IEnumerator SpawnRandomObstaclePuzzleCoroutine()
+
+        private Vector2Int SetObstacleSpawnPos()
         {
             List<PuzzleObject> list = new();
             
@@ -1146,7 +1150,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal)
+                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType != PuzzleType.Obstacle)
                     {
                         list.Add(_puzzles[i, j]);
                     }
@@ -1155,20 +1159,46 @@ namespace _01.Scripts._01.ThreeMatch
             
             PuzzleObject target = list[Random.Range(0, list.Count)];
 
+            return new Vector2Int(target.column, target.row);
+        }
+
+        private IEnumerator SpawnObstacleWarning(int curX, int curY)
+        {
+            Vector2 pos = CalculatePos(curX, curY);
+            GameObject warningOb = Instantiate(obstacleWarningPrefab, pos, Quaternion.identity, puzzleFrame);
+            yield return warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
+                .SetLoops(4, LoopType.Yoyo)
+                .OnComplete(() =>
+                {
+                    Destroy(warningOb);
+                })
+                .WaitForCompletion();
+        }
+        
+        private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
+        {
+            yield return new WaitUntil(() => _puzzles[curX, curY] != null);
+            
+            PuzzleObject target = _puzzles[curX, curY];
+
+            if (target is ObstaclePuzzleObject)
+            {
+                yield break;
+            }
+
             Vector3 currentPos = target.transform.position;
-            int col = target.column, row = target.row;
-            NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
-            _puzzles[col, row] = null;
+            NormalPuzzleType type = (NormalPuzzleType)_puzzles[curX, curY].GetPuzzleSubType();
+            _puzzles[curX, curY] = null;
             Destroy(target.gameObject);
             
             GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[(int)GetWeightedRandomObstacle()], puzzleFrame);
             newPuzzle.transform.position = currentPos;
-            newPuzzle.name = $"Puzzle({col + 1},{row + 1})";
+            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
             
             PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
-            _puzzles[col, row] = po;
-            po.Init(this, col, row);
+            _puzzles[curX, curY] = po;
+            po.Init(this, curX, curY);
             po.isMatched = false;
 
             switch (po)

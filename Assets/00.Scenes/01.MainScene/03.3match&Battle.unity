@@ -2247,7 +2247,8 @@ MonoBehaviour:
     weight: 30
   - type: 1
     weight: 70
-  obstacleSpawnDelay: 10
+  obstacleSpawnDelay: 2
+  obstacleSpawnInterval: 1
   normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
   - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
@@ -2274,6 +2275,7 @@ MonoBehaviour:
   - {fileID: 3475157618999507326, guid: a8d00f2cf750c9a46b69d8c3078589cc, type: 3}
   - {fileID: 1888854068479400938, guid: 558c50c9a624a704e916c6cab8688513, type: 3}
   - {fileID: 1888854068479400938, guid: 6e7d4520d58b9df41944bc8fd2e925c9, type: 3}
+  obstacleWarningPrefab: {fileID: 2444415622454818781, guid: ce1e179ce44092440bb8c160c2f8210e, type: 3}
   spawnStackManager: {fileID: 1195533400}
 --- !u!4 &1669581475
 Transform:
