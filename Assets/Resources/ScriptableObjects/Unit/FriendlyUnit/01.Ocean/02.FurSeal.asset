@@ -9,16 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b5649da6e9629f47bb251f0f8f97e60, type: 3}
+  m_Script: {fileID: 11500000, guid: 23d150917864c13489ce3f616347bdf6, type: 3}
   m_Name: 02.FurSeal
   m_EditorClassIdentifier: 
   team: 0
-  habitat: 1
   unitName: 7
   psdFile: {fileID: 7541202232396871869, guid: 94caf53a1cd6e304397ffa591e154756, type: 3}
-  unitCost: 100
   maxHp: 32
   baseMoveSpeed: 1
   attackRange: 1.5
   attackDamage: 8
   attackDelay: 0.5
+  habitat: 1
+  unitCost: 100
