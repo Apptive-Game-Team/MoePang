@@ -18,7 +18,7 @@ public enum UnitName
 
     //Ocean
     Jellyfish,
-    SeaTuretle,
+    SeaTurtle,
     FurSeal,
     Hippo,
     Whale,
