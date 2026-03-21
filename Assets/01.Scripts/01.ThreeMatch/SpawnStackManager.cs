@@ -43,25 +43,22 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void AddStackEffect(NormalPuzzleType type)
         {
-            _effectSeq?.Kill();
-            _effectSeq = DOTween.Sequence();
+            if (_effectSeq != null)
+            {
+                _effectSeq.Complete();
+                _effectSeq = null;
+            }
 
             Transform tr = stacks[(int)type].transform;
             Material mat = _stackMaterials[(int)type];
-
+            
             tr.localScale = Vector3.one;
-            mat.SetFloat(Highlight, 0);
+            mat.SetFloat(Highlight, 0f);
 
-            Tween t1 = tr.DOScale(0.8f, 0.2f)
-                .SetLoops(2, LoopType.Yoyo);
-
-            Tween t2 = DOTween.To(
-                    () => mat.GetFloat(Highlight),
-                    x => mat.SetFloat(Highlight, x),
-                    1f,
-                    0.1f
-                )
-                .SetLoops(2, LoopType.Yoyo);
+            _effectSeq = DOTween.Sequence();
+            
+            Tween t1 = tr.DOScale(0.8f, 0.1f).SetLoops(2, LoopType.Yoyo);
+            Tween t2 = mat.DOFloat(1f, Highlight, 0.1f).SetLoops(2, LoopType.Yoyo); 
 
             _effectSeq.Join(t1);
             _effectSeq.Join(t2);
@@ -69,7 +66,7 @@ namespace _01.Scripts._01.ThreeMatch
             _effectSeq.OnComplete(() =>
             {
                 tr.localScale = Vector3.one;
-                mat.SetFloat(Highlight, 0);
+                mat.SetFloat(Highlight, 0f);
                 _effectSeq = null;
             });
         }
