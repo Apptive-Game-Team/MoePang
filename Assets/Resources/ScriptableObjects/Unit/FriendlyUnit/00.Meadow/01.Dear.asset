@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b5649da6e9629f47bb251f0f8f97e60, type: 3}
-  m_Name: Tiger
+  m_Name: 01.Dear
   m_EditorClassIdentifier: 
+  team: 0
   habitat: 0
-  unitType: 0
+  unitName: 1
   psdFile: {fileID: 7812513906519258445, guid: 37098698714212a43b084f4c603c9df5, type: 3}
-  animatorController: {fileID: 9100000, guid: 209f2c79426f3884589e82d72b31fecc, type: 2}
-  teamType: 0
-  maxHp: 20
+  unitCost: 0
+  maxHp: 24
   baseMoveSpeed: 1
-  attackRange: 3
-  attackDamage: 5
-  attackDelay: 2
+  attackRange: 1.5
+  attackDamage: 6
+  attackDelay: 0.5
