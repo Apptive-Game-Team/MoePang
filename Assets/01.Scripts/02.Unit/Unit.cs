@@ -48,6 +48,7 @@ public class Unit : MonoBehaviour, IDamageable
 
     //참조 & 프로퍼티
     protected UnitData data;
+    protected GameObject visualInstance;
     protected GameObject attackPrefab;
     protected Animator animator;
     protected UnitPool ownerPool;
@@ -62,16 +63,10 @@ public class Unit : MonoBehaviour, IDamageable
     public TeamType GetTeam() => team;
 
     #region 시작 설정
-    protected virtual void Awake()
-    {
-        animator = GetComponentInChildren<Animator>();
-    }
-
     protected virtual void OnEnable()
     {
         Init();
         isAttacking = false;
-        if (animator != null) animator.SetBool("isWalking", true);
         currentState = UnitState.Move;
 
         //디버그용 이름 설정
@@ -87,7 +82,7 @@ public class Unit : MonoBehaviour, IDamageable
         moveSpeed = baseMoveSpeed;
     }
 
-    public void SetData(UnitData data)
+    public virtual void SetData(UnitData data)
     {
         this.data = data;
 
@@ -98,7 +93,32 @@ public class Unit : MonoBehaviour, IDamageable
         attackDelay = data.AttackDelay;
 
         team = data.Team;
+
+        moveSpeed = baseMoveSpeed;
+        
+        SetupVisual();
     }
+    protected virtual void SetupVisual()
+    {
+        if (visualInstance != null)
+        {
+            Destroy(visualInstance);
+        }
+
+        if (data.PsdFile == null)
+        {
+            Debug.LogWarning("PSD 파일 없음");
+            return;
+        }
+
+        visualInstance = Instantiate(data.PsdFile, transform);
+        visualInstance.transform.localPosition = Vector3.zero;
+
+        animator = GetComponentInChildren<Animator>();
+
+        if (animator != null) animator.SetBool("isWalking", true);
+    }
+
 
     /// <summary>
     /// 오브젝트 풀 지정

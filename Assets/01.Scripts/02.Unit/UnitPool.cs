@@ -8,10 +8,7 @@ public class UnitPool : MonoBehaviour
 {
     public static UnitPool Instance;
 
-    [Header("Pool Setting")]
-    [SerializeField] private Unit unitPrefab;
-
-    private Dictionary<UnitData, Queue<Unit>> pools = new();
+    private Dictionary<Unit, Queue<Unit>> pools = new();
 
     private void Awake()
     {
@@ -27,22 +24,23 @@ public class UnitPool : MonoBehaviour
     /// <summary>
     /// Unit 가져오기
     /// </summary>
-    public Unit Get(UnitData data, Transform spawnPos)
+    public Unit Get(Unit prefab, UnitData data, Transform spawnPos)
     {
-        if (!pools.ContainsKey(data))
+        if (!pools.ContainsKey(prefab))
         {
-            pools.Add(data, new Queue<Unit>());
+            pools.Add(prefab, new Queue<Unit>());
         }
 
         Unit unit;
 
-        if (pools[data].Count > 0)
+        if (pools[prefab].Count > 0)
         {
-            unit = pools[data].Dequeue();
+            unit = pools[prefab].Dequeue();
         }
+
         else
         {
-            unit = Instantiate(unitPrefab, transform);
+            unit = Instantiate(prefab, transform);
             unit.SetPool(this);
         }
 
@@ -60,13 +58,19 @@ public class UnitPool : MonoBehaviour
     {
         unit.gameObject.SetActive(false);
 
-        UnitData data = unit.Data;
+        Unit prefab = unit.gameObject.GetComponent<Unit>().GetType() == typeof(FriendlyUnit)
+            ? friendlyPrefabCache
+            : enemyPrefabCache;
 
-        if (!pools.ContainsKey(data))
-        {
-            pools.Add(data, new Queue<Unit>());
-        }
+        pools[prefab].Enqueue(unit);
+    }
 
-        pools[data].Enqueue(unit);
+    private Unit friendlyPrefabCache;
+    private Unit enemyPrefabCache;
+
+    public void SetPrefabs(Unit friendly, Unit enemy)
+    {
+        friendlyPrefabCache = friendly;
+        enemyPrefabCache = enemy;
     }
 }

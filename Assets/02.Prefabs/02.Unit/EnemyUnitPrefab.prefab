@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8796759884672343863
+--- !u!1 &148414490435609989
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,41 +8,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 772338642584942896}
-  - component: {fileID: 2138540559478136683}
-  - component: {fileID: 4960931039966411117}
-  m_Layer: 0
-  m_Name: UnitPrefab
+  - component: {fileID: 6848036820443723330}
+  - component: {fileID: 5985587198152181629}
+  - component: {fileID: 7641418122955250606}
+  m_Layer: 7
+  m_Name: EnemyUnitPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &772338642584942896
+--- !u!4 &6848036820443723330
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8796759884672343863}
+  m_GameObject: {fileID: 148414490435609989}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.14698967, y: 4.161788, z: -0.0021854192}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2138540559478136683
+--- !u!114 &5985587198152181629
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8796759884672343863}
+  m_GameObject: {fileID: 148414490435609989}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ad486fb27a0bd64385669a41d0fe90b, type: 3}
+  m_Script: {fileID: 11500000, guid: 007cc305b5a31dd4086bead08b7aa198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 0
@@ -59,13 +59,13 @@ MonoBehaviour:
   targetLayer:
     serializedVersion: 2
     m_Bits: 0
---- !u!61 &4960931039966411117
+--- !u!61 &7641418122955250606
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8796759884672343863}
+  m_GameObject: {fileID: 148414490435609989}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
