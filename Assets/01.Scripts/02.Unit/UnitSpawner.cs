@@ -9,8 +9,8 @@ public class UnitSpawner : MonoBehaviour
     [SerializeField] private UnitPool unitPool;
 
     [Header("스폰 유닛 데이터")]
-    [SerializeField] private UnitInFo friendlyUnitData;
-    [SerializeField] private UnitInFo enemyUnitData;
+    [SerializeField] private UnitData friendlyUnitData;
+    [SerializeField] private UnitData enemyUnitData;
 
     [Header("스폰 위치")]
     [SerializeField] private Transform friendlySpawnPosition;

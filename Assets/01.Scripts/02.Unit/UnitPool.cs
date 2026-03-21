@@ -11,7 +11,7 @@ public class UnitPool : MonoBehaviour
     [Header("Pool Setting")]
     [SerializeField] private Unit unitPrefab;
 
-    private Dictionary<UnitInFo, Queue<Unit>> pools = new();
+    private Dictionary<UnitData, Queue<Unit>> pools = new();
 
     private void Awake()
     {
@@ -27,7 +27,7 @@ public class UnitPool : MonoBehaviour
     /// <summary>
     /// Unit 가져오기
     /// </summary>
-    public Unit Get(UnitInFo data, Transform spawnPos)
+    public Unit Get(UnitData data, Transform spawnPos)
     {
         if (!pools.ContainsKey(data))
         {
@@ -60,7 +60,7 @@ public class UnitPool : MonoBehaviour
     {
         unit.gameObject.SetActive(false);
 
-        UnitInFo data = unit.Data;
+        UnitData data = unit.Data;
 
         if (!pools.ContainsKey(data))
         {
