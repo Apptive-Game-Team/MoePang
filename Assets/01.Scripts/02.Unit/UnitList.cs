@@ -2,21 +2,6 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 
-[System.Serializable]
-public struct UnitListComponent
-{
-    [SerializeField] private Habitat habitat;
-    [SerializeField] private UnitType unitType;
-    [SerializeField] private UnitInFo unitInFo;
-    [SerializeField] private int unlockValue;
-
-    //프로퍼티
-    public Habitat Habitat => habitat;
-    public UnitType UnitType => unitType;
-    public UnitInFo UnitInFo => unitInFo;
-    public int UnlockValue => unlockValue;
-}
-
 /// <summary>
 /// 소환되는 유닛 리스트
 /// </summary>
@@ -24,8 +9,33 @@ public struct UnitListComponent
 public class UnitList : ScriptableObject
 {
     [Header("Meadow")]
-    [SerializeField] List<UnitListComponent> meadowList = new List<UnitListComponent>();
+    [SerializeField] private List<UnitData> meadowUnits = new List<UnitData>();
 
-    [Header("Aqua")]
-    [SerializeField] List<UnitListComponent> aquaList = new List<UnitListComponent>();
+    [Header("Ocean")]
+    [SerializeField] private List<UnitData> oceanUnits = new List<UnitData>();
+
+    [Header("Desert")]
+    [SerializeField] private List<UnitData> desertUnits = new List<UnitData>();
+
+    [Header("Forest")]
+    [SerializeField] private List<UnitData> forestUnits = new List<UnitData>();
+
+    [Header("Polar")]
+    [SerializeField] private List<UnitData> polarUnits = new List<UnitData>();
+
+    /// <summary>
+    /// 외부 접근함수
+    /// </summary>
+    public List<UnitData> GetUnits(Habitat habitat)
+    {
+        return habitat switch
+        {
+            Habitat.Meadow => meadowUnits,
+            Habitat.Ocean => oceanUnits,
+            Habitat.Desert => desertUnits,
+            Habitat.Forest => forestUnits,
+            Habitat.Polar => polarUnits,
+            _ => null
+        };
+    }
 }

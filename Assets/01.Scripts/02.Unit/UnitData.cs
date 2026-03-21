@@ -4,14 +4,14 @@ using UnityEngine;
 /// <summary>
 /// 유닛 설정 데이터
 /// </summary>
-[CreateAssetMenu(fileName = "UnitInFo", menuName = "Scriptable Objects/UnitInFo")]
-public class UnitInFo : ScriptableObject
+[CreateAssetMenu(fileName = "UnitData", menuName = "Scriptable Objects/UnitData")]
+public class UnitData : ScriptableObject
 {
     [Header("Unit Setting")]
-    [SerializeField] TeamType team;
-    [SerializeField] Habitat habitat;
-    [SerializeField] UnitType unitType;
-    [SerializeField] GameObject psdFile;
+    [SerializeField] private TeamType team;
+    [SerializeField] private Habitat habitat;
+    [SerializeField] private UnitName unitName;
+    [SerializeField] private GameObject psdFile;
 
     [Header("유닛 설정")]
     [SerializeField] private float maxHp;
@@ -22,6 +22,9 @@ public class UnitInFo : ScriptableObject
 
     //프로퍼티
     public TeamType Team => team;
+    public Habitat Habitat => habitat;
+    public UnitName UnitName => unitName;
+    public GameObject PsdFile => psdFile;
     public float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
     public float AttackRange => attackRange;

@@ -47,12 +47,12 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected LayerMask targetLayer;
 
     //참조 & 프로퍼티
-    protected UnitInFo data;
+    protected UnitData data;
     protected GameObject attackPrefab;
     protected Animator animator;
     protected UnitPool ownerPool;
     protected bool isAttacking;
-    public UnitInFo Data => data;
+    public UnitData Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
@@ -87,7 +87,7 @@ public class Unit : MonoBehaviour, IDamageable
         moveSpeed = baseMoveSpeed;
     }
 
-    public void SetData(UnitInFo data)
+    public void SetData(UnitData data)
     {
         this.data = data;
 
