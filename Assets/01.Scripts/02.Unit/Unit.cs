@@ -209,6 +209,9 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
+            animator.Rebind();
+            animator.Update(0f);
+
             animator.SetBool("isWalking", false);
             animator.SetBool("isAttacking", false);
         }
