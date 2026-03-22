@@ -186,7 +186,7 @@ namespace _01.Scripts._01.ThreeMatch
                         .SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
-                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1)
+                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
                                 .OnComplete(() =>
                                 {
                                     po.puzzleState = PuzzleState.Idle;
@@ -398,6 +398,8 @@ namespace _01.Scripts._01.ThreeMatch
             if (_puzzles[x1, y1] is ObstaclePuzzleObject ||
                 _puzzles[x2, y2] is ObstaclePuzzleObject)
             {
+                _puzzles[x1, y1].FailedSwapEffect(x2 - x1, y2 - y1, 
+                    Vector2.Distance(_puzzles[x1, y1].transform.position, _puzzles[x2, y2].transform.position) / 2);
                 return;
             }
             
@@ -866,7 +868,7 @@ namespace _01.Scripts._01.ThreeMatch
                                 .SetEase(Ease.InSine)
                                 .OnComplete(() => 
                                 {
-                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1)
+                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
                                         .OnComplete(() =>
                                         {
                                             targetPo.puzzleState = PuzzleState.Idle;
