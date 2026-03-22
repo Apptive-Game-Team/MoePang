@@ -172,6 +172,7 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     GameObject puzzle = SetStartRandomPuzzle(i, j);
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                    po.puzzleState = PuzzleState.Falling;
                     puzzle.name = $"Puzzle({i + 1},{j + 1})";
                     _puzzles[i, j] = po;
                     
@@ -185,7 +186,11 @@ namespace _01.Scripts._01.ThreeMatch
                         .SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
-                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1);
+                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1)
+                                .OnComplete(() =>
+                                {
+                                    po.puzzleState = PuzzleState.Idle;
+                                });
                         });
 
                     seq.Insert(startAt, fallTween);
@@ -408,6 +413,8 @@ namespace _01.Scripts._01.ThreeMatch
             
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
+            p1.puzzleState = PuzzleState.Swapping;
+            p2.puzzleState = PuzzleState.Swapping;
     
             _puzzles[x1, y1] = p2;
             _puzzles[x2, y2] = p1;
@@ -461,6 +468,9 @@ namespace _01.Scripts._01.ThreeMatch
             
                 p1.Init(this, x1, y1);
                 p2.Init(this, x2, y2);
+                
+                p1.puzzleState = PuzzleState.Idle;
+                p2.puzzleState = PuzzleState.Idle;
             }
         }
 
@@ -673,6 +683,17 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator MatchPuzzle(Vector2Int? delayedBombPos = null)
         {
+            foreach (var group in _currentMatchGroups)
+            {
+                foreach (var pos in group.positions)
+                {
+                    if (_puzzles[pos.x, pos.y] != null)
+                    {
+                        _puzzles[pos.x, pos.y].puzzleState = PuzzleState.Matching;
+                    }
+                }
+            }
+            
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -769,6 +790,10 @@ namespace _01.Scripts._01.ThreeMatch
             
                     yield return newPuzzle.transform.DOScale(tileScale, 0.2f)
                         .SetEase(Ease.InSine)
+                        .OnComplete(() =>
+                        {
+                            po.puzzleState = PuzzleState.Idle;
+                        })
                         .WaitForCompletion();
                 }
             }
@@ -807,6 +832,7 @@ namespace _01.Scripts._01.ThreeMatch
                         {
                             if (_puzzles[i, k] != null)
                             {
+                                _puzzles[i, k].puzzleState = PuzzleState.Falling;
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
                                 targetPo = _puzzles[i, j];
@@ -820,6 +846,7 @@ namespace _01.Scripts._01.ThreeMatch
                             GameObject puzzle = SetRandomPuzzle(i, j, spawnOrder);
                             spawnOrder++;
                             targetPo = puzzle.GetComponent<PuzzleObject>();
+                            targetPo.puzzleState = PuzzleState.Falling;
                             _puzzles[i, j] = targetPo;
                         }
 
@@ -839,7 +866,11 @@ namespace _01.Scripts._01.ThreeMatch
                                 .SetEase(Ease.InSine)
                                 .OnComplete(() => 
                                 {
-                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1);
+                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8, 1)
+                                        .OnComplete(() =>
+                                        {
+                                            targetPo.puzzleState = PuzzleState.Idle;
+                                        });
                                 });
 
                             seq.Insert(startAt, fallTween);
@@ -899,8 +930,7 @@ namespace _01.Scripts._01.ThreeMatch
                     Destroy(self);
                 })
                 .WaitForCompletion();
-
-            Sequence seq1 = DOTween.Sequence();
+            
             Queue<(SpecialPuzzleObject, Vector2Int)> q = new();
             List<PuzzleObject> targetPuzzles = new();
             
@@ -909,6 +939,7 @@ namespace _01.Scripts._01.ThreeMatch
                 if (_puzzles[pos.x, pos.y] == null) continue;
 
                 PuzzleObject targetPuzzle = _puzzles[pos.x, pos.y];
+                targetPuzzle.puzzleState = PuzzleState.Matching;
                 
                 if (targetPuzzle is SpecialPuzzleObject nextSp)
                 {
@@ -918,12 +949,8 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     targetPuzzles.Add(targetPuzzle);
                     _puzzles[pos.x, pos.y] = null;
-                    // Tween t1 = targetPuzzle.transform.DOScale(tileScale / 3, 0.15f).SetEase(Ease.InSine);
-                    // seq1.Join(t1);
                 }
             }
-            
-            //yield return seq1.WaitForCompletion();
 
             yield return SetExplosionEffect(center.x, center.y, targetPuzzles, type);
 
@@ -1138,7 +1165,8 @@ namespace _01.Scripts._01.ThreeMatch
                 yield return new WaitForSeconds(obstacleSpawnInterval);
                 Vector2Int pos = SetObstacleSpawnPos();
                 yield return SpawnObstacleWarning(pos.x, pos.y);
-                AddTask(() => SpawnRandomObstaclePuzzleCoroutine(pos.x,pos.y));
+                StartCoroutine(SpawnRandomObstaclePuzzleCoroutine(pos.x, pos.y));
+                //AddTask(() => SpawnRandomObstaclePuzzleCoroutine(pos.x,pos.y));
             }
         }
 
@@ -1177,7 +1205,10 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
         {
-            yield return new WaitUntil(() => _puzzles[curX, curY] != null);
+            yield return new WaitUntil(() =>
+                _puzzles[curX, curY] != null &&
+                _puzzles[curX, curY].puzzleState == PuzzleState.Idle
+            );
             
             PuzzleObject target = _puzzles[curX, curY];
 
