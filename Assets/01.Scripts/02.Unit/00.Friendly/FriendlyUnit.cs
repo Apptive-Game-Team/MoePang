@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class FriendlyUnit : Unit
 {
+    [Header("아군 유닛 전용 데이터")]
+    [SerializeField] private Habitat habitat;
+
     private FriendlyUnitData friendlyData;
 
     public override void SetData(UnitData data)
@@ -9,13 +12,10 @@ public class FriendlyUnit : Unit
         base.SetData(data);
 
         friendlyData = data as FriendlyUnitData;
-    }
 
-    protected override void Init()
-    {
-        base.Init();
-        team = TeamType.Friendly;
         direction = 1f;
+
+        habitat = friendlyData.Habitat;
 
         Vector3 scale = transform.localScale;
         scale.x = -Mathf.Abs(scale.x);

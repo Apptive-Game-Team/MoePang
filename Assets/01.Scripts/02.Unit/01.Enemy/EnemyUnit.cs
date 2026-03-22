@@ -9,12 +9,7 @@ public class EnemyUnit : Unit
         base.SetData(data);
 
         enemyData = data as EnemyUnitData;
-    }
 
-    protected override void Init()
-    {
-        base.Init();
-        team = TeamType.Enemy;
         direction = -1f;
         targetLayer = LayerMask.GetMask("Friendly");
     }

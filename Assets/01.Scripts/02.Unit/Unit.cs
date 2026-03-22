@@ -64,28 +64,33 @@ public class Unit : MonoBehaviour, IDamageable
     public TeamType GetTeam() => team;
 
     #region 시작 설정
-    protected virtual void OnEnable()
-    {
-        Init();
-        isAttacking = false;
-        currentState = UnitState.Move;
-    }
-
     public virtual void SetData(UnitData data)
     {
         this.data = data;
 
+        currentState = UnitState.Move;
+
+        //피 설정
         maxHp = data.MaxHp;
+        currentHp = maxHp;
+
+        //이동속도 설정
         baseMoveSpeed = data.BaseMoveSpeed;
+        moveSpeed = baseMoveSpeed;
+
+        //공격 설정
         attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
         attackDelay = data.AttackDelay;
+
+        //팀 설정
         team = data.Team;
 
-        moveSpeed = baseMoveSpeed;
-
         SetupVisual();
+
+        StartCoroutine(InitStateDelayed());
     }
+
     protected virtual void SetupVisual()
     {
         if (visualInstance != null)
@@ -102,21 +107,22 @@ public class Unit : MonoBehaviour, IDamageable
         visualInstance = Instantiate(data.PsdFile, transform);
         visualInstance.transform.localPosition = Vector3.zero;
 
-        animator = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();   
+    }
+
+    private IEnumerator InitStateDelayed()
+    {
+        yield return null;
 
         if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+
+            animator.SetBool("isAttacking", false);
             animator.SetBool("isWalking", true);
+        }
     }
-
-    /// <summary>
-    /// Unit 생성 시 초기화 함수
-    /// </summary>
-    protected virtual void Init()
-    {
-        currentHp = maxHp;
-        moveSpeed = baseMoveSpeed;
-    }
-
 
     /// <summary>
     /// 오브젝트 풀 지정
@@ -184,18 +190,19 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (!IsOtherInRange())
         {
-            if (animator != null) animator.SetBool("isWalking", true);
+            if (animator != null)
+            {
+                animator.SetBool("isWalking", true);
+                animator.SetBool("isAttacking", false);
+            }
+            
             currentState = UnitState.Move;
             return;
         }
 
         if (isAttacking) return;
 
-        if (animator != null) animator.SetBool("isWalking", false);
-        if (!isAttacking)
-        {
-            StartCoroutine(AttackCoroutine());
-        }
+        StartCoroutine(AttackCoroutine());
     }
     /// <summary>
     /// 죽은 상태
@@ -203,6 +210,12 @@ public class Unit : MonoBehaviour, IDamageable
     protected virtual void DieState()
     {
         StopAllCoroutines();
+
+        if (animator != null)
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isAttacking", false);
+        }
 
         if (UTQ.Peek(team) == this)
         {
@@ -222,7 +235,12 @@ public class Unit : MonoBehaviour, IDamageable
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         IDamageable target = UTQ.Peek(enemyTeam);
 
-        if (animator != null) animator.SetBool("isAttacking", true);
+        if (animator != null)
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isAttacking", true);
+        }
+
         yield return new WaitForSeconds(attackDelay);
 
         if (target != null)
@@ -243,9 +261,13 @@ public class Unit : MonoBehaviour, IDamageable
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
 
-        if (animator != null) animator.SetBool("isAttacking", false);
+        if (animator != null)
+        {
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isWalking", true);
+        }
 
-        isAttacking = false;
+            isAttacking = false;
     }
 
     /// <summary>
