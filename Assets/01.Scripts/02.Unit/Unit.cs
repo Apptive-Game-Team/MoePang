@@ -221,6 +221,8 @@ public class Unit : MonoBehaviour, IDamageable
             UTQ.Dequeue(team);
         }
 
+        currentState = UnitState.Move;
+
         ownerPool.ReturnUnit(this);
     }   
 
