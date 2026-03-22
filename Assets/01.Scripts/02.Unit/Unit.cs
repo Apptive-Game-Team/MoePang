@@ -95,19 +95,14 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (visualInstance != null)
         {
-            Destroy(visualInstance);
-        }
-
-        if (data.PsdFile == null)
-        {
-            Debug.LogWarning("PSD 파일 없음");
+            visualInstance.transform.localPosition = Vector3.zero;
             return;
         }
 
         visualInstance = Instantiate(data.PsdFile, transform);
         visualInstance.transform.localPosition = Vector3.zero;
 
-        animator = GetComponentInChildren<Animator>();   
+        animator = visualInstance.GetComponent<Animator>();
     }
 
     private IEnumerator InitStateDelayed()
@@ -119,6 +114,7 @@ public class Unit : MonoBehaviour, IDamageable
             animator.Rebind();
             animator.Update(0f);
 
+            animator.Play("Idle", 0, 0f);
             animator.SetBool("isAttacking", false);
             animator.SetBool("isWalking", true);
         }
