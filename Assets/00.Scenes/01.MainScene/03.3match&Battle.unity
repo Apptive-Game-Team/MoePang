@@ -489,8 +489,27 @@ MonoBehaviour:
   x: 7
   y: 7
   space: 0.8
-  normalProbability: 88
-  specialProbability: 50
+  startObstacles:
+  - obstacles:
+    - type: 1
+      pos: {x: 3, y: 1}
+    - type: 1
+      pos: {x: 3, y: 3}
+    - type: 1
+      pos: {x: 3, y: 5}
+    - type: 0
+      pos: {x: 0, y: 0}
+    - type: 0
+      pos: {x: 6, y: 0}
+    - type: 0
+      pos: {x: 0, y: 6}
+    - type: 0
+      pos: {x: 6, y: 6}
+  obstacleWeights:
+  - type: 0
+    weight: 30
+  - type: 1
+    weight: 70
   normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
   - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
