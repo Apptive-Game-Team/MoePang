@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -5,40 +6,68 @@ using UnityEngine;
 /// </summary>
 public class UnitSpawner : MonoBehaviour
 {
-    [Header("유닛 풀")]
-    [SerializeField] private UnitPool friendlyPool;
-    [SerializeField] private UnitPool enemyPool;
+    [Header("프리팹")]
+    [SerializeField] private FriendlyUnit friendlyPrefab;
+    [SerializeField] private EnemyUnit enemyPrefab;
 
-    [Header("스폰 설정")]
+    [Header("유닛 리스트")]
+    [SerializeField] private FriendlyUnitList friendlyUnitList;
+    [SerializeField] private EnemyUnitList enemyUnitList;
+
+    [Header("스폰 위치")]
     [SerializeField] private Transform friendlySpawnPosition;
     [SerializeField] private Transform enemySpawnPosition;
-    [SerializeField] private float spawnInterval = 10.0f;
-
-    //참조
-    private float timer;
 
     private void Update()
     {
-        timer += Time.deltaTime;
-
-        if (timer >= spawnInterval)
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            Spawn();
-            timer = 0f;
+            SpawnFriendly();
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            SpawnEnemy();
         }
     }
 
-    /// <summary>
-    /// 유닛 소환
-    /// </summary>
-    private void Spawn()
+    private void SpawnFriendly()
     {
-        friendlyPool.SpawnUnit(friendlySpawnPosition);
-        enemyPool.SpawnUnit(enemySpawnPosition);
+        List<FriendlyUnitData> unlockedUnits = new();
+
+        foreach (Habitat habitat in System.Enum.GetValues(typeof(Habitat)))
+        {
+            var list = friendlyUnitList.GetUnits(habitat);
+            if (list == null) continue;
+
+            foreach (var unit in list)
+            {
+                if (HabitatManager.Instance.IsUnlocked(unit))
+                {
+                    unlockedUnits.Add(unit);
+                }
+            }
+        }
+
+        if (unlockedUnits.Count == 0)
+        {
+            Debug.Log("해금된 유닛 없음");
+            return;
+        }
+
+        var data = unlockedUnits[Random.Range(0, unlockedUnits.Count)];
+
+        UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
     }
 
-    public void FriendlySpawn()
+    private void SpawnEnemy()
     {
-        friendlyPool.SpawnUnit(friendlySpawnPosition);
+        var list = enemyUnitList.GetUnits();
+
+        if (list == null || list.Count == 0) return;
+
+        var data = list[Random.Range(0, list.Count)];
+
+        UnitPool.Instance.Get(enemyPrefab, data, enemySpawnPosition);
     }
 }

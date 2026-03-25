@@ -237,11 +237,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 081a58e8bb9aedf49badfaf2c0d45ec2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  friendlyPool: {fileID: 2029313149}
-  enemyPool: {fileID: 626392908}
+  unitPool: {fileID: 0}
+  friendlyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 0}
+  friendlyUnitList: {fileID: 0}
+  enemyUnitList: {fileID: 0}
   friendlySpawnPosition: {fileID: 697245518}
   enemySpawnPosition: {fileID: 2099301080}
-  spawnInterval: 3
 --- !u!4 &268232359
 Transform:
   m_ObjectHideFlags: 0
@@ -286,8 +288,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0509e677157db8e468905b5ef941de40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitPrefab: {fileID: -516061412293081656, guid: 65919676a9f138e46bedf74f40a40029, type: 3}
-  poolCount: 10
 --- !u!4 &626392909
 Transform:
   m_ObjectHideFlags: 0
@@ -859,8 +859,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0509e677157db8e468905b5ef941de40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitPrefab: {fileID: 8741981766073815800, guid: fbe748270534a5a44ae13ca80fb47812, type: 3}
-  poolCount: 10
 --- !u!4 &2029313150
 Transform:
   m_ObjectHideFlags: 0

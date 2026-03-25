@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23d150917864c13489ce3f616347bdf6, type: 3}
+  m_Name: 02.Anteater
+  m_EditorClassIdentifier: 
+  team: 0
+  unitName: 17
+  psdFile: {fileID: 7541202232396871869, guid: 94caf53a1cd6e304397ffa591e154756, type: 3}
+  maxHp: 32
+  baseMoveSpeed: 1
+  attackRange: 1.5
+  attackDamage: 8
+  attackDelay: 0.5
+  habitat: 3
+  unitCost: 100
