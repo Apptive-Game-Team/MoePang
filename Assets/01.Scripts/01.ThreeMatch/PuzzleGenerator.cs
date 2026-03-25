@@ -620,7 +620,7 @@ namespace _01.Scripts._01.ThreeMatch
                     yield return newPuzzle.transform.DOScale(0.8f, 0.2f).WaitForCompletion();
                 }
 
-                //unitSpawner.FriendlySpawn();
+                unitSpawner.FriendlySpawn();
             }
             
             yield return new WaitForSeconds(0.1f);
@@ -760,7 +760,7 @@ namespace _01.Scripts._01.ThreeMatch
             
             yield return seq.WaitForCompletion();
             
-            //unitSpawner.FriendlySpawn();
+            unitSpawner.FriendlySpawn();
 
             while (q.Count > 0)
             {
