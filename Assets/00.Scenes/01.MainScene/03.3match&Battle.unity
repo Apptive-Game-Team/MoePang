@@ -2702,6 +2702,7 @@ GameObject:
   - component: {fileID: 1986820698}
   - component: {fileID: 1986820697}
   - component: {fileID: 1986820699}
+  - component: {fileID: 1986820700}
   m_Layer: 0
   m_Name: UnitSpawner
   m_TagString: Untagged
@@ -2755,6 +2756,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
+--- !u!114 &1986820700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986820696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f70b62f6509a0b24496ec28c36669f36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentStage: 0
 --- !u!1 &1986912997
 GameObject:
   m_ObjectHideFlags: 0
