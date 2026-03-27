@@ -1,3 +1,7 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,25 +11,38 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [SerializeField] private GameObject[] stacks;
         
+        private static readonly int Highlight = Shader.PropertyToID("_Highlight");
         private static readonly int Full = Shader.PropertyToID("_Full");
         private Material[] _stackMaterials;
+        private Material _material;
+        private Sequence _effectSeq;
         private UnitSpawner _spawner;
         private int _stackLength;
         private int _stackCount;
         private const int StackMaxCount = 3;
+        
+        private readonly Queue<Func<IEnumerator>> _taskQueue = new();
+        private bool _isProcessing;
 
         private void Awake()
         {
+            Image img = GetComponent<Image>();
+            if (img.material != null)
+            {
+                _material = new Material(img.material);
+                img.material = _material;
+            }
+            
             _stackLength = stacks.Length;
             _stackMaterials = new Material[_stackLength];
-            for (int i = 0;i < _stackLength;i++)
+            for (int i = 0; i < _stackLength; i++)
             {
-                Image img = stacks[i].GetComponent<Image>();
-                if (img.material != null)
+                Image stackImg = stacks[i].GetComponent<Image>();
+                if (stackImg.material != null)
                 {
-                    Material material = new(img.material);
-                    img.material = material;
-                    _stackMaterials[i] = material;
+                    Material mat = new(stackImg.material);
+                    stackImg.material = mat;
+                    _stackMaterials[i] = mat;
                 }
             }
         }
@@ -34,20 +51,82 @@ namespace _01.Scripts._01.ThreeMatch
         {
             _spawner = spawner;
         }
-
+        
         public void AddStack(int num)
         {
-            _stackCount += num;
+            _taskQueue.Enqueue(() => AddStackProcess(num));
 
-            int spawnCount = 0;
-            if (_stackCount >= StackMaxCount)
+            if (!_isProcessing)
             {
-                spawnCount = _stackCount / StackMaxCount;
-                _stackCount %= StackMaxCount;
+                StartCoroutine(ProcessQueue());
+            }
+        }
+        
+        private IEnumerator ProcessQueue()
+        {
+            _isProcessing = true;
+            while (_taskQueue.Count > 0)
+            {
+                var task = _taskQueue.Dequeue();
+                yield return task();
+            }
+            _isProcessing = false;
+        }
+        
+        private IEnumerator AddStackProcess(int num)
+        {
+            AddStackEffect();
+            
+            int totalNewCount = _stackCount + num;
+            
+            if (totalNewCount >= StackMaxCount)
+            {
+                FillStack(StackMaxCount);
+                
+                yield return new WaitForSeconds(0.2f);
+                
+                int spawnCount = totalNewCount / StackMaxCount;
+                _stackCount = totalNewCount % StackMaxCount;
+                
+                // todo : Add Spawn Effect
+                
+                Spawn(spawnCount);
+                FillStack(_stackCount);
+            }
+            else
+            {
+                _stackCount = totalNewCount;
+                FillStack(_stackCount);
             }
 
-            FillStack(_stackCount);
-            Spawn(spawnCount);
+            yield return new WaitForSeconds(0.1f);
+        }
+        
+        private void AddStackEffect()
+        {
+            if (_effectSeq != null)
+            {
+                _effectSeq.Complete();
+                _effectSeq = null;
+            }
+
+            transform.localScale = Vector3.one;
+            _material.SetFloat(Highlight, 0f);
+
+            _effectSeq = DOTween.Sequence();
+            
+            Tween t1 = transform.DOScale(0.8f, 0.1f).SetLoops(2, LoopType.Yoyo);
+            Tween t2 = _material.DOFloat(1f, Highlight, 0.1f).SetLoops(2, LoopType.Yoyo);
+
+            _effectSeq.Join(t1);
+            _effectSeq.Join(t2);
+            
+            _effectSeq.OnComplete(() =>
+            {
+                transform.localScale = Vector3.one;
+                _material.SetFloat(Highlight, 0f);
+                _effectSeq = null;
+            });
         }
 
         private void Spawn(int num)
@@ -60,14 +139,9 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void FillStack(int num)
         {
-            for (int i = 0; i < num; i++)
+            for (int i = 0; i < _stackLength; i++)
             {
-                _stackMaterials[i].SetFloat(Full, 1);
-            }
-
-            for (int i = num; i < _stackLength; i++)
-            {
-                _stackMaterials[i].SetFloat(Full, 0);
+                _stackMaterials[i].SetFloat(Full, i < num ? 1 : 0);
             }
         }
     }
