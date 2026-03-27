@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -43,20 +44,31 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [Header("Puzzle Settings")]
         [SerializeField] private RectTransform puzzleFrame;
+        [SerializeField] private GameObject particleFrame;
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
+        [SerializeField] private float rowDropDelay = 0.01f;
+        [SerializeField] private float columnDropDelay = 0.02f;
+        [SerializeField] private float dropSpeed = 10f;
+        [SerializeField] private float moveSpeed = 10f;
+        [SerializeField] private float tileScale = 0.6f;
         [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
         [SerializeField] private List<ObstacleWeight> obstacleWeights;
+        [SerializeField] private float obstacleSpawnDelay = 2f;
+        [SerializeField] private float obstacleSpawnInterval = 10f;
+        
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
         [SerializeField] private GameObject[] specialPuzzlePrefabs;
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
         [SerializeField] private Sprite[] normalPuzzleImages;
+        [SerializeField] private GameObject[] specialPuzzleParticlePrefabs;
+        [SerializeField] private GameObject obstacleWarningPrefab;
         
-        [Header("Spawn Settings")]
-        [SerializeField] private UnitSpawner unitSpawner;
+        [Header("Spawn Settings")] 
+        [SerializeField] private SpawnStackManager spawnStackManager;
         
         private PuzzleObject[,] _puzzles;
         
@@ -68,12 +80,10 @@ namespace _01.Scripts._01.ThreeMatch
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
 
-        private const float ObstacleSpawnDelay = 10f;
-
         private class MatchGroup
         {
             public List<Vector2Int> positions = new();
-            public Vector2Int spawnPos; 
+            public Vector2Int spawnPos;  
             public SpecialPuzzleType? resultType = null;
             public NormalPuzzleType color;
         }
@@ -156,20 +166,36 @@ namespace _01.Scripts._01.ThreeMatch
         {
             Sequence seq = DOTween.Sequence();
             
-            for (int i = 0; i < y; i++)
+            for (int i = 0; i < x; i++)
             {
-                for (int j = 0; j < x; j++)
+                for (int j = 0; j < y; j++)
                 {
-                    GameObject puzzle = SetStartRandomPuzzle(j, i);
-                    
+                    GameObject puzzle = SetStartRandomPuzzle(i, j);
                     PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                    puzzle.name = $"Puzzle({j + 1},{i + 1})";
-                    _puzzles[j, i] = po;
+                    po.puzzleState = PuzzleState.Falling;
+                    puzzle.name = $"Puzzle({i + 1},{j + 1})";
+                    _puzzles[i, j] = po;
                     
-                    Tween t = puzzle.transform.DOMove(CalculatePos(j, i), 0.3f);
-                    seq.Join(t);
+                    Vector3 targetPos = CalculatePos(i, j);
                     
-                    po.Init(this, j, i);
+                    float distance = Vector3.Distance(po.transform.position, targetPos);
+                    float duration = distance / dropSpeed;
+                    float startAt = columnDropDelay * i + rowDropDelay * j;
+                    
+                    Tween fallTween = po.transform.DOMove(targetPos, duration)
+                        .SetEase(Ease.InSine)
+                        .OnComplete(() =>
+                        {
+                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                                .OnComplete(() =>
+                                {
+                                    po.puzzleState = PuzzleState.Idle;
+                                });
+                        });
+
+                    seq.Insert(startAt, fallTween);
+                    
+                    po.Init(this, i, j);
                 }
             }
 
@@ -216,11 +242,14 @@ namespace _01.Scripts._01.ThreeMatch
             return puzzle;
         }
 
-        private GameObject SetRandomPuzzle(int col, int row)
+        private GameObject SetRandomPuzzle(int col, int row, int spawnOrder)
         {
             var types = Enum.GetValues(typeof(NormalPuzzleType));
             var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
-            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+            
+            Vector3 startPos = CalculateDropPos(col, spawnOrder);
+            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], startPos, Quaternion.identity, puzzleFrame);
+            puzzle.name = $"Puzzle({col + 1}, {row + 1})"; 
             return puzzle;
         }
 
@@ -337,15 +366,19 @@ namespace _01.Scripts._01.ThreeMatch
             float offsetX = (x - 1) * space / 2f;
             float offsetY = (y - 1) * space / 2f;
             
-            return new Vector3(col * space - offsetX, row * space - offsetY, 0f);
+            return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
+                ,puzzleFrame.transform.position.y + row * space - offsetY, 0f);
         }
 
-        private Vector3 CalculateDropPos(int col, int row)
+        private Vector3 CalculateDropPos(int col, int spawnOrder)
         {
             float offsetX = (x - 1) * space / 2f;
-            float offsetY = (y + 3) * space / 2f;
+            float offsetY = (y - 1) * space / 2f;
+            
+            float spawnY = (y + spawnOrder) * space - offsetY;
 
-            return new Vector3(col * space - offsetX, row * space + offsetY, 0f);
+            return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
+                ,puzzleFrame.transform.position.y + spawnY, 0f);
         }
         #endregion
         
@@ -365,6 +398,8 @@ namespace _01.Scripts._01.ThreeMatch
             if (_puzzles[x1, y1] is ObstaclePuzzleObject ||
                 _puzzles[x2, y2] is ObstaclePuzzleObject)
             {
+                _puzzles[x1, y1].FailedSwapEffect(x2 - x1, y2 - y1, 
+                    Vector2.Distance(_puzzles[x1, y1].transform.position, _puzzles[x2, y2].transform.position) / 2);
                 return;
             }
             
@@ -380,12 +415,14 @@ namespace _01.Scripts._01.ThreeMatch
             
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
+            p1.puzzleState = PuzzleState.Swapping;
+            p2.puzzleState = PuzzleState.Swapping;
     
             _puzzles[x1, y1] = p2;
             _puzzles[x2, y2] = p1;
             
-            Vector3 pos1 = p1.transform.localPosition;
-            Vector3 pos2 = p2.transform.localPosition;
+            Vector3 pos1 = p1.transform.position;
+            Vector3 pos2 = p2.transform.position;
             
             Sequence seq1 = DOTween.Sequence();
             Tween t1 = p1.transform.DOMove(pos2, 0.2f);
@@ -433,6 +470,9 @@ namespace _01.Scripts._01.ThreeMatch
             
                 p1.Init(this, x1, y1);
                 p2.Init(this, x2, y2);
+                
+                p1.puzzleState = PuzzleState.Idle;
+                p2.puzzleState = PuzzleState.Idle;
             }
         }
 
@@ -645,6 +685,17 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator MatchPuzzle(Vector2Int? delayedBombPos = null)
         {
+            foreach (var group in _currentMatchGroups)
+            {
+                foreach (var pos in group.positions)
+                {
+                    if (_puzzles[pos.x, pos.y] != null)
+                    {
+                        _puzzles[pos.x, pos.y].puzzleState = PuzzleState.Matching;
+                    }
+                }
+            }
+            
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)
@@ -663,35 +714,74 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 Vector3 destination = CalculatePos(group.spawnPos.x, group.spawnPos.y);
                 
-                Sequence seq = DOTween.Sequence();
+                Sequence seq1 = DOTween.Sequence();
                 foreach (var pos in group.positions)
                 {
-                    if (_puzzles[pos.x, pos.y] == null)
+                    if (_puzzles[pos.x, pos.y] is NormalPuzzleObject no)
                     {
-                        continue;
+                        seq1.Join(no.HighlightEffect());
                     }
+                }
+                yield return seq1.WaitForCompletion();
+                
+                Sequence seq2 = DOTween.Sequence();
+                List<PuzzleObject> targets = new();
+                foreach (var pos in group.positions)
+                {
+                    var targetPuzzle = _puzzles[pos.x, pos.y];
+                    targets.Add(targetPuzzle);
+                    if (targetPuzzle == null) continue;
                     
+                    _puzzles[pos.x, pos.y] = null;
+
                     if (group.resultType != null)
                     {
-                        Tween t1 = _puzzles[pos.x, pos.y].transform.DOMove(destination, 0.2f);
-                        seq.Join(t1);
+                        Tween t1 = targetPuzzle.transform.DOMove(destination, 0.2f);
+                        seq2.Join(t1);
                     }
-
-                    Tween t2 = _puzzles[pos.x, pos.y].transform.DOScale(0, 0.2f)
-                        .OnComplete(() =>
-                        {
-                            Destroy(_puzzles[pos.x, pos.y].gameObject);
-                            _puzzles[pos.x, pos.y] = null;
-                        });
-                    seq.Join(t2);
+                    
+                    Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f).SetEase(Ease.InSine);
+                    seq2.Join(t2);
                 }
+                yield return seq2.WaitForCompletion();
                 
-                yield return seq.WaitForCompletion();
+                foreach (PuzzleObject targetPuzzle in targets)
+                {
+                    targetPuzzle.transform.SetParent(puzzleFrame.parent);
+                    
+                    Vector3 startPos = targetPuzzle.transform.position;
+                    Vector3 endPos = spawnStackManager.SetStack(group.color).transform.position;
+
+                    float distance = Vector3.Distance(startPos, endPos);
+                    float speed = 7.5f;
+                    float duration = distance / speed;
+                    float jumpPower = distance * 0.3f;
+                    
+                    Sequence seq = DOTween.Sequence();
+
+                    seq.Append(DOTween.To(
+                        () => 0f,
+                        t => {
+                            Vector3 pos = Vector3.Lerp(startPos, endPos, t);
+
+                            float height = Mathf.Sin(t * Mathf.PI) * jumpPower;
+
+                            targetPuzzle.transform.position = pos + Vector3.up * height;
+                        },
+                        1f,
+                        duration
+                    ).SetEase(Ease.OutSine)
+                    .OnComplete(() =>
+                    {
+                        spawnStackManager.AddStack(group.color, 1);
+                        Destroy(targetPuzzle.gameObject);
+                    }));
+                }
 
                 if (group.resultType != null)
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
-                    newPuzzle.transform.localPosition = destination;
+                    newPuzzle.transform.position = destination;
                     newPuzzle.name = $"Puzzle({group.spawnPos.x + 1},{group.spawnPos.y + 1})";
                     newPuzzle.transform.localScale = Vector3.zero;
             
@@ -700,13 +790,15 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    yield return newPuzzle.transform.DOScale(0.8f, 0.2f).WaitForCompletion();
+                    yield return newPuzzle.transform.DOScale(tileScale, 0.2f)
+                        .SetEase(Ease.InSine)
+                        .OnComplete(() =>
+                        {
+                            po.puzzleState = PuzzleState.Idle;
+                        })
+                        .WaitForCompletion();
                 }
-
-                unitSpawner.FriendlySpawn();
             }
-            
-            yield return new WaitForSeconds(0.1f);
 
             if (delayedBombPos.HasValue)
             {
@@ -721,76 +813,77 @@ namespace _01.Scripts._01.ThreeMatch
             
             yield return DropBlocks();
         }
-        
+
         private IEnumerator DropBlocks()
         {
             _movedPositions.Clear();
-            
             Sequence seq = DOTween.Sequence();
 
             for (int i = 0; i < x; i++)
             {
+                int spawnOrder = 0;
+
                 for (int j = 0; j < y; j++)
                 {
                     if (_puzzles[i, j] == null)
                     {
+                        PuzzleObject targetPo = null;
+                        bool foundUpperTile = false;
+                        
                         for (int k = j + 1; k < y; k++)
                         {
                             if (_puzzles[i, k] != null)
                             {
+                                _puzzles[i, k].puzzleState = PuzzleState.Falling;
                                 _puzzles[i, j] = _puzzles[i, k];
                                 _puzzles[i, k] = null;
-
-                                Tween t = _puzzles[i, j].transform.DOMove(CalculatePos(i, j), 0.3f);
-                                seq.Join(t);
-
-                                _puzzles[i, j].gameObject.name = $"Puzzle({i + 1},{j + 1})";
-                                _puzzles[i, j].Init(this, i, j);
-
-                                _movedPositions.Add(new Vector2Int(i, j));
-
+                                targetPo = _puzzles[i, j];
+                                foundUpperTile = true;
                                 break;
                             }
+                        }
+                        
+                        if (!foundUpperTile)
+                        {
+                            GameObject puzzle = SetRandomPuzzle(i, j, spawnOrder);
+                            spawnOrder++;
+                            targetPo = puzzle.GetComponent<PuzzleObject>();
+                            targetPo.puzzleState = PuzzleState.Falling;
+                            _puzzles[i, j] = targetPo;
+                        }
+
+                        if (targetPo != null)
+                        {
+                            targetPo.gameObject.name = $"Puzzle({i + 1},{j + 1})";
+                            targetPo.Init(this, i, j);
+                            _movedPositions.Add(new Vector2Int(i, j));
+
+                            Vector3 targetPos = CalculatePos(i, j);
+                            
+                            float distance = Vector3.Distance(targetPo.transform.position, targetPos);
+                            float duration = distance / dropSpeed;
+                            float startAt = columnDropDelay * i + rowDropDelay * j;
+                            
+                            Tween fallTween = targetPo.transform.DOMove(targetPos, duration)
+                                .SetEase(Ease.InSine)
+                                .OnComplete(() => 
+                                {
+                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                                        .OnComplete(() =>
+                                        {
+                                            targetPo.puzzleState = PuzzleState.Idle;
+                                        });
+                                });
+
+                            seq.Insert(startAt, fallTween);
                         }
                     }
                 }
             }
             
             yield return seq.WaitForCompletion();
-            yield return new WaitForSeconds(0.2f);
-            
-            yield return RefillBlocks();
-        }
-        
-        private IEnumerator RefillBlocks()
-        {
-            Sequence seq = DOTween.Sequence();
-            
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < y; j++)
-                {
-                    if (_puzzles[i, j] == null)
-                    {
-                        GameObject puzzle = SetRandomPuzzle(i, j);
-                        
-                        PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                        puzzle.name = $"Puzzle({i + 1},{j + 1})";
-                        _puzzles[i, j] = po;
-                        
-                        Tween t = po.transform.DOMove(CalculatePos(i, j), 0.3f);
-                        seq.Join(t);
-                        
-                        po.Init(this, i, j);
-                        
-                        _movedPositions.Add(new Vector2Int(i, j));
-                    }
-                }
-            }
+            yield return new WaitForSeconds(0.1f);
 
-            yield return seq.WaitForCompletion();
-            yield return new WaitForSeconds(0.2f);
-    
             if (CheckAnyMatches())
             {
                 yield return MatchPuzzle();
@@ -829,17 +922,26 @@ namespace _01.Scripts._01.ThreeMatch
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
             
             GameObject self = _puzzles[curX, curY].gameObject;
+            Vector2 center = new (self.transform.position.x, self.transform.position.y);
             _puzzles[curX, curY] = null;
-            self.transform.DOScale(0, 0.1f).OnComplete(() => Destroy(self));
 
-            Sequence seq = DOTween.Sequence();
+            yield return self.transform.DOScale(tileScale * 1.2f, 0.1f)
+                .SetLoops(2, LoopType.Yoyo)
+                .OnComplete(() =>
+                {
+                    Destroy(self);
+                })
+                .WaitForCompletion();
+            
             Queue<(SpecialPuzzleObject, Vector2Int)> q = new();
+            List<PuzzleObject> targetPuzzles = new();
             
             foreach (var pos in targets)
             {
                 if (_puzzles[pos.x, pos.y] == null) continue;
 
                 PuzzleObject targetPuzzle = _puzzles[pos.x, pos.y];
+                targetPuzzle.puzzleState = PuzzleState.Matching;
                 
                 if (targetPuzzle is SpecialPuzzleObject nextSp)
                 {
@@ -847,16 +949,12 @@ namespace _01.Scripts._01.ThreeMatch
                 }
                 else
                 {
+                    targetPuzzles.Add(targetPuzzle);
                     _puzzles[pos.x, pos.y] = null;
-                    Tween t = targetPuzzle.transform.DOScale(0, 0.15f)
-                        .OnComplete(() => Destroy(targetPuzzle.gameObject));
-                    seq.Join(t);
                 }
             }
-            
-            yield return seq.WaitForCompletion();
-            
-            unitSpawner.FriendlySpawn();
+
+            yield return SetExplosionEffect(center.x, center.y, targetPuzzles, type);
 
             while (q.Count > 0)
             {
@@ -865,7 +963,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
         }
 
-        private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.2f)
+        private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.1f)
         {
             yield return new WaitForSeconds(delay);
             yield return StartCoroutine(SpecialMatch(curX, curY, type));
@@ -878,88 +976,187 @@ namespace _01.Scripts._01.ThreeMatch
             switch (type)
             {
                 case SpecialPuzzleType.CircleBomb:
-                    CircleBombMatch(curX, curY, range);
+                    for (int i = curX - 2; i <= curX + 2; i++)
+                    {
+                        for (int j = curY - 2; j <= curY + 2; j++)
+                        {
+                            if (i < 0 || i >= x || j < 0 || j >= y) continue;
+                    
+                            bool isCorner = (i == curX - 2 || i == curX + 2) && (j == curY - 2 || j == curY + 2);
+            
+                            if (!isCorner)
+                            {
+                                range.Add(new Vector2Int(i, j));
+                            }
+                        }
+                    }
                     break;
                 case SpecialPuzzleType.ColumnBomb:
-                    ColumnBombMatch(curX,range);
+                    for (int j = 0; j < y; j++)
+                    {
+                        range.Add(new Vector2Int(curX, j));
+                    }
                     break;
                 case SpecialPuzzleType.RowBomb:
-                    RowBombMatch(curY, range);
+                    for (int i = 0; i < x; i++)
+                    {
+                        range.Add(new Vector2Int(i, curY));
+                    }
                     break;
                 case SpecialPuzzleType.CrossBomb:
-                    CrossBombMatch(curX, curY, range);
+                    for (int i = 0; i < x; i++)
+                    {
+                        for (int j = 0; j < y; j++)
+                        {
+                            if (i != curX && j != curY)
+                            {
+                                continue;
+                            }
+                    
+                            range.Add(new Vector2Int(i, j));
+                        }
+                    }
                     break;
                 case SpecialPuzzleType.ColorBomb:
-                    ColorBombMatch(curX, curY, range);
+                    var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
+
+                    for (int i = 0; i < x; i++)
+                    {
+                        for (int j = 0; j < y; j++)
+                        {
+                            if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
+                                (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
+                            {
+                                range.Add(new Vector2Int(i, j));
+                            }
+                        }
+                    }
                     break;
             }
             return range;
         }
 
-        private void CircleBombMatch(int curX, int curY, List<Vector2Int> list)
+        private IEnumerator SetExplosionEffect(float posX, float posY, List<PuzzleObject> list, SpecialPuzzleType type)
         {
-            for (int i = curX - 2; i <= curX + 2; i++)
+            GameObject effect = Instantiate(specialPuzzleParticlePrefabs[(int)type], new Vector2(posX, posY), Quaternion.identity, particleFrame.transform);
+            PlayParticleEffect(effect);
+            ParticleSystem ps = effect.GetComponentInChildren<ParticleSystem>();
+            float totalDuration = ps.main.duration + ps.main.startLifetime.constantMax;
+            Destroy(effect, totalDuration);
+            switch (type)
             {
-                for (int j = curY - 2; j <= curY + 2; j++)
-                {
-                    if (i < 0 || i >= x || j < 0 || j >= y) continue;
-                    
-                    bool isCorner = (i == curX - 2 || i == curX + 2) && (j == curY - 2 || j == curY + 2);
+                case SpecialPuzzleType.CircleBomb:
+                    if (ps != null)
+                    {
+                        float maxLifetime = ps.main.startLifetime.constant;
+                        Vector2 centerPos = new(posX, posY);
+                        
+                        foreach (PuzzleObject po in list)
+                        {
+                            float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
+                            
+                            float maxRadius = 3f;
+                            float delayRatio = Mathf.Clamp01(distance / maxRadius);
+                            float finalDelay = delayRatio * maxLifetime;
+                            
+                            StartCoroutine(DelayedTileEffect(po, finalDelay));
+                        }
+                    }
+                    break;
+                case SpecialPuzzleType.CrossBomb:
+                    foreach (PuzzleObject po in list)
+                    {
+                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                StartCoroutine(DelayedTileEffect(po, 0f));
+                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
+                            });
+                    }
+                    break;
+                case SpecialPuzzleType.RowBomb:
+                    foreach (PuzzleObject po in list)
+                    {
+                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                StartCoroutine(DelayedTileEffect(po, 0f));
+                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
+                            });
+                    }
+                    break;
+                case SpecialPuzzleType.ColumnBomb:
+                    foreach (PuzzleObject po in list)
+                    {
+                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
+                            .OnComplete(() =>
+                            {
+                                StartCoroutine(DelayedTileEffect(po, 0f));
+                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
+                            });
+                    }
+                    break; 
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        private void PlayParticleEffect(GameObject effect)
+        {
+            ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>();
+            foreach (var particle in particles)
+            {
+                particle.Play();
+            }
+        }
+
+        private IEnumerator DelayedTileEffect(PuzzleObject po, float delay)
+        {
+            yield return new WaitForSeconds(delay);
             
-                    if (!isCorner)
-                    {
-                        list.Add(new Vector2Int(i, j));
-                    }
-                }
+            if (po is NormalPuzzleObject no)
+            {
+                yield return no.HighlightEffect().WaitForCompletion();
             }
+            yield return po.transform.DOScale(tileScale / 3f, 0.2f).WaitForCompletion();
+
+            FlyingTileEffect(po);
         }
 
-        private void ColumnBombMatch(int curX, List<Vector2Int> list)
+        private void FlyingTileEffect(PuzzleObject targetPuzzle)
         {
-            for (int j = 0; j < y; j++)
+            if (targetPuzzle is NormalPuzzleObject no)
             {
-                list.Add(new Vector2Int(curX, j));
-            }
-        }
-
-        private void RowBombMatch(int curY, List<Vector2Int> list)
-        {
-            for (int i = 0; i < x; i++)
-            {
-                list.Add(new Vector2Int(i, curY));
-            }
-        }
-
-        private void CrossBombMatch(int curX, int curY, List<Vector2Int> list)
-        {
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < y; j++)
-                {
-                    if (i != curX && j != curY)
-                    {
-                        continue;
-                    }
+                targetPuzzle.transform.SetParent(puzzleFrame.parent);
                     
-                    list.Add(new Vector2Int(i, j));
-                }
-            }
-        }
+                Vector3 startPos = targetPuzzle.transform.position;
+                Vector3 endPos = spawnStackManager.SetStack(no.normalPuzzleType).transform.position;
 
-        private void ColorBombMatch(int curX, int curY, List<Vector2Int> list)
-        {
-            var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
+                float distance = Vector3.Distance(startPos, endPos);
+                float speed = 7.5f;
+                float duration = distance / speed;
+                float jumpPower = distance * 0.3f;
+                    
+                Tween t = DOTween.To(
+                        () => 0f,
+                        t => {
+                            Vector3 pos = Vector3.Lerp(startPos, endPos, t);
 
-            for (int i = 0; i < x; i++)
-            {
-                for (int j = 0; j < y; j++)
-                {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
-                        (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
+                            float height = Mathf.Sin(t * Mathf.PI) * jumpPower;
+
+                            targetPuzzle.transform.position = pos + Vector3.up * height;
+                        },
+                        1f,
+                        duration
+                    ).SetEase(Ease.OutSine)
+                    .OnComplete(() =>
                     {
-                        list.Add(new Vector2Int(i, j));
-                    }
-                }
+                        spawnStackManager.AddStack(no.normalPuzzleType, 1);
+                        Destroy(targetPuzzle.gameObject);
+                    });
+            }
+            else
+            {
+                Destroy(targetPuzzle.gameObject);
             }
         }
 
@@ -967,12 +1164,15 @@ namespace _01.Scripts._01.ThreeMatch
         {
             while (true)
             {
-                yield return new WaitForSeconds(ObstacleSpawnDelay);
-                AddTask(SpawnRandomObstaclePuzzleCoroutine);
+                yield return new WaitForSeconds(obstacleSpawnInterval);
+                Vector2Int pos = SetObstacleSpawnPos();
+                yield return SpawnObstacleWarning(pos.x, pos.y);
+                StartCoroutine(SpawnRandomObstaclePuzzleCoroutine(pos.x, pos.y));
+                //AddTask(() => SpawnRandomObstaclePuzzleCoroutine(pos.x,pos.y));
             }
         }
-        
-        private IEnumerator SpawnRandomObstaclePuzzleCoroutine()
+
+        private Vector2Int SetObstacleSpawnPos()
         {
             List<PuzzleObject> list = new();
             
@@ -980,7 +1180,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal)
+                    if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType != PuzzleType.Obstacle)
                     {
                         list.Add(_puzzles[i, j]);
                     }
@@ -989,20 +1189,49 @@ namespace _01.Scripts._01.ThreeMatch
             
             PuzzleObject target = list[Random.Range(0, list.Count)];
 
-            Vector3 currentPos = target.transform.localPosition;
-            int col = target.column, row = target.row;
-            NormalPuzzleType type = (NormalPuzzleType)_puzzles[col, row].GetPuzzleSubType();
-            _puzzles[col, row] = null;
+            return new Vector2Int(target.column, target.row);
+        }
+
+        private IEnumerator SpawnObstacleWarning(int curX, int curY)
+        {
+            Vector2 pos = CalculatePos(curX, curY);
+            GameObject warningOb = Instantiate(obstacleWarningPrefab, pos, Quaternion.identity, puzzleFrame);
+            yield return warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
+                .SetLoops(4, LoopType.Yoyo)
+                .OnComplete(() =>
+                {
+                    Destroy(warningOb);
+                })
+                .WaitForCompletion();
+        }
+        
+        private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
+        {
+            yield return new WaitUntil(() =>
+                _puzzles[curX, curY] != null &&
+                _puzzles[curX, curY].puzzleState == PuzzleState.Idle
+            );
+            
+            PuzzleObject target = _puzzles[curX, curY];
+
+            if (target is ObstaclePuzzleObject)
+            {
+                yield break;
+            }
+
+            Vector3 currentPos = target.transform.position;
+            NormalPuzzleType type = (NormalPuzzleType)_puzzles[curX, curY].GetPuzzleSubType();
+            _puzzles[curX, curY] = null;
             Destroy(target.gameObject);
             
             GameObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[(int)GetWeightedRandomObstacle()], puzzleFrame);
-            newPuzzle.transform.localPosition = currentPos;
-            newPuzzle.name = $"Puzzle({col + 1},{row + 1})";
+            newPuzzle.transform.position = currentPos;
+            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
             
             PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
-            _puzzles[col, row] = po;
-            po.Init(this, col, row);
+            _puzzles[curX, curY] = po;
+            po.Init(this, curX, curY);
             po.isMatched = false;
 
             switch (po)
@@ -1016,7 +1245,8 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
             }
             
-            Tween t =  newPuzzle.transform.DOScale(0.6f, 0.2f);
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
             yield return t.WaitForCompletion();
         }
         
@@ -1059,14 +1289,14 @@ namespace _01.Scripts._01.ThreeMatch
         {
             var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
             NormalPuzzleType targetType = obstacleObj.normalPuzzleType;
-            Vector3 currentPos = _puzzles[curX, curY].transform.localPosition;
+            Vector3 currentPos = _puzzles[curX, curY].transform.position;
             
             GameObject oldObject = _puzzles[curX, curY].gameObject;
             _puzzles[curX, curY] = null;
             Destroy(oldObject);
             
             GameObject newPuzzle = Instantiate(normalPuzzlePrefabs[(int)targetType], puzzleFrame);
-            newPuzzle.transform.localPosition = currentPos;
+            newPuzzle.transform.position = currentPos;
             newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
             newPuzzle.transform.localScale = Vector3.zero;
             
@@ -1075,7 +1305,8 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, curX, curY);
             po.isMatched = false;
             
-            newPuzzle.transform.DOScale(0.6f, 0.2f);
+            newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
 
             yield return null;
         }
