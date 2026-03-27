@@ -54,7 +54,7 @@ namespace _01.Scripts._01.ThreeMatch
         {
             for (int i = 0; i < num; i++)
             {
-                _spawner.FriendlySpawn();
+                _spawner.SpawnFriendly();
             }
         }
 

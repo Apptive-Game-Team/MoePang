@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace _01.Scripts._01.ThreeMatch
 {
     public class SpecialPuzzleObject : PuzzleObject
     {
         public SpecialPuzzleType specialPuzzleType;
-        public NormalPuzzleType colorBombType;
+        public Habitat habitat;
 
         public override int GetPuzzleSubType() => (int)specialPuzzleType;
         

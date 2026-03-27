@@ -16,14 +16,14 @@ namespace _01.Scripts._01.ThreeMatch
         Obstacle,
     }
 
-    public enum NormalPuzzleType
-    {
-        Flower,
-        Leaf,
-        Sand,
-        Snow,
-        Water,
-    }
+    // public enum NormalPuzzleType
+    // {
+    //     Flower,
+    //     Leaf,
+    //     Sand,
+    //     Snow,
+    //     Water,
+    // }
 
     public enum SpecialPuzzleType
     {
@@ -85,7 +85,7 @@ namespace _01.Scripts._01.ThreeMatch
             public List<Vector2Int> positions = new();
             public Vector2Int spawnPos;  
             public SpecialPuzzleType? resultType = null;
-            public NormalPuzzleType color;
+            public Habitat habitat;
         }
 
         [Serializable]
@@ -221,21 +221,21 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
                 PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
-                NormalPuzzleType randomType = GetValidRandomType(col, row);
+                Habitat randomType = GetValidRandomType(col, row);
                 switch (po)
                 {
                     case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
-                        op.normalPuzzleType = randomType;
+                        op.habitat = randomType;
                         break;
                     case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
-                        op.normalPuzzleType = randomType;
+                        op.habitat = randomType;
                         puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
                         break;
                 }
             }
             else
             {
-                NormalPuzzleType randomType = GetValidRandomType(col, row);
+                Habitat randomType = GetValidRandomType(col, row);
                 puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
             }
             
@@ -244,8 +244,8 @@ namespace _01.Scripts._01.ThreeMatch
 
         private GameObject SetRandomPuzzle(int col, int row, int spawnOrder)
         {
-            var types = Enum.GetValues(typeof(NormalPuzzleType));
-            var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+            var types = Enum.GetValues(typeof(Habitat));
+            var randomType = (Habitat)types.GetValue(Random.Range(0, types.Length));
             
             Vector3 startPos = CalculateDropPos(col, spawnOrder);
             GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], startPos, Quaternion.identity, puzzleFrame);
@@ -253,20 +253,20 @@ namespace _01.Scripts._01.ThreeMatch
             return puzzle;
         }
 
-        private NormalPuzzleType GetValidRandomType(int curX, int curY)
+        private Habitat GetValidRandomType(int curX, int curY)
         {
-            var types = Enum.GetValues(typeof(NormalPuzzleType));
-            var randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+            var types = Enum.GetValues(typeof(Habitat));
+            var randomType = (Habitat)types.GetValue(Random.Range(0, types.Length));
 
             while (IsStartingMatch(curX, curY, randomType))
             {
-                randomType = (NormalPuzzleType)types.GetValue(Random.Range(0, types.Length));
+                randomType = (Habitat)types.GetValue(Random.Range(0, types.Length));
             }
 
             return randomType;
         }
 
-        private bool IsStartingMatch(int curX, int curY, NormalPuzzleType type)
+        private bool IsStartingMatch(int curX, int curY, Habitat type)
         {
             if (curX > 1)
             {
@@ -310,7 +310,7 @@ namespace _01.Scripts._01.ThreeMatch
             
             if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op1)
             {
-                t1 = (int)op1.normalPuzzleType;
+                t1 = (int)op1.habitat;
             }
             else if (p1.puzzleType == PuzzleType.Normal)
             {
@@ -319,7 +319,7 @@ namespace _01.Scripts._01.ThreeMatch
 
             if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op2)
             {
-                t2 = (int)op2.normalPuzzleType;
+                t2 = (int)op2.habitat;
             }
             else if (p2.puzzleType == PuzzleType.Normal)
             {
@@ -334,18 +334,18 @@ namespace _01.Scripts._01.ThreeMatch
             return false;
         }
 
-        private bool CheckNormalType(PuzzleObject p, NormalPuzzleType type)
+        private bool CheckNormalType(PuzzleObject p, Habitat type)
         {
             if (p.puzzleType == PuzzleType.Normal)
             {
-                if ((NormalPuzzleType)p.GetPuzzleSubType() == type)
+                if ((Habitat)p.GetPuzzleSubType() == type)
                 {
                     return true;
                 }
             }
             else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
             {
-                if (op.normalPuzzleType == type)
+                if (op.habitat == type)
                 {
                     return true;
                 }
@@ -579,9 +579,9 @@ namespace _01.Scripts._01.ThreeMatch
         private MatchGroup GetMatchGroupBfs(int startX, int startY, bool[,] visited)
         {
             MatchGroup group = new();
-            NormalPuzzleType color = _puzzles[startX, startY] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op ?
-                op.normalPuzzleType : (NormalPuzzleType)_puzzles[startX, startY].GetPuzzleSubType();
-            group.color = color;
+            Habitat habitat = _puzzles[startX, startY] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op ?
+                op.habitat : (Habitat)_puzzles[startX, startY].GetPuzzleSubType();
+            group.habitat = habitat;
 
             Queue<Vector2Int> queue = new();
             queue.Enqueue(new Vector2Int(startX, startY));
@@ -602,7 +602,7 @@ namespace _01.Scripts._01.ThreeMatch
                     if (nx >= 0 && nx < x && ny >= 0 && ny < y && !visited[nx, ny])
                     {
                         if (_puzzles[nx, ny] != null && _puzzles[nx, ny].isMatched && 
-                            CheckNormalType(_puzzles[nx, ny], color))
+                            CheckNormalType(_puzzles[nx, ny], habitat))
                         {
                             visited[nx, ny] = true;
                             queue.Enqueue(new Vector2Int(nx, ny));
@@ -750,7 +750,7 @@ namespace _01.Scripts._01.ThreeMatch
                     targetPuzzle.transform.SetParent(puzzleFrame.parent);
                     
                     Vector3 startPos = targetPuzzle.transform.position;
-                    Vector3 endPos = spawnStackManager.SetStack(group.color).transform.position;
+                    Vector3 endPos = spawnStackManager.SetStack(group.habitat).transform.position;
 
                     float distance = Vector3.Distance(startPos, endPos);
                     float speed = 7.5f;
@@ -773,7 +773,7 @@ namespace _01.Scripts._01.ThreeMatch
                     ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
-                        spawnStackManager.AddStack(group.color, 1);
+                        spawnStackManager.AddStack(group.habitat, 1);
                         Destroy(targetPuzzle.gameObject);
                     }));
                 }
@@ -1018,14 +1018,14 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                     break;
                 case SpecialPuzzleType.ColorBomb:
-                    var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().colorBombType;
+                    var normalType = _puzzles[curX, curY].GetComponent<SpecialPuzzleObject>().habitat;
 
                     for (int i = 0; i < x; i++)
                     {
                         for (int j = 0; j < y; j++)
                         {
                             if (_puzzles[i, j] != null && _puzzles[i, j].puzzleType == PuzzleType.Normal && 
-                                (NormalPuzzleType)_puzzles[i, j].GetPuzzleSubType() == normalType)
+                                (Habitat)_puzzles[i, j].GetPuzzleSubType() == normalType)
                             {
                                 range.Add(new Vector2Int(i, j));
                             }
@@ -1129,7 +1129,7 @@ namespace _01.Scripts._01.ThreeMatch
                 targetPuzzle.transform.SetParent(puzzleFrame.parent);
                     
                 Vector3 startPos = targetPuzzle.transform.position;
-                Vector3 endPos = spawnStackManager.SetStack(no.normalPuzzleType).transform.position;
+                Vector3 endPos = spawnStackManager.SetStack(no.habitat).transform.position;
 
                 float distance = Vector3.Distance(startPos, endPos);
                 float speed = 7.5f;
@@ -1150,7 +1150,7 @@ namespace _01.Scripts._01.ThreeMatch
                     ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
-                        spawnStackManager.AddStack(no.normalPuzzleType, 1);
+                        spawnStackManager.AddStack(no.habitat, 1);
                         Destroy(targetPuzzle.gameObject);
                     });
             }
@@ -1220,7 +1220,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             Vector3 currentPos = target.transform.position;
-            NormalPuzzleType type = (NormalPuzzleType)_puzzles[curX, curY].GetPuzzleSubType();
+            Habitat type = (Habitat)_puzzles[curX, curY].GetPuzzleSubType();
             _puzzles[curX, curY] = null;
             Destroy(target.gameObject);
             
@@ -1237,10 +1237,10 @@ namespace _01.Scripts._01.ThreeMatch
             switch (po)
             {
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
-                    op.normalPuzzleType = type;
+                    op.habitat = type;
                     break;
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
-                    op.normalPuzzleType = type;
+                    op.habitat = type;
                     newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
                     break;
             }
@@ -1288,7 +1288,7 @@ namespace _01.Scripts._01.ThreeMatch
         private IEnumerator DeActivatedMatch(int curX, int curY)
         {
             var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
-            NormalPuzzleType targetType = obstacleObj.normalPuzzleType;
+            Habitat targetType = obstacleObj.habitat;
             Vector3 currentPos = _puzzles[curX, curY].transform.position;
             
             GameObject oldObject = _puzzles[curX, curY].gameObject;
