@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7024483505736919048}
   - component: {fileID: 5089521197111415638}
   - component: {fileID: 3020771313939166508}
-  - component: {fileID: 5176980939302490488}
+  - component: {fileID: 5074456913737877456}
   m_Layer: 0
-  m_Name: Sand
+  m_Name: Forest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: 903a832257a2e6b40a101632d2633256, type: 2}
+  m_Material: {fileID: 2100000, guid: 8d7f1c0f96b882942b24b9105f9b6a53, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -59,7 +59,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -123,7 +123,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2857731521102525544}
   m_CullTransparentMesh: 1
---- !u!114 &5176980939302490488
+--- !u!114 &5074456913737877456
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -136,7 +136,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puzzleType: 0
+  puzzleState: 4
   column: 0
   row: 0
   isMatched: 0
-  normalPuzzleType: 2
+  habitat: 3

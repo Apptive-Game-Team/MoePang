@@ -31,7 +31,7 @@ public class UnitSpawner : MonoBehaviour
         }
     }
 
-    private void SpawnFriendly()
+    public void SpawnFriendly()
     {
         List<FriendlyUnitData> unlockedUnits = new();
 

@@ -369,7 +369,7 @@ GameObject:
   m_Component:
   - component: {fileID: 108690367}
   m_Layer: 5
-  m_Name: FlowerStack
+  m_Name: MeadowStack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -397,57 +397,6 @@ RectTransform:
   m_AnchoredPosition: {x: -2.3, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &268232357
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 268232359}
-  - component: {fileID: 268232358}
-  m_Layer: 0
-  m_Name: UnitSpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &268232358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268232357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 081a58e8bb9aedf49badfaf2c0d45ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitPool: {fileID: 0}
-  friendlyPrefab: {fileID: 0}
-  enemyPrefab: {fileID: 0}
-  friendlyUnitList: {fileID: 0}
-  enemyUnitList: {fileID: 0}
-  friendlySpawnPosition: {fileID: 697245518}
-  enemySpawnPosition: {fileID: 2099301080}
---- !u!4 &268232359
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268232357}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.64, z: 0}
-  m_LocalScale: {x: 0.32010642, y: 0.32010642, z: 0.32010642}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &289694234
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,7 +633,7 @@ GameObject:
   - component: {fileID: 626392909}
   - component: {fileID: 626392908}
   m_Layer: 0
-  m_Name: EnemyUnitPool
+  m_Name: UnitPool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -802,7 +751,7 @@ GameObject:
   m_Component:
   - component: {fileID: 669281963}
   m_Layer: 5
-  m_Name: SnowStack
+  m_Name: PolarStack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -827,7 +776,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.15, y: 0}
+  m_AnchoredPosition: {x: 2.3, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &697245517
@@ -1067,7 +1016,7 @@ GameObject:
   - component: {fileID: 869903351}
   - component: {fileID: 869903353}
   m_Layer: 5
-  m_Name: Snow
+  m_Name: Polar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1089,7 +1038,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.15, y: 0}
+  m_AnchoredPosition: {x: 2.3, y: 0}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &869903351
@@ -1159,7 +1108,7 @@ GameObject:
   - component: {fileID: 968554135}
   - component: {fileID: 968554137}
   m_Layer: 5
-  m_Name: Flower
+  m_Name: Meadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1458,10 +1407,10 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 968554134}
-  - {fileID: 1261480032}
-  - {fileID: 1269356617}
-  - {fileID: 869903350}
   - {fileID: 1405368196}
+  - {fileID: 1269356617}
+  - {fileID: 1261480032}
+  - {fileID: 869903350}
   - {fileID: 108690367}
   - {fileID: 1390093392}
   - {fileID: 1070266398}
@@ -1526,11 +1475,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stacks:
   - {fileID: 968554137}
-  - {fileID: 1261480035}
-  - {fileID: 1269356620}
-  - {fileID: 869903353}
   - {fileID: 1405368199}
-  unitSpawner: {fileID: 268232358}
+  - {fileID: 1269356620}
+  - {fileID: 1261480035}
+  - {fileID: 869903353}
+  unitSpawner: {fileID: 1986820697}
 --- !u!1 &1261480031
 GameObject:
   m_ObjectHideFlags: 0
@@ -1544,7 +1493,7 @@ GameObject:
   - component: {fileID: 1261480033}
   - component: {fileID: 1261480035}
   m_Layer: 5
-  m_Name: Leaf
+  m_Name: Forest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1566,7 +1515,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.15, y: 0}
+  m_AnchoredPosition: {x: 1.15, y: 0}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1261480033
@@ -1636,7 +1585,7 @@ GameObject:
   - component: {fileID: 1269356618}
   - component: {fileID: 1269356620}
   m_Layer: 5
-  m_Name: Sand
+  m_Name: Desert
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1875,7 +1824,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1390093392}
   m_Layer: 5
-  m_Name: LeafStack
+  m_Name: ForestStack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1900,7 +1849,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.15, y: 0}
+  m_AnchoredPosition: {x: 1.15, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1405368195
@@ -1916,7 +1865,7 @@ GameObject:
   - component: {fileID: 1405368197}
   - component: {fileID: 1405368199}
   m_Layer: 5
-  m_Name: Water
+  m_Name: Ocean
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1938,7 +1887,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2.3, y: 0}
+  m_AnchoredPosition: {x: -1.15, y: 0}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1405368197
@@ -2080,7 +2029,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1609658507}
   m_Layer: 5
-  m_Name: WaterStack
+  m_Name: OceanStack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2105,7 +2054,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2.3, y: 0}
+  m_AnchoredPosition: {x: -1.15, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1669257954
@@ -2251,10 +2200,10 @@ MonoBehaviour:
   obstacleSpawnInterval: 10
   normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
-  - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
-  - {fileID: 2857731521102525544, guid: 858fa37a2b22e7242a5d761800dc4683, type: 3}
-  - {fileID: 2857731521102525544, guid: 4e60a5a53bc316a44b148d176d921ebc, type: 3}
   - {fileID: 2857731521102525544, guid: 060c10bf6e317334890b69ac17dd404d, type: 3}
+  - {fileID: 2857731521102525544, guid: 858fa37a2b22e7242a5d761800dc4683, type: 3}
+  - {fileID: 2857731521102525544, guid: 7338ac036148d4c40b17e511d2efe7aa, type: 3}
+  - {fileID: 2857731521102525544, guid: 4e60a5a53bc316a44b148d176d921ebc, type: 3}
   specialPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: 9fb90e3d43ae1d341916c097dc861caa, type: 3}
   - {fileID: 2857731521102525544, guid: 669fc956b998def4e9b25bf7d35ed4be, type: 3}
@@ -2266,10 +2215,10 @@ MonoBehaviour:
   - {fileID: 2857731521102525544, guid: 3078c7d34f980f744bd38f948248da48, type: 3}
   normalPuzzleImages:
   - {fileID: 21300000, guid: dee434639a2262e48b5065c75b9f7d44, type: 3}
-  - {fileID: 21300000, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
-  - {fileID: 21300000, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
-  - {fileID: 21300000, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
   - {fileID: 21300000, guid: b1bdf607f3102e54bac670741b98d44e, type: 3}
+  - {fileID: 21300000, guid: f17537f3cfec1974eab0b9d682f5d681, type: 3}
+  - {fileID: 21300000, guid: c143ea7f55bb32d45b42a291d67721bc, type: 3}
+  - {fileID: 21300000, guid: ebd12dc14902c49478af53315c3d73aa, type: 3}
   specialPuzzleParticlePrefabs:
   - {fileID: 2742193639010511216, guid: 7e2c4defc9ac8014b9d1c2dd90390a43, type: 3}
   - {fileID: 3475157618999507326, guid: a8d00f2cf750c9a46b69d8c3078589cc, type: 3}
@@ -2742,6 +2691,70 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1986820696
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1986820698}
+  - component: {fileID: 1986820697}
+  - component: {fileID: 1986820699}
+  m_Layer: 0
+  m_Name: UnitSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1986820697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986820696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 081a58e8bb9aedf49badfaf2c0d45ec2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  friendlyPrefab: {fileID: 7654564522672126550, guid: 44d81176aa2a88040bc6d878b02038bb, type: 3}
+  enemyPrefab: {fileID: 5985587198152181629, guid: f557ae89b1d96d6468343a86d7b1ba4b, type: 3}
+  friendlyUnitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
+  enemyUnitList: {fileID: 11400000, guid: 0e3d0a4531a02f445857dcce21efbad5, type: 2}
+  friendlySpawnPosition: {fileID: 697245518}
+  enemySpawnPosition: {fileID: 2099301080}
+--- !u!4 &1986820698
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986820696}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.14698967, y: 4.161788, z: -0.0021854192}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1986820699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986820696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964073c49240a604cb5f412962cf66a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
 --- !u!1 &1986912997
 GameObject:
   m_ObjectHideFlags: 0
@@ -2817,50 +2830,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1986912997}
   m_CullTransparentMesh: 1
---- !u!1 &2029313148
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2029313150}
-  - component: {fileID: 2029313149}
-  m_Layer: 0
-  m_Name: FriendlyUnitPool
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2029313149
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2029313148}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0509e677157db8e468905b5ef941de40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &2029313150
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2029313148}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.64, z: 0}
-  m_LocalScale: {x: 0.32010642, y: 0.32010642, z: 0.32010642}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2078394235
 GameObject:
   m_ObjectHideFlags: 0
@@ -3034,9 +3003,8 @@ SceneRoots:
   - {fileID: 1669257957}
   - {fileID: 1669581475}
   - {fileID: 1748779886}
-  - {fileID: 626392909}
   - {fileID: 697245517}
-  - {fileID: 1953625089}
   - {fileID: 2099301079}
-  - {fileID: 268232359}
-  - {fileID: 2029313150}
+  - {fileID: 1986820698}
+  - {fileID: 626392909}
+  - {fileID: 1953625089}

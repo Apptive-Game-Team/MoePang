@@ -1,18 +1,19 @@
 using DG.Tweening;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace _01.Scripts._01.ThreeMatch
 {
     public class NormalPuzzleObject : PuzzleObject
     {
-        public NormalPuzzleType normalPuzzleType;
+        public Habitat habitat;
 
         private Material _material;
         private static readonly int HighlightAlphaId = Shader.PropertyToID("_Highlight");
 
-        public override int GetPuzzleSubType() => (int)normalPuzzleType;
+        public override int GetPuzzleSubType() => (int)habitat;
 
         private void Start()
         {

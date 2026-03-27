@@ -35,13 +35,13 @@ namespace _01.Scripts._01.ThreeMatch
             }
         }
 
-        public void AddStack(NormalPuzzleType type, int num)
+        public void AddStack(Habitat type, int num)
         {
             AddStackEffect(type);
             stacks[(int)type].AddStack(num);
         }
 
-        private void AddStackEffect(NormalPuzzleType type)
+        private void AddStackEffect(Habitat type)
         {
             if (_effectSeq != null)
             {
@@ -71,7 +71,7 @@ namespace _01.Scripts._01.ThreeMatch
             });
         }
 
-        public SpawnStack SetStack(NormalPuzzleType type)
+        public SpawnStack SetStack(Habitat type)
         {
             return stacks[(int)type];
         }
