@@ -101,7 +101,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9550fcb4a8daed44a86b7bc911f53c88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 100
+  team: 0
+  maxHp: 80
   currentHp: 0
 --- !u!61 &337826284710907199
 BoxCollider2D:

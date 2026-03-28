@@ -517,7 +517,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1749898509}
-  - component: {fileID: 1749898508}
+  - component: {fileID: 1749898510}
   m_Layer: 0
   m_Name: UnitSpawner
   m_TagString: Untagged
@@ -525,24 +525,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1749898508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749898507}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 081a58e8bb9aedf49badfaf2c0d45ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  friendlyPrefab: {fileID: 7654564522672126550, guid: 44d81176aa2a88040bc6d878b02038bb, type: 3}
-  enemyPrefab: {fileID: 5985587198152181629, guid: f557ae89b1d96d6468343a86d7b1ba4b, type: 3}
-  friendlyUnitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
-  enemyUnitList: {fileID: 11400000, guid: 0e3d0a4531a02f445857dcce21efbad5, type: 2}
-  friendlySpawnPosition: {fileID: 1273364566}
-  enemySpawnPosition: {fileID: 1270584263}
 --- !u!4 &1749898509
 Transform:
   m_ObjectHideFlags: 0
@@ -558,6 +540,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1749898510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749898507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ac36e53116b4ad4c8769829ee3eeb6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  friendlyPrefab: {fileID: 7654564522672126550, guid: 44d81176aa2a88040bc6d878b02038bb, type: 3}
+  enemyPrefab: {fileID: 5985587198152181629, guid: f557ae89b1d96d6468343a86d7b1ba4b, type: 3}
+  friendlyUnitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
+  enemyUnitList: {fileID: 11400000, guid: 0e3d0a4531a02f445857dcce21efbad5, type: 2}
+  friendlySpawnPosition: {fileID: 1273364566}
+  enemySpawnPosition: {fileID: 1270584263}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
