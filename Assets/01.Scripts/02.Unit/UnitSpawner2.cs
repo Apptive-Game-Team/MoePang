@@ -21,6 +21,8 @@ public class UnitSpawner2 : MonoBehaviour
     private List<List<int>> _enemySpawnWeights;
     private float _enemySpawnInterval = 3f;
 
+    private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
+
     private void Awake()
     {
         _enemySpawnWeights = new List<List<int>>()
@@ -33,6 +35,8 @@ public class UnitSpawner2 : MonoBehaviour
 
     private void Start()
     {
+        BuildUnlockedUnitDictionary();
+
         StartCoroutine(SpawnEnemyCoroutine());
     }
 
@@ -40,35 +44,56 @@ public class UnitSpawner2 : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
-            SpawnFriendly();
+            SpawnFriendly(Habitat.Meadow);
         }
     }
 
-    public void SpawnFriendly()
+    /// <summary>
+    /// 서식지별 해금 유닛 딕셔너리 생성
+    /// <para>Scene 새로 들어갈때마다 생성</para>
+    /// </summary>
+    private void BuildUnlockedUnitDictionary()
     {
-        List<FriendlyUnitData> unlockedUnits = new();
+        _unlockedUnitsByHabitat = new Dictionary<Habitat, List<FriendlyUnitData>>();
 
         foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
         {
-            var list = friendlyUnitList.GetUnits(habitat);
-            if (list == null) continue;
+            List<FriendlyUnitData> unlockedList = new();
 
-            foreach (var unit in list)
+            var list = friendlyUnitList.GetUnits(habitat);
+            if (list != null)
             {
-                if (HabitatManager.Instance.IsUnlocked(unit))
+                foreach (var unit in list)
                 {
-                    unlockedUnits.Add(unit);
+                    if (HabitatManager.Instance.IsUnlocked(unit))
+                    {
+                        unlockedList.Add(unit);
+                    }
                 }
             }
-        }
 
-        if (unlockedUnits.Count == 0)
+            _unlockedUnitsByHabitat[habitat] = unlockedList;
+        }
+    }
+
+    /// <summary>
+    /// 특정 서식지에서 랜덤 유닛 스폰
+    /// </summary>
+    public void SpawnFriendly(Habitat habitat)
+    {
+        if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
         {
-            Debug.Log("해금된 유닛 없음");
+            Debug.Log($"{habitat} 서식지 없음");
             return;
         }
 
-        var data = unlockedUnits[UnityEngine.Random.Range(0, unlockedUnits.Count)];
+        if (unitList.Count == 0)
+        {
+            Debug.Log($"{habitat} 해금 유닛 없음");
+            return;
+        }
+
+        FriendlyUnitData data = unitList[UnityEngine.Random.Range(0, unitList.Count)];
 
         UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
     }
