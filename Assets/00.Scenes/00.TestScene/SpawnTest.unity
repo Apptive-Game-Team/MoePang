@@ -223,6 +223,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2327045114902766185, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_Color.b
       value: 0.48113203
@@ -308,6 +312,18 @@ PrefabInstance:
     - target: {fileID: 944671229565221473, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_Name
       value: FriendlyCastle
+      objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: flashAlpha
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: shakeDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: shakeStrength
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_LocalScale.x
