@@ -104,8 +104,8 @@ public class Unit : MonoBehaviour, IDamageable
             animator.Update(0f);
 
             animator.Play("Idle", 0, 0f);
-            animator.SetBool("isAttacking", false);
-            animator.SetBool("isWalking", true);
+            animator.SetBool("Idle", false);
+            animator.SetBool("Walk", true);
         }
     }
 

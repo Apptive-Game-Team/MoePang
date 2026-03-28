@@ -17,10 +17,6 @@ public class FriendlyUnit : Unit
 
         habitat = friendlyData.Habitat;
 
-        Vector3 scale = transform.localScale;
-        scale.x = -Mathf.Abs(scale.x);
-        transform.localScale = scale;
-
         targetLayer = LayerMask.GetMask("Enemy");
     }
 }
