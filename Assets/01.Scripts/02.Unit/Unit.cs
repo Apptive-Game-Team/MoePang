@@ -57,6 +57,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected UnitPool ownerPool;
     protected bool isAttacking;
     protected bool isDamaging;
+    protected bool isDying;
     protected float pendingDamage;
     protected Coroutine attackRoutine;
     protected Coroutine damageRoutine;
@@ -75,6 +76,18 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void SetData(UnitData data)
     {
         this.data = data;
+
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+
+            animator.Play("Idle", 0, 0f);
+            animator.SetBool("Idle", false);
+            animator.SetBool("Walk", false);
+        }
+
+        currentState = UnitState.Attack;
 
         //피 설정
         maxHp = data.MaxHp;
@@ -96,29 +109,6 @@ public class Unit : MonoBehaviour, IDamageable
         if (animator == null) animator = GetComponent<Animator>();
 
         animator.runtimeAnimatorController = data.AnimatorOverride;
-
-        StartCoroutine(InitStateDelayed());
-    }
-
-    /// <summary>
-    /// 생성 시 Animator 초기화 및 Attack State 변경
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator InitStateDelayed()
-    {
-        yield return null;
-
-        if (animator != null)
-        {
-            animator.Rebind();
-            animator.Update(0f);
-
-            animator.Play("Idle", 0, 0f);
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", false);
-        }
-
-        currentState = UnitState.Attack;
     }
 
     /// <summary>
@@ -288,6 +278,7 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
+        if (isDamaging || isDying) return;
         pendingDamage = damage;
         currentState = UnitState.Damage;
     }
@@ -347,14 +338,53 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void DieState()
     {
-        StopAllCoroutines();
+        if (isDying) return;
+        StartCoroutine(DieCoroutine());
+    }
+    protected virtual IEnumerator DieCoroutine()
+    {
+        isDying = true;
+
+        StopAttack();
+        isAttacking = false;
+        isDamaging = false;
+
+        // 방향 반전
+        direction *= -1f;
+        ApplyDirectionVisual();
+
+        if (animator != null)
+        {
+            animator.SetBool("Idle", false);
+            animator.SetBool("Walk", true);
+            animator.speed = 2f;
+        }
+
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        float elapsed = 0f;
+        float duration = 2f;
+        float runSpeed = moveSpeed * 2f;
+
+        Color startColor = sr.color;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            transform.position += Vector3.right * direction * runSpeed * Time.deltaTime;
+
+            float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
+            sr.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+
+            yield return null;
+        }
+
+        sr.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
 
         if (animator != null)
         {
             animator.Rebind();
             animator.Update(0f);
-
-            animator.SetBool("Walk", false);
         }
 
         if (UTQ.Peek(team) == this)
@@ -362,7 +392,22 @@ public class Unit : MonoBehaviour, IDamageable
             UTQ.Dequeue(team);
         }
 
+        animator.speed = 1f;
+        isDying = false;
         ownerPool.ReturnUnit(this);
+    }
+
+    /// <summary>
+    /// 방향 반전 함수
+    /// </summary>
+    protected void ApplyDirectionVisual()
+    {
+        Vector3 scale = transform.localScale;
+        scale.x = direction > 0
+            ? Mathf.Abs(scale.x)
+            : -Mathf.Abs(scale.x);
+
+        transform.localScale = scale;
     }
     #endregion
 }
