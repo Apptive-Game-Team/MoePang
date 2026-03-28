@@ -37,7 +37,15 @@ public class UnitSpawner : MonoBehaviour
     
     private void Start()
     {
-        StartCoroutine(SpawnEnemyCoroutine());
+        //StartCoroutine(SpawnEnemyCoroutine());
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            SpawnFriendly();
+        }
     }
 
     public void SpawnFriendly()

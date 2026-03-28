@@ -86,23 +86,12 @@ public class Unit : MonoBehaviour, IDamageable
         //팀 설정
         team = data.Team;
 
-        SetupVisual();
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        animator.runtimeAnimatorController = data.AnimatorOverride;
 
         StartCoroutine(InitStateDelayed());
-    }
-
-    protected virtual void SetupVisual()
-    {
-        if (visualInstance != null)
-        {
-            visualInstance.transform.localPosition = Vector3.zero;
-            return;
-        }
-
-        visualInstance = Instantiate(data.PsdFile, transform);
-        visualInstance.transform.localPosition = Vector3.zero;
-
-        animator = visualInstance.GetComponent<Animator>();
     }
 
     private IEnumerator InitStateDelayed()
