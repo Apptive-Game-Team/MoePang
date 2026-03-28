@@ -44,10 +44,11 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected UnitState currentState;
     [SerializeField] protected TeamType team;
 
-    [Header("탐색 설정")]
+    [Header("유닛 설정")]
     [SerializeField] protected LayerMask targetLayer;
+    [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
 
-    //참조 & 프로퍼티
+    //상태 & 참조
     protected Unit originPrefab;
     protected UnitData data;
     protected GameObject visualInstance;
@@ -55,6 +56,12 @@ public class Unit : MonoBehaviour, IDamageable
     protected Animator animator;
     protected UnitPool ownerPool;
     protected bool isAttacking;
+    protected bool isDamaging;
+    protected float pendingDamage;
+    protected Coroutine attackRoutine;
+    protected Coroutine damageRoutine;
+
+    //프로퍼티
     public UnitData Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
@@ -68,8 +75,6 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void SetData(UnitData data)
     {
         this.data = data;
-
-        currentState = UnitState.Move;
 
         //피 설정
         maxHp = data.MaxHp;
@@ -87,14 +92,18 @@ public class Unit : MonoBehaviour, IDamageable
         //팀 설정
         team = data.Team;
 
-        if (animator == null)
-            animator = GetComponent<Animator>();
+        //비주얼(애니메이터) 설정
+        if (animator == null) animator = GetComponent<Animator>();
 
         animator.runtimeAnimatorController = data.AnimatorOverride;
 
         StartCoroutine(InitStateDelayed());
     }
 
+    /// <summary>
+    /// 생성 시 Animator 초기화 및 Attack State 변경
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator InitStateDelayed()
     {
         yield return null;
@@ -106,8 +115,10 @@ public class Unit : MonoBehaviour, IDamageable
 
             animator.Play("Idle", 0, 0f);
             animator.SetBool("Idle", false);
-            animator.SetBool("Walk", true);
+            animator.SetBool("Walk", false);
         }
+
+        currentState = UnitState.Attack;
     }
 
     /// <summary>
@@ -116,6 +127,16 @@ public class Unit : MonoBehaviour, IDamageable
     public void SetPool(UnitPool pool)
     {
         this.ownerPool = pool;
+    }
+
+    public void SetOriginPrefab(Unit prefab)
+    {
+        originPrefab = prefab;
+    }
+
+    public Unit GetOriginPrefab()
+    {
+        return originPrefab;
     }
     #endregion
 
@@ -129,12 +150,16 @@ public class Unit : MonoBehaviour, IDamageable
             case UnitState.Attack:
                 AttackState();
                 break;
+            case UnitState.Damage:
+                DamageState();
+                break;
             case UnitState.Die:
                 DieState();
                 break;
         }
     }
 
+    #region MoveState
     /// <summary>
     /// 상대를 향해 이동하는 상태
     /// </summary>
@@ -163,12 +188,24 @@ public class Unit : MonoBehaviour, IDamageable
                 }
             }
 
+            animator.SetBool("Walk", false);
             currentState = UnitState.Attack;
             return;
         }
 
         transform.position += Vector3.right * direction * moveSpeed * Time.deltaTime;
     }
+
+    /// <summary>
+    /// 맨 앞에 도착했는지 판별
+    /// </summary>
+    protected bool IsInFrontOf(float otherX)
+    {
+        return (transform.position.x * direction) > (otherX * direction);
+    }
+    #endregion
+
+    #region AttackState
     /// <summary>
     /// 상대를 공격하는 상태
     /// </summary>
@@ -178,6 +215,7 @@ public class Unit : MonoBehaviour, IDamageable
         {
             if (animator != null)
             {
+                animator.SetBool("Idle", false);
                 animator.SetBool("Walk", true);
             }
             
@@ -187,32 +225,8 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (isAttacking) return;
 
-        StartCoroutine(AttackCoroutine());
+        attackRoutine = StartCoroutine(AttackCoroutine());
     }
-    /// <summary>
-    /// 죽은 상태
-    /// </summary>
-    protected virtual void DieState()
-    {
-        StopAllCoroutines();
-
-        if (animator != null)
-        {
-            animator.Rebind();
-            animator.Update(0f);
-
-            animator.SetBool("Walk", true);
-        }
-
-        if (UTQ.Peek(team) == this)
-        {
-            UTQ.Dequeue(team);
-        }
-
-        currentState = UnitState.Move;
-
-        ownerPool.ReturnUnit(this);
-    }   
 
     /// <summary>
     /// 상대를 마주친 유닛이 공격하는 로직
@@ -226,7 +240,6 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
-            animator.SetBool("Walk", false);
             animator.SetBool("Idle", false);
             animator.SetTrigger("Attack");
         }
@@ -246,17 +259,16 @@ public class Unit : MonoBehaviour, IDamageable
                 $"[{target.GetTeam()}] {target.GetName()} HP After: {target.CurrentHp}"
             );
         }
+
         else
         {
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
 
-        if (animator != null)
-        {
-            animator.SetBool("Idle", true);
-        }
+        yield return new WaitForSeconds(0.5f - attackDelay);
 
-            isAttacking = false;
+        isAttacking = false;
+        attackRoutine = null;
     }
 
     /// <summary>
@@ -268,31 +280,89 @@ public class Unit : MonoBehaviour, IDamageable
 
         return hit.collider != (null);
     }
+    #endregion
 
-    protected bool IsInFrontOf(float otherX)
-    {
-        return (transform.position.x * direction) > (otherX * direction);
-    }
-
+    #region DamageState
     /// <summary>
     /// 피격 시
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
-        currentHp -= damage;
+        pendingDamage = damage;
+        currentState = UnitState.Damage;
+    }
+
+    protected virtual void DamageState()
+    {
+        if (isDamaging) return;
+
+        damageRoutine = StartCoroutine(DamageCoroutine());
+    }
+
+    protected virtual IEnumerator DamageCoroutine()
+    {
+        isDamaging = true;
+
+        StopAttack();
+
+        if (animator != null)
+        {
+            animator.SetBool("Walk", false);
+            animator.SetBool("Idle", false);
+            animator.SetTrigger("Damage");
+        }
+
+        yield return new WaitForSeconds(damageDuration);
+
+        currentHp -= pendingDamage;
+
         if (currentHp <= 0)
         {
             currentState = UnitState.Die;
         }
+
+        else
+        {
+            currentState = UnitState.Attack;
+        }
+
+        isDamaging = false;
     }
 
-    public void SetOriginPrefab(Unit prefab)
+    protected void StopAttack()
     {
-        originPrefab = prefab;
-    }
+        isAttacking = false;
 
-    public Unit GetOriginPrefab()
-    {
-        return originPrefab;
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+        }
     }
+    #endregion
+
+    #region DieState
+    /// <summary>
+    /// 죽은 상태
+    /// </summary>
+    protected virtual void DieState()
+    {
+        StopAllCoroutines();
+
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+
+            animator.SetBool("Walk", false);
+        }
+
+        if (UTQ.Peek(team) == this)
+        {
+            UTQ.Dequeue(team);
+        }
+
+        ownerPool.ReturnUnit(this);
+    }
+    #endregion
 }
