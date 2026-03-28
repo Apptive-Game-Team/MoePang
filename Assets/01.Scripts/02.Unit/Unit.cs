@@ -2,6 +2,7 @@ using NUnit.Framework.Constraints;
 using System.Collections;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using DG.Tweening;
 
 /// <summary>
 /// 유닛의 상태 목록
@@ -61,6 +62,9 @@ public class Unit : MonoBehaviour, IDamageable
     protected float pendingDamage;
     protected Coroutine attackRoutine;
     protected Coroutine damageRoutine;
+    protected Tween damageTween;
+    protected SpriteRenderer spriteRenderer;
+    protected Vector3 originalScale;
 
     //프로퍼티
     public UnitData Data => data;
@@ -106,6 +110,10 @@ public class Unit : MonoBehaviour, IDamageable
         team = data.Team;
 
         //비주얼(애니메이터) 설정
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        originalScale = transform.localScale;
+
         if (animator == null) animator = GetComponent<Animator>();
 
         animator.runtimeAnimatorController = data.AnimatorOverride;
@@ -303,7 +311,19 @@ public class Unit : MonoBehaviour, IDamageable
             animator.SetTrigger("Damage");
         }
 
-        yield return new WaitForSeconds(damageDuration);
+        damageTween?.Kill();
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
+        seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
+
+        seq.Append(transform.DOScale(originalScale, 0.08f));
+        seq.Join(spriteRenderer.DOFade(1f, 0.08f));
+
+        damageTween = seq;
+
+        yield return seq.WaitForCompletion();
 
         currentHp -= pendingDamage;
 
@@ -348,6 +368,10 @@ public class Unit : MonoBehaviour, IDamageable
         StopAttack();
         isAttacking = false;
         isDamaging = false;
+
+        damageTween?.Kill();
+        transform.localScale = originalScale;
+        spriteRenderer.color = Color.white;
 
         // 방향 반전
         direction *= -1f;
