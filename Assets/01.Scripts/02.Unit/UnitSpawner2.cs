@@ -93,9 +93,55 @@ public class UnitSpawner2 : MonoBehaviour
             return;
         }
 
-        FriendlyUnitData data = unitList[UnityEngine.Random.Range(0, unitList.Count)];
+        FriendlyUnitData data = GetWeightedFriendlyUnit(unitList);
 
         UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
+    }
+
+    /// <summary>
+    /// 해금별 소환 확률
+    /// </summary>
+    private FriendlyUnitData GetWeightedFriendlyUnit(List<FriendlyUnitData> unlockedUnits)
+    {
+        int count = unlockedUnits.Count;
+
+        // 1개면 하나만
+        if (count == 1)
+        {
+            return unlockedUnits[0];
+        }
+
+        // 2개면 60 / 40
+        if (count == 2)
+        {
+            int roll = UnityEngine.Random.Range(0, 100);
+
+            return roll < 60
+                ? unlockedUnits[0]
+                : unlockedUnits[1];
+        }
+
+        // 3개 이상이면 최근 3개 60/ 30 / 10
+        List<FriendlyUnitData> recentThree = unlockedUnits
+            .Skip(count - 3)
+            .Take(3)
+            .ToList();
+
+        int[] weights = { 60, 30, 10 };
+        int random = UnityEngine.Random.Range(0, 100);
+
+        int cumulative = 0;
+        for (int i = 0; i < recentThree.Count; i++)
+        {
+            cumulative += weights[i];
+
+            if (random < cumulative)
+            {
+                return recentThree[i];
+            }
+        }
+
+        return recentThree[0];
     }
 
     private void SpawnEnemy()
