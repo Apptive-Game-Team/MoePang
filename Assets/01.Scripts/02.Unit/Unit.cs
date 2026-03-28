@@ -10,6 +10,7 @@ public enum UnitState
 {
     Move,
     Attack,
+    Damage,
     Die,
 }
 
@@ -177,8 +178,7 @@ public class Unit : MonoBehaviour, IDamageable
         {
             if (animator != null)
             {
-                animator.SetBool("isWalking", true);
-                animator.SetBool("isAttacking", false);
+                animator.SetBool("Walk", true);
             }
             
             currentState = UnitState.Move;
@@ -201,8 +201,7 @@ public class Unit : MonoBehaviour, IDamageable
             animator.Rebind();
             animator.Update(0f);
 
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isAttacking", false);
+            animator.SetBool("Walk", true);
         }
 
         if (UTQ.Peek(team) == this)
@@ -227,8 +226,9 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isAttacking", true);
+            animator.SetBool("Walk", false);
+            animator.SetBool("Idle", false);
+            animator.SetTrigger("Attack");
         }
 
         yield return new WaitForSeconds(attackDelay);
@@ -253,8 +253,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
-            animator.SetBool("isAttacking", false);
-            animator.SetBool("isWalking", true);
+            animator.SetBool("Idle", true);
         }
 
             isAttacking = false;

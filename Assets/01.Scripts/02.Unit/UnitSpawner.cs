@@ -37,7 +37,7 @@ public class UnitSpawner : MonoBehaviour
     
     private void Start()
     {
-        //StartCoroutine(SpawnEnemyCoroutine());
+        StartCoroutine(SpawnEnemyCoroutine());
     }
 
     private void Update()
