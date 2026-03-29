@@ -15,7 +15,13 @@ public class ShopManager : MonoBehaviour
 
     [Header("패널")]
     [SerializeField] private List<GameObject> panels;
+    [SerializeField] private GameObject animalsTap; //동물 해금 탭
+    [SerializeField] private GameObject upgradeTap; //강화 탭
 
+    [Header("버튼")]
+    [SerializeField] private Button animalsTapButton;
+    [SerializeField] private Button upgradeTapButton;
+    
     [Header("상태")]
     [SerializeField] private bool isUnitClicked = false;
     [SerializeField] private ShopUI currentSelected;
@@ -24,6 +30,7 @@ public class ShopManager : MonoBehaviour
 
     private void Awake()
     {
+        EnsureActivateAnimalsPanel();
         foreach (var panel in panels)
         {
             ShopUI[] ui = panel.GetComponentsInChildren<ShopUI>(true);
@@ -40,6 +47,8 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        animalsTap.SetActive(true);
+        upgradeTap.SetActive(false);
         UpdateBuyButtonText();
     }
     public void OnClickBack()
@@ -125,4 +134,35 @@ public class ShopManager : MonoBehaviour
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
         buyButtonText.text = "굿굿";
     }
+
+    private void EnsureActivateAnimalsPanel()
+    {
+        ActivateAnimalsTap();
+    }
+
+    #region 탭 전환 버튼
+
+    /// <summary>
+    /// 해금탭을 비활성화 하고 강화탭을 활성화
+    /// </summary>
+    public void ActivateUpgradeTap()
+    {
+        if (upgradeTap.activeSelf) return;
+        
+        animalsTap.SetActive(false);
+        upgradeTap.SetActive(true);
+    }
+
+    /// <summary>
+    /// 강화탭을 비활성화 하고 해금탭을 활성화
+    /// </summary>
+    public void ActivateAnimalsTap()
+    {
+        if (animalsTap.activeSelf) return;
+        
+        upgradeTap.SetActive(false);
+        animalsTap.SetActive(true);
+    }
+
+    #endregion
 }
