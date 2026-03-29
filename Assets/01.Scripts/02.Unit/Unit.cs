@@ -112,6 +112,8 @@ public class Unit : MonoBehaviour, IDamageable
         //비주얼(애니메이터) 설정
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
+        spriteRenderer.sortingOrder = UnitSortingManager.GetNextOrder();
+
         originalScale = transform.localScale;
 
         if (animator == null) animator = GetComponent<Animator>();
