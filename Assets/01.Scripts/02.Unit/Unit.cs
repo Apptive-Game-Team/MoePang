@@ -165,6 +165,7 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (IsOtherInRange())
         {
+            //큐가 비어있으면 자신을 추가
             if (UTQ.IsEmpty(team))
                 UTQ.Enqueue(team, this);
 
@@ -175,11 +176,14 @@ public class Unit : MonoBehaviour, IDamageable
                 float firstX = firstUnit.GetTransform().position.x;
                 float thisX = transform.position.x;
 
+                //내가 제일 앞에 있으면 큐 갱신
                 if (IsInFrontOf(firstX))
                 {
                     UTQ.Clear(team);
                     UTQ.Enqueue(team, this);
                 }
+
+                //내가 제일 앞에 있는 유닛과 거의 같은 위치에 있으면 큐에 추가
                 else if (Mathf.Abs(firstX - transform.position.x) < 0.001f)
                 {
                     UTQ.Enqueue(team, this);
@@ -233,6 +237,7 @@ public class Unit : MonoBehaviour, IDamageable
     {
         isAttacking = true;
 
+        //유닛 큐가 비어있으면 성을 공격
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         IDamageable target = UTQ.Peek(enemyTeam);
 
@@ -411,7 +416,7 @@ public class Unit : MonoBehaviour, IDamageable
             animator.Update(0f);
         }
 
-        if (UTQ.Peek(team) == this)
+        if (UTQ.Peek(team)?.GetTransform() == this.transform)
         {
             UTQ.Dequeue(team);
         }
