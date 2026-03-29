@@ -10,11 +10,9 @@ public class EnemyUnit : Unit
 
         enemyData = data as EnemyUnitData;
 
-        Vector3 scale = transform.localScale;
-        scale.x = -Mathf.Abs(scale.x);
-        transform.localScale = scale;
-
         direction = -1f;
+        ApplyDirectionVisual();
+
         targetLayer = LayerMask.GetMask("Friendly");
     }
 }

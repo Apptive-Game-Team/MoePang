@@ -163,32 +163,14 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void MoveState()
     {
-        if (IsOtherInRange())
+
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right * direction, attackRange, targetLayer);
+
+        if (hit.collider != null)
         {
-            //큐가 비어있으면 자신을 추가
-            if (UTQ.IsEmpty(team))
-                UTQ.Enqueue(team, this);
-
-            else
-            {
-                IDamageable firstUnit = UTQ.Peek(team);
-
-                float firstX = firstUnit.GetTransform().position.x;
-                float thisX = transform.position.x;
-
-                //내가 제일 앞에 있으면 큐 갱신
-                if (IsInFrontOf(firstX))
-                {
-                    UTQ.Clear(team);
-                    UTQ.Enqueue(team, this);
-                }
-
-                //내가 제일 앞에 있는 유닛과 거의 같은 위치에 있으면 큐에 추가
-                else if (Mathf.Abs(firstX - transform.position.x) < 0.001f)
-                {
-                    UTQ.Enqueue(team, this);
-                }
-            }
+            // 2. 적을 만났다면 나를 '상대팀의 타겟 후보'로 등록 (내가 맞아야 하니까)
+            // 상대방 입장에서 나는 '공격 대상'이므로 내 팀의 큐에 나를 넣음
+            UTQ.Enqueue(team, this);
 
             animator.SetBool("Walk", false);
             currentState = UnitState.Attack;
@@ -237,10 +219,6 @@ public class Unit : MonoBehaviour, IDamageable
     {
         isAttacking = true;
 
-        //유닛 큐가 비어있으면 성을 공격
-        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
-        IDamageable target = UTQ.Peek(enemyTeam);
-
         if (animator != null)
         {
             animator.SetBool("Idle", false);
@@ -248,6 +226,10 @@ public class Unit : MonoBehaviour, IDamageable
         }
 
         yield return new WaitForSeconds(attackDelay);
+
+        //유닛 큐가 비어있으면 성을 공격
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        IDamageable target = UTQ.Peek(enemyTeam);
 
         if (target != null)
         {
@@ -370,6 +352,8 @@ public class Unit : MonoBehaviour, IDamageable
     {
         isDying = true;
 
+        UTQ.RemoveUnit(team, this);
+
         StopAttack();
         isAttacking = false;
         isDamaging = false;
@@ -414,11 +398,6 @@ public class Unit : MonoBehaviour, IDamageable
         {
             animator.Rebind();
             animator.Update(0f);
-        }
-
-        if (UTQ.Peek(team)?.GetTransform() == this.transform)
-        {
-            UTQ.Dequeue(team);
         }
 
         animator.speed = 1f;

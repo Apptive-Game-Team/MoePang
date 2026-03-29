@@ -37,7 +37,24 @@ public class UnitTransformQueue : MonoBehaviour
     /// </summary>
     public void Enqueue(TeamType team, Unit unit)
     {
+        if (teamQueues[team].Contains(unit))
+            return;
+
         teamQueues[team].Enqueue(unit);
+    }
+
+    // 특정 유닛이 죽었을 때 호출하여 큐에서 제거하는 기능 추가
+    public void RemoveUnit(TeamType team, Unit unit)
+    {
+        if (teamQueues[team].Count == 0) return;
+
+        // 현재 큐를 리스트로 변환해 해당 유닛만 빼고 다시 구성
+        // (유닛 수가 적을 때는 이 방식이 가장 확실합니다)
+        List<Unit> tempList = new List<Unit>(teamQueues[team]);
+        if (tempList.Remove(unit))
+        {
+            teamQueues[team] = new Queue<Unit>(tempList);
+        }
     }
 
     /// <summary>
