@@ -15,4 +15,9 @@ public class GoldManager : SingletonObject<GoldManager>
         gold -= amount;
         return true;
     }
+
+    public void AddGold(float amount)
+    {
+        gold += amount;
+    }
 }

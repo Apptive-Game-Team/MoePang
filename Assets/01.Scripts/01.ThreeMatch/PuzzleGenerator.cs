@@ -1,9 +1,9 @@
+using _01.Scripts._04.UI.InGame;
 using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -15,15 +15,6 @@ namespace _01.Scripts._01.ThreeMatch
         Special,
         Obstacle,
     }
-
-    // public enum NormalPuzzleType
-    // {
-    //     Flower,
-    //     Leaf,
-    //     Sand,
-    //     Snow,
-    //     Water,
-    // }
 
     public enum SpecialPuzzleType
     {
@@ -45,6 +36,7 @@ namespace _01.Scripts._01.ThreeMatch
         [Header("Puzzle Settings")]
         [SerializeField] private RectTransform puzzleFrame;
         [SerializeField] private GameObject particleFrame;
+        [SerializeField] private GoldUI goldUI;
         [SerializeField] private int x;
         [SerializeField] private int y;
         [SerializeField] private float space;
@@ -57,6 +49,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private List<ObstacleWeight> obstacleWeights;
         [SerializeField] private float obstacleSpawnDelay = 2f;
         [SerializeField] private float obstacleSpawnInterval = 10f;
+        [Range(0, 100)] [SerializeField] private float goldTileSpawnRate = 5f;
         
         
         [Header("Puzzle Prefabs")]
@@ -66,6 +59,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private Sprite[] normalPuzzleImages;
         [SerializeField] private GameObject[] specialPuzzleParticlePrefabs;
         [SerializeField] private GameObject obstacleWarningPrefab;
+        [SerializeField] private GameObject goldPrefab;
         
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
@@ -117,7 +111,6 @@ namespace _01.Scripts._01.ThreeMatch
         /// <summary>
         /// 작업 큐 함수
         /// </summary>
-        /// <param name="task"></param>
         #region Task Queue
         public void AddTask(Func<IEnumerator> task)
         {
@@ -150,7 +143,6 @@ namespace _01.Scripts._01.ThreeMatch
         /// <summary>
         /// 시작 퍼즐 관련 함수 (시작 시 매치가 안 일어나게 설정)
         /// </summary>
-        /// <returns></returns>
         #region Start Puzzle
         private IEnumerator GenerateBoard()
         {
@@ -237,6 +229,12 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 Habitat randomType = GetValidRandomType(col, row);
                 puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                
+                float prob = Random.Range(0, 100f);
+                if (prob < goldTileSpawnRate)
+                {
+                    SetGoldTile(puzzle);
+                }
             }
             
             return puzzle;
@@ -250,6 +248,13 @@ namespace _01.Scripts._01.ThreeMatch
             Vector3 startPos = CalculateDropPos(col, spawnOrder);
             GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], startPos, Quaternion.identity, puzzleFrame);
             puzzle.name = $"Puzzle({col + 1}, {row + 1})"; 
+            
+            float prob = Random.Range(0, 100f);
+            if (prob < goldTileSpawnRate)
+            {
+                SetGoldTile(puzzle);
+            }
+            
             return puzzle;
         }
 
@@ -357,9 +362,6 @@ namespace _01.Scripts._01.ThreeMatch
         /// <summary>
         /// 실제 퍼즐 위치, 떨어지기 전의 퍼즐 위치 계산
         /// </summary>
-        /// <param name="col"></param>
-        /// <param name="row"></param>
-        /// <returns></returns>
         #region Puzzle Position
         private Vector3 CalculatePos(int col, int row)
         {
@@ -385,10 +387,6 @@ namespace _01.Scripts._01.ThreeMatch
         /// <summary>
         /// 퍼즐을 옮겼을 때 완성 되는지 확인하는 함수 및 퍼즐을 맞추고, 퍼즐이 사라지고, 내려오고, 채워지는 함수
         /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="y1"></param>
-        /// <param name="x2"></param>
-        /// <param name="y2"></param>
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
@@ -719,6 +717,11 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     if (_puzzles[pos.x, pos.y] is NormalPuzzleObject no)
                     {
+                        if (TryGetGoldTile(no, out _))
+                        {
+                            goldUI.ShowUI();
+                        }
+                        
                         seq1.Join(no.HighlightEffect());
                     }
                 }
@@ -738,6 +741,11 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         Tween t1 = targetPuzzle.transform.DOMove(destination, 0.2f);
                         seq2.Join(t1);
+                    }
+
+                    if (targetPuzzle is NormalPuzzleObject no && TryGetGoldTile(no, out GameObject gold))
+                    {
+                        GoldMoveEffect(gold);
                     }
                     
                     Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f).SetEase(Ease.InSine);
@@ -888,17 +896,16 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 yield return MatchPuzzle();
             }
+            else
+            {
+                goldUI.ShowUI(false);
+            }
         }
         #endregion
         
         /// <summary>
         /// 특수 및 장애물 타일 관련 함수
         /// </summary>
-        /// <param name="curX"></param>
-        /// <param name="curY"></param>
-        /// <param name="type"></param>
-        /// <param name="dropAfter"></param>
-        /// <returns></returns>
         #region Abnormal Puzzle
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
@@ -1113,12 +1120,22 @@ namespace _01.Scripts._01.ThreeMatch
         {
             yield return new WaitForSeconds(delay);
             
-            if (po is NormalPuzzleObject no)
+            if (po is NormalPuzzleObject no1)
             {
-                yield return no.HighlightEffect().WaitForCompletion();
+                if (TryGetGoldTile(no1, out _))
+                {
+                    goldUI.ShowUI();
+                }
+                yield return no1.HighlightEffect().WaitForCompletion();
             }
+            
+            if (po is NormalPuzzleObject no2 && TryGetGoldTile(no2, out GameObject gold))
+            {
+                GoldMoveEffect(gold);
+            }
+            
             yield return po.transform.DOScale(tileScale / 3f, 0.2f).WaitForCompletion();
-
+            
             FlyingTileEffect(po);
         }
 
@@ -1136,7 +1153,7 @@ namespace _01.Scripts._01.ThreeMatch
                 float duration = distance / speed;
                 float jumpPower = distance * 0.3f;
                     
-                Tween t = DOTween.To(
+                DOTween.To(
                         () => 0f,
                         t => {
                             Vector3 pos = Vector3.Lerp(startPos, endPos, t);
@@ -1168,7 +1185,6 @@ namespace _01.Scripts._01.ThreeMatch
                 Vector2Int pos = SetObstacleSpawnPos();
                 yield return SpawnObstacleWarning(pos.x, pos.y);
                 StartCoroutine(SpawnRandomObstaclePuzzleCoroutine(pos.x, pos.y));
-                //AddTask(() => SpawnRandomObstaclePuzzleCoroutine(pos.x,pos.y));
             }
         }
 
@@ -1309,6 +1325,56 @@ namespace _01.Scripts._01.ThreeMatch
                 .SetEase(Ease.InSine);
 
             yield return null;
+        }
+        #endregion
+        
+        /// <summary>
+        /// 골드 관련 함수
+        /// </summary>
+        #region Gold
+        private void SetGoldTile(GameObject puzzle)
+        {
+            GameObject gold = Instantiate(goldPrefab, puzzle.transform.position + new Vector3(0.2f, -0.2f, 0), Quaternion.identity, puzzle.transform);
+            gold.name = "Gold";
+        }
+
+        private bool TryGetGoldTile(NormalPuzzleObject puzzle, out GameObject gold)
+        {
+            Transform goldTr = puzzle.transform.Find("Gold");
+            
+            if (goldTr != null)
+            {
+                gold = goldTr.gameObject;
+                return true;
+            }
+            
+            gold = null;
+            return false;
+        }
+
+        private void GoldMoveEffect(GameObject gold)
+        {
+            Transform tr = gold.transform;
+            Vector3 scale = tr.localScale;
+            Sequence seq = DOTween.Sequence();
+
+            tr.SetParent(puzzleFrame.parent);
+            Tween t1 = tr.DOMove(goldUI.GoldImagePos, 0.4f)
+                .SetEase(Ease.OutSine);
+            Tween t2 = tr.DOScale(scale * 1.2f, 0.2f)
+                .SetEase(Ease.OutSine)
+                .SetLoops(2, LoopType.Yoyo);
+
+            seq.Join(t1).Join(t2);
+
+            seq.OnComplete(() =>
+            {
+                GoldManager.Instance.AddGold(100);
+                goldUI.AddGoldEffect();
+                goldUI.UpdateGold();
+                 
+                Destroy(tr.gameObject);
+            });
         }
         #endregion
     }
