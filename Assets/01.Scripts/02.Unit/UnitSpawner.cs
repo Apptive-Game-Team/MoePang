@@ -40,6 +40,14 @@ public class UnitSpawner : MonoBehaviour
         StartCoroutine(SpawnEnemyCoroutine());
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            SpawnFriendly();
+        }
+    }
+
     public void SpawnFriendly()
     {
         List<FriendlyUnitData> unlockedUnits = new();

@@ -36,8 +36,6 @@ public class UnitSpawner2 : MonoBehaviour
     private void Start()
     {
         BuildUnlockedUnitDictionary();
-
-        StartCoroutine(SpawnEnemyCoroutine());
     }
 
     private void Update()
@@ -45,6 +43,11 @@ public class UnitSpawner2 : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             SpawnFriendly(Habitat.Meadow);
+        }
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            SpawnEnemy();
         }
     }
 

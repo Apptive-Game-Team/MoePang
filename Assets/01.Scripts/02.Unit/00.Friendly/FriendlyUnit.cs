@@ -14,12 +14,9 @@ public class FriendlyUnit : Unit
         friendlyData = data as FriendlyUnitData;
 
         direction = 1f;
+        ApplyDirectionVisual();
 
         habitat = friendlyData.Habitat;
-
-        Vector3 scale = transform.localScale;
-        scale.x = -Mathf.Abs(scale.x);
-        transform.localScale = scale;
 
         targetLayer = LayerMask.GetMask("Enemy");
     }

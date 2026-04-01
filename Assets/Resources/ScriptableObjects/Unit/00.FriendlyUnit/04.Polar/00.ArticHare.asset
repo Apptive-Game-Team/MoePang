@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   unitName: 20
-  psdFile: {fileID: 7541202232396871869, guid: 94caf53a1cd6e304397ffa591e154756, type: 3}
+  animatorOverride: {fileID: 22100000, guid: dcbdeeb2071155047bc03a507ccb2f39, type: 2}
   maxHp: 16
   baseMoveSpeed: 1
   attackRange: 1.5
   attackDamage: 4
-  attackDelay: 0.5
+  attackDelay: 0.175
   habitat: 4
   unitCost: 100
