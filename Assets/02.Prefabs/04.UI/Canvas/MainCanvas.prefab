@@ -1982,7 +1982,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stageText: {fileID: 2554064629757971998}
-  goldtext: {fileID: 1400679329804759272}
+  goldText: {fileID: 0}
   playScene: DevJJW
   shopScene: Shop
 --- !u!1 &8383404407027416024
@@ -2050,7 +2050,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -5193376973422115981, guid: 8229219e795162f4e9a7de420603912d, type: 3}
+  m_Sprite: {fileID: -5193376973422115981, guid: 5472cd9fe71ff0549b9878f9503ce6a8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
