@@ -25,6 +25,8 @@ public class UnitSpawner : MonoBehaviour
     private List<List<int>> _enemySpawnWeights;
     private float _enemySpawnInterval = 3f;
 
+    private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
+
     private void Awake()
     {
         _enemySpawnWeights = new List<List<int>>()
@@ -34,47 +36,121 @@ public class UnitSpawner : MonoBehaviour
             new(){40, 30, 30}
         };
     }
-    
+
     private void Start()
     {
+        BuildUnlockedUnitDictionary();
+
         StartCoroutine(SpawnEnemyCoroutine());
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            SpawnFriendly(Habitat.Meadow);
+        }
+
         if (Input.GetKeyDown(KeyCode.F))
         {
-            SpawnFriendly();
+            SpawnEnemy();
         }
     }
 
-    public void SpawnFriendly()
+    /// <summary>
+    /// 서식지별 해금 유닛 딕셔너리 생성
+    /// <para>Scene 새로 들어갈때마다 생성</para>
+    /// </summary>
+    private void BuildUnlockedUnitDictionary()
     {
-        List<FriendlyUnitData> unlockedUnits = new();
+        _unlockedUnitsByHabitat = new Dictionary<Habitat, List<FriendlyUnitData>>();
 
         foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
         {
-            var list = friendlyUnitList.GetUnits(habitat);
-            if (list == null) continue;
+            List<FriendlyUnitData> unlockedList = new();
 
-            foreach (var unit in list)
+            var list = friendlyUnitList.GetUnits(habitat);
+            if (list != null)
             {
-                if (HabitatManager.Instance.IsUnlocked(unit))
+                foreach (var unit in list)
                 {
-                    unlockedUnits.Add(unit);
+                    if (HabitatManager.Instance.IsUnlocked(unit))
+                    {
+                        unlockedList.Add(unit);
+                    }
                 }
             }
-        }
 
-        if (unlockedUnits.Count == 0)
+            _unlockedUnitsByHabitat[habitat] = unlockedList;
+        }
+    }
+
+    /// <summary>
+    /// 특정 서식지에서 랜덤 유닛 스폰
+    /// </summary>
+    public void SpawnFriendly(Habitat habitat)
+    {
+        if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
         {
-            Debug.Log("해금된 유닛 없음");
+            Debug.Log($"{habitat} 서식지 없음");
             return;
         }
 
-        var data = unlockedUnits[Random.Range(0, unlockedUnits.Count)];
+        if (unitList.Count == 0)
+        {
+            Debug.Log($"{habitat} 해금 유닛 없음");
+            return;
+        }
+
+        FriendlyUnitData data = GetWeightedFriendlyUnit(unitList);
 
         UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
+    }
+
+    /// <summary>
+    /// 해금별 소환 확률
+    /// </summary>
+    private FriendlyUnitData GetWeightedFriendlyUnit(List<FriendlyUnitData> unlockedUnits)
+    {
+        int count = unlockedUnits.Count;
+
+        // 1개면 하나만
+        if (count == 1)
+        {
+            return unlockedUnits[0];
+        }
+
+        // 2개면 60 / 40
+        if (count == 2)
+        {
+            int roll = UnityEngine.Random.Range(0, 100);
+
+            return roll < 60
+                ? unlockedUnits[0]
+                : unlockedUnits[1];
+        }
+
+        // 3개 이상이면 최근 3개 60/ 30 / 10
+        List<FriendlyUnitData> recentThree = unlockedUnits
+            .Skip(count - 3)
+            .Take(3)
+            .ToList();
+
+        int[] weights = { 60, 30, 10 };
+        int random = UnityEngine.Random.Range(0, 100);
+
+        int cumulative = 0;
+        for (int i = 0; i < recentThree.Count; i++)
+        {
+            cumulative += weights[i];
+
+            if (random < cumulative)
+            {
+                return recentThree[i];
+            }
+        }
+
+        return recentThree[0];
     }
 
     private void SpawnEnemy()
@@ -100,7 +176,7 @@ public class UnitSpawner : MonoBehaviour
     private EnemyUnitData SetEnemyData(List<EnemyUnitData> list)
     {
         int stage = StageManager.Instance.CurrentStage;
-        
+
         if (stage >= 40)
         {
             return list[^1];
