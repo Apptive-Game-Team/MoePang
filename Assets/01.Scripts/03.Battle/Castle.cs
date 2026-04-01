@@ -16,6 +16,8 @@ public class Castle : MonoBehaviour, IDamageable
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
 
+    public GameObject clearUI;
+    
     private Tween damageTween;
     private SpriteRenderer spriteRenderer;
     private Vector3 originalPos;
@@ -77,5 +79,9 @@ public class Castle : MonoBehaviour, IDamageable
     private void Die()
     {
         Debug.Log("타워가 아파요 ㅠ");
+        if (team == TeamType.Enemy)
+        {
+            clearUI.SetActive(true);
+        }
     }
 }
