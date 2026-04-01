@@ -29,6 +29,7 @@ public class Castle : MonoBehaviour, IDamageable
 
     private void Start()
     {
+        maxHp = CastleManager.Instance.MaxHp;
         currentHp = maxHp;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalPos = transform.localPosition;
