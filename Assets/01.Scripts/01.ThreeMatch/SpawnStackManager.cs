@@ -19,7 +19,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         public void AddStack(Habitat type, int num)
         {
-            stacks[(int)type].AddStack(num);
+            stacks[(int)type].AddStack(type, num);
         }
 
         public SpawnStack SetStack(Habitat type)

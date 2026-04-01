@@ -52,9 +52,9 @@ namespace _01.Scripts._01.ThreeMatch
             _spawner = spawner;
         }
         
-        public void AddStack(int num)
+        public void AddStack(Habitat type, int num)
         {
-            _taskQueue.Enqueue(() => AddStackProcess(num));
+            _taskQueue.Enqueue(() => AddStackProcess(type, num));
 
             if (!_isProcessing)
             {
@@ -73,7 +73,7 @@ namespace _01.Scripts._01.ThreeMatch
             _isProcessing = false;
         }
         
-        private IEnumerator AddStackProcess(int num)
+        private IEnumerator AddStackProcess(Habitat type, int num)
         {
             AddStackEffect();
             
@@ -90,7 +90,7 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 // todo : Add Spawn Effect
                 
-                Spawn(spawnCount);
+                Spawn(type, spawnCount);
                 FillStack(_stackCount);
             }
             else
@@ -129,11 +129,11 @@ namespace _01.Scripts._01.ThreeMatch
             });
         }
 
-        private void Spawn(int num)
+        private void Spawn(Habitat type, int num)
         {
             for (int i = 0; i < num; i++)
             {
-                _spawner.SpawnFriendly();
+                _spawner.SpawnFriendly(type);
             }
         }
 
