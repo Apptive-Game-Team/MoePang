@@ -350,9 +350,6 @@ public class Unit : MonoBehaviour, IDamageable
 
     protected IEnumerator DamageAnimationCoroutine()
     {
-        if (animator != null)
-            animator.SetTrigger("Damage");
-
         damageTween?.Kill();
 
         Sequence seq = DOTween.Sequence();
