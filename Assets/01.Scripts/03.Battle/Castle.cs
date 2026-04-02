@@ -1,3 +1,4 @@
+using _01.Scripts._04.UI.InGame;
 using UnityEngine;
 using DG.Tweening;
 
@@ -16,6 +17,11 @@ public class Castle : MonoBehaviour, IDamageable
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
 
+    private static bool _isGameEnd;
+    private GameObject _gameClearUI;
+    private GameObject _gameOverUI;
+    private GameObject EndUI => team == TeamType.Friendly ? _gameOverUI : _gameClearUI;
+    
     private Tween damageTween;
     private SpriteRenderer spriteRenderer;
     private Vector3 originalPos;
@@ -38,6 +44,9 @@ public class Castle : MonoBehaviour, IDamageable
         {
             UnitTransformQueue.Instance.RegisterCastle(team, this);
         }
+        
+        _gameClearUI = FindAnyObjectByType<GameClearUI>(FindObjectsInactive.Include).gameObject;
+        _gameOverUI = FindAnyObjectByType<GameOverUI>(FindObjectsInactive.Include).gameObject;
     }
 
     public void TakeDamage(float damage)
@@ -78,5 +87,11 @@ public class Castle : MonoBehaviour, IDamageable
     private void Die()
     {
         Debug.Log("타워가 아파요 ㅠ");
+
+        if (!_isGameEnd)
+        {
+            _isGameEnd = true;
+            EndUI.SetActive(true);
+        }
     }
 }
