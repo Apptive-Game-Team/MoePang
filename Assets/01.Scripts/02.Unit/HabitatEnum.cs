@@ -17,7 +17,7 @@ public enum UnitName
     Tiger,
 
     //Ocean
-    Jellyfish,
+    JellyFish,
     SeaTurtle,
     FurSeal,
     Hippo,
