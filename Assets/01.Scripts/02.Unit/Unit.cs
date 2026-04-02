@@ -62,6 +62,8 @@ public class Unit : MonoBehaviour, IDamageable
     protected float pendingDamage;
     protected Coroutine attackRoutine;
     protected Coroutine damageRoutine;
+    protected bool halfHpTriggered;
+    protected Coroutine damageAnimRoutine;
     protected Tween damageTween;
     protected SpriteRenderer spriteRenderer;
     protected Vector3 originalScale;
@@ -275,9 +277,31 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
-        if (isDamaging || isDying) return;
-        pendingDamage = damage;
-        currentState = UnitState.Damage;
+        if (isDying) return;
+
+        float nextHp = currentHp - damage;
+
+        bool triggerHalf = !halfHpTriggered && nextHp <= maxHp * 0.5f;
+
+        if (triggerHalf)
+        {
+            pendingDamage = damage;
+            halfHpTriggered = true;
+            currentState = UnitState.Damage;
+        }
+
+        else
+        {
+            currentHp -= damage;
+
+            if (damageAnimRoutine != null)
+                StopCoroutine(damageAnimRoutine);
+
+            damageAnimRoutine = StartCoroutine(DamageAnimationCoroutine());
+
+            if (currentHp <= 0)
+                currentState = UnitState.Die;
+        }
     }
 
     protected virtual void DamageState()
@@ -294,18 +318,18 @@ public class Unit : MonoBehaviour, IDamageable
         StopAttack();
 
         if (animator != null)
-        {
-            animator.SetBool("Walk", false);
-            animator.SetBool("Idle", false);
             animator.SetTrigger("Damage");
-        }
 
         damageTween?.Kill();
+
+        Vector3 knockback = transform.position - Vector3.right * direction * 0.5f;
 
         Sequence seq = DOTween.Sequence();
 
         seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
         seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
+
+        seq.Append(transform.DOMove(knockback, 0.25f).SetEase(Ease.OutQuad));
 
         seq.Append(transform.DOScale(originalScale, 0.08f));
         seq.Join(spriteRenderer.DOFade(1f, 0.08f));
@@ -317,16 +341,29 @@ public class Unit : MonoBehaviour, IDamageable
         currentHp -= pendingDamage;
 
         if (currentHp <= 0)
-        {
             currentState = UnitState.Die;
-        }
-
         else
-        {
             currentState = UnitState.Attack;
-        }
 
         isDamaging = false;
+    }
+
+    protected IEnumerator DamageAnimationCoroutine()
+    {
+        if (animator != null)
+            animator.SetTrigger("Damage");
+
+        damageTween?.Kill();
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
+        seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
+
+        seq.Append(transform.DOScale(originalScale, 0.08f));
+        seq.Join(spriteRenderer.DOFade(1f, 0.08f));
+
+        yield return seq.WaitForCompletion();
     }
 
     protected void StopAttack()
