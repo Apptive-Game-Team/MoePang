@@ -33,7 +33,6 @@ public class UnitSpawner : MonoBehaviour
         {
             new(){70, 30, 0},
             new(){60, 30, 10},
-            new(){40, 30, 30}
         };
     }
 
@@ -177,19 +176,23 @@ public class UnitSpawner : MonoBehaviour
     {
         int stage = StageManager.Instance.CurrentStage;
 
-        if (stage >= 40)
+        if (stage >= 50)
         {
             return list[^1];
         }
+        
+        int cycleStep = stage % 10;
+        int subIndex = (cycleStep < 3) ? 0 : (cycleStep < 6 ? 1 : 2);
+        int index = stage / 10 * 3 + subIndex;
 
-        int enemyRange = _enemySpawnWeights[0].Count;
-        int enemyWeightsStep = Math.Clamp((stage % 10) / enemyRange, 0, enemyRange - 1);
-        int enemyStart = stage / 10 * 2;
+        int enemyStart = index / 2;
+        int enemyWeightsStep = index % 2;
+        
         List<int> enemyWeight = _enemySpawnWeights[enemyWeightsStep];
 
         int totalWeight = enemyWeight.Sum();
 
-        int pivot = Random.Range(0, totalWeight + 1);
+        int pivot = Random.Range(1, totalWeight + 1);
         int cumulative = 0;
 
         for (int i = 0; i < enemyWeight.Count; i++)
