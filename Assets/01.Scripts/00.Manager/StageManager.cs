@@ -1,19 +1,22 @@
+using _01.Scripts._00.Manager;
 using System;
 using UnityEngine;
 
 public class StageManager : SingletonObject<StageManager>
 {
-    private int _currentStage;
-    public int CurrentStage => _currentStage;
-    
+    public int MaxStage { get; private set; }
+    public int CurrentStage { get; private set; }
     public float CurrentTime { get; private set; }
     public bool IsTimerRunning { get; private set; }
     
     public event Action<float> OnTimeChanged;
 
-    private void Start()
+    protected override void Awake()
     {
-        StartStage();
+        base.Awake();
+        
+        MaxStage = GameManager.Instance.playData.clearedStage + 1;
+        CurrentStage = MaxStage;
     }
     
     private void Update()
@@ -25,9 +28,14 @@ public class StageManager : SingletonObject<StageManager>
         OnTimeChanged?.Invoke(CurrentTime);
     }
 
+    public void SetMaxStage(int maxStage)
+    {
+        MaxStage = maxStage;
+    }
+
     public void SetStage(int num)
     {
-        _currentStage += num;
+        CurrentStage += num;
     }
 
     public void StartStage()
@@ -39,5 +47,10 @@ public class StageManager : SingletonObject<StageManager>
     public void StopStage()
     {
         IsTimerRunning = false;
+    }
+
+    public bool CheckClearedStage()
+    {
+        return CurrentStage < MaxStage;
     }
 }
