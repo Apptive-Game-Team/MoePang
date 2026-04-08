@@ -10,8 +10,13 @@ namespace _01.Scripts._04.UI.InGame
         
         protected override void OnEnable()
         {
+            StageManager.Instance.StopStage();
+            float time = StageManager.Instance.CurrentTime;
+            int minutes = Mathf.FloorToInt(time / 60);
+            int seconds = Mathf.FloorToInt(time % 60);
+            
             Time.timeScale = 0.1f;
-            // todo : 시간 설정
+            timeText.text = $"{minutes}:{seconds:00}";
             coinText.text = $"{GoldManager.Instance.Gold}";
         }
     }
