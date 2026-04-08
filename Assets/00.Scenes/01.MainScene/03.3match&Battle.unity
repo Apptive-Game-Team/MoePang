@@ -7064,8 +7064,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2097611655}
   - component: {fileID: 2097611654}
-  - component: {fileID: 2097611653}
-  - component: {fileID: 2097611652}
   - component: {fileID: 2097611656}
   m_Layer: 0
   m_Name: TempManager
@@ -7074,31 +7072,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2097611652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2097611651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2a98048014e91b4d9f56c7360cb3cab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gold: 0
---- !u!114 &2097611653
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2097611651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f70b62f6509a0b24496ec28c36669f36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2097611654
 MonoBehaviour:
   m_ObjectHideFlags: 0

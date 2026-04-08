@@ -1365,9 +1365,8 @@ namespace _01.Scripts._01.ThreeMatch
 
             seq.OnComplete(() =>
             {
-                GoldManager.Instance.AddGold(100);
+                GoldManager.Instance.AddGold(1);
                 goldUI.AddGoldEffect();
-                goldUI.UpdateGold();
                  
                 Destroy(tr.gameObject);
             });
