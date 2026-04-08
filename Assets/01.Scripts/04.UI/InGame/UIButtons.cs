@@ -12,7 +12,7 @@ namespace _01.Scripts._04.UI.InGame
         
         public void NextStageButton()
         {
-            StageManager.Instance.SetStage(1);
+            StageManager.Instance.AddStage(1);
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 

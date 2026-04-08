@@ -12,22 +12,39 @@ namespace _01.Scripts._04.UI.InGame
 
         protected override void OnEnable()
         {
-            GameManager.Instance.playData.clearedStage = 
-                Mathf.Max(GameManager.Instance.playData.clearedStage, StageManager.Instance.CurrentStage);
-            StageManager.Instance.SetMaxStage(GameManager.Instance.playData.clearedStage + 1);
+            // Save
+            PlayData playData = GameManager.Instance.playData;
+            StageManager stageManager = StageManager.Instance;
+            GoldManager goldManager = GoldManager.Instance;
+            stageManager.StopStage();
+            float time = stageManager.CurrentTime;
+            int usedTileCount = stageManager.UsedTileCount;
             
-            StageManager.Instance.StopStage();
-            float time = StageManager.Instance.CurrentTime;
+            goldManager.AddStageClearedGold();
+
+            playData.goldAmount = goldManager.Gold;
+            
+            playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage);
+            stageManager.SetMaxStage(playData.clearedStage + 1);
+
+            StageData stageData = playData.stagesData[stageManager.CurrentStage];
+            stageData.maxUsedTile = Mathf.Max(stageData.maxUsedTile, usedTileCount);
+            stageData.minUsedTile = stageData.minUsedTile == 0 ?
+                usedTileCount : Mathf.Min(stageData.maxUsedTile, usedTileCount);
+            stageData.minUsedTime = stageData.minUsedTime == 0 ?
+                time : Mathf.Min(stageData.minUsedTime, time);
+            
+            GameManager.Instance.SavePlayData();
+            
+            // UI
             int minutes = Mathf.FloorToInt(time / 60);
             int seconds = Mathf.FloorToInt(time % 60);
             
-            GoldManager.Instance.AddStageClearedGold();
-            
-            Time.timeScale = 0.1f;
+            Time.timeScale = 0f;
             DepthOfField.active = true;
-            stageText.text = $"지켜낸 서식지 {StageManager.Instance.CurrentStage + 1}";
+            stageText.text = $"지켜낸 서식지 {stageManager.CurrentStage + 1}";
             timeText.text = $"{minutes}:{seconds:00}";
-            coinText.text = $"{GoldManager.Instance.Gold}";
+            coinText.text = $"{goldManager.Gold}";
         }
     }
 }

@@ -5,9 +5,9 @@ using UnityEngine;
 public class GoldManager : SingletonObject<GoldManager>
 {
     [Header("소지금")]
-    [SerializeField] private float gold;
+    [SerializeField] private int gold;
 
-    public float Gold => gold;
+    public int Gold => gold;
     public event Action OnGoldChanged;
 
     protected override void Awake()
@@ -17,7 +17,7 @@ public class GoldManager : SingletonObject<GoldManager>
         gold = GameManager.Instance.playData.goldAmount;
     }
 
-    public bool TrySpendGold(float amount)
+    public bool TrySpendGold(int amount)
     {
         if (gold < amount)
         {
@@ -29,7 +29,7 @@ public class GoldManager : SingletonObject<GoldManager>
         return true;
     }
 
-    public void AddGold(float amount)
+    public void AddGold(int amount)
     {
         gold += amount;
         OnGoldChanged?.Invoke();
@@ -37,7 +37,7 @@ public class GoldManager : SingletonObject<GoldManager>
 
     public void AddStageClearedGold()
     {
-        float amount = StageManager.Instance.CheckClearedStage() ? 20 : 100;
+        int amount = StageManager.Instance.CheckClearedStage() ? 20 : 100;
         AddGold(amount);
     }
 }

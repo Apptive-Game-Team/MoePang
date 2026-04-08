@@ -782,6 +782,7 @@ namespace _01.Scripts._01.ThreeMatch
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(group.habitat, 1);
+                        StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     }));
                 }
@@ -936,6 +937,7 @@ namespace _01.Scripts._01.ThreeMatch
                 .SetLoops(2, LoopType.Yoyo)
                 .OnComplete(() =>
                 {
+                    StageManager.Instance.SetUsedTile(1);
                     Destroy(self);
                 })
                 .WaitForCompletion();
@@ -1164,11 +1166,13 @@ namespace _01.Scripts._01.ThreeMatch
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(no.habitat, 1);
+                        StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     });
             }
             else
             {
+                StageManager.Instance.SetUsedTile(1);
                 Destroy(targetPuzzle.gameObject);
             }
         }

@@ -22,8 +22,10 @@ public class MainButtonManager : MonoBehaviour
 
     private void Start()
     {
-        stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
+        stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+
+        StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 
         previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
         nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
@@ -55,7 +57,7 @@ public class MainButtonManager : MonoBehaviour
     {
         if (StageManager.Instance != null)
         {
-            StageManager.Instance.SetStage(1);
+            StageManager.Instance.AddStage(1);
         }
         
         previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
@@ -71,7 +73,7 @@ public class MainButtonManager : MonoBehaviour
     {
         if (StageManager.Instance != null)
         {
-            StageManager.Instance.SetStage(-1);
+            StageManager.Instance.AddStage(-1);
         }
         
         previousButton.SetActive(StageManager.Instance.CurrentStage > 0);

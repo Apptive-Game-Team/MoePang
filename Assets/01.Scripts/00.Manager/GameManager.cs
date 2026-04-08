@@ -71,7 +71,7 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
         }
 
-        public void SavePlayerData()
+        public void SavePlayData()
         {
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
         }
