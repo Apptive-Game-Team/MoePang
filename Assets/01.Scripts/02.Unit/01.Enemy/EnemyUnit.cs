@@ -10,8 +10,6 @@ public class EnemyUnit : Unit
 
         enemyData = data as EnemyUnitData;
 
-        direction = 1f;
-        ApplyDirectionVisual();
         direction = -1f;
 
         targetLayer = LayerMask.GetMask("Friendly");

@@ -437,6 +437,7 @@ public class Unit : MonoBehaviour, IDamageable
         }
 
         animator.speed = 1f;
+        ApplyDirectionVisual();
         isDying = false;
         ownerPool.ReturnUnit(this);
     }
@@ -447,10 +448,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected void ApplyDirectionVisual()
     {
         Vector3 scale = transform.localScale;
-        scale.x = direction > 0
-            ? Mathf.Abs(scale.x)
-            : -Mathf.Abs(scale.x);
-
+        scale.x *= -1;
         transform.localScale = scale;
     }
     #endregion
