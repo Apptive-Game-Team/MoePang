@@ -16,7 +16,7 @@ public abstract class UnitData : ScriptableObject
     [SerializeField] protected float baseMoveSpeed;
     [SerializeField] protected float attackRange;
     [SerializeField] protected float attackDamage;
-    [SerializeField] protected float attackDelay;
+    [SerializeField] protected float attackSpeed;
 
     public TeamType Team => team;
     public UnitName UnitName => unitName;
@@ -25,5 +25,5 @@ public abstract class UnitData : ScriptableObject
     public float BaseMoveSpeed => baseMoveSpeed;
     public float AttackRange => attackRange;
     public float AttackDamage => attackDamage;
-    public float AttackDelay => attackDelay;
+    public float AttackSpeed => attackSpeed;
 }

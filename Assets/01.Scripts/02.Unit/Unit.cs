@@ -38,7 +38,7 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float speedModifier; //스피드 가중치
     [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
     [SerializeField] protected float attackDamage; //공격 데미지
-    [SerializeField] protected float attackDelay; //공격 속도
+    [SerializeField] protected float attackSpeed; //공격 속도
     [SerializeField] protected float direction; //이동, 투사체 발사 방향
 
     [Header("현재 상태")]
@@ -106,7 +106,7 @@ public class Unit : MonoBehaviour, IDamageable
         //공격 설정
         attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
-        attackDelay = data.AttackDelay;
+        attackSpeed = data.AttackSpeed;
 
         //팀 설정
         team = data.Team;
@@ -199,6 +199,8 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void AttackState()
     {
+        if (isAttacking) return;
+
         if (!IsOtherInRange())
         {
             if (animator != null)
@@ -206,12 +208,11 @@ public class Unit : MonoBehaviour, IDamageable
                 animator.SetBool("Idle", false);
                 animator.SetBool("Walk", true);
             }
-            
+
+            animator.speed = 1f;
             currentState = UnitState.Move;
             return;
         }
-
-        if (isAttacking) return;
 
         attackRoutine = StartCoroutine(AttackCoroutine());
     }
@@ -223,13 +224,17 @@ public class Unit : MonoBehaviour, IDamageable
     {
         isAttacking = true;
 
+        float segment = 1f / attackSpeed / 3f;
+        animator.speed = attackSpeed;
+
         if (animator != null)
         {
             animator.SetBool("Idle", false);
+            animator.SetBool("Walk", false);
             animator.SetTrigger("Attack");
         }
 
-        yield return new WaitForSeconds(attackDelay);
+        yield return new WaitForSeconds(segment);
 
         //유닛 큐가 비어있으면 성을 공격
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
@@ -254,8 +259,17 @@ public class Unit : MonoBehaviour, IDamageable
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
 
-        yield return new WaitForSeconds(0.5f - attackDelay);
+        yield return new WaitForSeconds(segment);
 
+        if (animator != null)
+        {
+            animator.SetBool("Idle", true);
+            animator.SetBool("Walk", false);
+        }
+
+        yield return new WaitForSeconds(segment);
+
+        animator.speed = 1f;
         isAttacking = false;
         attackRoutine = null;
     }
@@ -278,6 +292,8 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void TakeDamage(float damage)
     {
         if (isDying) return;
+
+        animator.speed = 1f;
 
         float nextHp = currentHp - damage;
 
