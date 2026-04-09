@@ -1,6 +1,7 @@
 using _01.Scripts._04.UI.InGame;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections;
 
 /// <summary>
 /// 각 팀의 성
@@ -13,6 +14,7 @@ public class Castle : MonoBehaviour, IDamageable
     [SerializeField] protected float currentHp;
 
     [Header("피격 연출")]
+    [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] private float shakeStrength = 0.05f;
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
@@ -25,6 +27,7 @@ public class Castle : MonoBehaviour, IDamageable
     private Tween damageTween;
     private SpriteRenderer spriteRenderer;
     private Vector3 originalPos;
+    protected bool isHitEffect;
 
     //프로퍼티
     public float CurrentHp => currentHp;
@@ -63,11 +66,43 @@ public class Castle : MonoBehaviour, IDamageable
         }
 
         PlayDamageEffect();
+        StartCoroutine(PlayHitEffect());
 
         if (currentHp <= 0)
         {
             Die();
         }
+    }
+
+    private IEnumerator PlayHitEffect()
+    {
+        if (hitEffectPrefab == null || isHitEffect) yield return null;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
+
+        Vector3 randomPos = new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            0
+        );
+        Vector3 spawnPos = transform.position + randomPos;
+        hitEffectPrefab.transform.position = spawnPos;
+
+        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        if (effectRenderer != null)
+        {
+            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+
+        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (ps != null) ? ps.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        hitEffectPrefab.SetActive(false);
+        isHitEffect = false;
     }
 
     private void PlayDamageEffect()

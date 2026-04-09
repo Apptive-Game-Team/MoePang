@@ -47,6 +47,7 @@ public class Unit : MonoBehaviour, IDamageable
 
     [Header("유닛 설정")]
     [SerializeField] protected LayerMask targetLayer;
+    [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
 
     //상태 & 참조
@@ -67,6 +68,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected Tween damageTween;
     protected SpriteRenderer spriteRenderer;
     protected Vector3 originalScale;
+    protected bool isHitEffect;
 
     //프로퍼티
     public UnitData Data => data;
@@ -293,6 +295,8 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (isDying) return;
 
+        StartCoroutine(PlayHitEffect());
+
         animator.speed = 1f;
 
         float nextHp = currentHp - damage;
@@ -318,6 +322,39 @@ public class Unit : MonoBehaviour, IDamageable
             if (currentHp <= 0)
                 currentState = UnitState.Die;
         }
+    }
+
+    private IEnumerator PlayHitEffect()
+    {
+        if (hitEffectPrefab == null || isHitEffect) yield return null;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
+
+        Vector3 randomPos = new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            0
+        );
+        Vector3 spawnPos = transform.position + randomPos;
+        hitEffectPrefab.transform.position = spawnPos;
+
+        
+
+        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        if (effectRenderer != null)
+        {
+            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+
+        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (ps != null) ? ps.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        hitEffectPrefab.SetActive(false);
+        isHitEffect = false;
     }
 
     protected virtual void DamageState()
