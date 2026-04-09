@@ -13,27 +13,12 @@ namespace _01.Scripts._04.UI.InGame
         protected override void OnEnable()
         {
             // Save
-            PlayData playData = GameManager.Instance.playData;
             StageManager stageManager = StageManager.Instance;
             GoldManager goldManager = GoldManager.Instance;
-            stageManager.StopStage();
             float time = stageManager.CurrentTime;
-            int usedTileCount = stageManager.UsedTileCount;
             
+            stageManager.StopStage();
             goldManager.AddStageClearedGold();
-
-            playData.goldAmount = goldManager.Gold;
-            
-            playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage);
-            stageManager.SetMaxStage(playData.clearedStage + 1);
-
-            StageData stageData = playData.stagesData[stageManager.CurrentStage];
-            stageData.maxUsedTile = Mathf.Max(stageData.maxUsedTile, usedTileCount);
-            stageData.minUsedTile = stageData.minUsedTile == 0 ?
-                usedTileCount : Mathf.Min(stageData.maxUsedTile, usedTileCount);
-            stageData.minUsedTime = stageData.minUsedTime == 0 ?
-                time : Mathf.Min(stageData.minUsedTime, time);
-            
             GameManager.Instance.SavePlayData();
             
             // UI
