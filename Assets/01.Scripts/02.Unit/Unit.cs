@@ -293,7 +293,7 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
-        if (isDying) return;
+        if (isDying || isDamaging) return;
 
         StartCoroutine(PlayHitEffect());
 
@@ -373,17 +373,29 @@ public class Unit : MonoBehaviour, IDamageable
 
         damageTween?.Kill();
 
-        Vector3 knockback = transform.position - Vector3.right * direction * 0.5f;
+        float originalY = transform.position.y;
+        Vector3 jumpEndPos = new Vector3(
+            transform.position.x - direction * 0.8f,
+            originalY,
+            transform.position.z
+        );
 
         Sequence seq = DOTween.Sequence();
 
         seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
         seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
 
-        seq.Append(transform.DOMove(knockback, 0.25f).SetEase(Ease.OutQuad));
+        seq.Append(transform.DOJump(jumpEndPos, 0.3f, 2, 0.6f).SetEase(Ease.OutQuad));
 
         seq.Append(transform.DOScale(originalScale, 0.08f));
         seq.Join(spriteRenderer.DOFade(1f, 0.08f));
+
+        seq.OnComplete(() =>
+        {
+            Vector3 pos = transform.position;
+            pos.y = originalY;
+            transform.position = pos;
+        });
 
         damageTween = seq;
 
