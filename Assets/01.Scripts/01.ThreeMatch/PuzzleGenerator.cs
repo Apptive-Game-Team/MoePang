@@ -1085,7 +1085,12 @@ namespace _01.Scripts._01.ThreeMatch
                     foreach (PuzzleObject po in list)
                     {
                         float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
-                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        float maxDistance = 4.0f;
+                        float normalizedDist = Mathf.Clamp01(distance / maxDistance);
+                        float curveFactor = Mathf.Pow(1 - normalizedDist, 1.5f);
+
+                        float delay = maxLifetime * curveFactor;
                         
                         StartCoroutine(DelayedTileEffect(po, delay));
                     }
@@ -1094,7 +1099,12 @@ namespace _01.Scripts._01.ThreeMatch
                     foreach (PuzzleObject po in list)
                     {
                         float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
-                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        float maxDistance = 4.0f;
+                        float normalizedDist = Mathf.Clamp01(distance / maxDistance);
+                        float curveFactor = Mathf.Pow(1 - normalizedDist, 1.5f);
+
+                        float delay = maxLifetime * curveFactor;
                         
                         StartCoroutine(DelayedTileEffect(po, delay));
                     }
