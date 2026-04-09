@@ -340,8 +340,6 @@ public class Unit : MonoBehaviour, IDamageable
         Vector3 spawnPos = transform.position + randomPos;
         hitEffectPrefab.transform.position = spawnPos;
 
-        
-
         var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
         if (effectRenderer != null)
         {
