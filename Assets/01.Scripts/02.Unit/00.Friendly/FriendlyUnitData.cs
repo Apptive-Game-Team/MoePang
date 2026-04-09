@@ -5,8 +5,8 @@ public class FriendlyUnitData : UnitData
 {
     [Header("Friendly Only")]
     [SerializeField] private Habitat habitat;
-    [SerializeField] private float unitCost;
+    [SerializeField] private int unitCost;
 
     public Habitat Habitat => habitat;
-    public float UnitCost => unitCost;
+    public int UnitCost => unitCost;
 }

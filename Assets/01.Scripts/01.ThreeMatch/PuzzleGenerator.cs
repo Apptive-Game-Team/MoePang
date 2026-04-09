@@ -782,6 +782,7 @@ namespace _01.Scripts._01.ThreeMatch
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(group.habitat, 1);
+                        StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     }));
                 }
@@ -936,6 +937,7 @@ namespace _01.Scripts._01.ThreeMatch
                 .SetLoops(2, LoopType.Yoyo)
                 .OnComplete(() =>
                 {
+                    StageManager.Instance.SetUsedTile(1);
                     Destroy(self);
                 })
                 .WaitForCompletion();
@@ -1050,13 +1052,15 @@ namespace _01.Scripts._01.ThreeMatch
             ParticleSystem ps = effect.GetComponentInChildren<ParticleSystem>();
             float totalDuration = ps.main.duration + ps.main.startLifetime.constantMax;
             Destroy(effect, totalDuration);
+            
+            float maxLifetime = ps.main.startLifetime.constant;
+            Vector2 centerPos = new(posX, posY);
             switch (type)
             {
                 case SpecialPuzzleType.CircleBomb:
                     if (ps != null)
                     {
-                        float maxLifetime = ps.main.startLifetime.constant;
-                        Vector2 centerPos = new(posX, posY);
+                        
                         
                         foreach (PuzzleObject po in list)
                         {
@@ -1073,34 +1077,28 @@ namespace _01.Scripts._01.ThreeMatch
                 case SpecialPuzzleType.CrossBomb:
                     foreach (PuzzleObject po in list)
                     {
-                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
-                            .OnComplete(() =>
-                            {
-                                StartCoroutine(DelayedTileEffect(po, 0f));
-                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
-                            });
+                        float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
+                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        StartCoroutine(DelayedTileEffect(po, delay));
                     }
                     break;
                 case SpecialPuzzleType.RowBomb:
                     foreach (PuzzleObject po in list)
                     {
-                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
-                            .OnComplete(() =>
-                            {
-                                StartCoroutine(DelayedTileEffect(po, 0f));
-                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
-                            });
+                        float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
+                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        StartCoroutine(DelayedTileEffect(po, delay));
                     }
                     break;
                 case SpecialPuzzleType.ColumnBomb:
                     foreach (PuzzleObject po in list)
                     {
-                        po.transform.DOScale(tileScale * 1.2f, 0.2f)
-                            .OnComplete(() =>
-                            {
-                                StartCoroutine(DelayedTileEffect(po, 0f));
-                                po.transform.DOMove(new Vector2(posX, posY), 0.2f);
-                            });
+                        float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
+                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        StartCoroutine(DelayedTileEffect(po, delay));
                     }
                     break; 
             }
@@ -1168,11 +1166,13 @@ namespace _01.Scripts._01.ThreeMatch
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(no.habitat, 1);
+                        StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     });
             }
             else
             {
+                StageManager.Instance.SetUsedTile(1);
                 Destroy(targetPuzzle.gameObject);
             }
         }
@@ -1369,9 +1369,8 @@ namespace _01.Scripts._01.ThreeMatch
 
             seq.OnComplete(() =>
             {
-                GoldManager.Instance.AddGold(100);
+                GoldManager.Instance.AddGold(1);
                 goldUI.AddGoldEffect();
-                goldUI.UpdateGold();
                  
                 Destroy(tr.gameObject);
             });

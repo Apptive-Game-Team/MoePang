@@ -39,6 +39,7 @@ public class Castle : MonoBehaviour, IDamageable
         currentHp = maxHp;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalPos = transform.localPosition;
+        _isGameEnd = false;
 
         if (UnitTransformQueue.Instance != null)
         {

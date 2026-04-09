@@ -1981,6 +1981,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8c7ffb28b81dca46a3fb3868875aa80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  previousButton: {fileID: 764431966419862559}
+  nextButton: {fileID: 7245613241033527601}
   stageText: {fileID: 2554064629757971998}
   goldText: {fileID: 0}
   playScene: DevJJW
