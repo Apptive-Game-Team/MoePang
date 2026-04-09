@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,6 +44,16 @@ namespace _01.Scripts._04.UI.InGame
         private void Start()
         {
             UpdateGold();
+        }
+
+        private void OnEnable()
+        {
+            GoldManager.Instance.OnGoldChanged += UpdateGold;
+        }
+
+        private void OnDisable()
+        {
+            GoldManager.Instance.OnGoldChanged -= UpdateGold;
         }
 
         public void ShowUI(bool show = true)

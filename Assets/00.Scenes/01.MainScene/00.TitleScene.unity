@@ -469,7 +469,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1116955147
+--- !u!1 &1168916408
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -477,22 +477,195 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1116955148}
-  - component: {fileID: 1116955149}
+  - component: {fileID: 1168916410}
+  - component: {fileID: 1168916409}
   m_Layer: 0
-  m_Name: GoldManager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1116955148
+--- !u!114 &1168916409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168916408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c494a60f86fb864bbf27e422c938b08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playData:
+    goldAmount: 0
+    clearedStage: -1
+    stagesData:
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+    - minUsedTime: 0
+      minUsedTile: 0
+      maxUsedTile: 0
+  gameData:
+    soundData:
+      masterVolume: 0.5
+      bgmVolume: 0.5
+      sfxVolume: 0.5
+    languageData:
+      languageIndex: 0
+--- !u!4 &1168916410
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1116955147}
+  m_GameObject: {fileID: 1168916408}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -501,20 +674,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1116955149
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1116955147}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2a98048014e91b4d9f56c7360cb3cab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gold: 10000
---- !u!1 &1549320870
+--- !u!1 &1656538893
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -522,8 +682,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1549320872}
-  - component: {fileID: 1549320871}
+  - component: {fileID: 1656538895}
+  - component: {fileID: 1656538896}
   m_Layer: 0
   m_Name: SoundManager
   m_TagString: Untagged
@@ -531,34 +691,34 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1549320871
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1549320870}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e0c00cf7ee5ab848b15d2c95852c01f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &1549320872
+--- !u!4 &1656538895
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1549320870}
+  m_GameObject: {fileID: 1656538893}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 422.70187, y: 1228.0413, z: -4.333959}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1691265333
+--- !u!114 &1656538896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656538893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e0c00cf7ee5ab848b15d2c95852c01f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1771935530
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -566,38 +726,37 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1691265335}
-  - component: {fileID: 1691265334}
+  - component: {fileID: 1771935532}
+  - component: {fileID: 1771935531}
   m_Layer: 0
-  m_Name: StageManager
+  m_Name: SaveLoadManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1691265334
+--- !u!114 &1771935531
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1691265333}
+  m_GameObject: {fileID: 1771935530}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f70b62f6509a0b24496ec28c36669f36, type: 3}
+  m_Script: {fileID: 11500000, guid: dbabfcc4411d43f459d76dffdb1640db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentStage: 0
---- !u!4 &1691265335
+--- !u!4 &1771935532
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1691265333}
+  m_GameObject: {fileID: 1771935530}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -825,18 +984,6 @@ MonoBehaviour:
   textComponent: {fileID: 7583510352471268236}
   blinkSpeed: 2
   nextSceneName: 01.MainScene
---- !u!114 &5021672212065652841
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5177785434050262139}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 182a56b77f2d02441b561cd3adf0ba3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &5177785434050262139
 GameObject:
   m_ObjectHideFlags: 0
@@ -847,7 +994,6 @@ GameObject:
   m_Component:
   - component: {fileID: 770709067775858759}
   - component: {fileID: 5512287838148500080}
-  - component: {fileID: 5021672212065652841}
   - component: {fileID: 7583510352471268236}
   m_Layer: 5
   m_Name: TouchToScreenText
@@ -1029,9 +1175,9 @@ SceneRoots:
   - {fileID: 830249570}
   - {fileID: 852718925824442143}
   - {fileID: 705899741}
-  - {fileID: 1116955148}
-  - {fileID: 1549320872}
   - {fileID: 798174269}
-  - {fileID: 1691265335}
   - {fileID: 877393215}
   - {fileID: 892819942}
+  - {fileID: 1168916410}
+  - {fileID: 1771935532}
+  - {fileID: 1656538895}
