@@ -223,6 +223,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2327045114902766185, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_Color.b
       value: 0.48113203
@@ -249,7 +253,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.07
+      value: 5.93
       objectReference: {fileID: 0}
     - target: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_LocalPosition.y
@@ -309,6 +313,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: FriendlyCastle
       objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: flashAlpha
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: shakeDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1831464839840112201, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: shakeStrength
+      value: 0.15
+      objectReference: {fileID: 0}
     - target: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.15505955
@@ -323,7 +339,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2
+      value: -5.6
       objectReference: {fileID: 0}
     - target: {fileID: 3518809064141264942, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_LocalPosition.y
@@ -549,7 +565,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1749898507}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ac36e53116b4ad4c8769829ee3eeb6c, type: 3}
+  m_Script: {fileID: 11500000, guid: 081a58e8bb9aedf49badfaf2c0d45ec2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   friendlyPrefab: {fileID: 7654564522672126550, guid: 44d81176aa2a88040bc6d878b02038bb, type: 3}

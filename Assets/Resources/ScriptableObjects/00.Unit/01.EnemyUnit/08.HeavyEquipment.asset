@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c327d1620960b7a4cb0c00d79973c2e9, type: 3}
+  m_Name: 08.HeavyEquipment
+  m_EditorClassIdentifier: 
+  team: 1
+  unitName: 33
+  animatorOverride: {fileID: 22100000, guid: c3e1f93e69177b64593a59dbce8c6dd5, type: 2}
+  maxHp: 44
+  baseMoveSpeed: 1
+  attackRange: 1.5
+  attackDamage: 11
+  attackDelay: 0.5

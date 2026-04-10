@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -6040098269396678781, guid: 0ca56993138ed6746be5f2569233e0ff, type: 3}
+  m_Sprite: {fileID: -6040098269396678781, guid: d4c0572d2f23e90408c9517b108e6593, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -104,6 +104,9 @@ MonoBehaviour:
   team: 0
   maxHp: 80
   currentHp: 0
+  shakeStrength: 0.05
+  shakeDuration: 0.2
+  flashAlpha: 0.4
 --- !u!61 &337826284710907199
 BoxCollider2D:
   m_ObjectHideFlags: 0

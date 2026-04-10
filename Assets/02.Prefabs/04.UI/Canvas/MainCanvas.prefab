@@ -1981,10 +1981,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8c7ffb28b81dca46a3fb3868875aa80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  previousButton: {fileID: 764431966419862559}
+  nextButton: {fileID: 7245613241033527601}
   stageText: {fileID: 2554064629757971998}
-  goldText: {fileID: 1400679329804759272}
-  playScene: 03.3match&Battle
-  shopScene: 02.ShopScene
+  goldText: {fileID: 0}
+  playScene: DevJJW
+  shopScene: Shop
 --- !u!1 &8383404407027416024
 GameObject:
   m_ObjectHideFlags: 0
@@ -2050,7 +2052,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -5193376973422115981, guid: 8229219e795162f4e9a7de420603912d, type: 3}
+  m_Sprite: {fileID: -5193376973422115981, guid: 5472cd9fe71ff0549b9878f9503ce6a8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
