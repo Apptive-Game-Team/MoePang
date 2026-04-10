@@ -1,5 +1,6 @@
 using NUnit.Framework.Constraints;
 using System.Collections;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 /// <summary>
@@ -31,7 +32,7 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float bassMoveSpeed; //초기 MoveSpeed
+    [SerializeField] protected float baseMoveSpeed; //초기 MoveSpeed
     [SerializeField] protected float speedModifier; //스피드 가중치
     [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
     [SerializeField] protected float attackDamage; //공격 데미지
@@ -46,10 +47,14 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected LayerMask targetLayer;
 
     //참조 & 프로퍼티
+    protected Unit originPrefab;
+    protected UnitData data;
+    protected GameObject visualInstance;
     protected GameObject attackPrefab;
     protected Animator animator;
     protected UnitPool ownerPool;
     protected bool isAttacking;
+    public UnitData Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
     public float MoveSpeed => moveSpeed;
@@ -59,29 +64,60 @@ public class Unit : MonoBehaviour, IDamageable
     public TeamType GetTeam() => team;
 
     #region 시작 설정
-    protected virtual void Awake()
+    public virtual void SetData(UnitData data)
     {
-        animator = GetComponentInChildren<Animator>();
-    }
+        this.data = data;
 
-    protected virtual void OnEnable()
-    {
-        Init();
-        isAttacking = false;
-        if (animator != null) animator.SetBool("isWalking", true);
         currentState = UnitState.Move;
 
-        //디버그용 이름 설정
-        gameObject.name = $"{team}_{GetInstanceID()}";
+        //피 설정
+        maxHp = data.MaxHp;
+        currentHp = maxHp;
+
+        //이동속도 설정
+        baseMoveSpeed = data.BaseMoveSpeed;
+        moveSpeed = baseMoveSpeed;
+
+        //공격 설정
+        attackRange = data.AttackRange;
+        attackDamage = data.AttackDamage;
+        attackDelay = data.AttackDelay;
+
+        //팀 설정
+        team = data.Team;
+
+        SetupVisual();
+
+        StartCoroutine(InitStateDelayed());
     }
 
-    /// <summary>
-    /// Unit 생성 시 초기화 함수
-    /// </summary>
-    protected virtual void Init()
+    protected virtual void SetupVisual()
     {
-        currentHp = maxHp;
-        moveSpeed = bassMoveSpeed;
+        if (visualInstance != null)
+        {
+            visualInstance.transform.localPosition = Vector3.zero;
+            return;
+        }
+
+        visualInstance = Instantiate(data.PsdFile, transform);
+        visualInstance.transform.localPosition = Vector3.zero;
+
+        animator = visualInstance.GetComponent<Animator>();
+    }
+
+    private IEnumerator InitStateDelayed()
+    {
+        yield return null;
+
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+
+            animator.Play("Idle", 0, 0f);
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isWalking", true);
+        }
     }
 
     /// <summary>
@@ -150,18 +186,19 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (!IsOtherInRange())
         {
-            if (animator != null) animator.SetBool("isWalking", true);
+            if (animator != null)
+            {
+                animator.SetBool("isWalking", true);
+                animator.SetBool("isAttacking", false);
+            }
+            
             currentState = UnitState.Move;
             return;
         }
 
         if (isAttacking) return;
 
-        if (animator != null) animator.SetBool("isWalking", false);
-        if (!isAttacking)
-        {
-            StartCoroutine(AttackCoroutine());
-        }
+        StartCoroutine(AttackCoroutine());
     }
     /// <summary>
     /// 죽은 상태
@@ -170,10 +207,21 @@ public class Unit : MonoBehaviour, IDamageable
     {
         StopAllCoroutines();
 
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isAttacking", false);
+        }
+
         if (UTQ.Peek(team) == this)
         {
             UTQ.Dequeue(team);
         }
+
+        currentState = UnitState.Move;
 
         ownerPool.ReturnUnit(this);
     }   
@@ -188,7 +236,12 @@ public class Unit : MonoBehaviour, IDamageable
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         IDamageable target = UTQ.Peek(enemyTeam);
 
-        if (animator != null) animator.SetBool("isAttacking", true);
+        if (animator != null)
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isAttacking", true);
+        }
+
         yield return new WaitForSeconds(attackDelay);
 
         if (target != null)
@@ -209,9 +262,13 @@ public class Unit : MonoBehaviour, IDamageable
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
 
-        if (animator != null) animator.SetBool("isAttacking", false);
+        if (animator != null)
+        {
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isWalking", true);
+        }
 
-        isAttacking = false;
+            isAttacking = false;
     }
 
     /// <summary>
@@ -235,9 +292,19 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void TakeDamage(float damage)
     {
         currentHp -= damage;
-        if (currentHp < 0)
+        if (currentHp <= 0)
         {
             currentState = UnitState.Die;
         }
+    }
+
+    public void SetOriginPrefab(Unit prefab)
+    {
+        originPrefab = prefab;
+    }
+
+    public Unit GetOriginPrefab()
+    {
+        return originPrefab;
     }
 }

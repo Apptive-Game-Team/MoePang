@@ -1,9 +1,11 @@
+using UnityEngine.Serialization;
+
 namespace _01.Scripts._01.ThreeMatch
 {
     public class ObstaclePuzzleObject : PuzzleObject
     {
         public ObstaclePuzzleType obstaclePuzzleType;
-        public NormalPuzzleType normalPuzzleType;
+        public Habitat habitat;
 
         public bool isTriggered;
         
