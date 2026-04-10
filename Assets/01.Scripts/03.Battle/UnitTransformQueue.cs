@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -21,10 +20,9 @@ public class UnitTransformQueue : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
 
         teamQueues = new Dictionary<TeamType, Queue<Unit>>()
-        {   
+        {
             { TeamType.Friendly, new Queue<Unit>() },
             { TeamType.Enemy, new Queue<Unit>() }
         };

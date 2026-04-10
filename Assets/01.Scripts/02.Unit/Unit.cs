@@ -38,7 +38,7 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float speedModifier; //스피드 가중치
     [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
     [SerializeField] protected float attackDamage; //공격 데미지
-    [SerializeField] protected float attackDelay; //공격 속도
+    [SerializeField] protected float attackSpeed; //공격 속도
     [SerializeField] protected float direction; //이동, 투사체 발사 방향
 
     [Header("현재 상태")]
@@ -47,6 +47,7 @@ public class Unit : MonoBehaviour, IDamageable
 
     [Header("유닛 설정")]
     [SerializeField] protected LayerMask targetLayer;
+    [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
 
     //상태 & 참조
@@ -62,9 +63,12 @@ public class Unit : MonoBehaviour, IDamageable
     protected float pendingDamage;
     protected Coroutine attackRoutine;
     protected Coroutine damageRoutine;
+    protected bool halfHpTriggered;
+    protected Coroutine damageAnimRoutine;
     protected Tween damageTween;
     protected SpriteRenderer spriteRenderer;
     protected Vector3 originalScale;
+    protected bool isHitEffect;
 
     //프로퍼티
     public UnitData Data => data;
@@ -104,7 +108,7 @@ public class Unit : MonoBehaviour, IDamageable
         //공격 설정
         attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
-        attackDelay = data.AttackDelay;
+        attackSpeed = data.AttackSpeed;
 
         //팀 설정
         team = data.Team;
@@ -197,6 +201,8 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void AttackState()
     {
+        if (isAttacking) return;
+
         if (!IsOtherInRange())
         {
             if (animator != null)
@@ -204,12 +210,11 @@ public class Unit : MonoBehaviour, IDamageable
                 animator.SetBool("Idle", false);
                 animator.SetBool("Walk", true);
             }
-            
+
+            animator.speed = 1f;
             currentState = UnitState.Move;
             return;
         }
-
-        if (isAttacking) return;
 
         attackRoutine = StartCoroutine(AttackCoroutine());
     }
@@ -221,13 +226,17 @@ public class Unit : MonoBehaviour, IDamageable
     {
         isAttacking = true;
 
+        float segment = 1f / attackSpeed / 3f;
+        animator.speed = attackSpeed;
+
         if (animator != null)
         {
             animator.SetBool("Idle", false);
+            animator.SetBool("Walk", false);
             animator.SetTrigger("Attack");
         }
 
-        yield return new WaitForSeconds(attackDelay);
+        yield return new WaitForSeconds(segment);
 
         //유닛 큐가 비어있으면 성을 공격
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
@@ -252,8 +261,17 @@ public class Unit : MonoBehaviour, IDamageable
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
 
-        yield return new WaitForSeconds(0.5f - attackDelay);
+        yield return new WaitForSeconds(segment);
 
+        if (animator != null)
+        {
+            animator.SetBool("Idle", true);
+            animator.SetBool("Walk", false);
+        }
+
+        yield return new WaitForSeconds(segment);
+
+        animator.speed = 1f;
         isAttacking = false;
         attackRoutine = null;
     }
@@ -275,9 +293,66 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
-        if (isDamaging || isDying) return;
-        pendingDamage = damage;
-        currentState = UnitState.Damage;
+        if (isDying || isDamaging) return;
+
+        StartCoroutine(PlayHitEffect());
+
+        animator.speed = 1f;
+
+        float nextHp = currentHp - damage;
+
+        bool triggerHalf = !halfHpTriggered && nextHp <= maxHp * 0.5f;
+
+        if (triggerHalf)
+        {
+            pendingDamage = damage;
+            halfHpTriggered = true;
+            currentState = UnitState.Damage;
+        }
+
+        else
+        {
+            currentHp -= damage;
+
+            if (damageAnimRoutine != null)
+                StopCoroutine(damageAnimRoutine);
+
+            damageAnimRoutine = StartCoroutine(DamageAnimationCoroutine());
+
+            if (currentHp <= 0)
+                currentState = UnitState.Die;
+        }
+    }
+
+    private IEnumerator PlayHitEffect()
+    {
+        if (hitEffectPrefab == null || isHitEffect) yield return null;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
+
+        Vector3 randomPos = new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            0
+        );
+        Vector3 spawnPos = transform.position + randomPos;
+        hitEffectPrefab.transform.position = spawnPos;
+
+        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        if (effectRenderer != null)
+        {
+            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+
+        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (ps != null) ? ps.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        hitEffectPrefab.SetActive(false);
+        isHitEffect = false;
     }
 
     protected virtual void DamageState()
@@ -294,12 +369,50 @@ public class Unit : MonoBehaviour, IDamageable
         StopAttack();
 
         if (animator != null)
-        {
-            animator.SetBool("Walk", false);
-            animator.SetBool("Idle", false);
             animator.SetTrigger("Damage");
-        }
 
+        damageTween?.Kill();
+
+        float originalY = transform.position.y;
+        Vector3 jumpEndPos = new Vector3(
+            transform.position.x - direction * 0.8f,
+            originalY,
+            transform.position.z
+        );
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
+        seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
+
+        seq.Append(transform.DOJump(jumpEndPos, 0.3f, 2, 0.6f).SetEase(Ease.OutQuad));
+
+        seq.Append(transform.DOScale(originalScale, 0.08f));
+        seq.Join(spriteRenderer.DOFade(1f, 0.08f));
+
+        seq.OnComplete(() =>
+        {
+            Vector3 pos = transform.position;
+            pos.y = originalY;
+            transform.position = pos;
+        });
+
+        damageTween = seq;
+
+        yield return seq.WaitForCompletion();
+
+        currentHp -= pendingDamage;
+
+        if (currentHp <= 0)
+            currentState = UnitState.Die;
+        else
+            currentState = UnitState.Attack;
+
+        isDamaging = false;
+    }
+
+    protected IEnumerator DamageAnimationCoroutine()
+    {
         damageTween?.Kill();
 
         Sequence seq = DOTween.Sequence();
@@ -310,23 +423,7 @@ public class Unit : MonoBehaviour, IDamageable
         seq.Append(transform.DOScale(originalScale, 0.08f));
         seq.Join(spriteRenderer.DOFade(1f, 0.08f));
 
-        damageTween = seq;
-
         yield return seq.WaitForCompletion();
-
-        currentHp -= pendingDamage;
-
-        if (currentHp <= 0)
-        {
-            currentState = UnitState.Die;
-        }
-
-        else
-        {
-            currentState = UnitState.Attack;
-        }
-
-        isDamaging = false;
     }
 
     protected void StopAttack()
@@ -403,6 +500,7 @@ public class Unit : MonoBehaviour, IDamageable
         }
 
         animator.speed = 1f;
+        ApplyDirectionVisual();
         isDying = false;
         ownerPool.ReturnUnit(this);
     }
@@ -413,10 +511,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected void ApplyDirectionVisual()
     {
         Vector3 scale = transform.localScale;
-        scale.x = direction > 0
-            ? Mathf.Abs(scale.x)
-            : -Mathf.Abs(scale.x);
-
+        scale.x *= -1;
         transform.localScale = scale;
     }
     #endregion
