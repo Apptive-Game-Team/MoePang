@@ -463,7 +463,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         // 방향 반전
         direction *= -1f;
-        ApplyDirectionVisual();
+        spriteRenderer.flipX = true;
 
         if (animator != null)
         {
@@ -500,19 +500,10 @@ public class Unit : MonoBehaviour, IDamageable
         }
 
         animator.speed = 1f;
-        ApplyDirectionVisual();
+        transform.localScale = originalScale;
+        spriteRenderer.flipX = false;
         isDying = false;
         ownerPool.ReturnUnit(this);
-    }
-
-    /// <summary>
-    /// 방향 반전 함수
-    /// </summary>
-    protected void ApplyDirectionVisual()
-    {
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
     }
     #endregion
 }
