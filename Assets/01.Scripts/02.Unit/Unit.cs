@@ -157,6 +157,8 @@ public class Unit : MonoBehaviour, IDamageable
 
         currentState = newState;
 
+        animator.speed = 1f;
+
         switch (currentState)
         {
             case UnitState.Move:
@@ -211,14 +213,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (!IsOtherInRange())
         {
-            if (animator != null)
-            {
-                animator.SetBool("Idle", false);
-                animator.SetBool("Walk", true);
-            }
-
-            animator.speed = 1f;
-            currentState = UnitState.Move;
+            ChangeState(UnitState.Move);
             return;
         }
 
@@ -237,8 +232,6 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", false);
             animator.SetTrigger("Attack");
         }
 
@@ -250,16 +243,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (target != null)
         {
-            Debug.Log(
-                $"[{team}] {name} -> {target.GetName()} 공격 " +
-                $"Damage: {attackDamage} | HP Before: {target.CurrentHp}"
-            );
-
             target.TakeDamage(attackDamage);
-
-            Debug.Log(
-                $"[{target.GetTeam()}] {target.GetName()} HP After: {target.CurrentHp}"
-            );
         }
 
         else
@@ -277,7 +261,6 @@ public class Unit : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(segment);
 
-        animator.speed = 1f;
         isAttacking = false;
         attackRoutine = null;
     }
