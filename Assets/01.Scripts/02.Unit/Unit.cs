@@ -4,6 +4,7 @@ using UnityEditor.PackageManager;
 using UnityEngine;
 using DG.Tweening;
 
+#region Enums
 /// <summary>
 /// 유닛의 상태 목록
 /// </summary>
@@ -23,6 +24,7 @@ public enum TeamType
     Friendly,
     Enemy
 }
+#endregion
 
 /// <summary>
 /// Unit의 최상위 클래스
@@ -30,52 +32,50 @@ public enum TeamType
 /// </summary>
 public class Unit : MonoBehaviour, IDamageable
 {
-    [Header("스탯")]
+    [Header("유닛 스탯")]
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
-    [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float baseMoveSpeed; //초기 MoveSpeed
-    [SerializeField] protected float speedModifier; //스피드 가중치
-    [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
+    [SerializeField] protected float moveSpeed; //이동 속도
+    [SerializeField] protected float attackRange; //공격 사거리
     [SerializeField] protected float attackDamage; //공격 데미지
-    [SerializeField] protected float attackSpeed; //공격 속도
-    [SerializeField] protected float direction; //이동, 투사체 발사 방향
-
-    [Header("현재 상태")]
-    [SerializeField] protected UnitState currentState;
-    [SerializeField] protected TeamType team;
+    [SerializeField] protected float attackSpeed; //공격 속도 (1초에 몇 번 공격하는지)
 
     [Header("유닛 설정")]
+    [SerializeField] protected UnitState currentState;
+    [SerializeField] protected TeamType team;
     [SerializeField] protected LayerMask targetLayer;
     [SerializeField] private GameObject hitEffectPrefab;
+    [SerializeField] protected float direction; //이동 방향
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
 
-    //상태 & 참조
+    //외부 참조
+    protected UnitPool ownerPool;
+
+    //내부 컴포넌트
     protected Unit originPrefab;
     protected UnitData data;
-    protected GameObject visualInstance;
-    protected GameObject attackPrefab;
+    protected SpriteRenderer spriteRenderer;
     protected Animator animator;
-    protected UnitPool ownerPool;
+
+    //상태 관리
     protected bool isAttacking;
+    protected bool halfHpTriggered;
+    protected bool isHitEffect;
     protected bool isDamaging;
     protected bool isDying;
+
+    //수치 / 로직 관리
+    protected Vector3 originalScale;
     protected float pendingDamage;
+    protected Tween damageTween;
     protected Coroutine attackRoutine;
     protected Coroutine damageRoutine;
-    protected bool halfHpTriggered;
     protected Coroutine damageAnimRoutine;
-    protected Tween damageTween;
-    protected SpriteRenderer spriteRenderer;
-    protected Vector3 originalScale;
-    protected bool isHitEffect;
 
     //프로퍼티
     public UnitData Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
-    public float MoveSpeed => moveSpeed;
-
     public Transform GetTransform() => transform;
     public string GetName() => name;
     public TeamType GetTeam() => team;
@@ -87,41 +87,35 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
-            animator.Rebind();
-            animator.Update(0f);
-
-            animator.Play("Idle", 0, 0f);
             animator.SetBool("Idle", false);
             animator.SetBool("Walk", false);
         }
 
-        currentState = UnitState.Attack;
+        SetStat();
+        SetVisual();
 
-        //피 설정
+        currentState = UnitState.Attack;    
+    }
+
+    protected virtual void SetStat()
+    {
+        team = data.Team;
+
         maxHp = data.MaxHp;
         currentHp = maxHp;
-
-        //이동속도 설정
-        baseMoveSpeed = data.BaseMoveSpeed;
-        moveSpeed = baseMoveSpeed;
-
-        //공격 설정
+        moveSpeed = data.BaseMoveSpeed;
         attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
         attackSpeed = data.AttackSpeed;
+    }
 
-        //팀 설정
-        team = data.Team;
-
-        //비주얼(애니메이터) 설정
+    protected virtual void SetVisual()
+    {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-
-        spriteRenderer.sortingOrder = UnitSortingManager.GetNextOrder();
-
-        originalScale = transform.localScale;
-
         if (animator == null) animator = GetComponent<Animator>();
 
+        originalScale = transform.localScale;
+        spriteRenderer.sortingOrder = UnitSortingManager.GetNextOrder();
         animator.runtimeAnimatorController = data.AnimatorOverride;
     }
 
