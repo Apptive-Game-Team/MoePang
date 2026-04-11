@@ -4,7 +4,7 @@ using DG.Tweening;
 using System.Collections;
 
 /// <summary>
-/// 각 팀의 성
+/// 각 팀의 성 관리 스크립트
 /// </summary>
 public class Castle : MonoBehaviour, IDamageable
 {
@@ -19,19 +19,24 @@ public class Castle : MonoBehaviour, IDamageable
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
 
-    private static bool _isGameEnd;
+    //외부 참조
     private GameObject _gameClearUI;
     private GameObject _gameOverUI;
-    private GameObject EndUI => team == TeamType.Friendly ? _gameOverUI : _gameClearUI;
-    
-    private Tween damageTween;
+
+    //내부 컴포넌트
     private SpriteRenderer spriteRenderer;
     private Vector3 originalPos;
+
+    //상태 관리
+    private static bool _isGameEnd;
     protected bool isHitEffect;
 
-    //프로퍼티
-    public float CurrentHp => currentHp;
+    //로직 제어
+    private Tween damageTween;
 
+    //프로퍼티
+    private GameObject EndUI => team == TeamType.Friendly ? _gameOverUI : _gameClearUI;
+    public float CurrentHp => currentHp;
     public Transform GetTransform() => transform;
     public string GetName() => name;
     public TeamType GetTeam() => team;
@@ -56,6 +61,7 @@ public class Castle : MonoBehaviour, IDamageable
         _gameOverUI = FindAnyObjectByType<GameOverUI>(FindObjectsInactive.Include).gameObject;
     }
 
+    #region 피격 & 피격 연출
     public void TakeDamage(float damage)
     {
         currentHp -= damage;
@@ -122,6 +128,7 @@ public class Castle : MonoBehaviour, IDamageable
 
         damageTween = seq;
     }
+    #endregion
 
     private void Die()
     {
