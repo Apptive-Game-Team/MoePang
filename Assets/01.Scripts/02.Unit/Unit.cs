@@ -178,6 +178,8 @@ public class Unit : MonoBehaviour, IDamageable
                 break;
 
             case UnitState.Die:
+                animator.speed = 2f;
+
                 animator.SetBool("Walk", true);
                 animator.SetBool("Idle", false);
                 break;
@@ -276,9 +278,11 @@ public class Unit : MonoBehaviour, IDamageable
     }
     #endregion
 
-    #region DamageState
+    #region TakeDamage & DamageState
     /// <summary>
-    /// 피격 시
+    /// 피격 시 데미지를 받음
+    /// <para>1. 피가 절반 이하로 내려가면 Damage 상태로 전환</para>
+    /// <para>2. 피가 0이하로 내려가면 Die 상태로 전환</para>
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
@@ -286,17 +290,14 @@ public class Unit : MonoBehaviour, IDamageable
 
         StartCoroutine(PlayHitEffect());
 
-        animator.speed = 1f;
-
         float nextHp = currentHp - damage;
-
         bool triggerHalf = !halfHpTriggered && nextHp <= maxHp * 0.5f;
 
         if (triggerHalf)
         {
             pendingDamage = damage;
             halfHpTriggered = true;
-            currentState = UnitState.Damage;
+            ChangeState(UnitState.Damage);
         }
 
         else
@@ -309,41 +310,13 @@ public class Unit : MonoBehaviour, IDamageable
             damageAnimRoutine = StartCoroutine(DamageAnimationCoroutine());
 
             if (currentHp <= 0)
-                currentState = UnitState.Die;
+                ChangeState(UnitState.Die);
         }
     }
 
-    private IEnumerator PlayHitEffect()
-    {
-        if (hitEffectPrefab == null || isHitEffect) yield return null;
-
-        isHitEffect = true;
-
-        hitEffectPrefab.SetActive(true);
-
-        Vector3 randomPos = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
-            0
-        );
-        Vector3 spawnPos = transform.position + randomPos;
-        hitEffectPrefab.transform.position = spawnPos;
-
-        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
-        if (effectRenderer != null)
-        {
-            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
-        }
-
-        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
-        float duration = (ps != null) ? ps.main.duration : 1.0f;
-
-        yield return new WaitForSeconds(duration);
-
-        hitEffectPrefab.SetActive(false);
-        isHitEffect = false;
-    }
-
+    /// <summary>
+    /// Damage State (피가 절반이하로 내려가면 1번만 실행)
+    /// </summary>
     protected virtual void DamageState()
     {
         if (isDamaging) return;
@@ -390,13 +363,17 @@ public class Unit : MonoBehaviour, IDamageable
         currentHp -= pendingDamage;
 
         if (currentHp <= 0)
-            currentState = UnitState.Die;
+            ChangeState(UnitState.Die);
         else
-            currentState = UnitState.Attack;
+            ChangeState(UnitState.Attack);
 
         isDamaging = false;
     }
 
+    /// <summary>
+    /// 피격 시 DoSclae & 반짝거리는 Animation
+    /// </summary>
+    /// <returns></returns>
     protected IEnumerator DamageAnimationCoroutine()
     {
         damageTween?.Kill();
@@ -412,6 +389,43 @@ public class Unit : MonoBehaviour, IDamageable
         yield return seq.WaitForCompletion();
     }
 
+    /// <summary>
+    /// 뭉게뭉게 구름 이펙트
+    /// </summary>
+    private IEnumerator PlayHitEffect()
+    {
+        if (hitEffectPrefab == null || isHitEffect) yield return null;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
+
+        Vector3 randomPos = new Vector3(
+            Random.Range(-0.5f, 0.5f),
+            Random.Range(-0.5f, 0.5f),
+            0
+        );
+        Vector3 spawnPos = transform.position + randomPos;
+        hitEffectPrefab.transform.position = spawnPos;
+
+        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        if (effectRenderer != null)
+        {
+            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+
+        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (ps != null) ? ps.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        hitEffectPrefab.SetActive(false);
+        isHitEffect = false;
+    }
+
+    /// <summary>
+    /// 실행중이던 공격 중단
+    /// </summary>
     protected void StopAttack()
     {
         isAttacking = false;
@@ -433,37 +447,31 @@ public class Unit : MonoBehaviour, IDamageable
         if (isDying) return;
         StartCoroutine(DieCoroutine());
     }
+
+    //반대로 보고 달려가는 죽음 연출
     protected virtual IEnumerator DieCoroutine()
     {
         isDying = true;
 
+        //큐에서 제거
         UTQ.RemoveUnit(team, this);
 
+        //상태 설정
         StopAttack();
-        isAttacking = false;
         isDamaging = false;
 
         damageTween?.Kill();
         transform.localScale = originalScale;
         spriteRenderer.color = Color.white;
 
-        // 방향 반전
         direction *= -1f;
         spriteRenderer.flipX = true;
 
-        if (animator != null)
-        {
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", true);
-            animator.speed = 2f;
-        }
-
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
         float elapsed = 0f;
         float duration = 2f;
         float runSpeed = moveSpeed * 2f;
 
-        Color startColor = sr.color;
+        Color startColor = spriteRenderer.color;
 
         while (elapsed < duration)
         {
@@ -472,23 +480,16 @@ public class Unit : MonoBehaviour, IDamageable
             transform.position += Vector3.right * direction * runSpeed * Time.deltaTime;
 
             float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
-            sr.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
 
             yield return null;
         }
 
-        sr.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
-
-        if (animator != null)
-        {
-            animator.Rebind();
-            animator.Update(0f);
-        }
-
-        animator.speed = 1f;
+        spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
         transform.localScale = originalScale;
         spriteRenderer.flipX = false;
         isDying = false;
+
         ownerPool.ReturnUnit(this);
     }
     #endregion
