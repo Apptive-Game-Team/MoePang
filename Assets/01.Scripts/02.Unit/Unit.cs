@@ -85,16 +85,10 @@ public class Unit : MonoBehaviour, IDamageable
     {
         this.data = data;
 
-        if (animator != null)
-        {
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", false);
-        }
-
         SetStat();
         SetVisual();
 
-        currentState = UnitState.Attack;    
+        ChangeState(UnitState.Attack);  
     }
 
     protected virtual void SetStat()
@@ -157,35 +151,53 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
+    protected void ChangeState(UnitState newState)
+    {
+        if (currentState == newState) return;
+
+        currentState = newState;
+
+        switch (currentState)
+        {
+            case UnitState.Move:
+                animator.SetBool("Walk", true);
+                animator.SetBool("Idle", false);
+                break;
+
+            case UnitState.Attack:
+                animator.SetBool("Walk", false);
+                animator.SetBool("Idle", false);
+                break;
+
+            case UnitState.Damage:
+                animator.SetBool("Walk", false);
+                animator.SetBool("Idle", false);
+                animator.SetTrigger("Damage");
+                break;
+
+            case UnitState.Die:
+                animator.SetBool("Walk", true);
+                animator.SetBool("Idle", false);
+                break;
+        }
+    }
+
     #region MoveState
     /// <summary>
     /// 상대를 향해 이동하는 상태
     /// </summary>
     protected virtual void MoveState()
     {
-
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right * direction, attackRange, targetLayer);
 
         if (hit.collider != null)
         {
-            // 2. 적을 만났다면 나를 '상대팀의 타겟 후보'로 등록 (내가 맞아야 하니까)
-            // 상대방 입장에서 나는 '공격 대상'이므로 내 팀의 큐에 나를 넣음
             UTQ.Enqueue(team, this);
-
-            animator.SetBool("Walk", false);
-            currentState = UnitState.Attack;
+            ChangeState(UnitState.Attack);
             return;
         }
 
         transform.position += Vector3.right * direction * moveSpeed * Time.deltaTime;
-    }
-
-    /// <summary>
-    /// 맨 앞에 도착했는지 판별
-    /// </summary>
-    protected bool IsInFrontOf(float otherX)
-    {
-        return (transform.position.x * direction) > (otherX * direction);
     }
     #endregion
 
@@ -361,9 +373,6 @@ public class Unit : MonoBehaviour, IDamageable
         isDamaging = true;
 
         StopAttack();
-
-        if (animator != null)
-            animator.SetTrigger("Damage");
 
         damageTween?.Kill();
 
