@@ -38,7 +38,10 @@ public class Castle : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        maxHp = CastleManager.Instance.MaxHp;
+        if (team == TeamType.Friendly)
+            maxHp = CastleManager.Instance.MaxHp;
+        else maxHp = StageManager.Instance.CurrentStage + 1 * 100f;
+
         currentHp = maxHp;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalPos = transform.localPosition;
