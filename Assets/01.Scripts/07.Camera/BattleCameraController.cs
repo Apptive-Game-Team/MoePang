@@ -91,6 +91,9 @@ public class BattleCameraController : MonoBehaviour
 
     void HandleZoom()
     {
+        float delta = 0f;
+
+        // 1. 모바일 핀치 줌 처리
         if (Input.touchCount == 2)
         {
             Touch t0 = Input.GetTouch(0);
@@ -102,14 +105,38 @@ public class BattleCameraController : MonoBehaviour
             float prevMag = (prev0 - prev1).magnitude;
             float currentMag = (t0.position - t1.position).magnitude;
 
-            float delta = (currentMag - prevMag) * zoomSpeed;
-            battleCam.orthographicSize = Mathf.Clamp(battleCam.orthographicSize - delta, minZoom, maxZoom);
+            delta = (currentMag - prevMag) * zoomSpeed;
+        }
+        // 2. 마우스 휠 처리 (에디터/PC)
+        else
+        {
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (Mathf.Abs(scroll) > 0.01f && IsInBattleZone(Input.mousePosition))
+            {
+                delta = scroll * 5f; // 마우스는 델타값이 작으므로 가중치 조절
+            }
         }
 
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(scroll) > 0.01f && IsInBattleZone(Input.mousePosition))
+        if (Mathf.Abs(delta) > 0.001f)
         {
-            battleCam.orthographicSize = Mathf.Clamp(battleCam.orthographicSize - scroll * 10f, minZoom, maxZoom);
+            // 줌 전 기준점 저장 (마우스 위치 혹은 화면 중앙)
+            Vector3 referencePos = (Input.touchCount == 2)
+                ? (Vector3)((Input.GetTouch(0).position + Input.GetTouch(1).position) * 0.5f)
+                : Input.mousePosition;
+
+            Vector3 beforeZoom = battleCam.ScreenToWorldPoint(referencePos);
+
+            // 줌 적용
+            battleCam.orthographicSize = Mathf.Clamp(battleCam.orthographicSize - delta, minZoom, maxZoom);
+
+            // 줌 후 위치 계산
+            Vector3 afterZoom = battleCam.ScreenToWorldPoint(referencePos);
+
+            // 중요: x축 차이만 적용하여 y축 이동 방지
+            float diffX = beforeZoom.x - afterZoom.x;
+
+            // y값은 건드리지 않고 x값만 더해줍니다.
+            transform.position += new Vector3(diffX, 0, 0);
         }
     }
 
