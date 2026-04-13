@@ -2396,6 +2396,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1772903313}
     m_Modifications:
+    - target: {fileID: 337826284710907199, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
+      propertyPath: m_Size.y
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 944671229565221473, guid: e0243ffb8c5bacd43becc56587a4df35, type: 3}
       propertyPath: m_Name
       value: FriendlyCastle
