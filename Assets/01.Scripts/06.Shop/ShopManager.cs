@@ -117,13 +117,13 @@ public class ShopManager : MonoBehaviour
             }
 
             int cost = UpgradeManager.Instance.GetCost(data);
-            buyButtonText.text = $"비용 : {cost}G";
+            buyButtonText.text = $"Buy";
             return;
         }
 
         if (currentSelected == null)
         {
-            buyButtonText.text = "골라주세용";
+            buyButtonText.text = "Buy";
             return;
         }
 
@@ -131,7 +131,7 @@ public class ShopManager : MonoBehaviour
 
         if (currentSelected.IsUnlocked)
         {
-            buyButtonText.text = "OwO";
+            buyButtonText.text = "구매완료";
             return;
         }
 
@@ -141,7 +141,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        buyButtonText.text = $"비용 : {unit.UnitCost}G";
+        buyButtonText.text = $"Buy";
     }
 
     public void OnClickBuy()
