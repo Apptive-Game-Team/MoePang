@@ -2874,6 +2874,37 @@ MonoBehaviour:
   - {fileID: 1128227080}
   - {fileID: 2078394235}
   - {fileID: 653744683}
+--- !u!1 &894054808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 894054809}
+  m_Layer: 0
+  m_Name: EnemySpawnPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &894054809
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894054808}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.4, y: 3.05, z: -9.898655}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &943568195
 GameObject:
   m_ObjectHideFlags: 0
@@ -5278,6 +5309,37 @@ MonoBehaviour:
   - {fileID: 730784418}
   - {fileID: 1578950480}
   - {fileID: 811447004}
+--- !u!1 &1540985936
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1540985937}
+  m_Layer: 0
+  m_Name: FriendlySpawnPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1540985937
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1540985936}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.4, y: 3.05, z: -9.898655}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1578950480
 GameObject:
   m_ObjectHideFlags: 0
@@ -7228,8 +7290,8 @@ MonoBehaviour:
   enemyPrefab: {fileID: 5985587198152181629, guid: f557ae89b1d96d6468343a86d7b1ba4b, type: 3}
   friendlyUnitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
   enemyUnitList: {fileID: 11400000, guid: 0e3d0a4531a02f445857dcce21efbad5, type: 2}
-  friendlySpawnPosition: {fileID: 697245518}
-  enemySpawnPosition: {fileID: 2099301080}
+  friendlySpawnPosition: {fileID: 1540985937}
+  enemySpawnPosition: {fileID: 894054809}
 --- !u!4 &1986820698
 Transform:
   m_ObjectHideFlags: 0
@@ -7757,3 +7819,5 @@ SceneRoots:
   - {fileID: 626392909}
   - {fileID: 1953625089}
   - {fileID: 2097611655}
+  - {fileID: 1540985937}
+  - {fileID: 894054809}
