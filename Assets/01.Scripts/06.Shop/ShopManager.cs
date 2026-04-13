@@ -25,13 +25,13 @@ public class ShopManager : MonoBehaviour
 
     [Header("구매 팝업")]
     [SerializeField] private GameObject buyPopup;
+    [SerializeField] private TextMeshProUGUI costText;
+    [SerializeField] private TextMeshProUGUI tooltipText;
 
-    [Header("상태")]
-    [SerializeField] private bool isUnitClicked = false;
-    [SerializeField] private ShopUI currentSelected;
-    [SerializeField] private UpgradeUI currentUpgradeSelected;
-
-    //private List<ShopUI> allShopUI = new List<ShopUI>();
+    //상태 제어
+    private ShopUI currentSelected;
+    private UpgradeUI currentUpgradeSelected;
+    private bool isBuyPopupActive = false;
 
     private void Awake()
     {
@@ -68,6 +68,8 @@ public class ShopManager : MonoBehaviour
 
     public void OnClickUnit(ShopUI clickedUI)
     {
+        if (isBuyPopupActive) return;
+
         if (currentSelected == clickedUI)
         {
             currentSelected.Deselect();
@@ -169,6 +171,10 @@ public class ShopManager : MonoBehaviour
             }
 
             buyPopup.SetActive(true);
+            isBuyPopupActive = true;
+            costText.text = $"Cost : {cost}G";
+            tooltipText.text = $"{data.UpgradeType}을 강화하겠습니까? " +
+                $"\n {data.UpgradeType} += {data.IncreasePerLevel}";
             return;
         }
 
@@ -196,6 +202,9 @@ public class ShopManager : MonoBehaviour
         }
 
         buyPopup.SetActive(true);
+        isBuyPopupActive = true;
+        costText.text = $"Cost : {unit.UnitCost}G";
+        tooltipText.text = $"{unit.UnitName}을 해금하겠습니까?";
     }
 
     /// <summary>
@@ -237,7 +246,10 @@ public class ShopManager : MonoBehaviour
     public void ClosePopup()
     {
         if (buyPopup != null)
+        {
+            isBuyPopupActive = false;
             buyPopup.SetActive(false);
+        }
     }
 
     private void EnsureActivateAnimalsPanel()
@@ -252,7 +264,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void ActivateUpgradeTap()
     {
-        if (upgradeTap.activeSelf) return;
+        if (upgradeTap.activeSelf || isBuyPopupActive) return;
         
         animalsTap.SetActive(false);
         upgradeTap.SetActive(true);
@@ -263,7 +275,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void ActivateAnimalsTap()
     {
-        if (animalsTap.activeSelf) return;
+        if (animalsTap.activeSelf || isBuyPopupActive) return;
         
         upgradeTap.SetActive(false);
         animalsTap.SetActive(true);

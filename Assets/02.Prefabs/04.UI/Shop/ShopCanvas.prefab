@@ -2531,9 +2531,8 @@ MonoBehaviour:
   animalsTapButton: {fileID: 2389490655649004364}
   upgradeTapButton: {fileID: 2637260147310304017}
   buyPopup: {fileID: 7867407077823513979}
-  isUnitClicked: 0
-  currentSelected: {fileID: 0}
-  currentUpgradeSelected: {fileID: 0}
+  costText: {fileID: 8879017983213885205}
+  tooltipText: {fileID: 5459530029264803767}
 --- !u!1 &7211116714734848845
 GameObject:
   m_ObjectHideFlags: 0
