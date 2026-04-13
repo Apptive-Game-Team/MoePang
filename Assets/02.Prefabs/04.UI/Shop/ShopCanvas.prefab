@@ -1375,7 +1375,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3589972166830047445}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6196075797540199672}
+        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
+        m_MethodName: ClosePopup
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4858974572041227097
 GameObject:
   m_ObjectHideFlags: 0
@@ -2154,7 +2166,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4076302487019100099}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6196075797540199672}
+        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
+        m_MethodName: ConfirmPurchase
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6277822147986644960
 GameObject:
   m_ObjectHideFlags: 0
@@ -2506,6 +2530,7 @@ MonoBehaviour:
   upgradeTap: {fileID: 9039789769758278154}
   animalsTapButton: {fileID: 2389490655649004364}
   upgradeTapButton: {fileID: 2637260147310304017}
+  buyPopup: {fileID: 7867407077823513979}
   isUnitClicked: 0
   currentSelected: {fileID: 0}
   currentUpgradeSelected: {fileID: 0}

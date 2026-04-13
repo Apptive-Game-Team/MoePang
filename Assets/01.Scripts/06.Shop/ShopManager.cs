@@ -22,13 +22,16 @@ public class ShopManager : MonoBehaviour
     [Header("버튼")]
     [SerializeField] private Button animalsTapButton;
     [SerializeField] private Button upgradeTapButton;
-    
+
+    [Header("구매 팝업")]
+    [SerializeField] private GameObject buyPopup;
+
     [Header("상태")]
     [SerializeField] private bool isUnitClicked = false;
     [SerializeField] private ShopUI currentSelected;
     [SerializeField] private UpgradeUI currentUpgradeSelected;
 
-    private List<ShopUI> allShopUI = new List<ShopUI>();
+    //private List<ShopUI> allShopUI = new List<ShopUI>();
 
     private void Awake()
     {
@@ -55,6 +58,7 @@ public class ShopManager : MonoBehaviour
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
         animalsTap.SetActive(true);
         upgradeTap.SetActive(false);
+        buyPopup.SetActive(false);
         UpdateBuyButtonText();
     }
     public void OnClickBack()
@@ -164,11 +168,7 @@ public class ShopManager : MonoBehaviour
                 return;
             }
 
-            UpgradeManager.Instance.Upgrade(data);
-
-            goldText.text = $"Gold : {GoldManager.Instance.Gold}";
-            currentUpgradeSelected.Refresh();
-            UpdateBuyButtonText();
+            buyPopup.SetActive(true);
             return;
         }
 
@@ -195,12 +195,49 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        HabitatManager.Instance.Unlock(unit);
+        buyPopup.SetActive(true);
+    }
 
-        currentSelected.RefreshUnlockState();
+    /// <summary>
+    /// 팝업의 [확인] 버튼에 연결할 실제 구매 로직
+    /// </summary>
+    public void ConfirmPurchase()
+    {
+        if (currentUpgradeSelected != null)
+        {
+            var data = currentUpgradeSelected.Data;
+            int cost = UpgradeManager.Instance.GetCost(data);
+
+            if (GoldManager.Instance.TrySpendGold(cost))
+            {
+                UpgradeManager.Instance.Upgrade(data);
+                currentUpgradeSelected.Refresh();
+            }
+        }
+
+        else if (currentSelected != null)
+        {
+            var unit = currentSelected.UnitData;
+
+            if (GoldManager.Instance.TrySpendGold(unit.UnitCost))
+            {
+                HabitatManager.Instance.Unlock(unit);
+                currentSelected.RefreshUnlockState();
+            }
+        }
 
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
-        buyButtonText.text = "굿굿";
+        UpdateBuyButtonText();
+        ClosePopup();
+    }
+
+    /// <summary>
+    /// 팝업의 [취소] 버튼이나 닫기 버튼에 연결
+    /// </summary>
+    public void ClosePopup()
+    {
+        if (buyPopup != null)
+            buyPopup.SetActive(false);
     }
 
     private void EnsureActivateAnimalsPanel()
