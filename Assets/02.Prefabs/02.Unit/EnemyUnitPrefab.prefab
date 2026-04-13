@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4948523906349553203}
@@ -51,18 +51,16 @@ MonoBehaviour:
   maxHp: 0
   currentHp: 0
   moveSpeed: 0
-  baseMoveSpeed: 0
-  speedModifier: 0
   attackRange: 0
   attackDamage: 0
   attackSpeed: 0
-  direction: 0
   currentState: 0
   team: 0
   targetLayer:
     serializedVersion: 2
     m_Bits: 0
   hitEffectPrefab: {fileID: 1279758348307487373}
+  direction: 0
   damageDuration: 0.3
 --- !u!212 &-1930983877192162145
 SpriteRenderer:
