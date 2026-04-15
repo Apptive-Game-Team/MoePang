@@ -58,4 +58,10 @@ public class OptionWindow : MonoBehaviour
         optionButton.interactable = true;
         Destroy(this.gameObject);
     }
+
+    public void OnTitleButton()
+    {
+        SoundManager.Instance.PlaySFX(SFX.SFX0_Default);
+        SceneManager.LoadScene("00.TitleScene");
+    }
 }

@@ -4,6 +4,7 @@ using UnityEditor.PackageManager;
 using UnityEngine;
 using DG.Tweening;
 
+#region Enums
 /// <summary>
 /// 유닛의 상태 목록
 /// </summary>
@@ -23,6 +24,7 @@ public enum TeamType
     Friendly,
     Enemy
 }
+#endregion
 
 /// <summary>
 /// Unit의 최상위 클래스
@@ -30,52 +32,50 @@ public enum TeamType
 /// </summary>
 public class Unit : MonoBehaviour, IDamageable
 {
-    [Header("스탯")]
+    [Header("유닛 스탯")]
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
-    [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float baseMoveSpeed; //초기 MoveSpeed
-    [SerializeField] protected float speedModifier; //스피드 가중치
-    [SerializeField] protected float attackRange; //공격 사거리(근접 유닛)
+    [SerializeField] protected float moveSpeed; //이동 속도
+    [SerializeField] protected float attackRange; //공격 사거리
     [SerializeField] protected float attackDamage; //공격 데미지
-    [SerializeField] protected float attackSpeed; //공격 속도
-    [SerializeField] protected float direction; //이동, 투사체 발사 방향
-
-    [Header("현재 상태")]
-    [SerializeField] protected UnitState currentState;
-    [SerializeField] protected TeamType team;
+    [SerializeField] protected float attackSpeed; //공격 속도 (1초에 몇 번 공격하는지)
 
     [Header("유닛 설정")]
+    [SerializeField] protected UnitState currentState;
+    [SerializeField] protected TeamType team;
     [SerializeField] protected LayerMask targetLayer;
     [SerializeField] private GameObject hitEffectPrefab;
+    [SerializeField] protected float direction; //이동 방향
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
 
-    //상태 & 참조
+    //외부 참조
+    protected UnitPool ownerPool;
+
+    //내부 컴포넌트
     protected Unit originPrefab;
     protected UnitData data;
-    protected GameObject visualInstance;
-    protected GameObject attackPrefab;
+    protected SpriteRenderer spriteRenderer;
     protected Animator animator;
-    protected UnitPool ownerPool;
+
+    //상태 관리
     protected bool isAttacking;
+    protected bool halfHpTriggered;
+    protected bool isHitEffect;
     protected bool isDamaging;
     protected bool isDying;
+
+    //수치 / 로직 관리
+    protected Vector3 originalScale;
     protected float pendingDamage;
+    protected Tween damageTween;
     protected Coroutine attackRoutine;
     protected Coroutine damageRoutine;
-    protected bool halfHpTriggered;
     protected Coroutine damageAnimRoutine;
-    protected Tween damageTween;
-    protected SpriteRenderer spriteRenderer;
-    protected Vector3 originalScale;
-    protected bool isHitEffect;
 
     //프로퍼티
     public UnitData Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
-    public float MoveSpeed => moveSpeed;
-
     public Transform GetTransform() => transform;
     public string GetName() => name;
     public TeamType GetTeam() => team;
@@ -85,43 +85,31 @@ public class Unit : MonoBehaviour, IDamageable
     {
         this.data = data;
 
-        if (animator != null)
-        {
-            animator.Rebind();
-            animator.Update(0f);
+        SetStat();
+        SetVisual();
 
-            animator.Play("Idle", 0, 0f);
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", false);
-        }
+        ChangeState(UnitState.Attack);  
+    }
 
-        currentState = UnitState.Attack;
+    protected virtual void SetStat()
+    {
+        team = data.Team;
 
-        //피 설정
         maxHp = data.MaxHp;
         currentHp = maxHp;
-
-        //이동속도 설정
-        baseMoveSpeed = data.BaseMoveSpeed;
-        moveSpeed = baseMoveSpeed;
-
-        //공격 설정
+        moveSpeed = data.BaseMoveSpeed;
         attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
         attackSpeed = data.AttackSpeed;
+    }
 
-        //팀 설정
-        team = data.Team;
-
-        //비주얼(애니메이터) 설정
+    protected virtual void SetVisual()
+    {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-
-        spriteRenderer.sortingOrder = UnitSortingManager.GetNextOrder();
-
-        originalScale = transform.localScale;
-
         if (animator == null) animator = GetComponent<Animator>();
 
+        originalScale = transform.localScale;
+        spriteRenderer.sortingOrder = UnitSortingManager.GetNextOrder();
         animator.runtimeAnimatorController = data.AnimatorOverride;
     }
 
@@ -163,35 +151,57 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
+    protected void ChangeState(UnitState newState)
+    {
+        if (currentState == newState) return;
+
+        currentState = newState;
+
+        animator.speed = 1f;
+
+        switch (currentState)
+        {
+            case UnitState.Move:
+                animator.SetBool("Walk", true);
+                animator.SetBool("Idle", false);
+                break;
+
+            case UnitState.Attack:
+                animator.SetBool("Walk", false);
+                animator.SetBool("Idle", false);
+                break;
+
+            case UnitState.Damage:
+                animator.SetBool("Walk", false);
+                animator.SetBool("Idle", false);
+                animator.SetTrigger("Damage");
+                break;
+
+            case UnitState.Die:
+                animator.speed = 2f;
+
+                animator.SetBool("Walk", true);
+                animator.SetBool("Idle", false);
+                break;
+        }
+    }
+
     #region MoveState
     /// <summary>
     /// 상대를 향해 이동하는 상태
     /// </summary>
     protected virtual void MoveState()
     {
-
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right * direction, attackRange, targetLayer);
 
         if (hit.collider != null)
         {
-            // 2. 적을 만났다면 나를 '상대팀의 타겟 후보'로 등록 (내가 맞아야 하니까)
-            // 상대방 입장에서 나는 '공격 대상'이므로 내 팀의 큐에 나를 넣음
             UTQ.Enqueue(team, this);
-
-            animator.SetBool("Walk", false);
-            currentState = UnitState.Attack;
+            ChangeState(UnitState.Attack);
             return;
         }
 
         transform.position += Vector3.right * direction * moveSpeed * Time.deltaTime;
-    }
-
-    /// <summary>
-    /// 맨 앞에 도착했는지 판별
-    /// </summary>
-    protected bool IsInFrontOf(float otherX)
-    {
-        return (transform.position.x * direction) > (otherX * direction);
     }
     #endregion
 
@@ -205,14 +215,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (!IsOtherInRange())
         {
-            if (animator != null)
-            {
-                animator.SetBool("Idle", false);
-                animator.SetBool("Walk", true);
-            }
-
-            animator.speed = 1f;
-            currentState = UnitState.Move;
+            ChangeState(UnitState.Move);
             return;
         }
 
@@ -231,8 +234,6 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (animator != null)
         {
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", false);
             animator.SetTrigger("Attack");
         }
 
@@ -244,16 +245,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (target != null)
         {
-            Debug.Log(
-                $"[{team}] {name} -> {target.GetName()} 공격 " +
-                $"Damage: {attackDamage} | HP Before: {target.CurrentHp}"
-            );
-
             target.TakeDamage(attackDamage);
-
-            Debug.Log(
-                $"[{target.GetTeam()}] {target.GetName()} HP After: {target.CurrentHp}"
-            );
         }
 
         else
@@ -271,7 +263,6 @@ public class Unit : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(segment);
 
-        animator.speed = 1f;
         isAttacking = false;
         attackRoutine = null;
     }
@@ -287,9 +278,11 @@ public class Unit : MonoBehaviour, IDamageable
     }
     #endregion
 
-    #region DamageState
+    #region TakeDamage & DamageState
     /// <summary>
-    /// 피격 시
+    /// 피격 시 데미지를 받음
+    /// <para>1. 피가 절반 이하로 내려가면 Damage 상태로 전환</para>
+    /// <para>2. 피가 0이하로 내려가면 Die 상태로 전환</para>
     /// </summary>
     public virtual void TakeDamage(float damage)
     {
@@ -297,17 +290,14 @@ public class Unit : MonoBehaviour, IDamageable
 
         StartCoroutine(PlayHitEffect());
 
-        animator.speed = 1f;
-
         float nextHp = currentHp - damage;
-
         bool triggerHalf = !halfHpTriggered && nextHp <= maxHp * 0.5f;
 
         if (triggerHalf)
         {
             pendingDamage = damage;
             halfHpTriggered = true;
-            currentState = UnitState.Damage;
+            ChangeState(UnitState.Damage);
         }
 
         else
@@ -320,41 +310,13 @@ public class Unit : MonoBehaviour, IDamageable
             damageAnimRoutine = StartCoroutine(DamageAnimationCoroutine());
 
             if (currentHp <= 0)
-                currentState = UnitState.Die;
+                ChangeState(UnitState.Die);
         }
     }
 
-    private IEnumerator PlayHitEffect()
-    {
-        if (hitEffectPrefab == null || isHitEffect) yield return null;
-
-        isHitEffect = true;
-
-        hitEffectPrefab.SetActive(true);
-
-        Vector3 randomPos = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
-            0
-        );
-        Vector3 spawnPos = transform.position + randomPos;
-        hitEffectPrefab.transform.position = spawnPos;
-
-        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
-        if (effectRenderer != null)
-        {
-            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
-        }
-
-        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
-        float duration = (ps != null) ? ps.main.duration : 1.0f;
-
-        yield return new WaitForSeconds(duration);
-
-        hitEffectPrefab.SetActive(false);
-        isHitEffect = false;
-    }
-
+    /// <summary>
+    /// Damage State (피가 절반이하로 내려가면 1번만 실행)
+    /// </summary>
     protected virtual void DamageState()
     {
         if (isDamaging) return;
@@ -367,9 +329,6 @@ public class Unit : MonoBehaviour, IDamageable
         isDamaging = true;
 
         StopAttack();
-
-        if (animator != null)
-            animator.SetTrigger("Damage");
 
         damageTween?.Kill();
 
@@ -404,13 +363,17 @@ public class Unit : MonoBehaviour, IDamageable
         currentHp -= pendingDamage;
 
         if (currentHp <= 0)
-            currentState = UnitState.Die;
+            ChangeState(UnitState.Die);
         else
-            currentState = UnitState.Attack;
+            ChangeState(UnitState.Attack);
 
         isDamaging = false;
     }
 
+    /// <summary>
+    /// 피격 시 DoSclae & 반짝거리는 Animation
+    /// </summary>
+    /// <returns></returns>
     protected IEnumerator DamageAnimationCoroutine()
     {
         damageTween?.Kill();
@@ -426,6 +389,43 @@ public class Unit : MonoBehaviour, IDamageable
         yield return seq.WaitForCompletion();
     }
 
+    /// <summary>
+    /// 뭉게뭉게 구름 이펙트
+    /// </summary>
+    private IEnumerator PlayHitEffect()
+    {
+        if (hitEffectPrefab == null || isHitEffect) yield return null;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
+
+        Vector3 randomPos = new Vector3(
+            Random.Range(-0.5f, 0.5f),
+            Random.Range(-0.5f, 0.5f),
+            0
+        );
+        Vector3 spawnPos = transform.position + randomPos;
+        hitEffectPrefab.transform.position = spawnPos;
+
+        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        if (effectRenderer != null)
+        {
+            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+
+        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (ps != null) ? ps.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        hitEffectPrefab.SetActive(false);
+        isHitEffect = false;
+    }
+
+    /// <summary>
+    /// 실행중이던 공격 중단
+    /// </summary>
     protected void StopAttack()
     {
         isAttacking = false;
@@ -447,37 +447,31 @@ public class Unit : MonoBehaviour, IDamageable
         if (isDying) return;
         StartCoroutine(DieCoroutine());
     }
+
+    //반대로 보고 달려가는 죽음 연출
     protected virtual IEnumerator DieCoroutine()
     {
         isDying = true;
 
+        //큐에서 제거
         UTQ.RemoveUnit(team, this);
 
+        //상태 설정
         StopAttack();
-        isAttacking = false;
         isDamaging = false;
 
         damageTween?.Kill();
         transform.localScale = originalScale;
         spriteRenderer.color = Color.white;
 
-        // 방향 반전
         direction *= -1f;
-        ApplyDirectionVisual();
+        spriteRenderer.flipX = true;
 
-        if (animator != null)
-        {
-            animator.SetBool("Idle", false);
-            animator.SetBool("Walk", true);
-            animator.speed = 2f;
-        }
-
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
         float elapsed = 0f;
         float duration = 2f;
         float runSpeed = moveSpeed * 2f;
 
-        Color startColor = sr.color;
+        Color startColor = spriteRenderer.color;
 
         while (elapsed < duration)
         {
@@ -486,33 +480,17 @@ public class Unit : MonoBehaviour, IDamageable
             transform.position += Vector3.right * direction * runSpeed * Time.deltaTime;
 
             float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
-            sr.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
 
             yield return null;
         }
 
-        sr.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
-
-        if (animator != null)
-        {
-            animator.Rebind();
-            animator.Update(0f);
-        }
-
-        animator.speed = 1f;
-        ApplyDirectionVisual();
+        spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
+        transform.localScale = originalScale;
+        spriteRenderer.flipX = false;
         isDying = false;
-        ownerPool.ReturnUnit(this);
-    }
 
-    /// <summary>
-    /// 방향 반전 함수
-    /// </summary>
-    protected void ApplyDirectionVisual()
-    {
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
+        ownerPool.ReturnUnit(this);
     }
     #endregion
 }
