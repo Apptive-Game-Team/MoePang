@@ -404,9 +404,10 @@ public class Unit : MonoBehaviour, IDamageable
 
         hitEffectPrefab.SetActive(true);
 
+        float effectRange = 0.4f * unitSize;
         Vector3 randomPos = new Vector3(
-            Random.Range(-0.5f, 0.5f),
-            Random.Range(-0.5f, 0.5f),
+            Random.Range(-effectRange/2, effectRange),
+            Random.Range(0, effectRange),
             0
         );
         Vector3 spawnPos = transform.position + randomPos;
