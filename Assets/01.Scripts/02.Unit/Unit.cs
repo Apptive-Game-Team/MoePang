@@ -90,6 +90,7 @@ public class Unit : MonoBehaviour, IDamageable
         SetVisual();
 
         UTQ.Enqueue(team, this);
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
         ChangeState(UnitState.Attack);  
     }
 
