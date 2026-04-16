@@ -36,9 +36,9 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed; //이동 속도
-    [SerializeField] protected float attackRange; //공격 사거리
     [SerializeField] protected float attackDamage; //공격 데미지
     [SerializeField] protected float attackSpeed; //공격 속도 (1초에 몇 번 공격하는지)
+    [SerializeField] protected float unitSize; //유닛 크기
 
     [Header("유닛 설정")]
     [SerializeField] protected UnitState currentState;
@@ -66,6 +66,7 @@ public class Unit : MonoBehaviour, IDamageable
 
     //수치 / 로직 관리
     protected Vector3 originalScale;
+    protected float attackRange = 1f;
     protected float pendingDamage;
     protected Tween damageTween;
     protected Coroutine attackRoutine;
@@ -88,6 +89,7 @@ public class Unit : MonoBehaviour, IDamageable
         SetStat();
         SetVisual();
 
+        UTQ.Enqueue(team, this);
         ChangeState(UnitState.Attack);  
     }
 
@@ -98,9 +100,11 @@ public class Unit : MonoBehaviour, IDamageable
         maxHp = data.MaxHp;
         currentHp = maxHp;
         moveSpeed = data.BaseMoveSpeed;
-        attackRange = data.AttackRange;
         attackDamage = data.AttackDamage;
         attackSpeed = data.AttackSpeed;
+        unitSize = data.UnitSize;
+
+        attackRange = unitSize;
     }
 
     protected virtual void SetVisual()
