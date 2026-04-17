@@ -92,8 +92,8 @@ public class Castle : MonoBehaviour, IDamageable
         hitEffectPrefab.SetActive(true);
 
         Vector3 randomPos = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
+            Random.Range(-0.3f, 0.3f),
+            Random.Range(-0.3f, 0.3f),
             0
         );
         Vector3 spawnPos = transform.position + randomPos;

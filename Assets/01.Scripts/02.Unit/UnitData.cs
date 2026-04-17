@@ -14,16 +14,17 @@ public abstract class UnitData : ScriptableObject
     [Header("Stats")]
     [SerializeField] protected float maxHp;
     [SerializeField] protected float baseMoveSpeed;
-    [SerializeField] protected float attackRange;
     [SerializeField] protected float attackDamage;
     [SerializeField] protected float attackSpeed;
+    [SerializeField] protected float unitSize = 1f;
+    
 
     public TeamType Team => team;
     public UnitName UnitName => unitName;
     public AnimatorOverrideController AnimatorOverride => animatorOverride;
     public float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
-    public float AttackRange => attackRange;
     public float AttackDamage => attackDamage;
     public float AttackSpeed => attackSpeed;
+    public float UnitSize => unitSize;
 }
