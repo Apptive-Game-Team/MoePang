@@ -302,7 +302,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             // normal <-> normal
-            if (p1.puzzleType == p2.puzzleType)
+            if (p1.puzzleType  == PuzzleType.Normal && p2.puzzleType == PuzzleType.Normal)
             {
                 if (p1.GetPuzzleSubType() == p2.GetPuzzleSubType())
                 {
@@ -1060,8 +1060,6 @@ namespace _01.Scripts._01.ThreeMatch
                 case SpecialPuzzleType.CircleBomb:
                     if (ps != null)
                     {
-                        
-                        
                         foreach (PuzzleObject po in list)
                         {
                             float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
@@ -1087,7 +1085,12 @@ namespace _01.Scripts._01.ThreeMatch
                     foreach (PuzzleObject po in list)
                     {
                         float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
-                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        float maxDistance = 4.0f;
+                        float normalizedDist = Mathf.Clamp01(distance / maxDistance);
+                        float curveFactor = Mathf.Pow(1 - normalizedDist, 1.5f);
+
+                        float delay = maxLifetime * curveFactor;
                         
                         StartCoroutine(DelayedTileEffect(po, delay));
                     }
@@ -1096,7 +1099,12 @@ namespace _01.Scripts._01.ThreeMatch
                     foreach (PuzzleObject po in list)
                     {
                         float distance = Vector2.Distance(centerPos, new Vector2(po.transform.position.x, po.transform.position.y));
-                        float delay = maxLifetime / distance / 1.5f;
+                        
+                        float maxDistance = 4.0f;
+                        float normalizedDist = Mathf.Clamp01(distance / maxDistance);
+                        float curveFactor = Mathf.Pow(1 - normalizedDist, 1.5f);
+
+                        float delay = maxLifetime * curveFactor;
                         
                         StartCoroutine(DelayedTileEffect(po, delay));
                     }

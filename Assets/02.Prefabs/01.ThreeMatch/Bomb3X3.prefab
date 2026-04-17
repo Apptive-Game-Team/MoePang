@@ -59,8 +59,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: -4392042050912748477, guid: a68a71c7d1ce74febbc35b655a6b7bad, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -136,8 +136,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puzzleType: 1
+  puzzleState: 4
   column: 0
   row: 0
   isMatched: 0
   specialPuzzleType: 0
-  colorBombType: 0
+  habitat: 0

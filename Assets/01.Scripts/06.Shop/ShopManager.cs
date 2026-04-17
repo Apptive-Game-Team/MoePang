@@ -22,13 +22,16 @@ public class ShopManager : MonoBehaviour
     [Header("버튼")]
     [SerializeField] private Button animalsTapButton;
     [SerializeField] private Button upgradeTapButton;
-    
-    [Header("상태")]
-    [SerializeField] private bool isUnitClicked = false;
-    [SerializeField] private ShopUI currentSelected;
-    [SerializeField] private UpgradeUI currentUpgradeSelected;
 
-    private List<ShopUI> allShopUI = new List<ShopUI>();
+    [Header("구매 팝업")]
+    [SerializeField] private GameObject buyPopup;
+    [SerializeField] private TextMeshProUGUI costText;
+    [SerializeField] private TextMeshProUGUI tooltipText;
+
+    //상태 제어
+    private ShopUI currentSelected;
+    private UpgradeUI currentUpgradeSelected;
+    private bool isBuyPopupActive = false;
 
     private void Awake()
     {
@@ -55,6 +58,7 @@ public class ShopManager : MonoBehaviour
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
         animalsTap.SetActive(true);
         upgradeTap.SetActive(false);
+        buyPopup.SetActive(false);
         UpdateBuyButtonText();
     }
     public void OnClickBack()
@@ -64,6 +68,8 @@ public class ShopManager : MonoBehaviour
 
     public void OnClickUnit(ShopUI clickedUI)
     {
+        if (isBuyPopupActive) return;
+
         if (currentSelected == clickedUI)
         {
             currentSelected.Deselect();
@@ -117,13 +123,13 @@ public class ShopManager : MonoBehaviour
             }
 
             int cost = UpgradeManager.Instance.GetCost(data);
-            buyButtonText.text = $"비용 : {cost}G";
+            buyButtonText.text = $"Buy";
             return;
         }
 
         if (currentSelected == null)
         {
-            buyButtonText.text = "골라주세용";
+            buyButtonText.text = "Buy";
             return;
         }
 
@@ -131,7 +137,7 @@ public class ShopManager : MonoBehaviour
 
         if (currentSelected.IsUnlocked)
         {
-            buyButtonText.text = "OwO";
+            buyButtonText.text = "구매완료";
             return;
         }
 
@@ -141,7 +147,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        buyButtonText.text = $"비용 : {unit.UnitCost}G";
+        buyButtonText.text = $"Buy";
     }
 
     public void OnClickBuy()
@@ -164,11 +170,11 @@ public class ShopManager : MonoBehaviour
                 return;
             }
 
-            UpgradeManager.Instance.Upgrade(data);
-
-            goldText.text = $"Gold : {GoldManager.Instance.Gold}";
-            currentUpgradeSelected.Refresh();
-            UpdateBuyButtonText();
+            buyPopup.SetActive(true);
+            isBuyPopupActive = true;
+            costText.text = $"Cost : {cost}G";
+            tooltipText.text = $"{data.UpgradeType}을 강화하겠습니까? " +
+                $"\n {data.UpgradeType} += {data.IncreasePerLevel}";
             return;
         }
 
@@ -195,12 +201,55 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        HabitatManager.Instance.Unlock(unit);
+        buyPopup.SetActive(true);
+        isBuyPopupActive = true;
+        costText.text = $"Cost : {unit.UnitCost}G";
+        tooltipText.text = $"{unit.UnitName}을 해금하겠습니까?";
+    }
 
-        currentSelected.RefreshUnlockState();
+    /// <summary>
+    /// 팝업의 [확인] 버튼에 연결할 실제 구매 로직
+    /// </summary>
+    public void ConfirmPurchase()
+    {
+        if (currentUpgradeSelected != null)
+        {
+            var data = currentUpgradeSelected.Data;
+            int cost = UpgradeManager.Instance.GetCost(data);
+
+            if (GoldManager.Instance.TrySpendGold(cost))
+            {
+                UpgradeManager.Instance.Upgrade(data);
+                currentUpgradeSelected.Refresh();
+            }
+        }
+
+        else if (currentSelected != null)
+        {
+            var unit = currentSelected.UnitData;
+
+            if (GoldManager.Instance.TrySpendGold(unit.UnitCost))
+            {
+                HabitatManager.Instance.Unlock(unit);
+                currentSelected.RefreshUnlockState();
+            }
+        }
 
         goldText.text = $"Gold : {GoldManager.Instance.Gold}";
-        buyButtonText.text = "굿굿";
+        UpdateBuyButtonText();
+        ClosePopup();
+    }
+
+    /// <summary>
+    /// 팝업의 [취소] 버튼이나 닫기 버튼에 연결
+    /// </summary>
+    public void ClosePopup()
+    {
+        if (buyPopup != null)
+        {
+            isBuyPopupActive = false;
+            buyPopup.SetActive(false);
+        }
     }
 
     private void EnsureActivateAnimalsPanel()
@@ -215,7 +264,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void ActivateUpgradeTap()
     {
-        if (upgradeTap.activeSelf) return;
+        if (upgradeTap.activeSelf || isBuyPopupActive) return;
         
         animalsTap.SetActive(false);
         upgradeTap.SetActive(true);
@@ -226,7 +275,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void ActivateAnimalsTap()
     {
-        if (animalsTap.activeSelf) return;
+        if (animalsTap.activeSelf || isBuyPopupActive) return;
         
         upgradeTap.SetActive(false);
         animalsTap.SetActive(true);

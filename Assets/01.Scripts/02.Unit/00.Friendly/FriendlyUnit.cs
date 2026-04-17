@@ -14,7 +14,6 @@ public class FriendlyUnit : Unit
         friendlyData = data as FriendlyUnitData;
 
         direction = 1f;
-        ApplyDirectionVisual();
 
         habitat = friendlyData.Habitat;
 
