@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,10 +31,13 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
 
         upgradeLevels[data]++;
 
+        GameManager.Instance.unitData.castleLevels = upgradeLevels;
+        GameManager.Instance.SaveUnitData();
+
         ApplyUpgrade(data);
     }
 
-    void ApplyUpgrade(UpgradeData data)
+    private void ApplyUpgrade(UpgradeData data)
     {
         if (data.UpgradeType == UpgradeType.CastleHP)
         {

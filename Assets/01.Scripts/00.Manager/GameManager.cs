@@ -11,7 +11,7 @@ namespace _01.Scripts._00.Manager
         public int goldAmount;
         public int clearedStage = -1;
         public List<StageData> stagesData;
-        // todo : 해금된 기물, 강화 요소 별 강화 수치 추가 예정
+        // todo : 해금된 기물 추가 예정
 
         public PlayData()
         {
@@ -20,6 +20,26 @@ namespace _01.Scripts._00.Manager
             {
                 stagesData.Add(new StageData());
             }
+        }
+    }
+
+    [Serializable]
+    public class UnitData
+    {
+        public Dictionary<UpgradeData, int> castleLevels = new();
+        
+        [SerializeField] private List<UpgradeData> castleKeys;
+        [SerializeField] private List<int> castleValues;
+        
+        // Dict <-> List
+        public void BeforeSave()
+        {
+            SaveLoadManager.DictionaryToLists(castleLevels, out castleKeys, out castleValues);
+        }
+
+        public void AfterLoad()
+        {
+            castleLevels = SaveLoadManager.ListsToDictionary(castleKeys, castleValues);
         }
     }
 
@@ -55,6 +75,7 @@ namespace _01.Scripts._00.Manager
     public class GameManager : SingletonObject<GameManager>
     {
         public PlayData playData;
+        public UnitData unitData;
         public GameData gameData;
 
         protected override void Awake()
@@ -68,6 +89,7 @@ namespace _01.Scripts._00.Manager
         private void Start()
         {
             SaveLoadManager.Instance.LoadData(playData, "PlayData");
+            SaveLoadManager.Instance.LoadData(unitData, "UnitData");
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
         }
 
@@ -92,6 +114,13 @@ namespace _01.Scripts._00.Manager
                 time : Mathf.Min(stageData.minUsedTime, time);
             
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
+        }
+        
+        public void SaveUnitData()
+        {
+            unitData.BeforeSave();
+            
+            SaveLoadManager.Instance.SaveData(unitData, "UnitData");
         }
 
         public void SaveGameData()
