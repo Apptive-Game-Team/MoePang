@@ -11,7 +11,6 @@ namespace _01.Scripts._00.Manager
         public int goldAmount;
         public int clearedStage = -1;
         public List<StageData> stagesData;
-        // todo : 해금된 기물 추가 예정
 
         public PlayData()
         {
@@ -23,8 +22,59 @@ namespace _01.Scripts._00.Manager
         }
     }
 
+    public interface IConvertable
+    {
+        public void BeforeSave();
+        public void AfterLoad();
+    }
+
     [Serializable]
-    public class UnitData
+    public class UnitData : IConvertable
+    {
+        public Dictionary<FriendlyUnitData, bool> unlockedUnits = new();
+        
+        [SerializeField] private List<FriendlyUnitData> unitKeys;
+        [SerializeField] private List<bool> unitValues;
+
+        public UnitData() { }
+
+        public UnitData(FriendlyUnitList unitList)
+        {
+            unlockedUnits.Clear();
+            
+            foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
+            {
+                List<FriendlyUnitData> units = unitList.GetUnits(habitat);
+                if (units == null) continue;
+
+                foreach (FriendlyUnitData unit in units)
+                {
+                    unlockedUnits[unit] = false;
+                }
+
+                if (units.Count > 0)
+                {
+                    unlockedUnits[units[0]] = true;
+                }
+            }
+
+            BeforeSave();
+        }
+        
+        // Dict <-> List
+        public void BeforeSave()
+        {
+            GameManager.DictionaryToLists(unlockedUnits, out unitKeys, out unitValues);
+        }
+
+        public void AfterLoad()
+        {
+            unlockedUnits = GameManager.ListsToDictionary(unitKeys, unitValues);
+        }
+    }
+
+    [Serializable]
+    public class CastleData : IConvertable
     {
         public Dictionary<UpgradeData, int> castleLevels = new();
         
@@ -34,18 +84,19 @@ namespace _01.Scripts._00.Manager
         // Dict <-> List
         public void BeforeSave()
         {
-            SaveLoadManager.DictionaryToLists(castleLevels, out castleKeys, out castleValues);
+            GameManager.DictionaryToLists(castleLevels, out castleKeys, out castleValues);
         }
 
         public void AfterLoad()
         {
-            castleLevels = SaveLoadManager.ListsToDictionary(castleKeys, castleValues);
+            castleLevels = GameManager.ListsToDictionary(castleKeys, castleValues);
         }
     }
 
     [Serializable]
     public class StageData
     {
+        public int stageNum;
         public float minUsedTime;
         public int minUsedTile;
         public int maxUsedTile;
@@ -74,7 +125,10 @@ namespace _01.Scripts._00.Manager
     
     public class GameManager : SingletonObject<GameManager>
     {
+        [SerializeField] private FriendlyUnitList unitList;
+        
         public PlayData playData;
+        public CastleData castleData;
         public UnitData unitData;
         public GameData gameData;
 
@@ -83,14 +137,43 @@ namespace _01.Scripts._00.Manager
             base.Awake();
             
             playData = new PlayData();
+            castleData = new CastleData();
+            unitData = new UnitData(unitList);
             gameData = new GameData();
         }
 
         private void Start()
         {
             SaveLoadManager.Instance.LoadData(playData, "PlayData");
+            SaveLoadManager.Instance.LoadData(castleData, "CastleData");
             SaveLoadManager.Instance.LoadData(unitData, "UnitData");
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
+        }
+        
+        public static void DictionaryToLists<TKey, TValue>(Dictionary<TKey, TValue> dict, out List<TKey> keys, out List<TValue> values)
+        {
+            keys = new List<TKey>();
+            values = new List<TValue>();
+    
+            if (dict == null) return;
+
+            foreach (var kvp in dict)
+            {
+                keys.Add(kvp.Key);
+                values.Add(kvp.Value);
+            }
+        }
+
+        public static Dictionary<TKey, TValue> ListsToDictionary<TKey, TValue>(List<TKey> keys, List<TValue> values)
+        {
+            var dict = new Dictionary<TKey, TValue>();
+            if (keys == null || values == null) return dict;
+
+            for (int i = 0; i < keys.Count; i++)
+            {
+                dict.Add(keys[i], values[i]);
+            }
+            return dict;
         }
 
         public void SavePlayData()
@@ -103,10 +186,11 @@ namespace _01.Scripts._00.Manager
 
             playData.goldAmount = goldManager.Gold;
             
-            playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage);
+            playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
             stageManager.SetMaxStage(playData.clearedStage + 1);
 
             StageData stageData = playData.stagesData[stageManager.CurrentStage];
+            stageData.stageNum = stageManager.CurrentStage + 1;
             stageData.maxUsedTile = Mathf.Max(stageData.maxUsedTile, usedTileCount);
             stageData.minUsedTile = stageData.minUsedTile == 0 ?
                 usedTileCount : Mathf.Min(stageData.maxUsedTile, usedTileCount);
@@ -116,10 +200,21 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
         }
         
+        public void SaveCastleData()
+        {
+            playData.goldAmount = GoldManager.Instance.Gold;
+            castleData.BeforeSave();
+            
+            SaveLoadManager.Instance.SaveData(playData, "PlayData");
+            SaveLoadManager.Instance.SaveData(castleData, "CastleData");
+        }
+
         public void SaveUnitData()
         {
+            playData.goldAmount = GoldManager.Instance.Gold;
             unitData.BeforeSave();
             
+            SaveLoadManager.Instance.SaveData(playData, "PlayData");
             SaveLoadManager.Instance.SaveData(unitData, "UnitData");
         }
 

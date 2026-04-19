@@ -6,6 +6,12 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
 {
     private Dictionary<UpgradeData, int> upgradeLevels = new();
 
+    protected override void Awake()
+    {
+        base.Awake();
+        upgradeLevels = GameManager.Instance.castleData.castleLevels;
+    }
+
     public int GetLevel(UpgradeData data)
     {
         if (!upgradeLevels.ContainsKey(data))
@@ -31,8 +37,8 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
 
         upgradeLevels[data]++;
 
-        GameManager.Instance.unitData.castleLevels = upgradeLevels;
-        GameManager.Instance.SaveUnitData();
+        GameManager.Instance.castleData.castleLevels = upgradeLevels;
+        GameManager.Instance.SaveCastleData();
 
         ApplyUpgrade(data);
     }

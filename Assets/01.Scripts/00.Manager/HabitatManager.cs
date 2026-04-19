@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
     //참조
     private Dictionary<FriendlyUnitData, bool> unlockDict = new();
 
-    private void Awake()
+    protected override void Awake()
     {
         base.Awake();
         Initialize();
@@ -20,25 +21,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
 
     private void Initialize()
     {
-        unlockDict.Clear();
-
-        foreach (Habitat habitat in System.Enum.GetValues(typeof(Habitat)))
-        {
-            var units = unitList.GetUnits(habitat);
-
-            if (units == null) continue;
-
-            foreach (var unit in units)
-            {
-                unlockDict[unit] = false;
-            }
-
-            //첫 유닛은 기본 해금
-            if (units.Count > 0)
-            {
-                unlockDict[units[0]] = true;
-            }
-        }
+        unlockDict = GameManager.Instance.unitData.unlockedUnits;
     }
 
     /// <summary>
@@ -57,6 +40,9 @@ public class HabitatManager : SingletonObject<HabitatManager>
         if (unlockDict.ContainsKey(unit))
         {
             unlockDict[unit] = true;
+
+            GameManager.Instance.unitData.unlockedUnits = unlockDict;
+            GameManager.Instance.SaveUnitData();
         }
     }
 
