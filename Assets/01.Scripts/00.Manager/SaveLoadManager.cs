@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -34,6 +35,11 @@ namespace _01.Scripts._00.Manager
             {
                 string json = File.ReadAllText(path);
                 JsonUtility.FromJsonOverwrite(json, data);
+                
+                if (data is IConvertable convert)
+                {
+                    convert.AfterLoad();
+                }
             }
         }
     }

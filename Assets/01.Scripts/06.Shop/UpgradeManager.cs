@@ -1,9 +1,16 @@
+using _01.Scripts._00.Manager;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class UpgradeManager : SingletonObject<UpgradeManager>
 {
     private Dictionary<UpgradeData, int> upgradeLevels = new();
+
+    protected override void Awake()
+    {
+        base.Awake();
+        upgradeLevels = GameManager.Instance.castleData.castleLevels;
+    }
 
     public int GetLevel(UpgradeData data)
     {
@@ -30,10 +37,13 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
 
         upgradeLevels[data]++;
 
+        GameManager.Instance.castleData.castleLevels = upgradeLevels;
+        GameManager.Instance.SaveCastleData();
+
         ApplyUpgrade(data);
     }
 
-    void ApplyUpgrade(UpgradeData data)
+    private void ApplyUpgrade(UpgradeData data)
     {
         if (data.UpgradeType == UpgradeType.CastleHP)
         {

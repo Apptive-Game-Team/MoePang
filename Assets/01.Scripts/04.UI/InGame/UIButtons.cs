@@ -13,11 +13,13 @@ namespace _01.Scripts._04.UI.InGame
         public void NextStageButton()
         {
             StageManager.Instance.AddStage(1);
+            StageManager.Instance.StartStage();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         public void RestartButton()
         {
+            StageManager.Instance.StartStage();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
