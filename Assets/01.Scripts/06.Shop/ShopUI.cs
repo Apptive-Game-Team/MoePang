@@ -41,6 +41,7 @@ public class ShopUI : MonoBehaviour
         bool unlocked = HabitatManager.Instance.IsUnlocked(unitData);
 
         unlockImage.gameObject.SetActive(!unlocked);
+        backgroundImage.gameObject.SetActive(unlocked);
     }
 
     public void OnClick()
