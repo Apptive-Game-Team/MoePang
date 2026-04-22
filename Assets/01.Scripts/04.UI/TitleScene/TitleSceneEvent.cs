@@ -14,11 +14,8 @@ public class TitleSceneEvent : MonoBehaviour
 
     private void Update()
     {
-        float alpha = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
-
-        Color color = textComponent.color;
-        color.a = alpha;
-        textComponent.color = color;
+        float t = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
+        textComponent.color = Color.Lerp(Color.black, Color.gray, t);
 
         if (Input.GetMouseButtonDown(0))
         {
