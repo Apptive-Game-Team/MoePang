@@ -61,6 +61,22 @@ public class ShopManager : MonoBehaviour
         buyPopup.SetActive(false);
         UpdateBuyButtonText();
     }
+
+    private void OnEnable()
+    {
+        GoldManager.Instance.OnGoldChanged += OnGoldChanged;
+    }
+
+    private void OnDisable()
+    {
+        GoldManager.Instance.OnGoldChanged -= OnGoldChanged;
+    }
+
+    private void OnGoldChanged()
+    {
+        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+    }
+    
     public void OnClickBack()
     {
         SceneManager.LoadScene(prevScene);
@@ -219,6 +235,7 @@ public class ShopManager : MonoBehaviour
 
             if (GoldManager.Instance.TrySpendGold(cost))
             {
+                GoldManager.Instance.AdjustGold(-cost);
                 UpgradeManager.Instance.Upgrade(data);
                 currentUpgradeSelected.Refresh();
             }
@@ -230,12 +247,12 @@ public class ShopManager : MonoBehaviour
 
             if (GoldManager.Instance.TrySpendGold(unit.UnitCost))
             {
+                GoldManager.Instance.AdjustGold(-unit.UnitCost);
                 HabitatManager.Instance.Unlock(unit);
                 currentSelected.RefreshUnlockState();
             }
         }
-
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        
         UpdateBuyButtonText();
         ClosePopup();
     }

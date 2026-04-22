@@ -19,17 +19,10 @@ public class GoldManager : SingletonObject<GoldManager>
 
     public bool TrySpendGold(int amount)
     {
-        if (gold < amount)
-        {
-            return false;
-        }
-
-        gold -= amount;
-        OnGoldChanged?.Invoke();
-        return true;
+        return gold >= amount;
     }
 
-    public void AddGold(int amount)
+    public void AdjustGold(int amount)
     {
         gold += amount;
         OnGoldChanged?.Invoke();
@@ -38,6 +31,6 @@ public class GoldManager : SingletonObject<GoldManager>
     public void AddStageClearedGold()
     {
         int amount = StageManager.Instance.CheckClearedStage() ? 20 : 100;
-        AddGold(amount);
+        AdjustGold(amount);
     }
 }
