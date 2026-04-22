@@ -1,3 +1,4 @@
+using _01.Scripts._08.Utility;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -6,9 +7,6 @@ using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
-    [Header("씬 연결")]
-    [SerializeField] private string prevScene;
-
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private TextMeshProUGUI buyButtonText;
@@ -79,7 +77,7 @@ public class ShopManager : MonoBehaviour
     
     public void OnClickBack()
     {
-        SceneManager.LoadScene(prevScene);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 
     public void OnClickUnit(ShopUI clickedUI)
