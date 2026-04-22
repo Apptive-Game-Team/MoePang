@@ -529,10 +529,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previousButton: {fileID: 764431966419862559}
   nextButton: {fileID: 7245613241033527601}
-  stageText: {fileID: 0}
-  goldText: {fileID: 0}
-  playScene: DevJJW
-  shopScene: Shop
+  stageText: {fileID: 1849102732987577372}
+  goldText: {fileID: 1400679329804759272}
 --- !u!1 &8069800624484021754
 GameObject:
   m_ObjectHideFlags: 0
@@ -1090,6 +1088,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6795801565845351269, guid: 246cc6e50b8636246a0f33093ba39a90, type: 3}
   m_PrefabInstance: {fileID: 6028220290507594767}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1849102732987577372 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5332788941956081683, guid: 246cc6e50b8636246a0f33093ba39a90, type: 3}
+  m_PrefabInstance: {fileID: 6028220290507594767}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7769254650871700837
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1294,3 +1303,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7389698500596840514, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
   m_PrefabInstance: {fileID: 7973899295221568495}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1400679329804759272 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9068223544862040839, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
+  m_PrefabInstance: {fileID: 7973899295221568495}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
