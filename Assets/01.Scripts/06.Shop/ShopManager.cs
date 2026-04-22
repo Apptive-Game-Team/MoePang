@@ -55,7 +55,7 @@ public class ShopManager : MonoBehaviour
 
     private void Start()
     {
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        goldText.text = $"{GoldManager.Instance.Gold}";
         animalsTap.SetActive(true);
         upgradeTap.SetActive(false);
         buyPopup.SetActive(false);
@@ -74,7 +74,7 @@ public class ShopManager : MonoBehaviour
 
     private void OnGoldChanged()
     {
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        goldText.text = $"{GoldManager.Instance.Gold}";
     }
     
     public void OnClickBack()

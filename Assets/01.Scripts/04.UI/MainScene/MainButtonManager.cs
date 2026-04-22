@@ -19,7 +19,7 @@ public class MainButtonManager : MonoBehaviour
     private void Start()
     {
         stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        goldText.text = $"{GoldManager.Instance.Gold}";
 
         StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 

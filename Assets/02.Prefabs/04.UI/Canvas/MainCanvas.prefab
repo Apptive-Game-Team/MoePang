@@ -529,7 +529,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previousButton: {fileID: 764431966419862559}
   nextButton: {fileID: 7245613241033527601}
-  stageText: {fileID: 0}
+  stageText: {fileID: 554529290442159308}
   goldText: {fileID: 1400679329804759272}
 --- !u!1 &8069800624484021754
 GameObject:
@@ -1090,6 +1090,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 246cc6e50b8636246a0f33093ba39a90, type: 3}
+--- !u!114 &554529290442159308 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5332788941956081683, guid: 246cc6e50b8636246a0f33093ba39a90, type: 3}
+  m_PrefabInstance: {fileID: 5599041113504013535}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1440100468292827066 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6795801565845351269, guid: 246cc6e50b8636246a0f33093ba39a90, type: 3}
@@ -1314,8 +1325,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9068223544862040839, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
+      propertyPath: m_margin.z
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 9068223544862040839, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
       propertyPath: m_HorizontalAlignment
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
