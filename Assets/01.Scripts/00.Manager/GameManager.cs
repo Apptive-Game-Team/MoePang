@@ -9,7 +9,7 @@ namespace _01.Scripts._00.Manager
     public class PlayData
     {
         public int goldAmount;
-        public int clearedStage = -1;
+        public int clearedStage;
         public List<StageData> stagesData;
 
         public PlayData()
