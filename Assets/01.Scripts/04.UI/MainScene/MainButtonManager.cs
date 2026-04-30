@@ -1,3 +1,4 @@
+using _01.Scripts._08.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,15 +16,10 @@ public class MainButtonManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI stageText;
     [SerializeField] private TextMeshProUGUI goldText;
 
-    [Header("씬")]
-    [SerializeField] private string playScene;
-    [SerializeField] private string shopScene;
-
-
     private void Start()
     {
         stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        goldText.text = $"{GoldManager.Instance.Gold}";
 
         StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 
@@ -34,7 +30,7 @@ public class MainButtonManager : MonoBehaviour
     public void OnClickPlay()
     {
         SceneManager.sceneLoaded += OnPlaySceneLoaded;
-        SceneManager.LoadScene(playScene);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
     }
 
     // 게임 플레이 시 시작돼야 할 사항들
@@ -47,7 +43,7 @@ public class MainButtonManager : MonoBehaviour
 
     public void OnClickShop()
     {
-        SceneManager.LoadScene(shopScene);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Shop));
     }
 
     /// <summary>

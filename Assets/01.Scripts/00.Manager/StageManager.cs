@@ -16,7 +16,7 @@ public class StageManager : SingletonObject<StageManager>
     {
         base.Awake();
         
-        MaxStage = GameManager.Instance.playData.clearedStage + 1;
+        MaxStage = GameManager.Instance.playData.clearedStage;
         CurrentStage = MaxStage;
     }
     

@@ -9,7 +9,7 @@ namespace _01.Scripts._00.Manager
     public class PlayData
     {
         public int goldAmount;
-        public int clearedStage = -1;
+        public int clearedStage;
         public List<StageData> stagesData;
 
         public PlayData()
@@ -187,7 +187,7 @@ namespace _01.Scripts._00.Manager
             playData.goldAmount = goldManager.Gold;
             
             playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
-            stageManager.SetMaxStage(playData.clearedStage + 1);
+            stageManager.SetMaxStage(playData.clearedStage);
 
             StageData stageData = playData.stagesData[stageManager.CurrentStage];
             stageData.stageNum = stageManager.CurrentStage + 1;

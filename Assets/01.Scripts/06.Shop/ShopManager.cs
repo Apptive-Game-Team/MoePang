@@ -1,3 +1,4 @@
+using _01.Scripts._08.Utility;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -6,9 +7,6 @@ using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
-    [Header("씬 연결")]
-    [SerializeField] private string prevScene;
-
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private TextMeshProUGUI buyButtonText;
@@ -55,15 +53,31 @@ public class ShopManager : MonoBehaviour
 
     private void Start()
     {
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        goldText.text = $"{GoldManager.Instance.Gold}";
         animalsTap.SetActive(true);
         upgradeTap.SetActive(false);
         buyPopup.SetActive(false);
         UpdateBuyButtonText();
     }
+
+    private void OnEnable()
+    {
+        GoldManager.Instance.OnGoldChanged += OnGoldChanged;
+    }
+
+    private void OnDisable()
+    {
+        GoldManager.Instance.OnGoldChanged -= OnGoldChanged;
+    }
+
+    private void OnGoldChanged()
+    {
+        goldText.text = $"{GoldManager.Instance.Gold}";
+    }
+    
     public void OnClickBack()
     {
-        SceneManager.LoadScene(prevScene);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 
     public void OnClickUnit(ShopUI clickedUI)
@@ -219,6 +233,7 @@ public class ShopManager : MonoBehaviour
 
             if (GoldManager.Instance.TrySpendGold(cost))
             {
+                GoldManager.Instance.AdjustGold(-cost);
                 UpgradeManager.Instance.Upgrade(data);
                 currentUpgradeSelected.Refresh();
             }
@@ -230,12 +245,12 @@ public class ShopManager : MonoBehaviour
 
             if (GoldManager.Instance.TrySpendGold(unit.UnitCost))
             {
+                GoldManager.Instance.AdjustGold(-unit.UnitCost);
                 HabitatManager.Instance.Unlock(unit);
                 currentSelected.RefreshUnlockState();
             }
         }
-
-        goldText.text = $"Gold : {GoldManager.Instance.Gold}";
+        
         UpdateBuyButtonText();
         ClosePopup();
     }

@@ -1,3 +1,4 @@
+using _01.Scripts._08.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,16 +12,10 @@ public class TitleSceneEvent : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textComponent;
     [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
 
-    [Header("이동할 씬")]
-    [SerializeField] private string nextSceneName;
-
-    void Update()
+    private void Update()
     {
-        float alpha = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
-
-        Color color = textComponent.color;
-        color.a = alpha;
-        textComponent.color = color;
+        float t = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
+        textComponent.color = Color.Lerp(Color.black, Color.gray, t);
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -30,6 +25,6 @@ public class TitleSceneEvent : MonoBehaviour
 
     private void MoveToNextScene()
     {
-        SceneManager.LoadScene(nextSceneName);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 }

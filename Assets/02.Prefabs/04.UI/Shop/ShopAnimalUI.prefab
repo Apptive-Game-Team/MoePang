@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3821094324235062245}
   - component: {fileID: 8273236352810543260}
   m_Layer: 5
-  m_Name: RockImage
+  m_Name: LockImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -212,7 +212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitData: {fileID: 0}
   unlockImage: {fileID: 8273236352810543260}
-  backgroundImage: {fileID: 0}
+  backgroundImage: {fileID: 6171963334323506393}
 --- !u!114 &3095907985998479396
 MonoBehaviour:
   m_ObjectHideFlags: 0

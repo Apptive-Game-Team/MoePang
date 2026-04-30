@@ -4037,6 +4037,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: GoldCard
       objectReference: {fileID: 0}
+    - target: {fileID: 3636308266506558057, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
+      propertyPath: m_Color.b
+      value: 0.79607844
+      objectReference: {fileID: 0}
+    - target: {fileID: 3636308266506558057, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
+      propertyPath: m_Color.g
+      value: 0.79607844
+      objectReference: {fileID: 0}
+    - target: {fileID: 3636308266506558057, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
+      propertyPath: m_Color.r
+      value: 0.79607844
+      objectReference: {fileID: 0}
+    - target: {fileID: 3636308266506558057, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: ac42e073a0c01cb429a08edf617310fc, type: 2}
     - target: {fileID: 7389698500596840514, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
       propertyPath: m_Pivot.x
       value: 1
