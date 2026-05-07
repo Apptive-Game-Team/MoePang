@@ -17,6 +17,15 @@ public enum UnitState
 }
 
 /// <summary>
+/// 유닛의 공격 방법
+/// </summary>
+public enum AttackType
+{
+    MeleeAttack,
+    RangeAttack,
+}
+
+/// <summary>
 /// 아군진영, 적진영 타입
 /// </summary>
 public enum TeamType
@@ -101,18 +110,18 @@ public class Unit : MonoBehaviour, IDamageable
         team = data.Team;
 
         unitGrade = data.UnitGrade;
+        maxHp = data.MaxHp;
         attackDamage = data.AttackDamage;
         unitSize = data.UnitSize;
+        moveSpeed = data.BaseMoveSpeed;
+        attackSpeed = data.AttackSpeed;
         attackRange = unitSize;
     }
 
     protected virtual void SetProceedStat()
     {
         UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
-        maxHp = data.MaxHp;
         currentHp = maxHp;
-        moveSpeed = data.BaseMoveSpeed;
-        attackSpeed = data.AttackSpeed;
     }
 
     protected virtual void SetVisual()

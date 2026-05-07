@@ -22,6 +22,9 @@ public class UnitGradeManager : SingletonObject<UnitGradeManager>
                 unit.UnitHpMultiplier(3f);
                 unit.AttackRangeMultiplier(0.7f);
                 break;
+            
+            default:
+                break;
         }
     }
 }
