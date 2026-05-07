@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,12 +20,12 @@ namespace _01.Scripts._01.ThreeMatch
 
         public void AddStack(Habitat type, int num)
         {
-            stacks[(int)type].AddStack(type, num);
+            stacks.First(s => s.type == type).AddStack(num);
         }
 
         public SpawnStack SetStack(Habitat type)
         {
-            return stacks[(int)type];
+            return stacks.First(s => s.type == type);
         }
     }
 }

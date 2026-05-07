@@ -1,8 +1,10 @@
+using _01.Scripts._00.Manager;
 using NUnit.Framework.Constraints;
 using System.Collections;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 #region Enums
 /// <summary>
@@ -39,6 +41,9 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float attackDamage; //공격 데미지
     [SerializeField] protected float attackSpeed; //공격 속도 (1초에 몇 번 공격하는지)
     [SerializeField] protected float unitSize; //유닛 크기
+    private float _originMoveSpeed;
+    private float _originAttackDamage;
+    private float _originAttackSpeed;
 
     [Header("유닛 설정")]
     [SerializeField] protected UnitState currentState;
@@ -47,6 +52,12 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] protected float direction; //이동 방향
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
+    
+    private Dictionary<StatType, float> _multipliers = new() {
+        { StatType.MoveSpeed, 1f },
+        { StatType.AttackSpeed, 1f },
+        { StatType.AttackDamage, 1f}
+    };
 
     //외부 참조
     protected UnitPool ownerPool;
@@ -90,6 +101,7 @@ public class Unit : MonoBehaviour, IDamageable
         SetVisual();
 
         UTQ.Enqueue(team, this);
+        BuffManager.Instance.RegisterUnit(this);
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
         ChangeState(UnitState.Attack);  
     }
@@ -104,6 +116,10 @@ public class Unit : MonoBehaviour, IDamageable
         attackDamage = data.AttackDamage;
         attackSpeed = data.AttackSpeed;
         unitSize = data.UnitSize;
+
+        _originMoveSpeed = moveSpeed;
+        _originAttackDamage = attackDamage;
+        _originAttackSpeed = attackSpeed;
 
         attackRange = unitSize;
     }
@@ -319,6 +335,11 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
+    public void Heal(float amount)
+    {
+        currentHp = Mathf.Clamp(currentHp + amount, 0, maxHp);
+    }
+
     /// <summary>
     /// Damage State (피가 절반이하로 내려가면 1번만 실행)
     /// </summary>
@@ -497,6 +518,31 @@ public class Unit : MonoBehaviour, IDamageable
         isDying = false;
 
         ownerPool.ReturnUnit(this);
+    }
+    #endregion
+
+    #region Buff
+    public void OnStatChanged(StatType type, float multiplier)
+    {
+        if (_multipliers.ContainsKey(type))
+        {
+            _multipliers[type] = multiplier;
+            UpdateFinalStats();
+        }
+    }
+
+    private void UpdateFinalStats()
+    {
+        moveSpeed *= _multipliers[StatType.MoveSpeed];
+        attackSpeed *= _multipliers[StatType.AttackSpeed];
+        attackDamage *= _multipliers[StatType.AttackDamage];
+    }
+
+    public void RestoreStats()
+    {
+        moveSpeed = _originMoveSpeed;
+        attackSpeed = _originAttackSpeed;
+        attackDamage = _originAttackDamage;
     }
     #endregion
 }

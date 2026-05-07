@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using UnityEngine;
 
 public class FriendlyUnit : Unit
@@ -6,7 +7,7 @@ public class FriendlyUnit : Unit
     [SerializeField] private Habitat habitat;
 
     private FriendlyUnitData friendlyData;
-
+    
     public override void SetData(UnitData data)
     {
         base.SetData(data);

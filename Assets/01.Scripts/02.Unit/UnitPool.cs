@@ -47,9 +47,9 @@ public class UnitPool : MonoBehaviour
 
         unit.transform.position = spawnPos.position;
 
-        unit.gameObject.SetActive(true);
-
         unit.SetData(data);
+        
+        unit.gameObject.SetActive(true);
 
         return unit;
     }

@@ -1184,6 +1184,53 @@ namespace _01.Scripts._01.ThreeMatch
                 Destroy(targetPuzzle.gameObject);
             }
         }
+        
+        public void SpawnSpecialPuzzle(SpecialPuzzleType type)
+        {
+            AddTask(() => SpawnSpecialPuzzleCoroutine(type));
+        }
+
+        private IEnumerator SpawnSpecialPuzzleCoroutine(SpecialPuzzleType type)
+        {
+            List<PuzzleObject> list = new();
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (_puzzles[i, j] != null &&
+                        _puzzles[i, j] is not SpecialPuzzleObject and not ObstaclePuzzleObject)
+                    {
+                        list.Add(_puzzles[i, j]);
+                    }
+                }
+            }
+
+            PuzzleObject target = list[Random.Range(0, list.Count)];
+            Vector3 currentPos = target.transform.position;
+            Vector2Int grid = new(target.column, target.row);
+
+            _puzzles[target.column, target.row] = null;
+            Destroy(target.gameObject);
+
+            GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)type], puzzleFrame);
+            newPuzzle.transform.position = currentPos;
+            newPuzzle.name = $"Puzzle({grid.x + 1},{grid.y + 1})";
+            newPuzzle.transform.localScale = Vector3.zero;
+
+            PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
+            _puzzles[grid.x, grid.y] = po;
+            po.Init(this, grid.x, grid.y);
+            po.isMatched = false;
+
+            yield return newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine)
+                .OnComplete(() =>
+                {
+                    po.puzzleState = PuzzleState.Idle;
+                })
+                .WaitForCompletion();
+        }
 
         private IEnumerator SpawnObstaclePuzzle()
         {
@@ -1191,6 +1238,10 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 yield return new WaitForSeconds(obstacleSpawnInterval);
                 Vector2Int pos = SetObstacleSpawnPos();
+                if (pos == new Vector2Int(-1, -1))
+                {
+                    yield break;
+                }
                 yield return SpawnObstacleWarning(pos.x, pos.y);
                 StartCoroutine(SpawnRandomObstaclePuzzleCoroutine(pos.x, pos.y));
             }
@@ -1209,6 +1260,11 @@ namespace _01.Scripts._01.ThreeMatch
                         list.Add(_puzzles[i, j]);
                     }
                 }
+            }
+
+            if (list.Count == 0)
+            {
+                return new Vector2Int(-1, -1);
             }
             
             PuzzleObject target = list[Random.Range(0, list.Count)];
