@@ -32,7 +32,8 @@ public enum TeamType
 /// </summary>
 public class Unit : MonoBehaviour, IDamageable
 {
-    [Header("유닛 스탯")]
+    [Header("유닛 스탯")] 
+    [SerializeField] protected int unitGrade;
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed; //이동 속도
@@ -87,6 +88,7 @@ public class Unit : MonoBehaviour, IDamageable
         this.data = data;
 
         SetStat();
+        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
         SetVisual();
 
         UTQ.Enqueue(team, this);
@@ -98,6 +100,7 @@ public class Unit : MonoBehaviour, IDamageable
     {
         team = data.Team;
 
+        unitGrade = data.UnitGrade;
         maxHp = data.MaxHp;
         currentHp = maxHp;
         moveSpeed = data.BaseMoveSpeed;
@@ -498,5 +501,14 @@ public class Unit : MonoBehaviour, IDamageable
 
         ownerPool.ReturnUnit(this);
     }
+    #endregion
+    
+    #region UnitSetting
+
+    public void AttackSpeedMultiplier(float value)
+    {
+        attackSpeed *= value;
+    }
+    
     #endregion
 }
