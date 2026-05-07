@@ -16,6 +16,12 @@ public class UnitGradeManager : SingletonObject<UnitGradeManager>
             case 3:
                 unit.AttackRangeMultiplier(2f);
                 break;
+            
+            case 4:
+                unit.MoveSpeedMultiplier(0.5f);
+                unit.UnitHpMultiplier(3f);
+                unit.AttackRangeMultiplier(0.7f);
+                break;
         }
     }
 }

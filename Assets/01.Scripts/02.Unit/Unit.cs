@@ -87,8 +87,8 @@ public class Unit : MonoBehaviour, IDamageable
     {
         this.data = data;
 
-        SetStat();
-        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
+        SetBaseStat();
+        SetProceedStat();
         SetVisual();
 
         UTQ.Enqueue(team, this);
@@ -96,19 +96,23 @@ public class Unit : MonoBehaviour, IDamageable
         ChangeState(UnitState.Attack);  
     }
 
-    protected virtual void SetStat()
+    protected virtual void SetBaseStat()
     {
         team = data.Team;
 
         unitGrade = data.UnitGrade;
+        attackDamage = data.AttackDamage;
+        unitSize = data.UnitSize;
+        attackRange = unitSize;
+    }
+
+    protected virtual void SetProceedStat()
+    {
+        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
         maxHp = data.MaxHp;
         currentHp = maxHp;
         moveSpeed = data.BaseMoveSpeed;
-        attackDamage = data.AttackDamage;
         attackSpeed = data.AttackSpeed;
-        unitSize = data.UnitSize;
-
-        attackRange = unitSize;
     }
 
     protected virtual void SetVisual()
@@ -516,6 +520,15 @@ public class Unit : MonoBehaviour, IDamageable
     {
         attackRange *= value;
     }
+
+    public void MoveSpeedMultiplier(float value)
+    {
+        moveSpeed *= value;
+    }
     
+    public void UnitHpMultiplier(float value)
+    {
+        maxHp *= value;
+    }
     #endregion
 }
