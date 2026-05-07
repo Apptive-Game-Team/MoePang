@@ -1,10 +1,24 @@
+using System;
 using UnityEngine;
 
 /// <summary>
 /// 유닛 단계에 따른 스탯 가중치 설정 매니저
 /// </summary>
-public class UnitGradeManager : SingletonObject<UnitGradeManager>
+public class UnitGradeManager : MonoBehaviour
 {
+    public static UnitGradeManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
     public void SetFriendlyUnitGradeStat(Unit unit)
     {
         switch (unit.Data.UnitGrade)
