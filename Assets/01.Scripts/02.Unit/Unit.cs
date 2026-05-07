@@ -504,10 +504,17 @@ public class Unit : MonoBehaviour, IDamageable
     #endregion
     
     #region UnitSetting
-
+    /// <summary>
+    /// 유닛 공격속도 설정
+    /// </summary>
     public void AttackSpeedMultiplier(float value)
     {
         attackSpeed *= value;
+    }
+    
+    public void AttackRangeMultiplier(float value)
+    {
+        attackRange *= value;
     }
     
     #endregion
