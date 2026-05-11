@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23d150917864c13489ce3f616347bdf6, type: 3}
-  m_Name: 02.Oustrich
+  m_Name: Lion
   m_EditorClassIdentifier: 
   team: 0
-  unitName: 12
-  unitGrade: 3
+  unitName: 14
+  unitGrade: 5
   animatorOverride: {fileID: 22100000, guid: 0d9c5f60398544d4a903bb0cdb014c2a, type: 2}
-  maxHp: 32
+  maxHp: 48
   baseMoveSpeed: 1
-  attackDamage: 8
+  attackDamage: 12
   attackSpeed: 1
   unitSize: 1
   habitat: 2
