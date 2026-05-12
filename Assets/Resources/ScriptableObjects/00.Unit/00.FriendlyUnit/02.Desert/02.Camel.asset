@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23d150917864c13489ce3f616347bdf6, type: 3}
-  m_Name: 02.Oustrich
+  m_Name: 02.Camel
   m_EditorClassIdentifier: 
   team: 0
   unitName: 12
-  animatorOverride: {fileID: 0}
+  unitGrade: 3
+  animatorOverride: {fileID: 22100000, guid: a749398e4599cb047b6366c131a40d2e, type: 2}
   maxHp: 32
   baseMoveSpeed: 1
   attackDamage: 8

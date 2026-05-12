@@ -17,6 +17,15 @@ public enum UnitState
 }
 
 /// <summary>
+/// 유닛의 공격 방법
+/// </summary>
+public enum AttackType
+{
+    MeleeAttack,
+    RangeAttack,
+}
+
+/// <summary>
 /// 아군진영, 적진영 타입
 /// </summary>
 public enum TeamType
@@ -32,7 +41,8 @@ public enum TeamType
 /// </summary>
 public class Unit : MonoBehaviour, IDamageable
 {
-    [Header("유닛 스탯")]
+    [Header("유닛 스탯")] 
+    [SerializeField] protected int unitGrade;
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
     [SerializeField] protected float moveSpeed; //이동 속도
@@ -45,6 +55,7 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected TeamType team;
     [SerializeField] protected LayerMask targetLayer;
     [SerializeField] private GameObject hitEffectPrefab;
+    [SerializeField] protected AttackType attackType = AttackType.MeleeAttack;
     [SerializeField] protected float direction; //이동 방향
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
 
@@ -86,26 +97,32 @@ public class Unit : MonoBehaviour, IDamageable
     {
         this.data = data;
 
-        SetStat();
+        SetBaseStat();
         SetVisual();
+        SetProceedStat();
 
         UTQ.Enqueue(team, this);
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
         ChangeState(UnitState.Attack);  
     }
 
-    protected virtual void SetStat()
+    protected virtual void SetBaseStat()
     {
         team = data.Team;
 
+        unitGrade = data.UnitGrade;
         maxHp = data.MaxHp;
-        currentHp = maxHp;
-        moveSpeed = data.BaseMoveSpeed;
         attackDamage = data.AttackDamage;
-        attackSpeed = data.AttackSpeed;
         unitSize = data.UnitSize;
-
+        moveSpeed = data.BaseMoveSpeed;
+        attackSpeed = data.AttackSpeed;
         attackRange = unitSize;
+    }
+
+    protected virtual void SetProceedStat()
+    {
+        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
+        currentHp = maxHp;
     }
 
     protected virtual void SetVisual()
@@ -244,20 +261,8 @@ public class Unit : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(segment);
 
-        //유닛 큐가 비어있으면 성을 공격
-        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
-        IDamageable target = UTQ.Peek(enemyTeam);
-
-        if (target != null)
-        {
-            target.TakeDamage(attackDamage);
-        }
-
-        else
-        {
-            Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
-        }
-
+        AttackByType();
+        
         yield return new WaitForSeconds(segment);
 
         if (animator != null)
@@ -281,6 +286,83 @@ public class Unit : MonoBehaviour, IDamageable
 
         return hit.collider != (null);
     }
+    
+    /// <summary>
+    /// 공격 타입에 따른 공격 방법
+    /// </summary>
+    protected virtual void AttackByType()
+    {
+        switch (attackType)
+        {
+            case AttackType.MeleeAttack:
+                MeleeAttack();
+                break;
+
+            case AttackType.RangeAttack:
+                RangeAttack();
+                break;
+
+            default:
+                Debug.LogWarning("이런 공격은 없어");
+                MeleeAttack();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 근접 공격
+    /// </summary>
+    protected virtual void MeleeAttack()
+    {
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        IDamageable target = UTQ.Peek(enemyTeam);
+
+        if (target != null)
+        {
+            target.TakeDamage(attackDamage);
+        }
+
+        else
+        {
+            Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
+        }
+    }
+    
+    /// <summary>
+    /// 원거리 공격
+    /// </summary>
+    protected virtual void RangeAttack()
+    {
+        Vector2 boxCenter = GetAttackBoxCenter();
+        Vector2 boxSize = GetAttackBoxSize();
+
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, 0f, targetLayer);
+
+        if (hits.Length == 0)
+        {
+            Debug.Log($"[{team}] {name} 범위 공격했지만 타겟 없음");
+            return;
+        }
+
+        foreach (Collider2D hit in hits)
+        {
+            if (!hit.TryGetComponent(out IDamageable target)) continue;
+            if (target.GetTeam() == team) continue;
+
+            target.TakeDamage(attackDamage);
+        }
+    }
+    
+    protected virtual Vector2 GetAttackBoxCenter()
+    {
+        return transform.position + Vector3.right * direction * attackRange;
+    }
+
+    protected virtual Vector2 GetAttackBoxSize()
+    {
+        return new Vector2(unitSize, unitSize);
+    }
+    
     #endregion
 
     #region TakeDamage & DamageState
@@ -497,6 +579,31 @@ public class Unit : MonoBehaviour, IDamageable
         isDying = false;
 
         ownerPool.ReturnUnit(this);
+    }
+    #endregion
+    
+    #region UnitSetting
+    /// <summary>
+    /// 유닛 공격속도 설정
+    /// </summary>
+    public void AttackSpeedMultiplier(float value)
+    {
+        attackSpeed *= value;
+    }
+    
+    public void AttackRangeMultiplier(float value)
+    {
+        attackRange *= value;
+    }
+
+    public void MoveSpeedMultiplier(float value)
+    {
+        moveSpeed *= value;
+    }
+    
+    public void UnitHpMultiplier(float value)
+    {
+        maxHp *= value;
     }
     #endregion
 }

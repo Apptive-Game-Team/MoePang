@@ -26,7 +26,7 @@ public enum UnitName
     //Desert
     Scorpion,
     Armadillo,
-    Ostrich,
+    Camel,
     Hyena,
     Lion,
 

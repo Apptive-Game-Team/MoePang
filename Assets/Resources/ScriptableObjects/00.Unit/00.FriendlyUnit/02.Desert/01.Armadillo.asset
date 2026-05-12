@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   unitName: 11
-  animatorOverride: {fileID: 0}
+  unitGrade: 2
+  animatorOverride: {fileID: 22100000, guid: a96864eaef47f364288ca5f259ade093, type: 2}
   maxHp: 24
   baseMoveSpeed: 1
   attackDamage: 6
