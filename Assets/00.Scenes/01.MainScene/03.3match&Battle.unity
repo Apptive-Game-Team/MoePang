@@ -7590,6 +7590,7 @@ GameObject:
   - component: {fileID: 2097611655}
   - component: {fileID: 2097611654}
   - component: {fileID: 2097611656}
+  - component: {fileID: 2097611657}
   m_Layer: 0
   m_Name: TempManager
   m_TagString: Untagged
@@ -7638,6 +7639,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 80
+--- !u!114 &2097611657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2097611651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6eb20bafed3e9e45874c7f2f6c9a3c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2099301079
 PrefabInstance:
   m_ObjectHideFlags: 0
