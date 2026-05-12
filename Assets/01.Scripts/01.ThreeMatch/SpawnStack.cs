@@ -10,6 +10,9 @@ namespace _01.Scripts._01.ThreeMatch
     public class SpawnStack : MonoBehaviour
     {
         [SerializeField] private GameObject[] stacks;
+        public Habitat type;
+
+        public event Action<int> OnStackAdded;
         
         private static readonly int Highlight = Shader.PropertyToID("_Highlight");
         private static readonly int Full = Shader.PropertyToID("_Full");
@@ -52,9 +55,9 @@ namespace _01.Scripts._01.ThreeMatch
             _spawner = spawner;
         }
         
-        public void AddStack(Habitat type, int num)
+        public void AddStack(int num)
         {
-            _taskQueue.Enqueue(() => AddStackProcess(type, num));
+            _taskQueue.Enqueue(() => AddStackProcess(num));
 
             if (!_isProcessing)
             {
@@ -73,11 +76,13 @@ namespace _01.Scripts._01.ThreeMatch
             _isProcessing = false;
         }
         
-        private IEnumerator AddStackProcess(Habitat type, int num)
+        private IEnumerator AddStackProcess(int num)
         {
             AddStackEffect();
             
             int totalNewCount = _stackCount + num;
+
+            OnStackAdded?.Invoke(num);
             
             if (totalNewCount >= StackMaxCount)
             {
@@ -90,7 +95,7 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 // todo : Add Spawn Effect
                 
-                Spawn(type, spawnCount);
+                Spawn(spawnCount);
                 FillStack(_stackCount);
             }
             else
@@ -129,7 +134,7 @@ namespace _01.Scripts._01.ThreeMatch
             });
         }
 
-        private void Spawn(Habitat type, int num)
+        private void Spawn(int num)
         {
             for (int i = 0; i < num; i++)
             {
