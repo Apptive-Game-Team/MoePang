@@ -1,7 +1,7 @@
+using _01.Scripts._06.Shop;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace _01.Scripts._00.Manager
 {
@@ -31,7 +31,7 @@ namespace _01.Scripts._00.Manager
     [Serializable]
     public class UnitData : IConvertable
     {
-        public Dictionary<FriendlyUnitData, bool> unlockedUnits = new();
+        public Dictionary<FriendlyUnitData, bool> UnlockedUnits = new();
         
         [SerializeField] private List<FriendlyUnitData> unitKeys;
         [SerializeField] private List<bool> unitValues;
@@ -40,7 +40,7 @@ namespace _01.Scripts._00.Manager
 
         public UnitData(FriendlyUnitList unitList)
         {
-            unlockedUnits.Clear();
+            UnlockedUnits.Clear();
             
             foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
             {
@@ -49,12 +49,12 @@ namespace _01.Scripts._00.Manager
 
                 foreach (FriendlyUnitData unit in units)
                 {
-                    unlockedUnits[unit] = false;
+                    UnlockedUnits[unit] = false;
                 }
 
                 if (units.Count > 0)
                 {
-                    unlockedUnits[units[0]] = true;
+                    UnlockedUnits[units[0]] = true;
                 }
             }
 
@@ -64,19 +64,19 @@ namespace _01.Scripts._00.Manager
         // Dict <-> List
         public void BeforeSave()
         {
-            GameManager.DictionaryToLists(unlockedUnits, out unitKeys, out unitValues);
+            GameManager.DictionaryToLists(UnlockedUnits, out unitKeys, out unitValues);
         }
 
         public void AfterLoad()
         {
-            unlockedUnits = GameManager.ListsToDictionary(unitKeys, unitValues);
+            UnlockedUnits = GameManager.ListsToDictionary(unitKeys, unitValues);
         }
     }
 
     [Serializable]
     public class CastleData : IConvertable
     {
-        public Dictionary<UpgradeData, int> castleLevels = new();
+        public Dictionary<UpgradeData, int> CastleLevels = new();
         
         [SerializeField] private List<UpgradeData> castleKeys;
         [SerializeField] private List<int> castleValues;
@@ -84,12 +84,12 @@ namespace _01.Scripts._00.Manager
         // Dict <-> List
         public void BeforeSave()
         {
-            GameManager.DictionaryToLists(castleLevels, out castleKeys, out castleValues);
+            GameManager.DictionaryToLists(CastleLevels, out castleKeys, out castleValues);
         }
 
         public void AfterLoad()
         {
-            castleLevels = GameManager.ListsToDictionary(castleKeys, castleValues);
+            CastleLevels = GameManager.ListsToDictionary(castleKeys, castleValues);
         }
     }
 
@@ -100,6 +100,35 @@ namespace _01.Scripts._00.Manager
         public float minUsedTime;
         public int minUsedTile;
         public int maxUsedTile;
+    }
+
+    [Serializable]
+    public class ItemData : IConvertable
+    {
+        public Dictionary<ItemType, int> ItemAmounts = new();
+
+        [SerializeField] private List<ItemType> items;
+        [SerializeField] private List<int> amounts;
+
+        public ItemData()
+        {
+            ItemAmounts.Clear();
+
+            foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
+            {
+                ItemAmounts.Add(itemType, 0);
+            }
+        }
+
+        public void BeforeSave()
+        {
+            GameManager.DictionaryToLists(ItemAmounts, out items, out amounts);
+        }
+
+        public void AfterLoad()
+        {
+            ItemAmounts = GameManager.ListsToDictionary(items, amounts);
+        }
     }
 
     [Serializable]
@@ -130,6 +159,7 @@ namespace _01.Scripts._00.Manager
         public PlayData playData;
         public CastleData castleData;
         public UnitData unitData;
+        public ItemData itemData;
         public GameData gameData;
 
         protected override void Awake()
@@ -139,6 +169,7 @@ namespace _01.Scripts._00.Manager
             playData = new PlayData();
             castleData = new CastleData();
             unitData = new UnitData(unitList);
+            itemData = new ItemData();
             gameData = new GameData();
         }
 
@@ -147,6 +178,7 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(playData, "PlayData");
             SaveLoadManager.Instance.LoadData(castleData, "CastleData");
             SaveLoadManager.Instance.LoadData(unitData, "UnitData");
+            SaveLoadManager.Instance.LoadData(itemData, "ItemData");
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
         }
         
@@ -216,6 +248,15 @@ namespace _01.Scripts._00.Manager
             
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
             SaveLoadManager.Instance.SaveData(unitData, "UnitData");
+        }
+        
+        public void SaveItemData()
+        {
+            playData.goldAmount = GoldManager.Instance.Gold;
+            itemData.BeforeSave();
+            
+            SaveLoadManager.Instance.SaveData(playData, "PlayData");
+            SaveLoadManager.Instance.SaveData(itemData, "ItemData");
         }
 
         public void SaveGameData()
