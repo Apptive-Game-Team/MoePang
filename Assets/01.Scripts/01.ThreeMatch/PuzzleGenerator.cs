@@ -511,7 +511,8 @@ namespace _01.Scripts._01.ThreeMatch
                 for (int i = 0; i < x - 2; i++)
                 {
                     if (CheckType(_puzzles[i, j], _puzzles[i + 1, j]) &&
-                        CheckType(_puzzles[i, j], _puzzles[i + 2, j]))
+                        CheckType(_puzzles[i, j], _puzzles[i + 2, j]) && 
+                        CheckType(_puzzles[i + 1, j], _puzzles[i + 2, j]))
                     {
                         _puzzles[i, j].isMatched = true;
                         CheckAnyObstaclePuzzle(i, j);
@@ -529,7 +530,8 @@ namespace _01.Scripts._01.ThreeMatch
                 for (int j = 0; j < y - 2; j++)
                 {
                     if (CheckType(_puzzles[i, j], _puzzles[i, j + 1]) &&
-                        CheckType(_puzzles[i, j], _puzzles[i, j + 2]))
+                        CheckType(_puzzles[i, j], _puzzles[i, j + 2]) && 
+                        CheckType(_puzzles[i, j + 1], _puzzles[i, j + 2]))
                     {
                         _puzzles[i, j].isMatched = true;
                         CheckAnyObstaclePuzzle(i, j);
