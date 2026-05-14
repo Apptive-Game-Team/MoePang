@@ -336,6 +336,7 @@ public class ShopManager : MonoBehaviour
             {
                 GoldManager.Instance.AdjustGold(-cost);
                 GameManager.Instance.itemData.ItemAmounts[currentItemSelected.type]++;
+                GameManager.Instance.SaveItemData();
                 currentItemSelected.Refresh();
             }
         }

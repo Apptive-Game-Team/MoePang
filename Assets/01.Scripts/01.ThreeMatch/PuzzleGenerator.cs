@@ -54,6 +54,7 @@ namespace _01.Scripts._01.ThreeMatch
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
+        [SerializeField] private GameObject jokerPuzzlePrefab;
         [SerializeField] private GameObject[] specialPuzzlePrefabs;
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
         [SerializeField] private Sprite[] normalPuzzleImages;
@@ -141,7 +142,7 @@ namespace _01.Scripts._01.ThreeMatch
         #endregion
         
         /// <summary>
-        /// 시작 퍼즐 관련 함수 (시작 시 매치가 안 일어나게 설정)
+        /// 시작 퍼즐 및 타입 검사 관련 함수 (시작 시 매치가 안 일어나게 설정)
         /// </summary>
         #region Start Puzzle
         private IEnumerator GenerateBoard()
@@ -300,6 +301,11 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 return false;
             }
+
+            if (p1 is JokerPuzzleObject || p2 is JokerPuzzleObject)
+            {
+                return true;
+            }
             
             // normal <-> normal
             if (p1.puzzleType  == PuzzleType.Normal && p2.puzzleType == PuzzleType.Normal)
@@ -341,6 +347,16 @@ namespace _01.Scripts._01.ThreeMatch
 
         private bool CheckNormalType(PuzzleObject p, Habitat type)
         {
+            if (p == null)
+            {
+                return false;
+            }
+
+            if (p is JokerPuzzleObject)
+            {
+                return true;
+            }
+            
             if (p.puzzleType == PuzzleType.Normal)
             {
                 if ((Habitat)p.GetPuzzleSubType() == type)
@@ -536,6 +552,11 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     if (_puzzles[i, j] != null && _puzzles[i, j].isMatched && !visited[i, j])
                     {
+                        if (_puzzles[i, j] is JokerPuzzleObject)
+                        {
+                            continue;
+                        }
+                        
                         MatchGroup group = GetMatchGroupBfs(i, j, visited);
                 
                         if (group.positions.Count >= 3)
@@ -602,7 +623,11 @@ namespace _01.Scripts._01.ThreeMatch
                         if (_puzzles[nx, ny] != null && _puzzles[nx, ny].isMatched && 
                             CheckNormalType(_puzzles[nx, ny], habitat))
                         {
-                            visited[nx, ny] = true;
+                            if (_puzzles[nx, ny] is not JokerPuzzleObject)
+                            {
+                                visited[nx, ny] = true;
+                            }
+
                             queue.Enqueue(new Vector2Int(nx, ny));
                         }
                     }
@@ -755,6 +780,11 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 foreach (PuzzleObject targetPuzzle in targets)
                 {
+                    if (targetPuzzle == null)
+                    {
+                        continue;
+                    }
+                    
                     targetPuzzle.transform.SetParent(puzzleFrame.parent);
                     
                     Vector3 startPos = targetPuzzle.transform.position;
@@ -1293,6 +1323,7 @@ namespace _01.Scripts._01.ThreeMatch
             );
             
             PuzzleObject target = _puzzles[curX, curY];
+            target.puzzleState = PuzzleState.Swapping;
 
             if (target is ObstaclePuzzleObject)
             {
@@ -1312,6 +1343,7 @@ namespace _01.Scripts._01.ThreeMatch
             PuzzleObject po = newPuzzle.GetComponent<PuzzleObject>();
             _puzzles[curX, curY] = po;
             po.Init(this, curX, curY);
+            po.puzzleState = PuzzleState.Idle;
             po.isMatched = false;
 
             switch (po)
@@ -1390,6 +1422,127 @@ namespace _01.Scripts._01.ThreeMatch
 
             yield return null;
         }
+        #endregion
+
+        #region Item
+
+        public IEnumerator UseJokerItem(PuzzleObject po)
+        {
+            if (po is not NormalPuzzleObject)
+            {
+                yield return null;
+            }
+            
+            int curX = po.column, curY = po.row;
+            
+            yield return new WaitUntil(() =>
+                _puzzles[curX, curY] != null &&
+                _puzzles[curX, curY].puzzleState == PuzzleState.Idle
+            );
+
+            _puzzles[curX, curY].puzzleState = PuzzleState.Swapping;
+            
+            Vector3 currentPos = po.transform.position;
+            _puzzles[curX, curY] = null;
+            Destroy(po.gameObject);
+            
+            GameObject newPuzzle = Instantiate(jokerPuzzlePrefab, puzzleFrame);
+            newPuzzle.transform.position = currentPos;
+            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
+            newPuzzle.transform.localScale = Vector3.zero;
+            
+            PuzzleObject puzzle = newPuzzle.GetComponent<PuzzleObject>();
+            _puzzles[curX, curY] = puzzle;
+            puzzle.Init(this, curX, curY);
+            puzzle.puzzleState = PuzzleState.Idle;
+            puzzle.isMatched = false;
+            
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
+            yield return t.WaitForCompletion();
+            
+            AddTask(() => MatchPuzzle());
+        }
+
+        public IEnumerator UseDestroyObstacleItem(PuzzleObject po)
+        {
+            if (po is not ObstaclePuzzleObject)
+            {
+                yield return null;
+            }
+            
+            int curX = po.column, curY = po.row;
+            
+            yield return new WaitUntil(() =>
+                _puzzles[curX, curY] != null &&
+                _puzzles[curX, curY].puzzleState == PuzzleState.Idle
+            );
+
+            _puzzles[curX, curY].puzzleState = PuzzleState.Swapping;
+            
+            Vector3 currentPos = po.transform.position;
+            ObstaclePuzzleObject ob = po as ObstaclePuzzleObject;
+            Habitat type = ob.habitat;
+            _puzzles[curX, curY] = null;
+            Destroy(po.gameObject);
+            
+            GameObject newPuzzle = Instantiate(normalPuzzlePrefabs[(int)type], puzzleFrame);
+            newPuzzle.transform.position = currentPos;
+            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
+            newPuzzle.transform.localScale = Vector3.zero;
+            
+            PuzzleObject puzzle = newPuzzle.GetComponent<PuzzleObject>();
+            _puzzles[curX, curY] = puzzle;
+            puzzle.Init(this, curX, curY);
+            puzzle.puzzleState = PuzzleState.Idle;
+            puzzle.isMatched = false;
+            
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
+            yield return t.WaitForCompletion();
+            
+            AddTask(() => MatchPuzzle());
+        }
+
+        public IEnumerator UseCreateLineBombItem(PuzzleObject po)
+        {
+            if (po is not NormalPuzzleObject)
+            {
+                yield return null;
+            }
+            
+            int curX = po.column, curY = po.row;
+            
+            yield return new WaitUntil(() =>
+                _puzzles[curX, curY] != null &&
+                _puzzles[curX, curY].puzzleState == PuzzleState.Idle
+            );
+
+            _puzzles[curX, curY].puzzleState = PuzzleState.Swapping;
+            
+            Vector3 currentPos = po.transform.position;
+            _puzzles[curX, curY] = null;
+            Destroy(po.gameObject);
+
+            int ranIdx = Random.Range(2, 4); 
+            GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[ranIdx], puzzleFrame);
+            newPuzzle.transform.position = currentPos;
+            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
+            newPuzzle.transform.localScale = Vector3.zero;
+            
+            PuzzleObject puzzle = newPuzzle.GetComponent<PuzzleObject>();
+            _puzzles[curX, curY] = puzzle;
+            puzzle.Init(this, curX, curY);
+            puzzle.puzzleState = PuzzleState.Idle;
+            puzzle.isMatched = false;
+            
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine);
+            yield return t.WaitForCompletion();
+            
+            AddTask(() => MatchPuzzle());
+        }
+
         #endregion
         
         /// <summary>
