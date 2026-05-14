@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c327d1620960b7a4cb0c00d79973c2e9, type: 3}
-  m_Name: 01.SlingShot
+  m_Name: 05.Shotgun
   m_EditorClassIdentifier: 
   team: 1
-  unitName: 26
+  unitName: 30
   unitGrade: 0
-  animatorOverride: {fileID: 22100000, guid: 4337cd8ac80f65f43876a32966405af6, type: 2}
-  maxHp: 16
+  animatorOverride: {fileID: 22100000, guid: c3e1f93e69177b64593a59dbce8c6dd5, type: 2}
+  maxHp: 32
   baseMoveSpeed: 0.3
-  attackDamage: 4
+  attackDamage: 8
   attackSpeed: 1
-  unitSize: 0.8
+  unitSize: 0.4
