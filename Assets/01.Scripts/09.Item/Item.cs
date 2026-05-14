@@ -67,6 +67,12 @@ namespace _01.Scripts._09.Item
         
         public void OnDrag(PointerEventData eventData)
         {
+            if (Time.timeScale <= 0) 
+            {
+                CancelDrag();
+                return;
+            }
+            
             if (_itemAmount == 0)
             {
                 return;
@@ -127,6 +133,21 @@ namespace _01.Scripts._09.Item
             {
                 ApplyItemEffect(_targetTile);
                 _targetTile.GetComponent<Image>().color = Color.white;
+            }
+        }
+        
+        private void CancelDrag()
+        {
+            if (_draggedIcon != null)
+            {
+                Destroy(_draggedIcon);
+                _draggedIcon = null;
+            }
+            
+            if (_targetTile != null)
+            {
+                _targetTile.GetComponent<Image>().color = _targetTileColor;
+                _targetTile = null;
             }
         }
 
