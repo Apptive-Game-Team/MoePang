@@ -50,7 +50,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private float obstacleSpawnDelay = 2f;
         [SerializeField] private float obstacleSpawnInterval = 10f;
         [Range(0, 100)] [SerializeField] private float goldTileSpawnRate = 5f;
-        
+        public int swapCount;
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
@@ -406,11 +406,18 @@ namespace _01.Scripts._01.ThreeMatch
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
-            if (_taskQueue.Count > 0 || _isProcessing) return;
-            if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
+            if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y)
+            {
+                return;
+            }
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject ||
-                _puzzles[x2, y2] is ObstaclePuzzleObject)
+            if (_taskQueue.Count > 0 || _isProcessing)
+            {
+                return;
+            }
+            
+            
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject || _puzzles[x2, y2] is ObstaclePuzzleObject)
             {
                 _puzzles[x1, y1].FailedSwapEffect(x2 - x1, y2 - y1, 
                     Vector2.Distance(_puzzles[x1, y1].transform.position, _puzzles[x2, y2].transform.position) / 2);
@@ -418,6 +425,8 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             _lastMovePos = new Vector2Int(x2, y2);
+            swapCount++;
+            
             AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
 
