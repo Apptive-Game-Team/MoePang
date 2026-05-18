@@ -9,7 +9,7 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
     protected override void Awake()
     {
         base.Awake();
-        upgradeLevels = GameManager.Instance.castleData.castleLevels;
+        upgradeLevels = GameManager.Instance.castleData.CastleLevels;
     }
 
     public int GetLevel(UpgradeData data)
@@ -37,7 +37,7 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
 
         upgradeLevels[data]++;
 
-        GameManager.Instance.castleData.castleLevels = upgradeLevels;
+        GameManager.Instance.castleData.CastleLevels = upgradeLevels;
         GameManager.Instance.SaveCastleData();
 
         ApplyUpgrade(data);

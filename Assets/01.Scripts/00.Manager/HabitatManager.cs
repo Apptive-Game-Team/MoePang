@@ -21,7 +21,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
 
     private void Initialize()
     {
-        unlockDict = GameManager.Instance.unitData.unlockedUnits;
+        unlockDict = GameManager.Instance.unitData.UnlockedUnits;
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
         {
             unlockDict[unit] = true;
 
-            GameManager.Instance.unitData.unlockedUnits = unlockDict;
+            GameManager.Instance.unitData.UnlockedUnits = unlockDict;
             GameManager.Instance.SaveUnitData();
         }
     }
