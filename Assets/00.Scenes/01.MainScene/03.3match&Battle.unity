@@ -1092,6 +1092,66 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 338950537}
   m_CullTransparentMesh: 1
+--- !u!1 &361443549
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 361443551}
+  - component: {fileID: 361443550}
+  m_Layer: 0
+  m_Name: ConstraintSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &361443550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361443549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 173aab0a4f8b0c443871ecc19258d302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  constraints:
+  - {fileID: 11400000, guid: 68944021aa6754943b286987e540f42f, type: 2}
+  - {fileID: 11400000, guid: 4ef44f5fbbbff2842be56aed7cb00819, type: 2}
+  - {fileID: 11400000, guid: 8d7e01eb79821e849b8d2977a48e4eff, type: 2}
+  - {fileID: 11400000, guid: 5504685ade3881d4f8ac829f438a26d2, type: 2}
+  - {fileID: 11400000, guid: a78945e28e83eb440ab514798dd851ab, type: 2}
+  - {fileID: 11400000, guid: 62c5a332c01e3b545ad42ef93d79ad52, type: 2}
+  puzzle: {fileID: 1669581474}
+  unitSpawner: {fileID: 1986820697}
+  spawnStacks:
+  - {fileID: 968554137}
+  - {fileID: 1405368199}
+  - {fileID: 1269356620}
+  - {fileID: 1261480035}
+  - {fileID: 869903353}
+  constraintApplyCount: 0
+--- !u!4 &361443551
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 361443549}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 330.0321, y: 846.6495, z: 5.2378645}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &394134026
 GameObject:
   m_ObjectHideFlags: 0
@@ -3043,6 +3103,7 @@ MonoBehaviour:
   - {fileID: 2078394235}
   - {fileID: 653744683}
   type: 4
+  isBanned: 0
 --- !u!1 &894054808
 GameObject:
   m_ObjectHideFlags: 0
@@ -3303,6 +3364,7 @@ MonoBehaviour:
   - {fileID: 394134026}
   - {fileID: 1273829780}
   type: 0
+  isBanned: 0
 --- !u!1 &974673696
 GameObject:
   m_ObjectHideFlags: 0
@@ -4748,6 +4810,7 @@ MonoBehaviour:
   - {fileID: 289694234}
   - {fileID: 1315105281}
   type: 3
+  isBanned: 0
 --- !u!1 &1269356616
 GameObject:
   m_ObjectHideFlags: 0
@@ -4841,6 +4904,7 @@ MonoBehaviour:
   - {fileID: 54667241}
   - {fileID: 536350783}
   type: 2
+  isBanned: 0
 --- !u!1 &1273829780
 GameObject:
   m_ObjectHideFlags: 0
@@ -5539,6 +5603,7 @@ MonoBehaviour:
   - {fileID: 1578950480}
   - {fileID: 811447004}
   type: 1
+  isBanned: 0
 --- !u!1 &1451357150
 GameObject:
   m_ObjectHideFlags: 0
@@ -6384,6 +6449,8 @@ MonoBehaviour:
   obstacleWarningPrefab: {fileID: 2444415622454818781, guid: ce1e179ce44092440bb8c160c2f8210e, type: 3}
   goldPrefab: {fileID: 4336401594318408796, guid: f9a06fa307e97174cba5cc3bc6a14784, type: 3}
   spawnStackManager: {fileID: 1195533400}
+  maxSwapCount: -1
+  isContinuousHabitatBanned: 0
 --- !u!4 &1669581475
 Transform:
   m_ObjectHideFlags: 0
@@ -7591,6 +7658,7 @@ MonoBehaviour:
   enemyUnitList: {fileID: 11400000, guid: 0e3d0a4531a02f445857dcce21efbad5, type: 2}
   friendlySpawnPosition: {fileID: 1540985937}
   enemySpawnPosition: {fileID: 894054809}
+  enemySpawnInterval: 3
 --- !u!4 &1986820698
 Transform:
   m_ObjectHideFlags: 0
@@ -8113,3 +8181,4 @@ SceneRoots:
   - {fileID: 2097611655}
   - {fileID: 777223922}
   - {fileID: 2040074868}
+  - {fileID: 361443551}

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace _01.Scripts._10.System
+namespace _01.Scripts._10.System.Constraint
 {
     public enum ConstraintType
     {
@@ -39,15 +39,41 @@ namespace _01.Scripts._10.System
         [SerializeField] private SpawnStack[] spawnStacks;
         
         [Header("Constraint Settings")]
-        [SerializeField] private int constraintApplyCount;
+        [SerializeField] private int constraintApplyInterval;
+        private int _constraintApplyCount;
         private ConstraintContext _constraintContext;
 
         private void Start()
         {
             _constraintContext = new ConstraintContext(puzzle, unitSpawner, spawnStacks);
+
+            _constraintApplyCount = 6;
+
+            ApplyRandomConstraints();
+        }
+        
+        private void ApplyRandomConstraints()
+        {
+            ConstraintType[] allTypes = (ConstraintType[])Enum.GetValues(typeof(ConstraintType));
+            
+            int targetCount = Mathf.Min(_constraintApplyCount, allTypes.Length);
+
+            if (targetCount <= 0)
+            {
+                return;
+            }
+            
+            var randomTypes = allTypes
+                .OrderBy(_ => UnityEngine.Random.value)
+                .Take(targetCount);
+            
+            foreach (ConstraintType type in randomTypes)
+            {
+                ApplyConstraint(type);
+            }
         }
 
-        public void ApplyConstraint(ConstraintType type)
+        private void ApplyConstraint(ConstraintType type)
         {
             constraints.First(c => c.type == type).ApplyConstraint(_constraintContext);
         }
