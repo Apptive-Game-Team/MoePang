@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c327d1620960b7a4cb0c00d79973c2e9, type: 3}
-  m_Name: 00.Farmer
+  m_Name: 04.Forklift
   m_EditorClassIdentifier: 
   team: 1
-  unitName: 25
+  unitName: 29
   unitGrade: 0
-  animatorOverride: {fileID: 22100000, guid: 00f61be9c22999c42ae6df5777a3ff37, type: 2}
-  maxHp: 12
+  attackType: 1
+  animatorOverride: {fileID: 22100000, guid: c3e1f93e69177b64593a59dbce8c6dd5, type: 2}
+  maxHp: 28
   baseMoveSpeed: 0.3
-  attackDamage: 3
+  attackDamage: 7
   attackSpeed: 1
   unitSize: 0.4

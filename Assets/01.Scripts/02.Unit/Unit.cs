@@ -25,6 +25,7 @@ public enum AttackType
 {
     MeleeAttack,
     RangeAttack,
+    TripleAttack,
 }
 
 /// <summary>
@@ -112,10 +113,12 @@ public class Unit : MonoBehaviour, IDamageable
         SetVisual();
         SetProceedStat();
 
-        UTQ.Enqueue(team, this);
-        BuffManager.Instance.RegisterUnit(this);
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
-        ChangeState(UnitState.Attack);  
+
+        UTQ.ResetAndInsert(this);
+        BuffManager.Instance.RegisterUnit(this);
+
+        ChangeState(UnitState.Move, true);
     }
 
     protected virtual void SetBaseStat()
@@ -125,6 +128,7 @@ public class Unit : MonoBehaviour, IDamageable
         unitGrade = data.UnitGrade;
         maxHp = data.MaxHp;
         attackDamage = data.AttackDamage;
+        attackType = data.AttackType;
         unitSize = data.UnitSize;
 
         _originMoveSpeed = moveSpeed;
@@ -191,9 +195,9 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
-    protected void ChangeState(UnitState newState)
+    protected void ChangeState(UnitState newState, bool force = false)
     {
-        if (currentState == newState) return;
+        if (!force && currentState == newState) return;
 
         currentState = newState;
 
@@ -232,11 +236,17 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void MoveState()
     {
+        if (animator != null && !animator.GetBool("Walk"))
+        {
+            animator.SetBool("Walk", true);
+            animator.SetBool("Idle", false);
+        }
+        
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right * direction, attackRange, targetLayer);
 
         if (hit.collider != null)
         {
-            UTQ.Enqueue(team, this);
+            UTQ.Insert(this);
             ChangeState(UnitState.Attack);
             return;
         }
@@ -320,6 +330,10 @@ public class Unit : MonoBehaviour, IDamageable
                 RangeAttack();
                 break;
 
+            case AttackType.TripleAttack:
+                TripleAttack();
+                break;
+
             default:
                 Debug.LogWarning("이런 공격은 없어");
                 MeleeAttack();
@@ -337,6 +351,9 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (target != null)
         {
+            if (!IsTargetInAttackRange(target))
+                return;
+
             target.TakeDamage(attackDamage);
         }
 
@@ -344,6 +361,19 @@ public class Unit : MonoBehaviour, IDamageable
         {
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
+    }
+
+    private bool IsTargetInAttackRange(IDamageable target)
+    {
+        Vector2 targetPoint = target.GetTransform().position;
+        Collider2D targetCollider = target.GetTransform().GetComponent<Collider2D>();
+
+        if (targetCollider != null)
+            targetPoint = targetCollider.ClosestPoint(transform.position);
+
+        float forwardDistance = (targetPoint.x - transform.position.x) * direction;
+
+        return forwardDistance >= 0f && forwardDistance <= attackRange;
     }
     
     /// <summary>
@@ -357,15 +387,28 @@ public class Unit : MonoBehaviour, IDamageable
         Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, 0f, targetLayer);
 
         if (hits.Length == 0)
-        {
-            Debug.Log($"[{team}] {name} 범위 공격했지만 타겟 없음");
             return;
-        }
 
         foreach (Collider2D hit in hits)
         {
-            if (!hit.TryGetComponent(out IDamageable target)) continue;
+            IDamageable target = hit.GetComponentInParent<IDamageable>();
+
+            if (target == null) continue;
             if (target.GetTeam() == team) continue;
+
+            target.TakeDamage(attackDamage);
+        }
+    }
+
+    protected virtual void TripleAttack()
+    {
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        List<IDamageable> targets = UTQ.PeekTargets(enemyTeam, 3);
+
+        foreach (IDamageable target in targets)
+        {
+            if (target == null) continue;
+            if (target is Castle && !IsTargetInAttackRange(target)) continue;
 
             target.TakeDamage(attackDamage);
         }
@@ -373,12 +416,12 @@ public class Unit : MonoBehaviour, IDamageable
     
     protected virtual Vector2 GetAttackBoxCenter()
     {
-        return transform.position + Vector3.right * direction * attackRange;
+        return transform.position + Vector3.right * direction * attackRange * 0.5f;
     }
 
     protected virtual Vector2 GetAttackBoxSize()
     {
-        return new Vector2(unitSize, unitSize);
+        return new Vector2(attackRange, unitSize);
     }
     
     #endregion
@@ -442,6 +485,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         damageTween?.Kill();
 
+        bool removedFromList = false;
         float originalY = transform.position.y;
         Vector3 jumpEndPos = new Vector3(
             transform.position.x - direction * 0.8f,
@@ -454,7 +498,17 @@ public class Unit : MonoBehaviour, IDamageable
         seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
         seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
 
-        seq.Append(transform.DOJump(jumpEndPos, 0.3f, 2, 0.6f).SetEase(Ease.OutQuad));
+        seq.Append(
+            transform.DOJump(jumpEndPos, 0.3f, 2, 0.6f)
+                .SetEase(Ease.OutQuad)
+                .OnUpdate(() =>
+                {
+                    if (removedFromList || !HasMovedBehindFrontUnit()) return;
+
+                    UTQ.Remove(this);
+                    removedFromList = true;
+                })
+        );
 
         seq.Append(transform.DOScale(originalScale, 0.08f));
         seq.Join(spriteRenderer.DOFade(1f, 0.08f));
@@ -473,11 +527,22 @@ public class Unit : MonoBehaviour, IDamageable
         currentHp -= pendingDamage;
 
         if (currentHp <= 0)
+        {
+            UTQ.RemoveUnit(team, this);
             ChangeState(UnitState.Die);
+        }
         else
+        {
+            UTQ.Insert(this);
             ChangeState(UnitState.Attack);
+        }
 
         isDamaging = false;
+    }
+
+    private bool HasMovedBehindFrontUnit()
+    {
+        return UTQ.HasMovedBehindAnotherUnit(this);
     }
 
     /// <summary>

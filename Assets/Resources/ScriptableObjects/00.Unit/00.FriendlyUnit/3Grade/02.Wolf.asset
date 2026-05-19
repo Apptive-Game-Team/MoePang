@@ -9,15 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c327d1620960b7a4cb0c00d79973c2e9, type: 3}
-  m_Name: 00.Farmer
+  m_Script: {fileID: 11500000, guid: 23d150917864c13489ce3f616347bdf6, type: 3}
+  m_Name: 02.Wolf
   m_EditorClassIdentifier: 
-  team: 1
-  unitName: 25
-  unitGrade: 0
-  animatorOverride: {fileID: 22100000, guid: 00f61be9c22999c42ae6df5777a3ff37, type: 2}
-  maxHp: 12
+  team: 0
+  unitName: 2
+  unitGrade: 3
+  animatorOverride: {fileID: 22100000, guid: e701c17f1de12ff43821ff9d5e2254f0, type: 2}
+  maxHp: 32
   baseMoveSpeed: 0.3
-  attackDamage: 3
+  attackDamage: 8
   attackSpeed: 1
-  unitSize: 0.4
+  unitSize: 1.2
+  habitat: 0
+  unitCost: 100

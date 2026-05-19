@@ -10,6 +10,7 @@ public abstract class UnitData : ScriptableObject
     [SerializeField] protected TeamType team;
     [SerializeField] protected UnitName unitName;
     [SerializeField] protected int unitGrade;
+    [SerializeField] protected AttackType attackType = AttackType.MeleeAttack;
     [SerializeField] protected AnimatorOverrideController animatorOverride;
 
     [Header("Stats")]
@@ -23,6 +24,7 @@ public abstract class UnitData : ScriptableObject
     public TeamType Team => team;
     public UnitName UnitName => unitName;
     public int UnitGrade => unitGrade;
+    public AttackType AttackType => attackType;
     public AnimatorOverrideController AnimatorOverride => animatorOverride;
     public float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
