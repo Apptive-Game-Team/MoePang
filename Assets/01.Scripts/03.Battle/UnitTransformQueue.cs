@@ -8,7 +8,7 @@ public class UnitTransformQueue : MonoBehaviour
 {
     public static UnitTransformQueue Instance { get; private set; }
 
-    private Dictionary<TeamType, Queue<Unit>> teamQueues;
+    private Dictionary<TeamType, LinkedList<Unit>> teamQueues;
     private Dictionary<TeamType, IDamageable> teamCastles;
 
     private void Awake()
@@ -21,10 +21,10 @@ public class UnitTransformQueue : MonoBehaviour
 
         Instance = this;
 
-        teamQueues = new Dictionary<TeamType, Queue<Unit>>()
+        teamQueues = new Dictionary<TeamType, LinkedList<Unit>>()
         {
-            { TeamType.Friendly, new Queue<Unit>() },
-            { TeamType.Enemy, new Queue<Unit>() }
+            { TeamType.Friendly, new LinkedList<Unit>() },
+            { TeamType.Enemy, new LinkedList<Unit>() }
         };
 
         teamCastles = new Dictionary<TeamType, IDamageable>();
@@ -38,21 +38,13 @@ public class UnitTransformQueue : MonoBehaviour
         if (teamQueues[team].Contains(unit))
             return;
 
-        teamQueues[team].Enqueue(unit);
+        teamQueues[team].AddLast(unit);
     }
 
     // 특정 유닛이 죽었을 때 호출하여 큐에서 제거하는 기능 추가
     public void RemoveUnit(TeamType team, Unit unit)
     {
-        if (teamQueues[team].Count == 0) return;
-
-        // 현재 큐를 리스트로 변환해 해당 유닛만 빼고 다시 구성
-        // (유닛 수가 적을 때는 이 방식이 가장 확실합니다)
-        List<Unit> tempList = new List<Unit>(teamQueues[team]);
-        if (tempList.Remove(unit))
-        {
-            teamQueues[team] = new Queue<Unit>(tempList);
-        }
+        teamQueues[team].Remove(unit);
     }
 
     /// <summary>
@@ -61,7 +53,7 @@ public class UnitTransformQueue : MonoBehaviour
     public void Dequeue(TeamType team)
     {
         if (teamQueues[team].Count > 0)
-            teamQueues[team].Dequeue();
+            teamQueues[team].RemoveFirst();
     }
 
     /// <summary>
@@ -77,11 +69,9 @@ public class UnitTransformQueue : MonoBehaviour
     /// </summary>
     public IDamageable Peek(TeamType team)
     {
-        //유닛이 있으면 유닛 반환
         if (teamQueues[team].Count > 0)
-            return teamQueues[team].Peek();
+            return teamQueues[team].First.Value;
 
-        //유닛이 없으면 캐슬 반환
         if (teamCastles.ContainsKey(team))
             return teamCastles[team];
 
@@ -116,7 +106,7 @@ public class UnitTransformQueue : MonoBehaviour
             IDamageable firstUnit = Peek(team);
             if (firstUnit != null)
             {
-                Gizmos.color = (team == TeamType.Friendly) ? Color.blue : Color.red;
+                Gizmos.color = team == TeamType.Friendly ? Color.blue : Color.red;
 
                 Vector3 pos = firstUnit.GetTransform().position;
                 Gizmos.DrawWireSphere(pos + Vector3.up * 1.5f, 0.3f);
