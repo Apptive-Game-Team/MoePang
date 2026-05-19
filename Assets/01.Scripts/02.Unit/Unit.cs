@@ -25,6 +25,7 @@ public enum AttackType
 {
     MeleeAttack,
     RangeAttack,
+    TripleAttack,
 }
 
 /// <summary>
@@ -329,6 +330,10 @@ public class Unit : MonoBehaviour, IDamageable
                 RangeAttack();
                 break;
 
+            case AttackType.TripleAttack:
+                TripleAttack();
+                break;
+
             default:
                 Debug.LogWarning("이런 공격은 없어");
                 MeleeAttack();
@@ -390,6 +395,20 @@ public class Unit : MonoBehaviour, IDamageable
 
             if (target == null) continue;
             if (target.GetTeam() == team) continue;
+
+            target.TakeDamage(attackDamage);
+        }
+    }
+
+    protected virtual void TripleAttack()
+    {
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        List<IDamageable> targets = UTQ.PeekTargets(enemyTeam, 3);
+
+        foreach (IDamageable target in targets)
+        {
+            if (target == null) continue;
+            if (target is Castle && !IsTargetInAttackRange(target)) continue;
 
             target.TakeDamage(attackDamage);
         }

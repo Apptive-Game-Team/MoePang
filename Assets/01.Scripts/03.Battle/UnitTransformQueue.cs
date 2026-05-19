@@ -109,6 +109,26 @@ public class UnitTransformQueue : MonoBehaviour
         return null;
     }
 
+    public List<IDamageable> PeekTargets(TeamType team, int count)
+    {
+        RemoveInvalidUnits(team);
+
+        List<IDamageable> targets = new List<IDamageable>(count);
+
+        foreach (QueueEntry entry in teamLists[team])
+        {
+            targets.Add(entry.Unit);
+
+            if (targets.Count >= count)
+                return targets;
+        }
+
+        if (targets.Count < count && teamCastles.ContainsKey(team))
+            targets.Add(teamCastles[team]);
+
+        return targets;
+    }
+
     public bool HasMovedBehindAnotherUnit(Unit unit)
     {
         if (unit == null) return false;
