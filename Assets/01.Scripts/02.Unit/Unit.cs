@@ -112,9 +112,12 @@ public class Unit : MonoBehaviour, IDamageable
         SetVisual();
         SetProceedStat();
 
-        BuffManager.Instance.RegisterUnit(this);
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
-        ChangeState(UnitState.Move);
+
+        UTQ.ResetAndInsert(this);
+        BuffManager.Instance.RegisterUnit(this);
+
+        ChangeState(UnitState.Move, true);
     }
 
     protected virtual void SetBaseStat()
@@ -190,9 +193,9 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
-    protected void ChangeState(UnitState newState)
+    protected void ChangeState(UnitState newState, bool force = false)
     {
-        if (currentState == newState) return;
+        if (!force && currentState == newState) return;
 
         currentState = newState;
 
@@ -241,7 +244,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (hit.collider != null)
         {
-            UTQ.Enqueue(team, this);
+            UTQ.Insert(this);
             ChangeState(UnitState.Attack);
             return;
         }
@@ -447,6 +450,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         damageTween?.Kill();
 
+        bool removedFromList = false;
         float originalY = transform.position.y;
         Vector3 jumpEndPos = new Vector3(
             transform.position.x - direction * 0.8f,
@@ -459,7 +463,17 @@ public class Unit : MonoBehaviour, IDamageable
         seq.Append(transform.DOScale(originalScale * 1.2f, 0.08f));
         seq.Join(spriteRenderer.DOFade(0.25f, 0.08f));
 
-        seq.Append(transform.DOJump(jumpEndPos, 0.3f, 2, 0.6f).SetEase(Ease.OutQuad));
+        seq.Append(
+            transform.DOJump(jumpEndPos, 0.3f, 2, 0.6f)
+                .SetEase(Ease.OutQuad)
+                .OnUpdate(() =>
+                {
+                    if (removedFromList || !HasMovedBehindFrontUnit()) return;
+
+                    UTQ.Remove(this);
+                    removedFromList = true;
+                })
+        );
 
         seq.Append(transform.DOScale(originalScale, 0.08f));
         seq.Join(spriteRenderer.DOFade(1f, 0.08f));
@@ -478,11 +492,22 @@ public class Unit : MonoBehaviour, IDamageable
         currentHp -= pendingDamage;
 
         if (currentHp <= 0)
+        {
+            UTQ.RemoveUnit(team, this);
             ChangeState(UnitState.Die);
+        }
         else
+        {
+            UTQ.Insert(this);
             ChangeState(UnitState.Attack);
+        }
 
         isDamaging = false;
+    }
+
+    private bool HasMovedBehindFrontUnit()
+    {
+        return UTQ.HasMovedBehindAnotherUnit(this);
     }
 
     /// <summary>

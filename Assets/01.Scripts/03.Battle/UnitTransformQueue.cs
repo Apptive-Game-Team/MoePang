@@ -1,13 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 공격 우선순위 설정 큐
-/// </summary>
 public class UnitTransformQueue : MonoBehaviour
 {
     public static UnitTransformQueue Instance { get; private set; }
-    
+
     private class QueueEntry
     {
         public Unit Unit;
@@ -20,10 +17,9 @@ public class UnitTransformQueue : MonoBehaviour
         }
     }
 
-    private Dictionary<TeamType, LinkedList<QueueEntry>> teamQueues;
+    private readonly Dictionary<Unit, long> unitOrders = new();
+    private Dictionary<TeamType, LinkedList<QueueEntry>> teamLists;
     private Dictionary<TeamType, IDamageable> teamCastles;
-    
-    private Dictionary<Unit, long> unitOrders = new();
     private long nextOrder;
 
     private void Awake()
@@ -36,7 +32,7 @@ public class UnitTransformQueue : MonoBehaviour
 
         Instance = this;
 
-        teamQueues = new Dictionary<TeamType, LinkedList<QueueEntry>>()
+        teamLists = new Dictionary<TeamType, LinkedList<QueueEntry>>()
         {
             { TeamType.Friendly, new LinkedList<QueueEntry>() },
             { TeamType.Enemy, new LinkedList<QueueEntry>() }
@@ -45,77 +41,67 @@ public class UnitTransformQueue : MonoBehaviour
         teamCastles = new Dictionary<TeamType, IDamageable>();
     }
 
-    /// <summary>
-    /// 큐에 유닛 넣기
-    /// </summary>
-    public void Enqueue(TeamType team, Unit unit)
+    public void ResetAndInsert(Unit unit)
+    {
+        Remove(unit, true);
+        Insert(unit);
+    }
+
+    public void Insert(Unit unit)
     {
         if (unit == null) return;
 
-        RemoveUnit(team, unit, false);
+        Remove(unit, false);
 
         if (!unitOrders.ContainsKey(unit))
             unitOrders[unit] = nextOrder++;
 
+        TeamType team = unit.GetTeam();
         QueueEntry entry = new QueueEntry(unit, unitOrders[unit]);
         InsertSorted(team, entry);
     }
-    
+
+    public void Enqueue(TeamType team, Unit unit)
+    {
+        Insert(unit);
+    }
+
     public void RefreshUnit(TeamType team, Unit unit)
     {
-        Enqueue(team, unit);
+        Insert(unit);
     }
-    
-    // 특정 유닛이 죽었을 때 호출하여 큐에서 제거하는 기능 추가
+
+    public void Remove(Unit unit)
+    {
+        Remove(unit, false);
+    }
+
     public void RemoveUnit(TeamType team, Unit unit)
     {
-        RemoveUnit(team, unit, true);
-    }
-    
-    private void RemoveUnit(TeamType team, Unit unit, bool removeOrder)
-    {
-        LinkedList<QueueEntry> list = teamQueues[team];
-
-        for (LinkedListNode<QueueEntry> node = list.First; node != null; node = node.Next)
-        {
-            if (node.Value.Unit == unit)
-            {
-                list.Remove(node);
-                break;
-            }
-        }
-
-        if (removeOrder)
-            unitOrders.Remove(unit);
+        Remove(unit, true);
     }
 
-
-    /// <summary>
-    /// 큐에서 유닛/캐슬 빼기
-    /// </summary>
     public void Dequeue(TeamType team)
     {
-        if (teamQueues[team].Count > 0)
-            teamQueues[team].RemoveFirst();
+        if (teamLists[team].Count <= 0) return;
+
+        Unit unit = teamLists[team].First.Value.Unit;
+        unitOrders.Remove(unit);
+        teamLists[team].RemoveFirst();
     }
 
-    /// <summary>
-    /// 큐가 비어있는지 확인
-    /// </summary>
     public bool IsEmpty(TeamType team)
     {
-        return teamQueues[team].Count == 0;
+        RemoveInvalidUnits(team);
+        return teamLists[team].Count == 0;
     }
 
-    /// <summary>
-    /// 큐 맨 앞의 유닛/캐슬 확인
-    /// </summary>
     public IDamageable Peek(TeamType team)
     {
         RemoveInvalidUnits(team);
 
-        if (teamQueues[team].Count > 0)
-            return teamQueues[team].First.Value.Unit;
+        if (teamLists[team].Count > 0)
+            return teamLists[team].First.Value.Unit;
 
         if (teamCastles.ContainsKey(team))
             return teamCastles[team];
@@ -123,34 +109,70 @@ public class UnitTransformQueue : MonoBehaviour
         return null;
     }
 
-    /// <summary>
-    /// 큐 초기화
-    /// </summary>
-    public void Clear(TeamType team)
+    public bool HasMovedBehindAnotherUnit(Unit unit)
     {
-        foreach (QueueEntry entry in teamQueues[team])
-            unitOrders.Remove(entry.Unit);
+        if (unit == null) return false;
 
-        teamQueues[team].Clear();
+        TeamType team = unit.GetTeam();
+        float unitX = unit.transform.position.x;
+
+        foreach (QueueEntry entry in teamLists[team])
+        {
+            Unit other = entry.Unit;
+
+            if (other == null || other == unit) continue;
+
+            float otherX = other.transform.position.x;
+
+            if (team == TeamType.Friendly && unitX < otherX)
+                return true;
+
+            if (team == TeamType.Enemy && unitX > otherX)
+                return true;
+        }
+
+        return false;
     }
 
-    /// <summary>
-    /// 각 팀의 캐슬 등록
-    /// </summary>
+    public void Clear(TeamType team)
+    {
+        foreach (QueueEntry entry in teamLists[team])
+            unitOrders.Remove(entry.Unit);
+
+        teamLists[team].Clear();
+    }
+
     public void RegisterCastle(TeamType team, IDamageable castle)
     {
         teamCastles[team] = castle;
     }
-    
+
+    private void Remove(Unit unit, bool removeOrder)
+    {
+        if (unit == null) return;
+
+        foreach (LinkedList<QueueEntry> list in teamLists.Values)
+        {
+            for (LinkedListNode<QueueEntry> node = list.First; node != null; node = node.Next)
+            {
+                if (node.Value.Unit != unit) continue;
+
+                list.Remove(node);
+
+                if (removeOrder)
+                    unitOrders.Remove(unit);
+
+                return;
+            }
+        }
+
+        if (removeOrder)
+            unitOrders.Remove(unit);
+    }
+
     private void InsertSorted(TeamType team, QueueEntry newEntry)
     {
-        LinkedList<QueueEntry> list = teamQueues[team];
-
-        if (list.Count == 0)
-        {
-            list.AddFirst(newEntry);
-            return;
-        }
+        LinkedList<QueueEntry> list = teamLists[team];
 
         for (LinkedListNode<QueueEntry> node = list.First; node != null; node = node.Next)
         {
@@ -182,16 +204,19 @@ public class UnitTransformQueue : MonoBehaviour
 
     private void RemoveInvalidUnits(TeamType team)
     {
-        LinkedList<QueueEntry> list = teamQueues[team];
+        LinkedList<QueueEntry> list = teamLists[team];
         LinkedListNode<QueueEntry> node = list.First;
 
         while (node != null)
         {
             LinkedListNode<QueueEntry> next = node.Next;
+            Unit unit = node.Value.Unit;
 
-            if (node.Value.Unit == null || !node.Value.Unit.gameObject.activeInHierarchy)
+            if (unit == null || !unit.gameObject.activeInHierarchy)
             {
-                unitOrders.Remove(node.Value.Unit);
+                if (unit != null)
+                    unitOrders.Remove(unit);
+
                 list.Remove(node);
             }
 
@@ -199,24 +224,19 @@ public class UnitTransformQueue : MonoBehaviour
         }
     }
 
-
-    /// <summary>
-    /// 유닛 순서 큐 기즈모
-    /// </summary>
     private void OnDrawGizmos()
     {
-        if (teamQueues == null) return;
+        if (teamLists == null) return;
 
-        foreach (var team in teamQueues.Keys)
+        foreach (TeamType team in teamLists.Keys)
         {
             IDamageable firstUnit = Peek(team);
-            if (firstUnit != null)
-            {
-                Gizmos.color = team == TeamType.Friendly ? Color.blue : Color.red;
+            if (firstUnit == null) continue;
 
-                Vector3 pos = firstUnit.GetTransform().position;
-                Gizmos.DrawWireSphere(pos + Vector3.up * 1.5f, 0.3f);
-            }
+            Gizmos.color = team == TeamType.Friendly ? Color.blue : Color.red;
+
+            Vector3 pos = firstUnit.GetTransform().position;
+            Gizmos.DrawWireSphere(pos + Vector3.up * 1.5f, 0.3f);
         }
     }
 }
