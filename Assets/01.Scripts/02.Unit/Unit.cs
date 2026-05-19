@@ -127,6 +127,7 @@ public class Unit : MonoBehaviour, IDamageable
         unitGrade = data.UnitGrade;
         maxHp = data.MaxHp;
         attackDamage = data.AttackDamage;
+        attackType = data.AttackType;
         unitSize = data.UnitSize;
 
         _originMoveSpeed = moveSpeed;
