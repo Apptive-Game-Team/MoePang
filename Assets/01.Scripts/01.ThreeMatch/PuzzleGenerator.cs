@@ -153,6 +153,20 @@ namespace _01.Scripts._01.ThreeMatch
             _puzzles = new PuzzleObject[x, y];
             yield return SetStartPuzzle();
         }
+
+        public void ResetBoard()
+        {
+            for (int i = 0;i < x;i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (_puzzles[i, j] != null)
+                    {
+                        Destroy(_puzzles[i, j].gameObject);
+                    }
+                }
+            }
+        }
         
         private IEnumerator SetStartPuzzle()
         {
