@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 /// <summary>
@@ -23,7 +24,7 @@ public class UnitSpawner : MonoBehaviour
     [SerializeField] private Transform enemySpawnPosition;
 
     private List<List<int>> _enemySpawnWeights;
-    private float _enemySpawnInterval = 3f;
+    public float enemySpawnInterval = 3f;
 
     private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
 
@@ -167,7 +168,7 @@ public class UnitSpawner : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(_enemySpawnInterval);
+            yield return new WaitForSeconds(enemySpawnInterval);
             SpawnEnemy();
         }
     }

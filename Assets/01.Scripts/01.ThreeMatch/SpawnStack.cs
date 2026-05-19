@@ -11,6 +11,7 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [SerializeField] private GameObject[] stacks;
         public Habitat type;
+        public bool isBanned;
 
         public event Action<int> OnStackAdded;
         
@@ -54,9 +55,20 @@ namespace _01.Scripts._01.ThreeMatch
         {
             _spawner = spawner;
         }
+
+        public void BanStack()
+        {
+            isBanned = true;
+            GetComponent<Image>().color = Color.gray;
+        }
         
         public void AddStack(int num)
         {
+            if (isBanned)
+            {
+                return;
+            }
+            
             _taskQueue.Enqueue(() => AddStackProcess(num));
 
             if (!_isProcessing)

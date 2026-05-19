@@ -48,9 +48,8 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private List<ObstacleSpawnGroup> startObstacles;
         [SerializeField] private List<ObstacleWeight> obstacleWeights;
         [SerializeField] private float obstacleSpawnDelay = 2f;
-        [SerializeField] private float obstacleSpawnInterval = 10f;
+        public float obstacleSpawnInterval = 10f;
         [Range(0, 100)] [SerializeField] private float goldTileSpawnRate = 5f;
-        
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
@@ -69,6 +68,10 @@ namespace _01.Scripts._01.ThreeMatch
         
         private bool _isProcessing;
         public bool IsProcessing => _isProcessing;
+        private int _swapCount;
+        public int maxSwapCount = -1;
+        private Habitat? _lastMovedHabitat = null;
+        public bool isContinuousHabitatBanned;
             
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
@@ -145,14 +148,10 @@ namespace _01.Scripts._01.ThreeMatch
         /// 시작 퍼즐 및 타입 검사 관련 함수 (시작 시 매치가 안 일어나게 설정)
         /// </summary>
         #region Start Puzzle
-        private IEnumerator GenerateBoard()
+        public IEnumerator GenerateBoard()
         {
-            _isProcessing = true;
-            
             _puzzles = new PuzzleObject[x, y];
             yield return SetStartPuzzle();
-            
-            _isProcessing = false;
         }
         
         private IEnumerator SetStartPuzzle()
@@ -406,11 +405,19 @@ namespace _01.Scripts._01.ThreeMatch
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
-            if (_taskQueue.Count > 0 || _isProcessing) return;
-            if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y) return;
+            if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y)
+            {
+                return;
+            }
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject ||
-                _puzzles[x2, y2] is ObstaclePuzzleObject)
+            if (_taskQueue.Count > 0 || _isProcessing)
+            {
+                return;
+            }
+            
+            
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject || _puzzles[x2, y2] is ObstaclePuzzleObject
+                || (maxSwapCount != -1 && _swapCount >= maxSwapCount))
             {
                 _puzzles[x1, y1].FailedSwapEffect(x2 - x1, y2 - y1, 
                     Vector2.Distance(_puzzles[x1, y1].transform.position, _puzzles[x2, y2].transform.position) / 2);
@@ -418,6 +425,8 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             _lastMovePos = new Vector2Int(x2, y2);
+            _swapCount++;
+            
             AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
 
@@ -786,6 +795,12 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         continue;
                     }
+
+                    if (_lastMovedHabitat == group.habitat && isContinuousHabitatBanned)
+                    {
+                        Destroy(targetPuzzle.gameObject);
+                        continue;
+                    }
                     
                     targetPuzzle.transform.SetParent(puzzleFrame.parent);
                     
@@ -839,6 +854,8 @@ namespace _01.Scripts._01.ThreeMatch
                         })
                         .WaitForCompletion();
                 }
+                
+                _lastMovedHabitat = group.habitat;
             }
 
             if (delayedBombPos.HasValue)
