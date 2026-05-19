@@ -375,46 +375,33 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void RangeAttack()
     {
-        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
-        IDamageable target = UTQ.Peek(enemyTeam);
+        Vector2 boxCenter = GetAttackBoxCenter();
+        Vector2 boxSize = GetAttackBoxSize();
 
-        if (target != null)
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, 0f, targetLayer);
+
+        if (hits.Length == 0)
+            return;
+
+        foreach (Collider2D hit in hits)
         {
-            if (!IsTargetInRangeAttackArea(target))
-                return;
+            IDamageable target = hit.GetComponentInParent<IDamageable>();
+
+            if (target == null) continue;
+            if (target.GetTeam() == team) continue;
 
             target.TakeDamage(attackDamage);
         }
-
-        else
-        {
-            Debug.Log($"[{team}] {name} 범위 공격했지만 타겟 없음");
-        }
-    }
-
-    private bool IsTargetInRangeAttackArea(IDamageable target)
-    {
-        Vector2 targetPoint = target.GetTransform().position;
-        Collider2D targetCollider = target.GetTransform().GetComponent<Collider2D>();
-
-        if (targetCollider != null)
-            targetPoint = targetCollider.ClosestPoint(GetAttackBoxCenter());
-
-        Vector2 boxCenter = GetAttackBoxCenter();
-        Vector2 boxHalfSize = GetAttackBoxSize() * 0.5f;
-        Vector2 delta = targetPoint - boxCenter;
-
-        return Mathf.Abs(delta.x) <= boxHalfSize.x && Mathf.Abs(delta.y) <= boxHalfSize.y;
     }
     
     protected virtual Vector2 GetAttackBoxCenter()
     {
-        return transform.position + Vector3.right * direction * attackRange;
+        return transform.position + Vector3.right * direction * attackRange * 0.5f;
     }
 
     protected virtual Vector2 GetAttackBoxSize()
     {
-        return new Vector2(unitSize, unitSize);
+        return new Vector2(attackRange, unitSize);
     }
     
     #endregion
