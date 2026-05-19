@@ -375,24 +375,36 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void RangeAttack()
     {
-        Vector2 boxCenter = GetAttackBoxCenter();
-        Vector2 boxSize = GetAttackBoxSize();
+        TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
+        IDamageable target = UTQ.Peek(enemyTeam);
 
-        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, 0f, targetLayer);
-
-        if (hits.Length == 0)
+        if (target != null)
         {
-            Debug.Log($"[{team}] {name} 범위 공격했지만 타겟 없음");
-            return;
-        }
-
-        foreach (Collider2D hit in hits)
-        {
-            if (!hit.TryGetComponent(out IDamageable target)) continue;
-            if (target.GetTeam() == team) continue;
+            if (!IsTargetInRangeAttackArea(target))
+                return;
 
             target.TakeDamage(attackDamage);
         }
+
+        else
+        {
+            Debug.Log($"[{team}] {name} 범위 공격했지만 타겟 없음");
+        }
+    }
+
+    private bool IsTargetInRangeAttackArea(IDamageable target)
+    {
+        Vector2 targetPoint = target.GetTransform().position;
+        Collider2D targetCollider = target.GetTransform().GetComponent<Collider2D>();
+
+        if (targetCollider != null)
+            targetPoint = targetCollider.ClosestPoint(GetAttackBoxCenter());
+
+        Vector2 boxCenter = GetAttackBoxCenter();
+        Vector2 boxHalfSize = GetAttackBoxSize() * 0.5f;
+        Vector2 delta = targetPoint - boxCenter;
+
+        return Mathf.Abs(delta.x) <= boxHalfSize.x && Mathf.Abs(delta.y) <= boxHalfSize.y;
     }
     
     protected virtual Vector2 GetAttackBoxCenter()
