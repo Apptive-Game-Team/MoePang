@@ -345,6 +345,9 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (target != null)
         {
+            if (!IsTargetInAttackRange(target))
+                return;
+
             target.TakeDamage(attackDamage);
         }
 
@@ -352,6 +355,19 @@ public class Unit : MonoBehaviour, IDamageable
         {
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
+    }
+
+    private bool IsTargetInAttackRange(IDamageable target)
+    {
+        Vector2 targetPoint = target.GetTransform().position;
+        Collider2D targetCollider = target.GetTransform().GetComponent<Collider2D>();
+
+        if (targetCollider != null)
+            targetPoint = targetCollider.ClosestPoint(transform.position);
+
+        float forwardDistance = (targetPoint.x - transform.position.x) * direction;
+
+        return forwardDistance >= 0f && forwardDistance <= attackRange;
     }
     
     /// <summary>
