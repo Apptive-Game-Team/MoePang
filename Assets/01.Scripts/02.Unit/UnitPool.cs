@@ -46,10 +46,10 @@ public class UnitPool : MonoBehaviour
         }
 
         unit.transform.position = spawnPos.position;
-
-        unit.SetData(data);
         
         unit.gameObject.SetActive(true);
+        
+        unit.SetData(data);
 
         return unit;
     }

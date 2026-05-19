@@ -112,10 +112,9 @@ public class Unit : MonoBehaviour, IDamageable
         SetVisual();
         SetProceedStat();
 
-        UTQ.Enqueue(team, this);
         BuffManager.Instance.RegisterUnit(this);
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
-        ChangeState(UnitState.Attack);  
+        ChangeState(UnitState.Move);
     }
 
     protected virtual void SetBaseStat()
@@ -232,6 +231,12 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     protected virtual void MoveState()
     {
+        if (animator != null && !animator.GetBool("Walk"))
+        {
+            animator.SetBool("Walk", true);
+            animator.SetBool("Idle", false);
+        }
+        
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right * direction, attackRange, targetLayer);
 
         if (hit.collider != null)
