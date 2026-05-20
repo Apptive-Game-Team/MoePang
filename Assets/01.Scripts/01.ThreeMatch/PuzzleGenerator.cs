@@ -154,7 +154,7 @@ namespace _01.Scripts._01.ThreeMatch
             yield return SetStartPuzzle();
         }
 
-        public void ResetBoard()
+        public IEnumerator ResetBoard()
         {
             for (int i = 0;i < x;i++)
             {
@@ -166,6 +166,8 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                 }
             }
+
+            yield return null;
         }
         
         private IEnumerator SetStartPuzzle()
