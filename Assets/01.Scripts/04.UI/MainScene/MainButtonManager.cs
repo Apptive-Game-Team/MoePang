@@ -33,6 +33,11 @@ public class MainButtonManager : MonoBehaviour
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
     }
 
+    public void SelectHabitatMode()
+    {
+        
+    }
+
     // 게임 플레이 시 시작돼야 할 사항들
     private void OnPlaySceneLoaded(Scene scene, LoadSceneMode mode)
     {
