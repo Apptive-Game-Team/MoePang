@@ -8,6 +8,7 @@ namespace _01.Scripts._08.Utility
         Main,
         Shop,
         MatchAndBattle,
+        HabitatBattle,
     }
     
     public static class SceneInfo
@@ -18,6 +19,7 @@ namespace _01.Scripts._08.Utility
             { SceneType.Main, "01.MainScene"},
             { SceneType.Shop, "02.ShopScene"},
             { SceneType.MatchAndBattle, "03.3match&Battle"},
+            { SceneType.HabitatBattle, "04.HabitatBattle"},
         };
 
         public static string GetSceneName(SceneType type)

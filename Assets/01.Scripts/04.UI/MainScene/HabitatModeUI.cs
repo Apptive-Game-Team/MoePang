@@ -10,7 +10,7 @@ namespace _01.Scripts._04.UI.MainScene
     public class HabitatModeUI : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI modeText;
-        [SerializeField] private SceneType startScene = SceneType.MatchAndBattle;
+        [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
 
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
 
