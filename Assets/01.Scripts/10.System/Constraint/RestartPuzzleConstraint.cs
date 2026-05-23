@@ -21,6 +21,7 @@ namespace _01.Scripts._10.System.Constraint
             {
                 yield return new WaitForSeconds(restartInterval);
 
+                puzzle.AddTask(puzzle.ResetBoard);
                 puzzle.AddTask(puzzle.GenerateBoard);
             }
         }
