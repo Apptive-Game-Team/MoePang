@@ -685,13 +685,13 @@ public class Unit : MonoBehaviour, IDamageable
         switch (type)
         {
             case StatType.MoveSpeed:
-                moveSpeed *= _multipliers[type];
+                moveSpeed = _originMoveSpeed * _multipliers[type];
                 break;
             case StatType.AttackDamage:
-                attackDamage *= _multipliers[type];
+                attackDamage = _originAttackDamage * _multipliers[type];
                 break;
             case StatType.AttackSpeed:
-                attackSpeed *= _multipliers[type];
+                attackSpeed = _originAttackSpeed * _multipliers[type];
                 break;
         }
     }
