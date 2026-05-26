@@ -6449,6 +6449,12 @@ MonoBehaviour:
   obstacleWarningPrefab: {fileID: 2444415622454818781, guid: ce1e179ce44092440bb8c160c2f8210e, type: 3}
   goldPrefab: {fileID: 4336401594318408796, guid: f9a06fa307e97174cba5cc3bc6a14784, type: 3}
   spawnStackManager: {fileID: 1195533400}
+  isDebug: 0
+  resetRectanglePrefab: {fileID: 1359563286638045153, guid: d45e9fa7bbd42b6498c2dea1964f0f67, type: 3}
+  resetEffectDuration: 1
+  resetScaleRange: {x: 0.9, y: 1.1}
+  resetMoveDistanceRange: {x: 0, y: 0.2}
+  resetStayChance: 0.25
   maxSwapCount: -1
   isContinuousHabitatBanned: 0
 --- !u!4 &1669581475

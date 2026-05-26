@@ -63,6 +63,14 @@ namespace _01.Scripts._01.ThreeMatch
         
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
+
+        [Header("Puzzle Reset Setting")] 
+        [SerializeField] private bool isDebug = false;
+        [SerializeField] private GameObject resetRectanglePrefab;
+        [SerializeField] private float resetEffectDuration = 0.8f;
+        [SerializeField] private Vector2 resetScaleRange = new Vector2(1f, 1.3f);
+        [SerializeField] private Vector2 resetMoveDistanceRange = new Vector2(0.1f, 0.3f);
+        [SerializeField, Range(0f, 1f)] private float resetStayChance = 0.25f;
         
         private PuzzleObject[,] _puzzles;
         
@@ -77,6 +85,8 @@ namespace _01.Scripts._01.ThreeMatch
         private List<MatchGroup> _currentMatchGroups = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
+        
+        private List<GameObject> resetRectangles = new();
 
         private class MatchGroup
         {
@@ -166,6 +176,8 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                 }
             }
+
+            StartCoroutine(SpawnResetRectangles());
 
             yield return null;
         }
@@ -412,6 +424,122 @@ namespace _01.Scripts._01.ThreeMatch
 
             return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
                 ,puzzleFrame.transform.position.y + spawnY, 0f);
+        }
+        #endregion
+
+        /// <summary>
+        /// 매치 불가 시, 리셋 관련 함수
+        /// 1. 리셋 알림 UI
+        /// 2. 반짝이는 네모 생성
+        /// </summary>
+        /// <returns></returns>
+        #region Reset
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                isDebug = true;
+                StartCoroutine(ResetBoard());
+            }
+        }
+
+        private IEnumerator SpawnResetRectangles()
+        {
+            if (resetRectanglePrefab == null)
+            {
+                yield return null;
+            }
+            
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    GameObject rect = Instantiate(resetRectanglePrefab, puzzleFrame);
+
+                    rect.name = $"ResetRectangle({i + 1},{j + 1})";
+                    rect.transform.position = CalculatePos(i, j);
+                    
+                    resetRectangles.Add(rect);
+                }
+            }
+            
+            float timer = 0f;
+
+            Vector3[] startPositions = new Vector3[resetRectangles.Count];
+            Vector3[] targetPositions = new Vector3[resetRectangles.Count];
+            Vector3[] startScales = new Vector3[resetRectangles.Count];
+            Vector3[] targetScales = new Vector3[resetRectangles.Count];
+
+            for (int i = 0; i < resetRectangles.Count; i++)
+            {
+                GameObject rect = resetRectangles[i];
+
+                startPositions[i] = rect.transform.position;
+                startScales[i] = rect.transform.localScale;
+
+                float targetScale = Random.Range(resetScaleRange.x, resetScaleRange.y);
+                targetScales[i] = startScales[i] * targetScale;
+
+                bool stay = Random.value < resetStayChance;
+
+                if (stay)
+                {
+                    targetPositions[i] = startPositions[i];
+                }
+                else
+                {
+                    float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                    Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+
+                    float distance = Random.Range(resetMoveDistanceRange.x, resetMoveDistanceRange.y);
+                    targetPositions[i] = startPositions[i] + direction * distance;
+                }
+            }
+
+            while (timer < resetEffectDuration)
+            {
+                timer += Time.deltaTime;
+
+                float t = Mathf.Clamp01(timer / resetEffectDuration);
+                t = Mathf.SmoothStep(0f, 1f, t);
+
+                for (int i = 0; i < resetRectangles.Count; i++)
+                {
+                    GameObject rect = resetRectangles[i];
+
+                    if (rect == null)
+                    {
+                        continue;
+                    }
+
+                    rect.transform.position = Vector3.Lerp(startPositions[i], targetPositions[i], t);
+                    rect.transform.localScale = Vector3.Lerp(startScales[i], targetScales[i], t);
+                }
+
+                yield return null;
+            }
+            
+            ClearResetRectangles();
+        }
+        
+        private void ClearResetRectangles()
+        {
+            foreach (GameObject rect in resetRectangles)
+            {
+                if (rect != null)
+                {
+                    Destroy(rect);
+                }
+            }
+
+            resetRectangles.Clear();
+
+            if (isDebug)
+            {
+                isDebug = false;
+                StartCoroutine(GenerateBoard());
+            }
         }
         #endregion
         
