@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using Random = UnityEngine.Random;
 
 namespace _01.Scripts._01.ThreeMatch
@@ -71,6 +72,9 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private Vector2 resetScaleRange = new Vector2(1f, 1.3f);
         [SerializeField] private Vector2 resetMoveDistanceRange = new Vector2(0.1f, 0.3f);
         [SerializeField, Range(0f, 1f)] private float resetStayChance = 0.25f;
+        [SerializeField] private Image resetPopUpImage;
+        [SerializeField] private TextMeshProUGUI resetPopUpText;
+        [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
         
         private PuzzleObject[,] _puzzles;
         
@@ -166,6 +170,8 @@ namespace _01.Scripts._01.ThreeMatch
 
         public IEnumerator ResetBoard()
         {
+            yield return ResetPopUpEvent();
+            
             for (int i = 0;i < x;i++)
             {
                 for (int j = 0; j < y; j++)
@@ -177,9 +183,7 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
 
-            StartCoroutine(SpawnResetRectangles());
-
-            yield return null;
+            yield return SpawnResetRectangles();
         }
         
         private IEnumerator SetStartPuzzle()
@@ -433,8 +437,9 @@ namespace _01.Scripts._01.ThreeMatch
         /// 2. 반짝이는 네모 생성
         /// </summary>
         /// <returns></returns>
-        #region Reset
 
+        #region Reset
+        //디버그용 체크
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.P))
@@ -442,6 +447,33 @@ namespace _01.Scripts._01.ThreeMatch
                 isDebug = true;
                 StartCoroutine(ResetBoard());
             }
+        }
+        
+        private IEnumerator ResetPopUpEvent()
+        {
+            float duration = 2f;
+            float timer = 0f;
+
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+
+                if (resetPopUpImage != null)
+                {
+                    float t = (Mathf.Sin(Time.time * blinkSpeed) + 1f) * 0.5f;
+                    resetPopUpImage.color = Color.Lerp(Color.black, Color.gray, t);
+                    resetPopUpText.color = Color.Lerp(Color.gray, Color.white, t);
+                }
+
+                yield return null;
+            }
+
+            if (resetPopUpImage != null)
+            {
+                resetPopUpImage.color = Color.black;
+            }
+
+            yield return null;
         }
 
         private IEnumerator SpawnResetRectangles()
@@ -521,6 +553,8 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             ClearResetRectangles();
+
+            yield return null;
         }
         
         private void ClearResetRectangles()
