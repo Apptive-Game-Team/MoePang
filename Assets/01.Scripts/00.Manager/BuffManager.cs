@@ -36,29 +36,21 @@ namespace _01.Scripts._00.Manager
             {
                 if (_allies.Add(fu))
                 {
-                    ApplyAllyMultiplier(fu);
+                    ApplyMultiplier(fu, _allyMultiplier);
                 }
             }
             else if (unit is EnemyUnit eu)
             {
                 if (_enemies.Add(eu))
                 {
-                    ApplyEnemyMultiplier(eu);
+                    ApplyMultiplier(eu, _enemyMultiplier);
                 }
             }
         }
 
-        private void ApplyAllyMultiplier(Unit unit)
+        private void ApplyMultiplier(Unit unit, Dictionary<StatType, float> multiplier)
         {
-            foreach (var stat in _allyMultiplier)
-            {
-                unit.OnStatChanged(stat.Key, stat.Value);
-            }
-        }
-        
-        private void ApplyEnemyMultiplier(Unit unit)
-        {
-            foreach (var stat in _enemyMultiplier)
+            foreach (var stat in multiplier)
             {
                 unit.OnStatChanged(stat.Key, stat.Value);
             }
