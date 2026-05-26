@@ -451,29 +451,64 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator ResetPopUpEvent()
         {
+            if (resetPopUpImage == null)
+            {
+                yield break;
+            }
+
+            Color originImageColor = resetPopUpImage.color;
+            Color originTextColor = resetPopUpText != null
+                ? resetPopUpText.color
+                : Color.white;
+
+            resetPopUpImage.gameObject.SetActive(true);
+
             float duration = 2f;
+            int repeatCount = 2;
             float timer = 0f;
 
             while (timer < duration)
             {
                 timer += Time.deltaTime;
 
-                if (resetPopUpImage != null)
+                float normalizedTime = Mathf.Clamp01(timer / duration);
+
+                float wave = Mathf.PingPong(normalizedTime * repeatCount * 2f, 1f);
+                float alpha = wave;
+
+                Color imageColor = originImageColor;
+                imageColor.a = alpha;
+                resetPopUpImage.color = imageColor;
+
+                if (resetPopUpText != null)
                 {
-                    float t = (Mathf.Sin(Time.time * blinkSpeed) + 1f) * 0.5f;
-                    resetPopUpImage.color = Color.Lerp(Color.black, Color.gray, t);
-                    resetPopUpText.color = Color.Lerp(Color.gray, Color.white, t);
+                    Color textColor = originTextColor;
+                    textColor.a = alpha;
+                    resetPopUpText.color = textColor;
                 }
 
                 yield return null;
             }
 
-            if (resetPopUpImage != null)
+            Color finalImageColor = originImageColor;
+            finalImageColor.a = 0f;
+            resetPopUpImage.color = finalImageColor;
+
+            if (resetPopUpText != null)
             {
-                resetPopUpImage.color = Color.black;
+                Color finalTextColor = originTextColor;
+                finalTextColor.a = 0f;
+                resetPopUpText.color = finalTextColor;
             }
 
-            yield return null;
+            resetPopUpImage.gameObject.SetActive(false);
+
+            resetPopUpImage.color = originImageColor;
+
+            if (resetPopUpText != null)
+            {
+                resetPopUpText.color = originTextColor;
+            }
         }
 
         private IEnumerator SpawnResetRectangles()
