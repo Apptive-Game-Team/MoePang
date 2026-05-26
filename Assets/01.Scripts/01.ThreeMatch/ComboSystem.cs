@@ -10,19 +10,13 @@ namespace _01.Scripts._01.ThreeMatch
 {
     public class ComboSystem : MonoBehaviour
     {
-        [Header("Combo Settings")]
-        [SerializeField] private float comboKeepTime = 5f;
-        [SerializeField] private int comboThreshold = 21;
-        
-        [Header("Castle Settings")]
-        public Habitat castleType;
-        public bool isTypeNull;
-        
         [Header("References")]
         [SerializeField] private SpawnStack[] stacks;
         [SerializeField] private UnitSpawner unitSpawner;
         
-        private List<(int amount, float time)> _comboTrackers = new();
+        public bool isTypeNull;
+        
+        private int _continuousComboCount;
         private PuzzleGenerator _puzzle;
 
         private void Awake()
@@ -32,44 +26,48 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void Start()
         {
-            foreach (SpawnStack stack in stacks)
-            {
-                stack.OnStackAdded += OnStackAdded;
-            }
+            _puzzle.OnComboInitialized += OnComboInitialized;
+            _puzzle.OnComboDetected += OnComboDetected;
         }
-        
-        private void OnStackAdded(int amount)
+
+        private void OnComboInitialized()
         {
-            float currentTime = Time.time;
-            
-            _comboTrackers.Add((amount, currentTime));
-            
-            _comboTrackers.RemoveAll(x => currentTime - x.time > comboKeepTime);
-            int totalRecentStacks = _comboTrackers.Sum(x => x.amount);
-            
-            if (totalRecentStacks >= comboThreshold)
+            _continuousComboCount = 0;
+        }
+
+        private void OnComboDetected()
+        {
+            _continuousComboCount++;
+
+            switch (_continuousComboCount)
             {
-                TriggerComboEffect();
-                _comboTrackers.Clear();
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    print($"{_continuousComboCount} combo detected");
+                    TriggerComboEffect(GameManager.Instance.comboData.comboSequence[_continuousComboCount - 2]);
+                    break;
             }
         }
 
-        private void TriggerComboEffect()
+        private void TriggerComboEffect(Habitat comboType)
         {
-            print("콤보 발동");
+            print($"{comboType} combo applied");
             
-            if (isTypeNull)
-            {
-                // 모든 속성 1스택 추가
-                foreach (SpawnStack stack in stacks)
-                {
-                    stack.AddStack(1);
-                }
-
-                return;
-            }
+            // if (isTypeNull)
+            // {
+            //     // 모든 속성 1스택 추가
+            //     foreach (SpawnStack stack in stacks)
+            //     {
+            //         stack.AddStack(1);
+            //     }
+            //
+            //     return;
+            // }
             
-            switch (castleType)
+            switch (comboType)
             {
                 case Habitat.Meadow:
                     // 모든 서식지 기물 1종씩 소환

@@ -21,6 +21,15 @@ namespace _01.Scripts._00.Manager
             }
         }
     }
+    
+    [Serializable]
+    public class StageData
+    {
+        public int stageNum;
+        public float minUsedTime;
+        public int minUsedTile;
+        public int maxUsedTile;
+    }
 
     public interface IConvertable
     {
@@ -94,15 +103,6 @@ namespace _01.Scripts._00.Manager
     }
 
     [Serializable]
-    public class StageData
-    {
-        public int stageNum;
-        public float minUsedTime;
-        public int minUsedTile;
-        public int maxUsedTile;
-    }
-
-    [Serializable]
     public class ItemData : IConvertable
     {
         public Dictionary<ItemType, int> ItemAmounts = new();
@@ -129,6 +129,19 @@ namespace _01.Scripts._00.Manager
         {
             ItemAmounts = GameManager.ListsToDictionary(items, amounts);
         }
+    }
+    
+    [Serializable]
+    public class ComboData
+    {
+        public List<Habitat> comboSequence = new()
+        {
+            Habitat.Meadow,
+            Habitat.Ocean,
+            Habitat.Desert,
+            Habitat.Forest,
+            Habitat.Polar
+        };
     }
 
     [Serializable]
@@ -160,6 +173,7 @@ namespace _01.Scripts._00.Manager
         public CastleData castleData;
         public UnitData unitData;
         public ItemData itemData;
+        public ComboData comboData;
         public GameData gameData;
 
         protected override void Awake()
@@ -170,6 +184,7 @@ namespace _01.Scripts._00.Manager
             castleData = new CastleData();
             unitData = new UnitData(unitList);
             itemData = new ItemData();
+            comboData = new ComboData();
             gameData = new GameData();
         }
 
@@ -179,6 +194,7 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(castleData, "CastleData");
             SaveLoadManager.Instance.LoadData(unitData, "UnitData");
             SaveLoadManager.Instance.LoadData(itemData, "ItemData");
+            SaveLoadManager.Instance.LoadData(comboData, "ComboData");
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
         }
         
