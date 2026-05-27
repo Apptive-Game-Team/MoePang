@@ -105,6 +105,8 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyForestEffect()
         {
+            BuffManager.Instance.StartEnemyHealOverTime(15f, 15f);
+
             Debug.Log("Apply Forest Mode effect.");
         }
 

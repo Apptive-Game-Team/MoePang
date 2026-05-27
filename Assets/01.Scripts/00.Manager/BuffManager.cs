@@ -27,6 +27,8 @@ namespace _01.Scripts._00.Manager
 
         private readonly HashSet<FriendlyUnit> _allies = new();
         private readonly HashSet<EnemyUnit> _enemies = new();
+        
+        private Coroutine _enemyHealCoroutine;
 
         private void Awake() => Instance = this;
 
@@ -114,6 +116,48 @@ namespace _01.Scripts._00.Manager
             }
 
             _enemyCoroutines[type] = null;
+        }
+        
+        public void StartEnemyHealOverTime(float healAmount, float interval)
+        {
+            if (_enemyHealCoroutine != null)
+            {
+                StopCoroutine(_enemyHealCoroutine);
+            }
+
+            _enemyHealCoroutine = StartCoroutine(EnemyHealOverTimeRoutine(healAmount, interval));
+        }
+        public void StopEnemyHealOverTime()
+        {
+            if (_enemyHealCoroutine == null) return;
+
+            StopCoroutine(_enemyHealCoroutine);
+            _enemyHealCoroutine = null;
+
+            Debug.Log("Enemy heal over time stopped.");
+        }
+        
+        private IEnumerator EnemyHealOverTimeRoutine(float healAmount, float interval)
+        {
+            Debug.Log($"Enemy heal over time started. HealAmount: {healAmount}, Interval: {interval}");
+
+            while (true)
+            {
+                yield return new WaitForSeconds(interval);
+
+                int healedCount = 0;
+
+                foreach (EnemyUnit enemy in _enemies)
+                {
+                    if (enemy == null) continue;
+                    if (!enemy.gameObject.activeInHierarchy) continue;
+
+                    enemy.Heal(healAmount);
+                    healedCount++;
+                }
+
+                Debug.Log($"Enemy heal over time applied. HealAmount: {healAmount}, HealedCount: {healedCount}");
+            }
         }
     }
 }
