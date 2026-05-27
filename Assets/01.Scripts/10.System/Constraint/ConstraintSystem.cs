@@ -47,7 +47,7 @@ namespace _01.Scripts._10.System.Constraint
         {
             _constraintContext = new ConstraintContext(puzzle, unitSpawner, spawnStacks);
 
-            _constraintApplyCount = 6;
+            _constraintApplyCount = StageManager.Instance.CurrentStage / constraintApplyInterval;
 
             ApplyRandomConstraints();
         }

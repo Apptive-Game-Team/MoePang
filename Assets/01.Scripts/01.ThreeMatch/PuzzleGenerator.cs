@@ -82,8 +82,11 @@ namespace _01.Scripts._01.ThreeMatch
         public bool IsProcessing => _isProcessing;
         private int _swapCount;
         public int maxSwapCount = -1;
-        private Habitat? _lastMovedHabitat = null;
+        private Habitat? _lastMovedHabitat;
         public bool isContinuousHabitatBanned;
+
+        public Action OnComboInitialized;
+        public Action OnComboDetected;
             
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
@@ -976,6 +979,8 @@ namespace _01.Scripts._01.ThreeMatch
                 }
                 yield return seq1.WaitForCompletion();
                 
+                OnComboDetected?.Invoke();
+                
                 Sequence seq2 = DOTween.Sequence();
                 List<PuzzleObject> targets = new();
                 foreach (var pos in group.positions)
@@ -1161,6 +1166,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
             else
             {
+                OnComboInitialized?.Invoke();
                 goldUI.ShowUI(false);
             }
         }
@@ -1226,6 +1232,8 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             yield return SetExplosionEffect(center.x, center.y, targetPuzzles, type);
+
+            OnComboDetected?.Invoke();
 
             while (q.Count > 0)
             {

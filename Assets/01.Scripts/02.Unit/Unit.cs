@@ -131,14 +131,14 @@ public class Unit : MonoBehaviour, IDamageable
         attackType = data.AttackType;
         unitSize = data.UnitSize;
 
-        _originMoveSpeed = moveSpeed;
-        _originAttackDamage = attackDamage;
-        _originAttackSpeed = attackSpeed;
-
         moveSpeed = data.BaseMoveSpeed;
         attackSpeed = data.AttackSpeed;
 
         attackRange = unitSize;
+        
+        _originMoveSpeed = moveSpeed;
+        _originAttackDamage = attackDamage;
+        _originAttackSpeed = attackSpeed;
     }
 
     protected virtual void SetProceedStat()
@@ -676,15 +676,24 @@ public class Unit : MonoBehaviour, IDamageable
         if (_multipliers.ContainsKey(type))
         {
             _multipliers[type] = multiplier;
-            UpdateFinalStats();
+            UpdateFinalStat(type);
         }
     }
 
-    private void UpdateFinalStats()
+    private void UpdateFinalStat(StatType type)
     {
-        moveSpeed *= _multipliers[StatType.MoveSpeed];
-        attackSpeed *= _multipliers[StatType.AttackSpeed];
-        attackDamage *= _multipliers[StatType.AttackDamage];
+        switch (type)
+        {
+            case StatType.MoveSpeed:
+                moveSpeed = _originMoveSpeed * _multipliers[type];
+                break;
+            case StatType.AttackDamage:
+                attackDamage = _originAttackDamage * _multipliers[type];
+                break;
+            case StatType.AttackSpeed:
+                attackSpeed = _originAttackSpeed * _multipliers[type];
+                break;
+        }
     }
 
     public void RestoreStats()

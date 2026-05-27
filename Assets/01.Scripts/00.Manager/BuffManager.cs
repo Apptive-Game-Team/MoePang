@@ -10,7 +10,13 @@ namespace _01.Scripts._00.Manager
     {
         public static BuffManager Instance { get; private set; }
 
-        private Dictionary<StatType, float> _multiplier = new() {
+        private Dictionary<StatType, float> _allyMultiplier = new() {
+            { StatType.MoveSpeed, 1f },
+            { StatType.AttackSpeed, 1f },
+            { StatType.AttackDamage, 1f }
+        };
+        
+        private Dictionary<StatType, float> _enemyMultiplier = new() {
             { StatType.MoveSpeed, 1f },
             { StatType.AttackSpeed, 1f },
             { StatType.AttackDamage, 1f }
@@ -30,21 +36,21 @@ namespace _01.Scripts._00.Manager
             {
                 if (_allies.Add(fu))
                 {
-                    ApplyMultiplier(fu);
+                    ApplyMultiplier(fu, _allyMultiplier);
                 }
             }
             else if (unit is EnemyUnit eu)
             {
                 if (_enemies.Add(eu))
                 {
-                    ApplyMultiplier(eu);
+                    ApplyMultiplier(eu, _enemyMultiplier);
                 }
             }
         }
 
-        private void ApplyMultiplier(Unit unit)
+        private void ApplyMultiplier(Unit unit, Dictionary<StatType, float> multiplier)
         {
-            foreach (var stat in _multiplier)
+            foreach (var stat in multiplier)
             {
                 unit.OnStatChanged(stat.Key, stat.Value);
             }
@@ -62,7 +68,7 @@ namespace _01.Scripts._00.Manager
 
         private IEnumerator AllyBuffRoutine(StatType type, float mul, float duration)
         {
-            _multiplier[type] = mul;
+            _allyMultiplier[type] = mul;
             foreach (FriendlyUnit unit in _allies)
             {
                 unit.OnStatChanged(type, mul);
@@ -70,7 +76,7 @@ namespace _01.Scripts._00.Manager
 
             yield return new WaitForSeconds(duration);
 
-            _multiplier[type] = 1f;
+            _allyMultiplier[type] = 1f;
             foreach (FriendlyUnit unit in _allies)
             {
                 unit.OnStatChanged(type, 1f);
@@ -92,7 +98,7 @@ namespace _01.Scripts._00.Manager
 
         private IEnumerator EnemyBuffRoutine(StatType type, float mul, float duration)
         {
-            _multiplier[type] = mul;
+            _enemyMultiplier[type] = mul;
             foreach (EnemyUnit unit in _enemies)
             {
                 unit.OnStatChanged(type, mul);
@@ -100,7 +106,7 @@ namespace _01.Scripts._00.Manager
 
             yield return new WaitForSeconds(duration);
 
-            _multiplier[type] = 1f;
+            _enemyMultiplier[type] = 1f;
             foreach (EnemyUnit unit in _enemies)
             {
                 unit.OnStatChanged(type, 1f);
