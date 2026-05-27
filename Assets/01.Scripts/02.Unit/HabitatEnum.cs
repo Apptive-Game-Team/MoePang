@@ -40,7 +40,7 @@ public enum UnitName
     //Polar
     ArticHare,
     Penguin,
-    ArticWolf,
+    ArticFox,
     Reindeer,
     PolarBear,
 

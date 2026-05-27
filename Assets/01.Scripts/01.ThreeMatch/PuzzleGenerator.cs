@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using Random = UnityEngine.Random;
 
 namespace _01.Scripts._01.ThreeMatch
@@ -63,6 +64,17 @@ namespace _01.Scripts._01.ThreeMatch
         
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
+
+        [Header("Puzzle Reset Setting")] 
+        [SerializeField] private bool isDebug = false;
+        [SerializeField] private GameObject resetRectanglePrefab;
+        [SerializeField] private float resetEffectDuration = 0.8f;
+        [SerializeField] private Vector2 resetScaleRange = new Vector2(1f, 1.3f);
+        [SerializeField] private Vector2 resetMoveDistanceRange = new Vector2(0.1f, 0.3f);
+        [SerializeField, Range(0f, 1f)] private float resetStayChance = 0.25f;
+        [SerializeField] private Image resetPopUpImage;
+        [SerializeField] private TextMeshProUGUI resetPopUpText;
+        [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
         
         private PuzzleObject[,] _puzzles;
         
@@ -80,6 +92,8 @@ namespace _01.Scripts._01.ThreeMatch
         private List<MatchGroup> _currentMatchGroups = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
+        
+        private List<GameObject> resetRectangles = new();
 
         private class MatchGroup
         {
@@ -159,6 +173,8 @@ namespace _01.Scripts._01.ThreeMatch
 
         public IEnumerator ResetBoard()
         {
+            yield return ResetPopUpEvent();
+            
             for (int i = 0;i < x;i++)
             {
                 for (int j = 0; j < y; j++)
@@ -170,7 +186,7 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
 
-            yield return null;
+            yield return SpawnResetRectangles();
         }
         
         private IEnumerator SetStartPuzzle()
@@ -415,6 +431,187 @@ namespace _01.Scripts._01.ThreeMatch
 
             return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
                 ,puzzleFrame.transform.position.y + spawnY, 0f);
+        }
+        #endregion
+
+        /// <summary>
+        /// 매치 불가 시, 리셋 관련 함수
+        /// 1. 리셋 알림 UI
+        /// 2. 반짝이는 네모 생성
+        /// </summary>
+        /// <returns></returns>
+
+        #region Reset
+        //디버그용 체크
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                isDebug = true;
+                StartCoroutine(ResetBoard());
+            }
+        }
+        
+        private IEnumerator ResetPopUpEvent()
+        {
+            if (resetPopUpImage == null)
+            {
+                yield break;
+            }
+
+            Color originImageColor = resetPopUpImage.color;
+            Color originTextColor = resetPopUpText != null
+                ? resetPopUpText.color
+                : Color.white;
+
+            resetPopUpImage.gameObject.SetActive(true);
+
+            float duration = 2f;
+            int repeatCount = 2;
+            float timer = 0f;
+
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+
+                float normalizedTime = Mathf.Clamp01(timer / duration);
+
+                float wave = Mathf.PingPong(normalizedTime * repeatCount * 2f, 1f);
+                float alpha = wave;
+
+                Color imageColor = originImageColor;
+                imageColor.a = alpha;
+                resetPopUpImage.color = imageColor;
+
+                if (resetPopUpText != null)
+                {
+                    Color textColor = originTextColor;
+                    textColor.a = alpha;
+                    resetPopUpText.color = textColor;
+                }
+
+                yield return null;
+            }
+
+            Color finalImageColor = originImageColor;
+            finalImageColor.a = 0f;
+            resetPopUpImage.color = finalImageColor;
+
+            if (resetPopUpText != null)
+            {
+                Color finalTextColor = originTextColor;
+                finalTextColor.a = 0f;
+                resetPopUpText.color = finalTextColor;
+            }
+
+            resetPopUpImage.gameObject.SetActive(false);
+
+            resetPopUpImage.color = originImageColor;
+
+            if (resetPopUpText != null)
+            {
+                resetPopUpText.color = originTextColor;
+            }
+        }
+
+        private IEnumerator SpawnResetRectangles()
+        {
+            if (resetRectanglePrefab == null)
+            {
+                yield return null;
+            }
+            
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    GameObject rect = Instantiate(resetRectanglePrefab, puzzleFrame);
+
+                    rect.name = $"ResetRectangle({i + 1},{j + 1})";
+                    rect.transform.position = CalculatePos(i, j);
+                    
+                    resetRectangles.Add(rect);
+                }
+            }
+            
+            float timer = 0f;
+
+            Vector3[] startPositions = new Vector3[resetRectangles.Count];
+            Vector3[] targetPositions = new Vector3[resetRectangles.Count];
+            Vector3[] startScales = new Vector3[resetRectangles.Count];
+            Vector3[] targetScales = new Vector3[resetRectangles.Count];
+
+            for (int i = 0; i < resetRectangles.Count; i++)
+            {
+                GameObject rect = resetRectangles[i];
+
+                startPositions[i] = rect.transform.position;
+                startScales[i] = rect.transform.localScale;
+
+                float targetScale = Random.Range(resetScaleRange.x, resetScaleRange.y);
+                targetScales[i] = startScales[i] * targetScale;
+
+                bool stay = Random.value < resetStayChance;
+
+                if (stay)
+                {
+                    targetPositions[i] = startPositions[i];
+                }
+                else
+                {
+                    float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                    Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+
+                    float distance = Random.Range(resetMoveDistanceRange.x, resetMoveDistanceRange.y);
+                    targetPositions[i] = startPositions[i] + direction * distance;
+                }
+            }
+
+            while (timer < resetEffectDuration)
+            {
+                timer += Time.deltaTime;
+
+                float t = Mathf.Clamp01(timer / resetEffectDuration);
+                t = Mathf.SmoothStep(0f, 1f, t);
+
+                for (int i = 0; i < resetRectangles.Count; i++)
+                {
+                    GameObject rect = resetRectangles[i];
+
+                    if (rect == null)
+                    {
+                        continue;
+                    }
+
+                    rect.transform.position = Vector3.Lerp(startPositions[i], targetPositions[i], t);
+                    rect.transform.localScale = Vector3.Lerp(startScales[i], targetScales[i], t);
+                }
+
+                yield return null;
+            }
+            
+            ClearResetRectangles();
+
+            yield return null;
+        }
+        
+        private void ClearResetRectangles()
+        {
+            foreach (GameObject rect in resetRectangles)
+            {
+                if (rect != null)
+                {
+                    Destroy(rect);
+                }
+            }
+
+            resetRectangles.Clear();
+
+            if (isDebug)
+            {
+                isDebug = false;
+                StartCoroutine(GenerateBoard());
+            }
         }
         #endregion
         
