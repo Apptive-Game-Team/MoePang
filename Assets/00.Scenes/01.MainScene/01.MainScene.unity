@@ -543,6 +543,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   habitatMode: 0
+  oceanEnemyStatMultiplier: 1.5
+  oceanEnemyBuffDuration: 9999
+  polarFriendlyStatMultiplier: 0.1
+  polarFriendlyBuffDuration: 9999
 --- !u!4 &1624848197
 Transform:
   m_ObjectHideFlags: 0

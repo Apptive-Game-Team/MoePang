@@ -13,6 +13,10 @@ namespace _01.Scripts._11.HabitatMode
         [Header("Ocean Debuff")]
         [SerializeField] private float oceanEnemyStatMultiplier = 1.5f;
         [SerializeField] private float oceanEnemyBuffDuration = 9999f;
+        
+        [Header("Ocean Debuff")]
+        [SerializeField] private float polarFriendlyStatMultiplier = 0.75f;
+        [SerializeField] private float polarFriendlyBuffDuration = 9999f;
 
         public event Action<HabitatMode> HabitatModeApplied;
 
@@ -106,6 +110,18 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyPolarEffect()
         {
+            BuffManager.Instance.ApplyAllyBuff(
+                StatType.MoveSpeed,
+                polarFriendlyStatMultiplier,
+                polarFriendlyBuffDuration
+            );
+
+            BuffManager.Instance.ApplyAllyBuff(
+                StatType.AttackSpeed,
+                polarFriendlyStatMultiplier,
+                polarFriendlyBuffDuration
+            );
+            
             Debug.Log("Apply Polar Mode effect.");
         }
     }
