@@ -1,3 +1,4 @@
+using _01.Scripts._11.HabitatMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,8 @@ namespace _01.Scripts._01.ThreeMatch
         public bool isBanned;
 
         public event Action<int> OnStackAdded;
+
+        [SerializeField] private int StackMaxCount = 3;
         
         private static readonly int Highlight = Shader.PropertyToID("_Highlight");
         private static readonly int Full = Shader.PropertyToID("_Full");
@@ -23,7 +26,7 @@ namespace _01.Scripts._01.ThreeMatch
         private UnitSpawner _spawner;
         private int _stackLength;
         private int _stackCount;
-        private const int StackMaxCount = 3;
+        //private const int StackMaxCount = 3;
         
         private readonly Queue<Func<IEnumerator>> _taskQueue = new();
         private bool _isProcessing;
@@ -48,6 +51,14 @@ namespace _01.Scripts._01.ThreeMatch
                     stackImg.material = mat;
                     _stackMaterials[i] = mat;
                 }
+            }
+        }
+
+        private void Start()
+        {
+            if (HabitatModeManager.Instance.HabitatMode != HabitatMode.MeadowMode)
+            {
+                SetStackMaxCount(3);
             }
         }
 
@@ -160,6 +171,15 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 _stackMaterials[i].SetFloat(Full, i < num ? 1 : 0);
             }
+        }
+        
+        /// <summary>
+        /// 스택 Max 갯수 변경 (집을 지켜라 모드에서 사용)
+        /// </summary>
+        public void SetStackMaxCount(int count)
+        {
+            StackMaxCount = count;
+            FillStack(_stackCount);
         }
     }
 }

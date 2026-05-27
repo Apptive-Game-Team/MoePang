@@ -27,5 +27,16 @@ namespace _01.Scripts._01.ThreeMatch
         {
             return stacks.First(s => s.type == type);
         }
+        
+        /// <summary>
+        /// SpawnStack 최대 스택 수 한번에 변경 (집을 지켜라 모드에서 사용)
+        /// </summary>
+        public void SetAllStackMaxCount(int count)
+        {
+            foreach (SpawnStack stack in stacks)
+            {
+                stack.SetStackMaxCount(count);
+            }
+        }
     }
 }

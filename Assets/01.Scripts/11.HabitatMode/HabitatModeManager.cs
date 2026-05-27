@@ -1,4 +1,5 @@
 using _01.Scripts._00.Manager;
+using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._08.Utility;
 using System;
 using UnityEngine;
@@ -18,6 +19,8 @@ namespace _01.Scripts._11.HabitatMode
         [SerializeField] private float polarFriendlyStatMultiplier = 0.75f;
         [SerializeField] private float polarFriendlyBuffDuration = 9999f;
 
+        private SpawnStackManager spawnStackManager;
+        
         public event Action<HabitatMode> HabitatModeApplied;
 
         public HabitatMode HabitatMode
@@ -42,6 +45,8 @@ namespace _01.Scripts._11.HabitatMode
             {
                 return;
             }
+            
+            spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
 
             ApplyHabitatModeEffect();
         }
@@ -72,6 +77,8 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyMeadowEffect()
         {
+            spawnStackManager.SetAllStackMaxCount(6);
+            
             Debug.Log("Apply Meadow Mode effect.");
         }
 
