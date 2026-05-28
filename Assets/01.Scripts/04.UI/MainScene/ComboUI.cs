@@ -14,10 +14,11 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private GameObject comboUIPrefab;
         [SerializeField] private GameObject content;
         [SerializeField] private List<Combo> combos;
-
+        
         private void Awake()
         {
             InitialSetting();
+            OnGoldChanged();
         }
 
         private void InitialSetting()
@@ -26,7 +27,11 @@ namespace _01.Scripts._04.UI.MainScene
             {
                 Combo combo = combos.Find(c => c.info.comboType == type);
                 GameObject comboUI = Instantiate(comboUIPrefab, content.transform);
+                ComboUIObject obj = comboUI.GetComponent<ComboUIObject>();
                 var comboLevels = GameManager.Instance.comboData.comboLevels;
+                
+                obj.Initialize(this);
+                obj.habitat = type;
                 
                 TextMeshProUGUI comboOrder = comboUI.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>();
                 Image comboImage = comboUI.transform.GetChild(1).GetComponent<Image>();
@@ -76,6 +81,18 @@ namespace _01.Scripts._04.UI.MainScene
         private void OnGoldChanged()
         {
             gold.text = $"{GoldManager.Instance.Gold}";
+        }
+
+        public void OnOrderChanged()
+        {
+            List<ComboUIObject> objs = content.transform.GetComponentsInChildren<ComboUIObject>().ToList();
+            List<Habitat> list = objs.ConvertAll(c => c.habitat);
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                GameManager.Instance.comboData.comboSequence[i] = list[i];
+                objs[i].gameObject.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = (i + 1).ToString();
+            }
         }
     }
 }
