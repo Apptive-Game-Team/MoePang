@@ -9,6 +9,7 @@ namespace _01.Scripts._08.Utility
         Shop,
         MatchAndBattle,
         HabitatBattle,
+        Combo,
     }
     
     public static class SceneInfo
@@ -20,6 +21,7 @@ namespace _01.Scripts._08.Utility
             { SceneType.Shop, "02.ShopScene"},
             { SceneType.MatchAndBattle, "03.3match&Battle"},
             { SceneType.HabitatBattle, "04.HabitatBattle"},
+            { SceneType.Combo, "05.ComboScene"},
         };
 
         public static string GetSceneName(SceneType type)

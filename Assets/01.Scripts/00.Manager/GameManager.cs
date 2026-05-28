@@ -132,7 +132,7 @@ namespace _01.Scripts._00.Manager
     }
     
     [Serializable]
-    public class ComboData
+    public class ComboData : IConvertable
     {
         public List<Habitat> comboSequence = new()
         {
@@ -142,6 +142,31 @@ namespace _01.Scripts._00.Manager
             Habitat.Forest,
             Habitat.Polar
         };
+        
+        public Dictionary<Habitat, int> comboLevels = new();
+
+        [SerializeField] private List<Habitat> combos;
+        [SerializeField] private List<int> levels;
+
+        public ComboData()
+        {
+            comboLevels.Clear();
+
+            foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
+            {
+                comboLevels.Add(habitat, 1);
+            }
+        }
+        
+        public void BeforeSave()
+        {
+            GameManager.DictionaryToLists(comboLevels, out combos, out levels);
+        }
+
+        public void AfterLoad()
+        {
+            comboLevels = GameManager.ListsToDictionary(combos, levels);
+        }
     }
 
     [Serializable]
@@ -278,6 +303,11 @@ namespace _01.Scripts._00.Manager
         public void SaveGameData()
         {
             SaveLoadManager.Instance.SaveData(gameData, "GameData");
+        }
+
+        public void SaveComboData()
+        {
+            SaveLoadManager.Instance.SaveData(comboData, "ComboData");
         }
     }
 }

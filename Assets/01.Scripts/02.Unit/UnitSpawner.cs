@@ -107,6 +107,23 @@ public class UnitSpawner : MonoBehaviour
         UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
     }
 
+    public void SpawnHighestFriendly(Habitat habitat)
+    {
+        if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
+        {
+            Debug.Log($"{habitat} 서식지 없음");
+            return;
+        }
+
+        if (unitList.Count == 0)
+        {
+            Debug.Log($"{habitat} 해금 유닛 없음");
+            return;
+        }
+        
+        UnitPool.Instance.Get(friendlyPrefab, unitList[^1], friendlySpawnPosition);
+    }
+
     /// <summary>
     /// 해금별 소환 확률
     /// </summary>

@@ -1,0 +1,81 @@
+using _01.Scripts._00.Manager;
+using _01.Scripts._10.System.Combo;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace _01.Scripts._04.UI.MainScene
+{
+    public class ComboUI : MonoBehaviour
+    {
+        [SerializeField] private TextMeshProUGUI gold;
+        [SerializeField] private GameObject comboUIPrefab;
+        [SerializeField] private GameObject content;
+        [SerializeField] private List<Combo> combos;
+
+        private void Awake()
+        {
+            InitialSetting();
+        }
+
+        private void InitialSetting()
+        {
+            foreach (var (type,idx) in GameManager.Instance.comboData.comboSequence.Select((value, index) => (value, index)))
+            {
+                Combo combo = combos.Find(c => c.info.comboType == type);
+                GameObject comboUI = Instantiate(comboUIPrefab, content.transform);
+                var comboLevels = GameManager.Instance.comboData.comboLevels;
+                
+                TextMeshProUGUI comboOrder = comboUI.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>();
+                Image comboImage = comboUI.transform.GetChild(1).GetComponent<Image>();
+                TextMeshProUGUI comboLevel = comboUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+                TextMeshProUGUI comboDescription = comboUI.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
+                Button comboUpgradeButton =  comboUI.transform.GetChild(4).GetComponent<Button>();
+                TextMeshProUGUI upgradeText = comboUpgradeButton.GetComponentInChildren<TextMeshProUGUI>();
+                
+                comboOrder.text = (idx + 1).ToString();
+                comboImage.sprite = combo.info.comboImage;
+                comboLevel.text = $"LV{comboLevels[type]}";
+                comboDescription.text = combo.DynamicDescription();
+                if (comboLevels[type] == combo.info.ComboMaxLevel)
+                {
+                    comboUpgradeButton.interactable = false;
+                    upgradeText.text = "Level Max";
+                }
+                comboUpgradeButton.onClick.AddListener(() =>
+                {
+                    if (comboLevels[type] < combo.info.ComboMaxLevel)
+                    {
+                        // 골드 사용 추가
+                        comboLevels[type]++;
+                        comboLevel.text = $"LV{comboLevels[type]}";
+                        comboDescription.text = combo.DynamicDescription();
+                        
+                        if (comboLevels[type] == combo.info.ComboMaxLevel)
+                        {
+                            comboUpgradeButton.interactable = false;
+                            upgradeText.text = "Level Max";
+                        }
+                    }
+                });
+            }
+        }
+        
+        private void OnEnable()
+        {
+            GoldManager.Instance.OnGoldChanged += OnGoldChanged;
+        }
+
+        private void OnDisable()
+        {
+            GoldManager.Instance.OnGoldChanged -= OnGoldChanged;
+        }
+
+        private void OnGoldChanged()
+        {
+            gold.text = $"{GoldManager.Instance.Gold}";
+        }
+    }
+}
