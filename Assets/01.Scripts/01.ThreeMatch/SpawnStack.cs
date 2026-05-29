@@ -1,9 +1,11 @@
+using _01.Scripts._08.Utility;
 using _01.Scripts._11.HabitatMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace _01.Scripts._01.ThreeMatch
@@ -33,16 +35,18 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void Awake()
         {
+            SetupStackSlots();
+            
             Image img = GetComponent<Image>();
             if (img.material != null)
             {
                 _material = new Material(img.material);
                 img.material = _material;
             }
-            
-            _stackLength = stacks.Length;
-            _stackMaterials = new Material[_stackLength];
-            for (int i = 0; i < _stackLength; i++)
+
+            _stackMaterials = new Material[stacks.Length];
+
+            for (int i = 0; i < stacks.Length; i++)
             {
                 Image stackImg = stacks[i].GetComponent<Image>();
                 if (stackImg.material != null)
@@ -53,12 +57,33 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
         }
-
-        private void Start()
+        
+        private void SetupStackSlots()
         {
-            if (HabitatModeManager.Instance.HabitatMode != HabitatMode.MeadowMode)
+            bool isHabitatBattleScene =
+                SceneManager.GetActiveScene().name == SceneInfo.GetSceneName(SceneType.HabitatBattle);
+
+            if (!isHabitatBattleScene)
             {
-                SetStackMaxCount(3);
+                StackMaxCount = 3;
+                _stackLength = stacks.Length;
+                return;
+            }
+
+            bool isMeadowMode =
+                HabitatModeManager.Instance.HabitatMode == HabitatMode.MeadowMode;
+
+            StackMaxCount = isMeadowMode ? 6 : 3;
+            _stackLength = StackMaxCount;
+
+            if (!isMeadowMode)
+            {
+                return;
+            }
+
+            for (int i = 0; i < stacks.Length; i++)
+            {
+                stacks[i].SetActive(true);
             }
         }
 
@@ -167,9 +192,17 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void FillStack(int num)
         {
-            for (int i = 0; i < _stackLength; i++)
+            int filledCount = 0;
+
+            for (int i = 0; i < stacks.Length; i++)
             {
-                _stackMaterials[i].SetFloat(Full, i < num ? 1 : 0);
+                if (!stacks[i].activeSelf)
+                {
+                    continue;
+                }
+
+                _stackMaterials[i].SetFloat(Full, filledCount < num ? 1 : 0);
+                filledCount++;
             }
         }
         

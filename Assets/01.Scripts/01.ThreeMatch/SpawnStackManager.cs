@@ -1,7 +1,8 @@
-using DG.Tweening;
+using _01.Scripts._08.Utility;
+using _01.Scripts._11.HabitatMode;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace _01.Scripts._01.ThreeMatch
 {
@@ -9,6 +10,8 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [SerializeField] private SpawnStack[] stacks;
         [SerializeField] private UnitSpawner unitSpawner;
+        
+        private SpawnStack[] activeStacks;
 
         private void Awake()
         {
