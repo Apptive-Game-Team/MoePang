@@ -24,7 +24,7 @@ namespace _01.Scripts._10.System.Combo
             {
                 return string.Format(info.comboDescription, mul1, "");   
             }
-            return string.Format(info.comboDescription, mul1, $"/<color=gray>{mul2}</color>");
+            return string.Format(info.comboDescription, mul1, $"/<color=grey>{mul2}</color>");
         }
     }
 }

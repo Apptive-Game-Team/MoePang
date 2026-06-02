@@ -26,7 +26,7 @@ namespace _01.Scripts._10.System.Combo
             {
                 return string.Format(info.comboDescription, level, "");   
             }
-            return string.Format(info.comboDescription, level, $"/<color=gray>({1 + level})</color>");
+            return string.Format(info.comboDescription, level, $"/<color=grey>{1 + level}</color>");
         }
     }
 }

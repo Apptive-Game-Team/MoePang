@@ -23,7 +23,7 @@ namespace _01.Scripts._10.System.Combo
             {
                 return string.Format(info.comboDescription, 1 + ((level - 1) / 2), "");   
             }
-            return string.Format(info.comboDescription, 1 + ((level - 1) / 2), $"/<color=gray>{1 + (level / 2)}</color>");
+            return string.Format(info.comboDescription, 1 + ((level - 1) / 2), $"/<color=grey>{1 + (level / 2)}</color>");
         }
     }
 }
