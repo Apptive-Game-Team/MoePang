@@ -5,6 +5,8 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Button = UnityEngine.UI.Button;
+using Image = UnityEngine.UI.Image;
 
 namespace _01.Scripts._04.UI.MainScene
 {
@@ -13,6 +15,7 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private TextMeshProUGUI gold;
         [SerializeField] private GameObject comboUIPrefab;
         [SerializeField] private GameObject content;
+        [SerializeField] private GameObject upgradeUI;
         [SerializeField] private List<Combo> combos;
         
         private void Awake()
@@ -23,6 +26,9 @@ namespace _01.Scripts._04.UI.MainScene
 
         private void InitialSetting()
         {
+            CanvasGroup scrollRectCG = content.transform.parent.parent.GetComponent<CanvasGroup>();
+            ScrollRect scrollRect = content.transform.parent.parent.GetComponent<ScrollRect>();
+            
             foreach (var (type,idx) in GameManager.Instance.comboData.comboSequence.Select((value, index) => (value, index)))
             {
                 Combo combo = combos.Find(c => c.info.comboType == type);
@@ -53,19 +59,47 @@ namespace _01.Scripts._04.UI.MainScene
                 {
                     if (comboLevels[type] < combo.info.ComboMaxLevel)
                     {
-                        // 골드 사용 추가
-                        comboLevels[type]++;
-                        comboLevel.text = $"LV{comboLevels[type]}";
-                        comboDescription.text = combo.DynamicDescription();
-                        
-                        if (comboLevels[type] == combo.info.ComboMaxLevel)
+                        if (!GoldManager.Instance.TrySpendGold(comboLevels[type] * 100))
                         {
-                            comboUpgradeButton.interactable = false;
-                            upgradeText.text = "Level Max";
+                            return;
                         }
+                        
+                        upgradeUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
+                            $"Level {type.ToString()} 콤보를 업그레이드 하시겠습니까?";
+                        upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
+                        upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
+                        {
+                            comboLevels[type]++;
+                            upgradeUI.SetActive(false);
+                            
+                            comboLevel.text = $"LV{comboLevels[type]}";
+                            comboDescription.text = combo.DynamicDescription();
+                        
+                            if (comboLevels[type] == combo.info.ComboMaxLevel)
+                            {
+                                comboUpgradeButton.interactable = false;
+                                upgradeText.text = "Level Max";
+                            }
+                            
+                            scrollRectCG.interactable = true;
+                            scrollRectCG.blocksRaycasts = true;
+                            scrollRect.enabled = true;
+                        });
+                        scrollRect.enabled = false;
+                        scrollRectCG.interactable = false;
+                        scrollRectCG.blocksRaycasts = false;
+                        upgradeUI.SetActive(true);
                     }
                 });
             }
+            
+            upgradeUI.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+            {
+                upgradeUI.SetActive(false);
+                scrollRectCG.interactable = true;
+                scrollRectCG.blocksRaycasts = true;
+                scrollRect.enabled = true;
+            });
         }
         
         private void OnEnable()
