@@ -65,12 +65,8 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected float direction; //이동 방향
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
     
-    private Dictionary<StatType, float> _multipliers = new() {
-        { StatType.MoveSpeed, 1f },
-        { StatType.AttackSpeed, 1f },
-        { StatType.AttackDamage, 1f}
-    };
-
+    private List<Buff> _activeBuffs = new();
+    
     //외부 참조
     protected UnitPool ownerPool;
 
@@ -672,32 +668,51 @@ public class Unit : MonoBehaviour, IDamageable
     #endregion
 
     #region Buff
-    public void OnStatChanged(StatType type, float multiplier)
+    public void AddBuff(Buff buff)
     {
-        if (_multipliers.ContainsKey(type))
+        _activeBuffs.Add(buff);
+        UpdateFinalStats();
+    }
+    
+    public void RemoveBuff(Buff buff)
+    {
+        if (_activeBuffs.Contains(buff))
         {
-            _multipliers[type] = multiplier;
-            UpdateFinalStat(type);
+            _activeBuffs.Remove(buff);
+            UpdateFinalStats();
         }
     }
-
-    private void UpdateFinalStat(StatType type)
+    
+    private void UpdateFinalStats()
     {
-        switch (type)
+        RestoreStats();
+        
+        float moveSpeedMul = 1f;
+        float attackSpeedMul = 1f;
+        float attackDamageMul = 1f;
+
+        foreach (Buff buff in _activeBuffs)
         {
-            case StatType.MoveSpeed:
-                moveSpeed = _originMoveSpeed * _multipliers[type];
-                break;
-            case StatType.AttackDamage:
-                attackDamage = _originAttackDamage * _multipliers[type];
-                break;
-            case StatType.AttackSpeed:
-                attackSpeed = _originAttackSpeed * _multipliers[type];
-                break;
+            switch (buff.StatType)
+            {
+                case StatType.MoveSpeed:
+                    moveSpeedMul += buff.Multiplier - 1;
+                    break;
+                case StatType.AttackSpeed:
+                    attackSpeedMul += buff.Multiplier - 1;
+                    break;
+                case StatType.AttackDamage:
+                    attackDamageMul += buff.Multiplier - 1;
+                    break;
+            }
         }
+        
+        moveSpeed = _originMoveSpeed * moveSpeedMul;
+        attackSpeed = _originAttackSpeed * attackSpeedMul;
+        attackDamage = _originAttackDamage * attackDamageMul;
     }
 
-    public void RestoreStats()
+    private void RestoreStats()
     {
         moveSpeed = _originMoveSpeed;
         attackSpeed = _originAttackSpeed;
