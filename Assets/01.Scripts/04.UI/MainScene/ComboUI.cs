@@ -13,10 +13,13 @@ namespace _01.Scripts._04.UI.MainScene
     public class ComboUI : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI gold;
+        [SerializeField] private Button comboOrderButton;
         [SerializeField] private GameObject comboUIPrefab;
         [SerializeField] private GameObject content;
         [SerializeField] private GameObject upgradeUI;
         [SerializeField] private List<Combo> combos;
+
+        private bool _isComboOrdering;
         
         private void Awake()
         {
@@ -26,6 +29,7 @@ namespace _01.Scripts._04.UI.MainScene
 
         private void InitialSetting()
         {
+            // 콤보 버튼 UI 설정
             CanvasGroup scrollRectCG = content.transform.parent.parent.GetComponent<CanvasGroup>();
             ScrollRect scrollRect = content.transform.parent.parent.GetComponent<ScrollRect>();
             
@@ -40,10 +44,10 @@ namespace _01.Scripts._04.UI.MainScene
                 obj.habitat = type;
                 
                 TextMeshProUGUI comboOrder = comboUI.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>();
-                Image comboImage = comboUI.transform.GetChild(1).GetComponent<Image>();
-                TextMeshProUGUI comboLevel = comboUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
-                TextMeshProUGUI comboDescription = comboUI.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
-                Button comboUpgradeButton =  comboUI.transform.GetChild(4).GetComponent<Button>();
+                Image comboImage = comboUI.transform.GetChild(2).GetComponent<Image>();
+                TextMeshProUGUI comboLevel = comboUI.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
+                TextMeshProUGUI comboDescription = comboUI.transform.GetChild(4).GetComponent<TextMeshProUGUI>();
+                Button comboUpgradeButton =  comboUI.transform.GetChild(5).GetComponent<Button>();
                 TextMeshProUGUI upgradeText = comboUpgradeButton.GetComponentInChildren<TextMeshProUGUI>();
                 
                 comboOrder.text = (idx + 1).ToString();
@@ -70,6 +74,7 @@ namespace _01.Scripts._04.UI.MainScene
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
                         {
                             comboLevels[type]++;
+                            GameManager.Instance.SaveComboData();
                             upgradeUI.SetActive(false);
                             
                             comboLevel.text = $"LV{comboLevels[type]}";
@@ -85,6 +90,7 @@ namespace _01.Scripts._04.UI.MainScene
                             scrollRectCG.blocksRaycasts = true;
                             scrollRect.enabled = true;
                         });
+                        
                         scrollRect.enabled = false;
                         scrollRectCG.interactable = false;
                         scrollRectCG.blocksRaycasts = false;
@@ -99,6 +105,24 @@ namespace _01.Scripts._04.UI.MainScene
                 scrollRectCG.interactable = true;
                 scrollRectCG.blocksRaycasts = true;
                 scrollRect.enabled = true;
+            });
+            
+            // 콤보 정렬 버튼 설정
+            comboOrderButton.onClick.AddListener(() =>
+            {
+                _isComboOrdering = !_isComboOrdering;
+                
+                comboOrderButton.GetComponentInChildren<TextMeshProUGUI>().text = _isComboOrdering ? "콤보 정렬 완료" : "콤보 정렬";
+                foreach (ComboUIObject ui in content.transform.GetComponentsInChildren<ComboUIObject>())
+                {
+                    ui.transform.GetChild(5).GetComponent<Button>().interactable = !_isComboOrdering;
+                    ui.transform.GetChild(1).gameObject.SetActive(_isComboOrdering);
+                }
+
+                if (!_isComboOrdering)
+                {
+                    GameManager.Instance.SaveComboData();
+                }
             });
         }
         

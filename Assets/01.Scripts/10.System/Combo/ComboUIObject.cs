@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace _01.Scripts._10.System.Combo
 {
-    public class ComboUIObject : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class ComboUIObject : MonoBehaviour
     {
         public Habitat habitat;
         
@@ -18,6 +18,7 @@ namespace _01.Scripts._10.System.Combo
         private RectTransform _scrollWindow;
         private bool _isDragging;
         private Vector2 _currentMousePosition;
+        private Vector2 _dragOffset;
         
         [Header("Auto Scroll Settings")]
         [SerializeField] private float scrollSpeed = 2.5f;
@@ -58,13 +59,14 @@ namespace _01.Scripts._10.System.Combo
             _isDragging = true;
             _currentMousePosition = eventData.position;
             
+            _dragOffset = (Vector2)transform.position - eventData.position;
+            
             _placeholder = new GameObject("Combo_Placeholder");
             _placeholder.transform.SetParent(_parentContent);
-        
-            LayoutElement placeHolderElement = _placeholder.AddComponent<LayoutElement>();
+            
+            RectTransform placeholderRect = _placeholder.AddComponent<RectTransform>();
             RectTransform myRect = GetComponent<RectTransform>();
-            placeHolderElement.preferredWidth = myRect.rect.width;
-            placeHolderElement.preferredHeight = myRect.rect.height;
+            placeholderRect.sizeDelta = new Vector2(myRect.rect.width, myRect.rect.height);
 
             _placeholder.transform.SetSiblingIndex(transform.GetSiblingIndex());
             
@@ -75,7 +77,7 @@ namespace _01.Scripts._10.System.Combo
 
         public void OnDrag(PointerEventData eventData)
         {
-            transform.position = eventData.position;
+            transform.position = eventData.position + _dragOffset;
             _currentMousePosition = eventData.position;
             
             int newSiblingIndex = _parentContent.childCount - 1;
