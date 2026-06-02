@@ -18,6 +18,12 @@ namespace _01.Scripts._00.Manager
         public void SaveData<T>(T data, string fileName)
         {
             string path = GetSavePath(fileName);
+            
+            if (data is IConvertable convert)
+            {
+                convert.BeforeSave();
+            }
+            
             string json = JsonUtility.ToJson(data, true);
 
             File.WriteAllText(path, json);
