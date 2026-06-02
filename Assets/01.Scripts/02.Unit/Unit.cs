@@ -100,6 +100,7 @@ public class Unit : MonoBehaviour, IDamageable
     public UnitData Data => data;
     protected UnitTransformQueue UTQ => UnitTransformQueue.Instance;
     public float CurrentHp => currentHp;
+    public float MaxHp => maxHp;
     public Transform GetTransform() => transform;
     public string GetName() => name;
     public TeamType GetTeam() => team;

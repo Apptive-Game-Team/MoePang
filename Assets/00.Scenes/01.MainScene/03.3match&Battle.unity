@@ -6563,10 +6563,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66cdc4234a0abb94a9064927afcea1d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboKeepTime: 5
-  comboThreshold: 21
-  castleType: 1
-  isTypeNull: 0
   stacks:
   - {fileID: 968554137}
   - {fileID: 1405368199}
@@ -6574,6 +6570,13 @@ MonoBehaviour:
   - {fileID: 1261480035}
   - {fileID: 869903353}
   unitSpawner: {fileID: 1986820697}
+  combos:
+  - {fileID: 11400000, guid: 366b53a23ecc411439e8380524758232, type: 2}
+  - {fileID: 11400000, guid: 5cca166f40c7672439309d71c3da5b82, type: 2}
+  - {fileID: 11400000, guid: c93df728c7c87bd4aa910e007b424ca6, type: 2}
+  - {fileID: 11400000, guid: 78f6204ec7953134c9562fb2c51ac057, type: 2}
+  - {fileID: 11400000, guid: 14444d6ada8ad24479f1b05a6d2086d3, type: 2}
+  isTypeNull: 0
 --- !u!1 &1674606226
 GameObject:
   m_ObjectHideFlags: 0
