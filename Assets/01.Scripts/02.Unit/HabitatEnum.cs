@@ -34,7 +34,7 @@ public enum UnitName
     Flog,
     Capybara,
     Anteater,
-    Leopard,
+    Jaguar,
     Elephant,
 
     //Polar
