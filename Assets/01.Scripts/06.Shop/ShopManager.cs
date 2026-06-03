@@ -39,7 +39,7 @@ public class ShopManager : MonoBehaviour
     //상태 제어
     private ShopUI currentSelected;
     private UpgradeUI currentUpgradeSelected;
-    private ItemUI currentItemSelected;
+    private ItemObject currentItemSelected;
     private bool isBuyPopupActive = false;
 
     private void Awake()
@@ -60,10 +60,10 @@ public class ShopManager : MonoBehaviour
                 temp.SetManager(this);
             }
             
-            ItemUI[] itemUI = panel.GetComponentsInChildren<ItemUI>(true);
+            ItemObject[] itemUI = panel.GetComponentsInChildren<ItemObject>(true);
             foreach (var temp in itemUI)
             {
-                temp.SetManager(this);
+                //temp.SetManager(this);
                 temp.Init(itemData.items.First(info => info.type == temp.type));
             }
         }
@@ -142,11 +142,11 @@ public class ShopManager : MonoBehaviour
         UpdateBuyButtonText();
     }
 
-    public void OnClickItem(ItemUI clickedUI)
+    public void OnClickItem(ItemObject clickedUI)
     {
         if (currentItemSelected == clickedUI)
         {
-            currentItemSelected.Deselect();
+            //currentItemSelected.Deselect();
             currentItemSelected = null;
             UpdateBuyButtonText();
             return;
@@ -154,11 +154,11 @@ public class ShopManager : MonoBehaviour
 
         if (currentItemSelected != null)
         {
-            currentItemSelected.Deselect();
+            //currentItemSelected.Deselect();
         }
 
         currentItemSelected = clickedUI;
-        currentItemSelected.Select();
+        //currentItemSelected.Select();
         
         UpdateBuyButtonText();
     }
@@ -337,7 +337,7 @@ public class ShopManager : MonoBehaviour
                 GoldManager.Instance.AdjustGold(-cost);
                 GameManager.Instance.itemData.ItemAmounts[currentItemSelected.type]++;
                 GameManager.Instance.SaveItemData();
-                currentItemSelected.Refresh();
+                //currentItemSelected.Refresh();
             }
         }
         
