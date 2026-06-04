@@ -1,73 +1,73 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace _01.Scripts._04.UI.InGame
 {
     public class BattleUIController : MonoBehaviour
     {
-        [Header("Zoom")]
-        [SerializeField] private float zoomSpeed = 0.2f;
-        [SerializeField] private float dragSpeed = 0.1f;
-        [SerializeField] private float minScale = 1f;
-        [SerializeField] private float maxScale = 3f;
+        [Header("Connected Components")]
+        [Tooltip("전투 구역의 배경이나 맵의 SpriteRenderer를 넣어주세요. (카메라 범위를 제한하는 기준)")]
+        [SerializeField] private SpriteRenderer battleBackgroundSr;
         
-        private Camera _cam;
-        private SpriteRenderer _sr;
-        private SpriteRenderer _parentSr;
+        [Header("Zoom")]
+        [SerializeField] private float zoomSpeed = 2f;
+        [SerializeField] private float minOrthographicSize = 2f;  // 숫자가 작을수록 확대(Zoom In)
+        [SerializeField] private float maxOrthographicSize = 5f;  // 숫자가 클수록 축소(Zoom Out)
+        
+        [Header("Drag")]
+        [SerializeField] private float dragSpeed = 0.5f;
 
+        private Camera _battleCam;
         private bool _isDragging;
-        private Vector3 _offset;
-        private Vector3 _originScale;
         private Vector3 _lastMousePos;
-
+        private float _targetZoom;
+        private float _groundYAnchor;
 
         private void Awake()
         {
-            _cam = Camera.main;
-            _sr = GetComponent<SpriteRenderer>();
-            _parentSr = transform.parent.GetComponent<SpriteRenderer>();
-            _originScale = transform.localScale;
+            _battleCam = GetComponent<Camera>();
+            _targetZoom = _battleCam.orthographicSize;
+            _groundYAnchor = battleBackgroundSr.bounds.min.y;
         }
 
         private void Update()
         {
-            if (IsMouseInsideParent())
+            // UI를 클릭했을 때만 작동하도록 마우스 위치 필터링 (RawImage 영역 안에서 스크롤/드래그 되도록)
+            // 만약 하단 퍼즐 UI를 만지고 있을 때는 작동하지 않게 방지합니다.
+            if (EventSystem.current.IsPointerOverGameObject())
             {
-                HandleZoom();
-                HandleDrag();
+                // TODO: 필요한 경우, 오직 상단 전투 RawImage 위에서만 작동하게 체크하는 로직을 넣을 수 있습니다.
             }
-            else
-            {
-                if (Input.GetMouseButtonUp(0))
-                {
-                    _isDragging = false;
-                }
-            }
-        }
-        
-        private bool IsMouseInsideParent()
-        {
-            if (_parentSr == null) return false;
 
-            Vector3 mouse = MouseWorld();
-            Bounds bounds = _parentSr.bounds;
-
-            return bounds.Contains(mouse);
+            HandleZoom();
+            HandleDrag();
         }
 
         private void HandleZoom()
         {
             float scroll = Input.mouseScrollDelta.y;
-
             if (scroll == 0) return;
 
-            float scaleX = transform.localScale.x + scroll * zoomSpeed;
-            float scaleY = transform.localScale.y + scroll * zoomSpeed * _originScale.y / _originScale.x;
-            scaleX = Mathf.Clamp(scaleX, _originScale.x * minScale, _originScale.x * maxScale);
-            scaleY = Mathf.Clamp(scaleY, _originScale.y * minScale, _originScale.y * maxScale);
+            // 1. 타겟 줌 수치 변경 및 제한
+            _targetZoom -= scroll * zoomSpeed;
+            _targetZoom = Mathf.Clamp(_targetZoom, minOrthographicSize, maxOrthographicSize);
+            _battleCam.orthographicSize = _targetZoom;
 
-            transform.localScale = new Vector3(scaleX, scaleY, 1);
+            // 2. [핵심] 현재 줌 상태가 얼마나 확대되었는지 비율 계산 (0: 최대 축소, 1: 최대 확대)
+            // t 수치가 1에 가까워질수록(바짝 확대할수록) 카메라는 groundYAnchor(바닥)에 가까워집니다.
+            float t = (maxOrthographicSize - _battleCam.orthographicSize) / (maxOrthographicSize - minOrthographicSize);
 
-            ClampInsideParent();
+            // 3. 카메라의 현재 Y 위치를 줌 배율에 따라 바닥 쪽으로 보정
+            Vector3 currentPos = transform.position;
+    
+            // 최대 축소 상태일 때는 원래 자유롭게 드래그하던 Y값을 유지하되, 
+            // 확대될수록 지정한 groundYAnchor(바닥)에 강제로 붙도록 Lerp를 걸어줍니다.
+            float targetY = Mathf.Lerp(currentPos.y, _groundYAnchor, t * 0.5f); // 0.5f는 고정 강도(원하는 대로 조절)
+    
+            transform.position = new Vector3(currentPos.x, targetY, currentPos.z);
+
+            // 4. 화면 밖으로 안 나가게 최종 락 걸기
+            ClampCameraInsideBackground();
         }
 
         private void HandleDrag()
@@ -75,7 +75,7 @@ namespace _01.Scripts._04.UI.InGame
             if (Input.GetMouseButtonDown(0))
             {
                 _isDragging = true;
-                _lastMousePos = MouseWorld();
+                _lastMousePos = Input.mousePosition;
             }
 
             if (Input.GetMouseButtonUp(0))
@@ -85,60 +85,49 @@ namespace _01.Scripts._04.UI.InGame
 
             if (_isDragging)
             {
-                Vector3 current = MouseWorld();
-                Vector3 delta = current - _lastMousePos;
+                Vector3 currentMousePos = Input.mousePosition;
+                Vector3 delta = currentMousePos - _lastMousePos;
 
-                transform.position += delta * dragSpeed;
-                _lastMousePos = current;
+                // 카메라가 가만히 있고 월드가 움직이는 게 아니라, 카메라가 직접 움직이는 것이므로
+                // 마우스 드래그 방향과 카메라 이동 방향을 일치시키기 위해 음수(-)를 곱해줍니다.
+                Vector3 moveDirection = new Vector3(-delta.x, 0, 0) * (dragSpeed * 0.01f * _battleCam.orthographicSize);
+                
+                transform.position += moveDirection;
+                _lastMousePos = currentMousePos;
 
-                ClampInsideParent();
+                ClampCameraInsideBackground();
             }
         }
 
-        private Vector3 MouseWorld()
+        /// <summary>
+        /// 카메라가 전투 배경(맵) 바깥으로 벗어나지 못하도록 제한하는 메서드
+        /// </summary>
+        private void ClampCameraInsideBackground()
         {
-            Vector3 pos = Input.mousePosition;
-            pos.z = Mathf.Abs(_cam.transform.position.z);
-            return _cam.ScreenToWorldPoint(pos);
-        }
+            if (battleBackgroundSr == null) return;
 
-        private void ClampInsideParent()
-        {
-            if (transform.parent == null || _sr == null || _parentSr == null) return;
+            Bounds bgBounds = battleBackgroundSr.bounds;
 
-            Bounds child = _sr.bounds;
-            Bounds parent = _parentSr.bounds;
+            // 현재 카메라의 해상도 비율에 따른 시야 크기 계산
+            float camHeight = _battleCam.orthographicSize;
+            float camWidth = camHeight * _battleCam.aspect;
 
-            Vector3 pos = transform.position;
+            Vector3 camPos = transform.position;
 
-            float offsetX = 0f;
-            float offsetY = 0f;
+            // 카메라가 가둘 수 있는 최소/최대 좌표 범위 계산
+            float minX = bgBounds.min.x + camWidth;
+            float maxX = bgBounds.max.x - camWidth;
+            float minY = bgBounds.min.y + camHeight;
+            float maxY = bgBounds.max.y - camHeight;
 
-            
-            if (child.min.x > parent.min.x)
-            {
-                offsetX = parent.min.x - child.min.x;
-            }
-            
-            if (child.max.x < parent.max.x)
-            {
-                offsetX = parent.max.x - child.max.x;
-            }
-            
-            if (child.min.y > parent.min.y)
-            {
-                offsetY = parent.min.y - child.min.y;
-            }
-            
-            if (child.max.y < parent.max.y)
-            {
-                offsetY = parent.max.y - child.max.y;
-            }
+            // 만약 맵 크기가 카메라 시야보다 작다면 중앙에 고정
+            if (minX > maxX) camPos.x = bgBounds.center.x;
+            else camPos.x = Mathf.Clamp(camPos.x, minX, maxX);
 
-            pos.x += offsetX;
-            pos.y += offsetY;
+            if (minY > maxY) camPos.y = bgBounds.center.y;
+            else camPos.y = Mathf.Clamp(camPos.y, minY, maxY);
 
-            transform.position = pos;
+            transform.position = new Vector3(camPos.x, camPos.y, transform.position.z);
         }
     }
 }
