@@ -87,6 +87,8 @@ namespace _01.Scripts._01.ThreeMatch
         private Habitat? _lastMovedHabitat;
         public bool isContinuousHabitatBanned;
         private bool isReset = false;
+        private const string DesertCoverName = "DesertPuzzleCover";
+        private Coroutine _desertCoverCoroutine;
 
         public Action OnComboInitialized;
         public Action OnComboDetected;
@@ -665,6 +667,126 @@ namespace _01.Scripts._01.ThreeMatch
                     }
 
                     Destroy(effect, resetSpawnEffectDestroyDelay);
+                }
+            }
+        }
+        #endregion
+        
+        /// <summary>
+        /// 집을 지켜라 사막모드 퍼즐 가리개
+        /// </summary>
+        #region PuzzleHide
+        public void StartDesertPuzzleCover(GameObject coverPrefab, float duration, float refreshInterval = 0.1f)
+        {
+            if (coverPrefab == null)
+            {
+                return;
+            }
+
+            if (_desertCoverCoroutine != null)
+            {
+                StopCoroutine(_desertCoverCoroutine);
+                ClearDesertPuzzleCovers();
+            }
+
+            _desertCoverCoroutine = StartCoroutine(DesertPuzzleCoverRoutine(coverPrefab, duration, refreshInterval));
+        }
+        
+        private IEnumerator DesertPuzzleCoverRoutine(GameObject coverPrefab, float duration, float refreshInterval)
+        {
+            float timer = 0f;
+
+            while (timer < duration)
+            {
+                AttachDesertCoversToCurrentPuzzles(coverPrefab);
+
+                timer += refreshInterval;
+                yield return new WaitForSeconds(refreshInterval);
+            }
+
+            ClearDesertPuzzleCovers();
+            _desertCoverCoroutine = null;
+        }
+        
+        private void AttachDesertCoversToCurrentPuzzles(GameObject coverPrefab)
+        {
+            if (_puzzles == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    PuzzleObject puzzle = _puzzles[i, j];
+
+                    if (puzzle == null)
+                    {
+                        continue;
+                    }
+
+                    if (puzzle.transform.Find(DesertCoverName) != null)
+                    {
+                        continue;
+                    }
+
+                    GameObject cover = Instantiate(coverPrefab, puzzle.transform);
+                    cover.name = DesertCoverName;
+                    cover.transform.SetAsLastSibling();
+
+                    RectTransform coverRect = cover.GetComponent<RectTransform>();
+                    RectTransform puzzleRect = puzzle.GetComponent<RectTransform>();
+
+                    if (coverRect != null && puzzleRect != null)
+                    {
+                        coverRect.anchorMin = Vector2.zero;
+                        coverRect.anchorMax = Vector2.one;
+                        coverRect.offsetMin = Vector2.zero;
+                        coverRect.offsetMax = Vector2.zero;
+                        coverRect.localScale = Vector3.one;
+                        coverRect.localRotation = Quaternion.identity;
+                    }
+                    else
+                    {
+                        cover.transform.localPosition = Vector3.zero;
+                        cover.transform.localRotation = Quaternion.identity;
+                        cover.transform.localScale = Vector3.one;
+                    }
+
+                    Graphic[] graphics = cover.GetComponentsInChildren<Graphic>(true);
+                    foreach (Graphic graphic in graphics)
+                    {
+                        graphic.raycastTarget = false;
+                    }
+                }
+            }
+        }
+        
+        private void ClearDesertPuzzleCovers()
+        {
+            if (_puzzles == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    PuzzleObject puzzle = _puzzles[i, j];
+
+                    if (puzzle == null)
+                    {
+                        continue;
+                    }
+
+                    Transform cover = puzzle.transform.Find(DesertCoverName);
+
+                    if (cover != null)
+                    {
+                        Destroy(cover.gameObject);
+                    }
                 }
             }
         }

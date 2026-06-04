@@ -4,6 +4,7 @@ using _01.Scripts._08.Utility;
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace _01.Scripts._11.HabitatMode
 {
@@ -16,6 +17,13 @@ namespace _01.Scripts._11.HabitatMode
         [SerializeField] private float oceanEventEnemyStatMultiplier = 1.25f;
         [SerializeField] private float oceanEnemyBuffDuration = 9999f;
         
+        [Header("Desert Debuff")]
+        [SerializeField] private GameObject desertPuzzleCoverPrefab;
+        [SerializeField] private float desertPuzzleCoverInterval = 15f;
+        [SerializeField] private float desertEventPuzzleCoverInterval = 25f;
+        [SerializeField] private float desertPuzzleCoverDuration = 5f;
+        [SerializeField] private float desertPuzzleCoverRefreshInterval = 0.1f;
+        
         [Header("Forest Debuff")]
         [SerializeField] private float forestEnemyHealAmount = 15f;
         [SerializeField] private float forestEnemyHealInterval = 15f;
@@ -27,6 +35,8 @@ namespace _01.Scripts._11.HabitatMode
         [SerializeField] private float polarFriendlyBuffDuration = 9999f;
 
         private SpawnStackManager spawnStackManager;
+        private PuzzleGenerator puzzleGenerator;
+        private Coroutine desertPuzzleCoverCoroutine;
         
         public event Action<HabitatMode> HabitatModeApplied;
 
@@ -54,8 +64,32 @@ namespace _01.Scripts._11.HabitatMode
             }
             
             spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
+            puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
 
             ApplyHabitatModeEffect();
+        }
+        
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                if (puzzleGenerator == null)
+                {
+                    puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+                }
+
+                if (puzzleGenerator == null)
+                {
+                    Debug.LogWarning("PuzzleGenerator not found.");
+                    return;
+                }
+
+                puzzleGenerator.StartDesertPuzzleCover(
+                    desertPuzzleCoverPrefab,
+                    desertPuzzleCoverDuration,
+                    desertPuzzleCoverRefreshInterval
+                );
+            }
         }
 
         public void ApplyHabitatModeEffect()
@@ -149,7 +183,40 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyDesertEffect()
         {
+            if (desertPuzzleCoverCoroutine != null)
+            {
+                StopCoroutine(desertPuzzleCoverCoroutine);
+            }
+
+            desertPuzzleCoverCoroutine = StartCoroutine(DesertPuzzleCoverRoutine());
+
             Debug.Log("Apply Desert Mode effect.");
+        }
+        
+        private IEnumerator DesertPuzzleCoverRoutine()
+        {
+            while (true)
+            {
+                float coverInterval = IsHabitatModeEventDay(HabitatMode.DesertMode)
+                    ? desertEventPuzzleCoverInterval
+                    : desertPuzzleCoverInterval;
+
+                yield return new WaitForSeconds(coverInterval);
+
+                if (puzzleGenerator == null)
+                {
+                    puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+                }
+
+                if (puzzleGenerator != null)
+                {
+                    puzzleGenerator.StartDesertPuzzleCover(
+                        desertPuzzleCoverPrefab,
+                        desertPuzzleCoverDuration,
+                        desertPuzzleCoverRefreshInterval
+                    );
+                }
+            }
         }
 
         private void ApplyForestEffect()
