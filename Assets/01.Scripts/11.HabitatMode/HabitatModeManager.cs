@@ -13,16 +13,18 @@ namespace _01.Scripts._11.HabitatMode
         
         [Header("Ocean Debuff")]
         [SerializeField] private float oceanEnemyStatMultiplier = 1.5f;
+        [SerializeField] private float oceanEventEnemyStatMultiplier = 1.25f;
         [SerializeField] private float oceanEnemyBuffDuration = 9999f;
-        
-        [Header("Ocean Debuff")]
-        [SerializeField] private float polarFriendlyStatMultiplier = 0.75f;
-        [SerializeField] private float polarFriendlyBuffDuration = 9999f;
         
         [Header("Forest Debuff")]
         [SerializeField] private float forestEnemyHealAmount = 15f;
         [SerializeField] private float forestEnemyHealInterval = 15f;
-        [SerializeField] private float forestThursdayEnemyHealInterval = 25f;
+        [SerializeField] private float forestEventEnemyHealInterval = 25f;
+        
+        [Header("Polar Debuff")]
+        [SerializeField] private float polarFriendlyStatMultiplier = 0.75f;
+        [SerializeField] private float polarEventFriendlyStatMultiplier = 0.85f;
+        [SerializeField] private float polarFriendlyBuffDuration = 9999f;
 
         private SpawnStackManager spawnStackManager;
         
@@ -58,12 +60,6 @@ namespace _01.Scripts._11.HabitatMode
 
         public void ApplyHabitatModeEffect()
         {
-            if (!IsHabitatModeAvailableToday(habitatMode))
-            {
-                Debug.Log($"Habitat mode is not available today. Mode: {habitatMode}, KoreaDay: {GetKoreaDayOfWeek()}");
-                return;
-            }
-
             switch (habitatMode)
             {
                 case HabitatMode.MeadowMode:
@@ -86,9 +82,14 @@ namespace _01.Scripts._11.HabitatMode
             HabitatModeApplied?.Invoke(habitatMode);
         }
 
-        public bool IsHabitatModeAvailableToday(HabitatMode mode)
+        public bool IsHabitatModeEventDay(HabitatMode mode)
         {
             DayOfWeek koreaDay = GetKoreaDayOfWeek();
+
+            if (koreaDay == DayOfWeek.Saturday || koreaDay == DayOfWeek.Sunday)
+            {
+                return true;
+            }
 
             switch (koreaDay)
             {
@@ -102,9 +103,6 @@ namespace _01.Scripts._11.HabitatMode
                     return mode == HabitatMode.ForestMode;
                 case DayOfWeek.Friday:
                     return mode == HabitatMode.PolarMode;
-                case DayOfWeek.Saturday:
-                case DayOfWeek.Sunday:
-                    return true;
                 default:
                     return false;
             }
@@ -124,21 +122,25 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyOceanEffect()
         {
+            float statMultiplier = IsHabitatModeEventDay(HabitatMode.OceanMode)
+                ? oceanEventEnemyStatMultiplier
+                : oceanEnemyStatMultiplier;
+
             BuffManager.Instance.ApplyEnemyBuff(
                 StatType.AttackSpeed,
-                oceanEnemyStatMultiplier,
+                statMultiplier,
                 oceanEnemyBuffDuration
             );
 
             BuffManager.Instance.ApplyEnemyBuff(
                 StatType.AttackDamage,
-                oceanEnemyStatMultiplier,
+                statMultiplier,
                 oceanEnemyBuffDuration
             );
 
             BuffManager.Instance.ApplyEnemyBuff(
                 StatType.MoveSpeed,
-                oceanEnemyStatMultiplier,
+                statMultiplier,
                 oceanEnemyBuffDuration
             );
 
@@ -152,8 +154,8 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyForestEffect()
         {
-            float healInterval = IsKoreaThursday()
-                ? forestThursdayEnemyHealInterval
+            float healInterval = IsHabitatModeEventDay(HabitatMode.ForestMode)
+                ? forestEventEnemyHealInterval
                 : forestEnemyHealInterval;
 
             BuffManager.Instance.StartEnemyHealOverTime(forestEnemyHealAmount, healInterval);
@@ -161,22 +163,21 @@ namespace _01.Scripts._11.HabitatMode
             Debug.Log("Apply Forest Mode effect.");
         }
 
-        private bool IsKoreaThursday()
-        {
-            return GetKoreaDayOfWeek() == DayOfWeek.Thursday;
-        }
-
         private void ApplyPolarEffect()
         {
+            float statMultiplier = IsHabitatModeEventDay(HabitatMode.PolarMode)
+                ? polarEventFriendlyStatMultiplier
+                : polarFriendlyStatMultiplier;
+
             BuffManager.Instance.ApplyAllyBuff(
                 StatType.MoveSpeed,
-                polarFriendlyStatMultiplier,
+                statMultiplier,
                 polarFriendlyBuffDuration
             );
 
             BuffManager.Instance.ApplyAllyBuff(
                 StatType.AttackSpeed,
-                polarFriendlyStatMultiplier,
+                statMultiplier,
                 polarFriendlyBuffDuration
             );
             
