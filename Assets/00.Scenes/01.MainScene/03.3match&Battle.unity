@@ -3180,6 +3180,7 @@ MonoBehaviour:
   - {fileID: 653744683}
   type: 4
   isBanned: 0
+  StackMaxCount: 3
 --- !u!1 &894054808
 GameObject:
   m_ObjectHideFlags: 0
@@ -3441,6 +3442,7 @@ MonoBehaviour:
   - {fileID: 1273829780}
   type: 0
   isBanned: 0
+  StackMaxCount: 3
 --- !u!1 &974673696
 GameObject:
   m_ObjectHideFlags: 0
@@ -4887,6 +4889,7 @@ MonoBehaviour:
   - {fileID: 1315105281}
   type: 3
   isBanned: 0
+  StackMaxCount: 3
 --- !u!1 &1269356616
 GameObject:
   m_ObjectHideFlags: 0
@@ -4981,6 +4984,7 @@ MonoBehaviour:
   - {fileID: 536350783}
   type: 2
   isBanned: 0
+  StackMaxCount: 3
 --- !u!1 &1273829780
 GameObject:
   m_ObjectHideFlags: 0
@@ -5680,6 +5684,7 @@ MonoBehaviour:
   - {fileID: 811447004}
   type: 1
   isBanned: 0
+  StackMaxCount: 3
 --- !u!1 &1451357150
 GameObject:
   m_ObjectHideFlags: 0
@@ -6534,6 +6539,7 @@ MonoBehaviour:
   resetPopUpImage: {fileID: 370849405}
   resetPopUpText: {fileID: 2073931808}
   blinkSpeed: 2
+  resetSpawnEffectPrefab: {fileID: 3099870053393062540, guid: 0ef50d9e9d1c1ab4896159067bd15ecb, type: 3}
   maxSwapCount: -1
   isContinuousHabitatBanned: 0
 --- !u!4 &1669581475

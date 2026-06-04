@@ -75,16 +75,18 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private Image resetPopUpImage;
         [SerializeField] private TextMeshProUGUI resetPopUpText;
         [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
+        [SerializeField] private GameObject resetSpawnEffectPrefab;
+        [SerializeField] private float resetSpawnEffectDestroyDelay = 1.5f;
         
         private PuzzleObject[,] _puzzles;
 
-        private bool isReset = false;
         private bool _isProcessing;
         public bool IsProcessing => _isProcessing;
         private int _swapCount;
         public int maxSwapCount = -1;
         private Habitat? _lastMovedHabitat;
         public bool isContinuousHabitatBanned;
+        private bool isReset = false;
 
         public Action OnComboInitialized;
         public Action OnComboDetected;
@@ -170,6 +172,13 @@ namespace _01.Scripts._01.ThreeMatch
         {
             _puzzles = new PuzzleObject[x, y];
             yield return SetStartPuzzle();
+            
+            if (isReset)
+            {
+                PlayResetSpawnEffects();
+            }
+
+            isReset = false;
         }
 
         public IEnumerator ResetBoard()
@@ -234,8 +243,6 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, i, j);
                 }
             }
-
-            isReset = false;
 
             yield return seq.WaitForCompletion();
         }
@@ -449,6 +456,7 @@ namespace _01.Scripts._01.ThreeMatch
         /// 매치 불가 시, 리셋 관련 함수
         /// 1. 리셋 알림 UI
         /// 2. 반짝이는 네모 생성
+        /// 3. 퍼즐 생성 파티클
         /// </summary>
         /// <returns></returns>
 
@@ -624,6 +632,40 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 isDebug = false;
                 StartCoroutine(GenerateBoard());
+            }
+        }
+        
+        private void PlayResetSpawnEffects()
+        {
+            if (resetSpawnEffectPrefab == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    GameObject effect = Instantiate(
+                        resetSpawnEffectPrefab,
+                        CalculatePos(i, j),
+                        Quaternion.identity,
+                        puzzleFrame
+                    );
+
+                    ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>(true);
+                    foreach (ParticleSystem particle in particles)
+                    {
+                        if (particle == null)
+                        {
+                            continue;
+                        }
+
+                        particle.Play(true);
+                    }
+
+                    Destroy(effect, resetSpawnEffectDestroyDelay);
+                }
             }
         }
         #endregion
