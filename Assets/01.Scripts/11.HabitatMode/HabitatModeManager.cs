@@ -18,6 +18,11 @@ namespace _01.Scripts._11.HabitatMode
         [Header("Ocean Debuff")]
         [SerializeField] private float polarFriendlyStatMultiplier = 0.75f;
         [SerializeField] private float polarFriendlyBuffDuration = 9999f;
+        
+        [Header("Forest Debuff")]
+        [SerializeField] private float forestEnemyHealAmount = 15f;
+        [SerializeField] private float forestEnemyHealInterval = 15f;
+        [SerializeField] private float forestThursdayEnemyHealInterval = 25f;
 
         private SpawnStackManager spawnStackManager;
         
@@ -53,6 +58,12 @@ namespace _01.Scripts._11.HabitatMode
 
         public void ApplyHabitatModeEffect()
         {
+            if (!IsHabitatModeAvailableToday(habitatMode))
+            {
+                Debug.Log($"Habitat mode is not available today. Mode: {habitatMode}, KoreaDay: {GetKoreaDayOfWeek()}");
+                return;
+            }
+
             switch (habitatMode)
             {
                 case HabitatMode.MeadowMode:
@@ -73,6 +84,35 @@ namespace _01.Scripts._11.HabitatMode
             }
 
             HabitatModeApplied?.Invoke(habitatMode);
+        }
+
+        public bool IsHabitatModeAvailableToday(HabitatMode mode)
+        {
+            DayOfWeek koreaDay = GetKoreaDayOfWeek();
+
+            switch (koreaDay)
+            {
+                case DayOfWeek.Monday:
+                    return mode == HabitatMode.MeadowMode;
+                case DayOfWeek.Tuesday:
+                    return mode == HabitatMode.OceanMode;
+                case DayOfWeek.Wednesday:
+                    return mode == HabitatMode.DesertMode;
+                case DayOfWeek.Thursday:
+                    return mode == HabitatMode.ForestMode;
+                case DayOfWeek.Friday:
+                    return mode == HabitatMode.PolarMode;
+                case DayOfWeek.Saturday:
+                case DayOfWeek.Sunday:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private DayOfWeek GetKoreaDayOfWeek()
+        {
+            return DateTime.UtcNow.AddHours(9).DayOfWeek;
         }
 
         private void ApplyMeadowEffect()
@@ -112,9 +152,18 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyForestEffect()
         {
-            BuffManager.Instance.StartEnemyHealOverTime(15f, 15f);
+            float healInterval = IsKoreaThursday()
+                ? forestThursdayEnemyHealInterval
+                : forestEnemyHealInterval;
+
+            BuffManager.Instance.StartEnemyHealOverTime(forestEnemyHealAmount, healInterval);
 
             Debug.Log("Apply Forest Mode effect.");
+        }
+
+        private bool IsKoreaThursday()
+        {
+            return GetKoreaDayOfWeek() == DayOfWeek.Thursday;
         }
 
         private void ApplyPolarEffect()
@@ -135,4 +184,3 @@ namespace _01.Scripts._11.HabitatMode
         }
     }
 }
-
