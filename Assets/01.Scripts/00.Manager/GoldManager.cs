@@ -6,9 +6,12 @@ public class GoldManager : SingletonObject<GoldManager>
 {
     [Header("소지금")]
     [SerializeField] private int gold;
+    [SerializeField] private int dia;
 
     public int Gold => gold;
+    public int Dia => dia;
     public event Action OnGoldChanged;
+    public event Action OnDiaChanged;
 
     protected override void Awake()
     {
@@ -22,10 +25,21 @@ public class GoldManager : SingletonObject<GoldManager>
         return gold >= amount;
     }
 
+    public bool TrySpendDia(int amount)
+    {
+        return dia >= amount;
+    }
+
     public void AdjustGold(int amount)
     {
         gold += amount;
         OnGoldChanged?.Invoke();
+    }
+
+    public void AdjustDia(int amount)
+    {
+        dia += amount;
+        OnDiaChanged?.Invoke();
     }
 
     public void AddStageClearedGold()
