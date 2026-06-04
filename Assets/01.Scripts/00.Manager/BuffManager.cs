@@ -1,29 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace _01.Scripts._00.Manager
 {
     public enum StatType { MoveSpeed, AttackSpeed, AttackDamage }
+    
+    public class Buff
+    {
+        public StatType StatType { get; private set; }
+        public float Multiplier { get; private set; }
+        public Coroutine Coroutine { get; set; }
+
+        public Buff(StatType statType, float multiplier)
+        {
+            StatType = statType;
+            Multiplier = multiplier;
+        }
+    }
 
     public class BuffManager : MonoBehaviour
     {
         public static BuffManager Instance { get; private set; }
-
-        private Dictionary<StatType, float> _allyMultiplier = new() {
-            { StatType.MoveSpeed, 1f },
-            { StatType.AttackSpeed, 1f },
-            { StatType.AttackDamage, 1f }
-        };
         
-        private Dictionary<StatType, float> _enemyMultiplier = new() {
-            { StatType.MoveSpeed, 1f },
-            { StatType.AttackSpeed, 1f },
-            { StatType.AttackDamage, 1f }
-        };
-        
-        private Dictionary<StatType, Coroutine> _allyCoroutines = new();
-        private Dictionary<StatType, Coroutine> _enemyCoroutines = new();
+        private List<Buff> _activeAllyBuffs = new();
+        private List<Buff> _activeEnemyBuffs = new();
 
         private readonly HashSet<FriendlyUnit> _allies = new();
         private readonly HashSet<EnemyUnit> _enemies = new();
@@ -31,91 +33,80 @@ namespace _01.Scripts._00.Manager
         private Coroutine _enemyHealCoroutine;
 
         private void Awake() => Instance = this;
-
+        
         public void RegisterUnit(Unit unit)
         {
-            if (unit is FriendlyUnit fu)
+            switch (unit)
             {
-                if (_allies.Add(fu))
-                {
-                    ApplyMultiplier(fu, _allyMultiplier);
-                }
-            }
-            else if (unit is EnemyUnit eu)
-            {
-                if (_enemies.Add(eu))
-                {
-                    ApplyMultiplier(eu, _enemyMultiplier);
-                }
+                case FriendlyUnit fu:
+                    if (_allies.Add(fu))
+                    {
+                        foreach (Buff buff in _activeAllyBuffs)
+                        {
+                            fu.AddBuff(buff);
+                        }
+                    }
+                    break;
+                case EnemyUnit eu:
+                    if (_enemies.Add(eu))
+                    {
+                        foreach (Buff buff in _activeEnemyBuffs)
+                        {
+                            eu.AddBuff(buff);
+                        }
+                    }
+                    break;
             }
         }
-
-        private void ApplyMultiplier(Unit unit, Dictionary<StatType, float> multiplier)
-        {
-            foreach (var stat in multiplier)
-            {
-                unit.OnStatChanged(stat.Key, stat.Value);
-            }
-        }
-
+        
         public void ApplyAllyBuff(StatType type, float multiplier, float duration)
         {
-            if (_allyCoroutines.ContainsKey(type) && _allyCoroutines[type] != null)
-            {
-                StopCoroutine(_allyCoroutines[type]);
-            }
-
-            _allyCoroutines[type] = StartCoroutine(AllyBuffRoutine(type, multiplier, duration));
+            Buff newBuff = new(type, multiplier);
+            newBuff.Coroutine = StartCoroutine(AllyBuffRoutine(newBuff, duration));
         }
 
-        private IEnumerator AllyBuffRoutine(StatType type, float mul, float duration)
+        private IEnumerator AllyBuffRoutine(Buff buff, float duration)
         {
-            _allyMultiplier[type] = mul;
-            foreach (FriendlyUnit unit in _allies)
+            _activeAllyBuffs.Add(buff);
+            
+            foreach (FriendlyUnit unit in _allies.Where(unit => unit))
             {
-                unit.OnStatChanged(type, mul);
+                unit.AddBuff(buff);
             }
 
             yield return new WaitForSeconds(duration);
-
-            _allyMultiplier[type] = 1f;
-            foreach (FriendlyUnit unit in _allies)
+            
+            _activeAllyBuffs.Remove(buff);
+            
+            foreach (FriendlyUnit unit in _allies.Where(unit => unit))
             {
-                unit.OnStatChanged(type, 1f);
-                unit.RestoreStats();
+                unit.RemoveBuff(buff);
             }
-
-            _allyCoroutines[type] = null;
         }
-
+        
         public void ApplyEnemyBuff(StatType type, float multiplier, float duration)
         {
-            if (_enemyCoroutines.ContainsKey(type) && _enemyCoroutines[type] != null)
-            {
-                StopCoroutine(_enemyCoroutines[type]);
-            }
-
-            _enemyCoroutines[type] = StartCoroutine(EnemyBuffRoutine(type, multiplier, duration));
+            Buff newBuff = new(type, multiplier);
+            newBuff.Coroutine = StartCoroutine(EnemyBuffRoutine(newBuff, duration));
         }
 
-        private IEnumerator EnemyBuffRoutine(StatType type, float mul, float duration)
+        private IEnumerator EnemyBuffRoutine(Buff buff, float duration)
         {
-            _enemyMultiplier[type] = mul;
-            foreach (EnemyUnit unit in _enemies)
+            _activeEnemyBuffs.Add(buff);
+
+            foreach (EnemyUnit unit in _enemies.Where(unit => unit))
             {
-                unit.OnStatChanged(type, mul);
+                unit.AddBuff(buff);
             }
 
             yield return new WaitForSeconds(duration);
 
-            _enemyMultiplier[type] = 1f;
-            foreach (EnemyUnit unit in _enemies)
-            {
-                unit.OnStatChanged(type, 1f);
-                unit.RestoreStats();
-            }
+            _activeEnemyBuffs.Remove(buff);
 
-            _enemyCoroutines[type] = null;
+            foreach (EnemyUnit unit in _enemies.Where(unit => unit))
+            {
+                unit.RemoveBuff(buff);
+            }
         }
         
         public void StartEnemyHealOverTime(float healAmount, float interval)
