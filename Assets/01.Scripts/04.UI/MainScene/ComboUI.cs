@@ -74,6 +74,7 @@ namespace _01.Scripts._04.UI.MainScene
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
                         {
                             comboLevels[type]++;
+                            GameManager.Instance.SaveGoldData();
                             GameManager.Instance.SaveComboData();
                             upgradeUI.SetActive(false);
                             
