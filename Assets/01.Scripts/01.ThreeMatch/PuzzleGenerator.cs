@@ -77,7 +77,8 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
         
         private PuzzleObject[,] _puzzles;
-        
+
+        private bool isReset = false;
         private bool _isProcessing;
         public bool IsProcessing => _isProcessing;
         private int _swapCount;
@@ -205,6 +206,14 @@ namespace _01.Scripts._01.ThreeMatch
                     
                     Vector3 targetPos = CalculatePos(i, j);
                     
+                    if (isReset)
+                    {
+                        po.transform.position = targetPos;
+                        po.puzzleState = PuzzleState.Idle;
+                        po.Init(this, i, j);
+                        continue;
+                    }
+                    
                     float distance = Vector3.Distance(po.transform.position, targetPos);
                     float duration = distance / dropSpeed;
                     float startAt = columnDropDelay * i + rowDropDelay * j;
@@ -225,6 +234,8 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, i, j);
                 }
             }
+
+            isReset = false;
 
             yield return seq.WaitForCompletion();
         }
@@ -454,6 +465,8 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator ResetPopUpEvent()
         {
+            isReset = true;
+            
             if (resetPopUpImage == null)
             {
                 yield break;
