@@ -54,11 +54,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BaseAlpha: 0.75
+    - _BaseAlpha: 0.9
+    - _EdgeCitStrength: 2
+    - _EdgeNoiseScale: 8
     - _EnableExternalAlpha: 0
     - _NoiseScale: 20
     - _NoiseSpeed: 0.4
-    - _NoiseStrength: 0.25
+    - _NoiseStrength: 5
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ZWrite: 0
