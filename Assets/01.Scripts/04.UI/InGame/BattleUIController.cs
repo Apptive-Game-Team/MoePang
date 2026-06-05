@@ -30,31 +30,61 @@ namespace _01.Scripts._04.UI.InGame
 
         private void Update()
         {
+            if (Time.timeScale == 0)
+            {
+                return;
+            }
+            
             HandleZoom();
             HandleDrag();
         }
 
         private void HandleZoom()
         {
-            float scroll = Input.mouseScrollDelta.y;
+            float zoomDelta = 0f;
+            Vector3 zoomScreenPos = Vector3.zero;
             
-            if (scroll == 0)
+            if (Input.touchCount < 2)
+            {
+                zoomDelta = Input.mouseScrollDelta.y;
+                zoomScreenPos = Input.mousePosition;
+            }
+            else if (Input.touchCount == 2)
+            {
+                Touch touchZero = Input.GetTouch(0);
+                Touch touchOne = Input.GetTouch(1);
+                
+                Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+                Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+                
+                float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+                float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+                
+                zoomDelta = (touchDeltaMag - prevTouchDeltaMag) * 0.01f;
+                
+                zoomScreenPos = (touchZero.position + touchOne.position) * 0.5f;
+            }
+            
+            if (Mathf.Approximately(zoomDelta, 0f))
             {
                 return;
             }
             
-            _targetZoom -= scroll * zoomSpeed;
+            Vector3 worldPosBeforeZoom = _battleCam.ScreenToWorldPoint(new Vector3(zoomScreenPos.x, zoomScreenPos.y, _battleCam.nearClipPlane));
+            
+            _targetZoom -= zoomDelta * zoomSpeed;
             _targetZoom = Mathf.Clamp(_targetZoom, minOrthographicSize, maxOrthographicSize);
             _battleCam.orthographicSize = _targetZoom;
+            
+            Vector3 worldPosAfterZoom = _battleCam.ScreenToWorldPoint(new Vector3(zoomScreenPos.x, zoomScreenPos.y, _battleCam.nearClipPlane));
+            
+            Vector3 difference = worldPosBeforeZoom - worldPosAfterZoom;
+            transform.position += new Vector3(difference.x, difference.y, 0);
+            
+            Vector3 pos = transform.position;
+            pos.y = _groundYAnchor;
+            transform.position = pos;
 
-            float t = (maxOrthographicSize - _battleCam.orthographicSize) / (maxOrthographicSize - minOrthographicSize);
-            
-            Vector3 currentPos = transform.position;
-            
-            float targetY = Mathf.Lerp(currentPos.y, _groundYAnchor, t * 0.5f);
-    
-            transform.position = new Vector3(currentPos.x, targetY, currentPos.z);
-            
             ClampCameraInsideBackground();
         }
 
@@ -86,7 +116,7 @@ namespace _01.Scripts._04.UI.InGame
         
         private void ClampCameraInsideBackground()
         {
-            if (battleBackgroundSr == null)
+            if (!battleBackgroundSr)
             {
                 return;
             }
