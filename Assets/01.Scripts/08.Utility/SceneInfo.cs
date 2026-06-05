@@ -18,7 +18,7 @@ namespace _01.Scripts._08.Utility
         {
             { SceneType.Title , "00.TitleScene"},
             { SceneType.Main, "01.MainScene"},
-            { SceneType.Shop, "02.ShopScene"},
+            { SceneType.Shop, "06.ShopSceneR"},
             { SceneType.MatchAndBattle, "03.3match&Battle"},
             { SceneType.HabitatBattle, "04.HabitatBattle"},
             { SceneType.Combo, "05.ComboScene"},

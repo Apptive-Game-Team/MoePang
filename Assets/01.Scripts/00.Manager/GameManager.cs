@@ -83,23 +83,9 @@ namespace _01.Scripts._00.Manager
     }
 
     [Serializable]
-    public class CastleData : IConvertable
+    public class CastleData
     {
-        public Dictionary<UpgradeData, int> CastleLevels = new();
-        
-        [SerializeField] private List<UpgradeData> castleKeys;
-        [SerializeField] private List<int> castleValues;
-        
-        // Dict <-> List
-        public void BeforeSave()
-        {
-            GameManager.DictionaryToLists(CastleLevels, out castleKeys, out castleValues);
-        }
-
-        public void AfterLoad()
-        {
-            CastleLevels = GameManager.ListsToDictionary(castleKeys, castleValues);
-        }
+        public int castleLevel = 1;
     }
 
     [Serializable]
@@ -275,28 +261,24 @@ namespace _01.Scripts._00.Manager
         
         public void SaveCastleData()
         {
-            playData.goldAmount = GoldManager.Instance.Gold;
-            castleData.BeforeSave();
+            SaveGoldData();
             
-            SaveLoadManager.Instance.SaveData(playData, "PlayData");
             SaveLoadManager.Instance.SaveData(castleData, "CastleData");
         }
 
         public void SaveUnitData()
         {
-            playData.goldAmount = GoldManager.Instance.Gold;
-            unitData.BeforeSave();
+            SaveGoldData();
             
-            SaveLoadManager.Instance.SaveData(playData, "PlayData");
+            unitData.BeforeSave();
             SaveLoadManager.Instance.SaveData(unitData, "UnitData");
         }
         
         public void SaveItemData()
         {
-            playData.goldAmount = GoldManager.Instance.Gold;
-            itemData.BeforeSave();
+            SaveGoldData();
             
-            SaveLoadManager.Instance.SaveData(playData, "PlayData");
+            itemData.BeforeSave();
             SaveLoadManager.Instance.SaveData(itemData, "ItemData");
         }
 
@@ -308,6 +290,12 @@ namespace _01.Scripts._00.Manager
         public void SaveComboData()
         {
             SaveLoadManager.Instance.SaveData(comboData, "ComboData");
+        }
+
+        public void SaveGoldData()
+        {
+            playData.goldAmount = GoldManager.Instance.Gold;
+            SaveLoadManager.Instance.SaveData(playData, "PlayData");
         }
     }
 }

@@ -15,6 +15,7 @@ public class MainButtonManager : MonoBehaviour
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI stageText;
     [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TextMeshProUGUI diaText;
 
     [Header("컴포넌트")] 
     [SerializeField] private GameObject habitatPanel;
@@ -23,6 +24,7 @@ public class MainButtonManager : MonoBehaviour
     {
         stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
         goldText.text = $"{GoldManager.Instance.Gold}";
+        diaText.text = $"{GoldManager.Instance.Dia}";
 
         StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 

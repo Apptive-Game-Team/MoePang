@@ -1,7 +1,9 @@
 using _01.Scripts._00.Manager;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Obsolete("이제 안씁니다 CastleUpgradeUI로 이관")]
 public class UpgradeManager : SingletonObject<UpgradeManager>
 {
     private Dictionary<UpgradeData, int> upgradeLevels = new();
@@ -9,7 +11,7 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
     protected override void Awake()
     {
         base.Awake();
-        upgradeLevels = GameManager.Instance.castleData.CastleLevels;
+        upgradeLevels = new();
     }
 
     public int GetLevel(UpgradeData data)
@@ -37,7 +39,7 @@ public class UpgradeManager : SingletonObject<UpgradeManager>
 
         upgradeLevels[data]++;
 
-        GameManager.Instance.castleData.CastleLevels = upgradeLevels;
+        //GameManager.Instance.castleData.CastleLevels = upgradeLevels;
         GameManager.Instance.SaveCastleData();
 
         ApplyUpgrade(data);
