@@ -34,5 +34,15 @@ namespace _01.Scripts._08.Utility
         {
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Combo));
         }
+
+        public void HabitatModeSelectMoveButton()
+        {
+            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.HabitatModeSelect));
+        }
+
+        public void UnitInfoMoveButton()
+        {
+            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitInfo));
+        }
     }
 }
