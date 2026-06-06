@@ -6137,6 +6137,8 @@ MonoBehaviour:
   resetPopUpImage: {fileID: 370849405}
   resetPopUpText: {fileID: 2073931808}
   blinkSpeed: 2
+  resetSpawnEffectPrefab: {fileID: 3099870053393062540, guid: 0ef50d9e9d1c1ab4896159067bd15ecb, type: 3}
+  resetSpawnEffectDestroyDelay: 1.5
   maxSwapCount: -1
   isContinuousHabitatBanned: 0
 --- !u!4 &1669581475

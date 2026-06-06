@@ -713,8 +713,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   habitatMode: 0
   oceanEnemyStatMultiplier: 1.5
+  oceanEventEnemyStatMultiplier: 1.25
   oceanEnemyBuffDuration: 9999
+  desertPuzzleCoverPrefab: {fileID: 1359563286638045153, guid: 3da9cd6a51334cc4ea040d76bb071850, type: 3}
+  desertPuzzleCoverInterval: 25
+  desertPuzzleCoverDuration: 5
+  desertPuzzleCoverRefreshInterval: 0.1
+  forestEnemyHealAmount: 15
+  forestEnemyHealInterval: 15
+  forestEventEnemyHealInterval: 25
   polarFriendlyStatMultiplier: 0.1
+  polarEventFriendlyStatMultiplier: 0.85
   polarFriendlyBuffDuration: 9999
 --- !u!4 &1624848197
 Transform:

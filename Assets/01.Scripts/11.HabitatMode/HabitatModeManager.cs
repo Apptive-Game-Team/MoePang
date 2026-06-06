@@ -4,6 +4,7 @@ using _01.Scripts._08.Utility;
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace _01.Scripts._11.HabitatMode
 {
@@ -13,13 +14,29 @@ namespace _01.Scripts._11.HabitatMode
         
         [Header("Ocean Debuff")]
         [SerializeField] private float oceanEnemyStatMultiplier = 1.5f;
+        [SerializeField] private float oceanEventEnemyStatMultiplier = 1.25f;
         [SerializeField] private float oceanEnemyBuffDuration = 9999f;
         
-        [Header("Ocean Debuff")]
+        [Header("Desert Debuff")]
+        [SerializeField] private GameObject desertPuzzleCoverPrefab;
+        [SerializeField] private float desertPuzzleCoverInterval = 15f;
+        [SerializeField] private float desertEventPuzzleCoverInterval = 25f;
+        [SerializeField] private float desertPuzzleCoverDuration = 5f;
+        [SerializeField] private float desertPuzzleCoverRefreshInterval = 0.1f;
+        
+        [Header("Forest Debuff")]
+        [SerializeField] private float forestEnemyHealAmount = 15f;
+        [SerializeField] private float forestEnemyHealInterval = 15f;
+        [SerializeField] private float forestEventEnemyHealInterval = 25f;
+        
+        [Header("Polar Debuff")]
         [SerializeField] private float polarFriendlyStatMultiplier = 0.75f;
+        [SerializeField] private float polarEventFriendlyStatMultiplier = 0.85f;
         [SerializeField] private float polarFriendlyBuffDuration = 9999f;
 
         private SpawnStackManager spawnStackManager;
+        private PuzzleGenerator puzzleGenerator;
+        private Coroutine desertPuzzleCoverCoroutine;
         
         public event Action<HabitatMode> HabitatModeApplied;
 
@@ -47,8 +64,32 @@ namespace _01.Scripts._11.HabitatMode
             }
             
             spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
+            puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
 
             ApplyHabitatModeEffect();
+        }
+        
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                if (puzzleGenerator == null)
+                {
+                    puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+                }
+
+                if (puzzleGenerator == null)
+                {
+                    Debug.LogWarning("PuzzleGenerator not found.");
+                    return;
+                }
+
+                puzzleGenerator.StartDesertPuzzleCover(
+                    desertPuzzleCoverPrefab,
+                    desertPuzzleCoverDuration,
+                    desertPuzzleCoverRefreshInterval
+                );
+            }
         }
 
         public void ApplyHabitatModeEffect()
@@ -75,6 +116,37 @@ namespace _01.Scripts._11.HabitatMode
             HabitatModeApplied?.Invoke(habitatMode);
         }
 
+        public bool IsHabitatModeEventDay(HabitatMode mode)
+        {
+            DayOfWeek koreaDay = GetKoreaDayOfWeek();
+
+            if (koreaDay == DayOfWeek.Saturday || koreaDay == DayOfWeek.Sunday)
+            {
+                return true;
+            }
+
+            switch (koreaDay)
+            {
+                case DayOfWeek.Monday:
+                    return mode == HabitatMode.MeadowMode;
+                case DayOfWeek.Tuesday:
+                    return mode == HabitatMode.OceanMode;
+                case DayOfWeek.Wednesday:
+                    return mode == HabitatMode.DesertMode;
+                case DayOfWeek.Thursday:
+                    return mode == HabitatMode.ForestMode;
+                case DayOfWeek.Friday:
+                    return mode == HabitatMode.PolarMode;
+                default:
+                    return false;
+            }
+        }
+
+        private DayOfWeek GetKoreaDayOfWeek()
+        {
+            return DateTime.UtcNow.AddHours(9).DayOfWeek;
+        }
+
         private void ApplyMeadowEffect()
         {
             spawnStackManager.SetAllStackMaxCount(6);
@@ -84,21 +156,25 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyOceanEffect()
         {
+            float statMultiplier = IsHabitatModeEventDay(HabitatMode.OceanMode)
+                ? oceanEventEnemyStatMultiplier
+                : oceanEnemyStatMultiplier;
+
             BuffManager.Instance.ApplyEnemyBuff(
                 StatType.AttackSpeed,
-                oceanEnemyStatMultiplier,
+                statMultiplier,
                 oceanEnemyBuffDuration
             );
 
             BuffManager.Instance.ApplyEnemyBuff(
                 StatType.AttackDamage,
-                oceanEnemyStatMultiplier,
+                statMultiplier,
                 oceanEnemyBuffDuration
             );
 
             BuffManager.Instance.ApplyEnemyBuff(
                 StatType.MoveSpeed,
-                oceanEnemyStatMultiplier,
+                statMultiplier,
                 oceanEnemyBuffDuration
             );
 
@@ -107,27 +183,68 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyDesertEffect()
         {
+            if (desertPuzzleCoverCoroutine != null)
+            {
+                StopCoroutine(desertPuzzleCoverCoroutine);
+            }
+
+            desertPuzzleCoverCoroutine = StartCoroutine(DesertPuzzleCoverRoutine());
+
             Debug.Log("Apply Desert Mode effect.");
+        }
+        
+        private IEnumerator DesertPuzzleCoverRoutine()
+        {
+            while (true)
+            {
+                float coverInterval = IsHabitatModeEventDay(HabitatMode.DesertMode)
+                    ? desertEventPuzzleCoverInterval
+                    : desertPuzzleCoverInterval;
+
+                yield return new WaitForSeconds(coverInterval);
+
+                if (puzzleGenerator == null)
+                {
+                    puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+                }
+
+                if (puzzleGenerator != null)
+                {
+                    puzzleGenerator.StartDesertPuzzleCover(
+                        desertPuzzleCoverPrefab,
+                        desertPuzzleCoverDuration,
+                        desertPuzzleCoverRefreshInterval
+                    );
+                }
+            }
         }
 
         private void ApplyForestEffect()
         {
-            BuffManager.Instance.StartEnemyHealOverTime(15f, 15f);
+            float healInterval = IsHabitatModeEventDay(HabitatMode.ForestMode)
+                ? forestEventEnemyHealInterval
+                : forestEnemyHealInterval;
+
+            BuffManager.Instance.StartEnemyHealOverTime(forestEnemyHealAmount, healInterval);
 
             Debug.Log("Apply Forest Mode effect.");
         }
 
         private void ApplyPolarEffect()
         {
+            float statMultiplier = IsHabitatModeEventDay(HabitatMode.PolarMode)
+                ? polarEventFriendlyStatMultiplier
+                : polarFriendlyStatMultiplier;
+
             BuffManager.Instance.ApplyAllyBuff(
                 StatType.MoveSpeed,
-                polarFriendlyStatMultiplier,
+                statMultiplier,
                 polarFriendlyBuffDuration
             );
 
             BuffManager.Instance.ApplyAllyBuff(
                 StatType.AttackSpeed,
-                polarFriendlyStatMultiplier,
+                statMultiplier,
                 polarFriendlyBuffDuration
             );
             
@@ -135,4 +252,3 @@ namespace _01.Scripts._11.HabitatMode
         }
     }
 }
-
