@@ -7,6 +7,7 @@ namespace _01.Scripts._01.ThreeMatch
     {
         public SpecialPuzzleType specialPuzzleType;
         public Habitat habitat;
+        public bool isBlocked;
 
         public override int GetPuzzleSubType() => (int)specialPuzzleType;
         
@@ -14,6 +15,12 @@ namespace _01.Scripts._01.ThreeMatch
         {
             if (Generator.IsProcessing)
             {
+                return;
+            }
+
+            if (isBlocked)
+            {
+                isBlocked = false;
                 return;
             }
             

@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 007cc305b5a31dd4086bead08b7aa198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unitGrade: 0
   maxHp: 0
   currentHp: 0
   moveSpeed: 0
@@ -60,6 +61,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   hitEffectPrefab: {fileID: 1279758348307487373}
+  attackType: 0
   direction: 0
   damageDuration: 0.3
 --- !u!212 &-1930983877192162145
@@ -115,7 +117,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
-  m_MaskInteraction: 1
+  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!95 &-1655210097018449079
 Animator:

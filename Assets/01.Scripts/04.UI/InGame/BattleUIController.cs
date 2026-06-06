@@ -4,70 +4,88 @@ namespace _01.Scripts._04.UI.InGame
 {
     public class BattleUIController : MonoBehaviour
     {
-        [Header("Zoom")]
-        [SerializeField] private float zoomSpeed = 0.2f;
-        [SerializeField] private float dragSpeed = 0.1f;
-        [SerializeField] private float minScale = 1f;
-        [SerializeField] private float maxScale = 3f;
+        [Header("Components")]
+        [SerializeField] private SpriteRenderer battleBackgroundSr;
         
-        private Camera _cam;
-        private SpriteRenderer _sr;
-        private SpriteRenderer _parentSr;
+        [Header("Zoom")]
+        [SerializeField] private float zoomSpeed = 2f;
+        [SerializeField] private float minOrthographicSize = 2f;
+        [SerializeField] private float maxOrthographicSize = 5f;
+        
+        [Header("Drag")]
+        [SerializeField] private float dragSpeed = 0.5f;
 
+        private Camera _battleCam;
         private bool _isDragging;
-        private Vector3 _offset;
-        private Vector3 _originScale;
         private Vector3 _lastMousePos;
-
+        private float _targetZoom;
+        private float _groundYAnchor;
 
         private void Awake()
         {
-            _cam = Camera.main;
-            _sr = GetComponent<SpriteRenderer>();
-            _parentSr = transform.parent.GetComponent<SpriteRenderer>();
-            _originScale = transform.localScale;
+            _battleCam = GetComponent<Camera>();
+            _targetZoom = _battleCam.orthographicSize;
+            _groundYAnchor = battleBackgroundSr.bounds.min.y;
         }
 
         private void Update()
         {
-            if (IsMouseInsideParent())
+            if (Time.timeScale == 0)
             {
-                HandleZoom();
-                HandleDrag();
+                return;
             }
-            else
-            {
-                if (Input.GetMouseButtonUp(0))
-                {
-                    _isDragging = false;
-                }
-            }
-        }
-        
-        private bool IsMouseInsideParent()
-        {
-            if (_parentSr == null) return false;
-
-            Vector3 mouse = MouseWorld();
-            Bounds bounds = _parentSr.bounds;
-
-            return bounds.Contains(mouse);
+            
+            HandleZoom();
+            HandleDrag();
         }
 
         private void HandleZoom()
         {
-            float scroll = Input.mouseScrollDelta.y;
+            float zoomDelta = 0f;
+            Vector3 zoomScreenPos = Vector3.zero;
+            
+            if (Input.touchCount < 2)
+            {
+                zoomDelta = Input.mouseScrollDelta.y;
+                zoomScreenPos = Input.mousePosition;
+            }
+            else if (Input.touchCount == 2)
+            {
+                Touch touchZero = Input.GetTouch(0);
+                Touch touchOne = Input.GetTouch(1);
+                
+                Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+                Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+                
+                float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+                float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+                
+                zoomDelta = (touchDeltaMag - prevTouchDeltaMag) * 0.01f;
+                
+                zoomScreenPos = (touchZero.position + touchOne.position) * 0.5f;
+            }
+            
+            if (Mathf.Approximately(zoomDelta, 0f))
+            {
+                return;
+            }
+            
+            Vector3 worldPosBeforeZoom = _battleCam.ScreenToWorldPoint(new Vector3(zoomScreenPos.x, zoomScreenPos.y, _battleCam.nearClipPlane));
+            
+            _targetZoom -= zoomDelta * zoomSpeed;
+            _targetZoom = Mathf.Clamp(_targetZoom, minOrthographicSize, maxOrthographicSize);
+            _battleCam.orthographicSize = _targetZoom;
+            
+            Vector3 worldPosAfterZoom = _battleCam.ScreenToWorldPoint(new Vector3(zoomScreenPos.x, zoomScreenPos.y, _battleCam.nearClipPlane));
+            
+            Vector3 difference = worldPosBeforeZoom - worldPosAfterZoom;
+            transform.position += new Vector3(difference.x, difference.y, 0);
+            
+            Vector3 pos = transform.position;
+            pos.y = _groundYAnchor;
+            transform.position = pos;
 
-            if (scroll == 0) return;
-
-            float scaleX = transform.localScale.x + scroll * zoomSpeed;
-            float scaleY = transform.localScale.y + scroll * zoomSpeed * _originScale.y / _originScale.x;
-            scaleX = Mathf.Clamp(scaleX, _originScale.x * minScale, _originScale.x * maxScale);
-            scaleY = Mathf.Clamp(scaleY, _originScale.y * minScale, _originScale.y * maxScale);
-
-            transform.localScale = new Vector3(scaleX, scaleY, 1);
-
-            ClampInsideParent();
+            ClampCameraInsideBackground();
         }
 
         private void HandleDrag()
@@ -75,7 +93,7 @@ namespace _01.Scripts._04.UI.InGame
             if (Input.GetMouseButtonDown(0))
             {
                 _isDragging = true;
-                _lastMousePos = MouseWorld();
+                _lastMousePos = Input.mousePosition;
             }
 
             if (Input.GetMouseButtonUp(0))
@@ -85,60 +103,40 @@ namespace _01.Scripts._04.UI.InGame
 
             if (_isDragging)
             {
-                Vector3 current = MouseWorld();
-                Vector3 delta = current - _lastMousePos;
+                Vector3 currentMousePos = Input.mousePosition;
+                Vector3 delta = currentMousePos - _lastMousePos;
+                Vector3 moveDirection = new Vector3(-delta.x, 0, 0) * (dragSpeed * 0.01f * _battleCam.orthographicSize);
+                
+                transform.position += moveDirection;
+                _lastMousePos = currentMousePos;
 
-                transform.position += delta * dragSpeed;
-                _lastMousePos = current;
-
-                ClampInsideParent();
+                ClampCameraInsideBackground();
             }
         }
-
-        private Vector3 MouseWorld()
+        
+        private void ClampCameraInsideBackground()
         {
-            Vector3 pos = Input.mousePosition;
-            pos.z = Mathf.Abs(_cam.transform.position.z);
-            return _cam.ScreenToWorldPoint(pos);
-        }
-
-        private void ClampInsideParent()
-        {
-            if (transform.parent == null || _sr == null || _parentSr == null) return;
-
-            Bounds child = _sr.bounds;
-            Bounds parent = _parentSr.bounds;
-
-            Vector3 pos = transform.position;
-
-            float offsetX = 0f;
-            float offsetY = 0f;
-
-            
-            if (child.min.x > parent.min.x)
+            if (!battleBackgroundSr)
             {
-                offsetX = parent.min.x - child.min.x;
-            }
-            
-            if (child.max.x < parent.max.x)
-            {
-                offsetX = parent.max.x - child.max.x;
-            }
-            
-            if (child.min.y > parent.min.y)
-            {
-                offsetY = parent.min.y - child.min.y;
-            }
-            
-            if (child.max.y < parent.max.y)
-            {
-                offsetY = parent.max.y - child.max.y;
+                return;
             }
 
-            pos.x += offsetX;
-            pos.y += offsetY;
+            Bounds bgBounds = battleBackgroundSr.bounds;
+            
+            float camHeight = _battleCam.orthographicSize;
+            float camWidth = camHeight * _battleCam.aspect;
 
-            transform.position = pos;
+            Vector3 camPos = transform.position;
+            
+            float minX = bgBounds.min.x + camWidth;
+            float maxX = bgBounds.max.x - camWidth;
+            float minY = bgBounds.min.y + camHeight;
+            float maxY = bgBounds.max.y - camHeight;
+
+            camPos.x = minX > maxX ? bgBounds.center.x : Mathf.Clamp(camPos.x, minX, maxX);
+            camPos.y = minY > maxY ? bgBounds.center.y : Mathf.Clamp(camPos.y, minY, maxY);
+
+            transform.position = new Vector3(camPos.x, camPos.y, transform.position.z);
         }
     }
 }
