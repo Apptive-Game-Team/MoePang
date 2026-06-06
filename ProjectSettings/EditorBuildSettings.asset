@@ -32,6 +32,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/00.Scenes/01.MainScene/06.ShopSceneR.unity
     guid: 533055b8dd1009540bf01d2823938c2a
+  - enabled: 1
+    path: Assets/00.Scenes/01.MainScene/07.HabitatModeSelect.unity
+    guid: 1be4a69443210364bba2e1ed633c840c
+  - enabled: 1
+    path: Assets/00.Scenes/01.MainScene/08. UnitInfoScene.unity
+    guid: 53b2e45f3a029ec44922439f1ef886e3
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 07ab3b770b9b1ac4799faf6404832ae6, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
