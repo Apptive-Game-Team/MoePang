@@ -11,6 +11,7 @@ namespace _01.Scripts._08.Utility
         HabitatBattle,
         Combo,
         HabitatModeSelect,
+        UnitInfoScene,
     }
     
     public static class SceneInfo
