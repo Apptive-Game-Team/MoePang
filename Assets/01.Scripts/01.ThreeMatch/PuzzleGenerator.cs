@@ -690,6 +690,15 @@ namespace _01.Scripts._01.ThreeMatch
             if (_puzzles[x1, y1] is ObstaclePuzzleObject || _puzzles[x2, y2] is ObstaclePuzzleObject
                 || (maxSwapCount != -1 && _swapCount >= maxSwapCount))
             {
+                if (_puzzles[x1, y1] is SpecialPuzzleObject sp1)
+                {
+                    sp1.isBlocked = true;
+                }
+                if (_puzzles[x2, y2] is SpecialPuzzleObject sp2)
+                {
+                    sp2.isBlocked = true;
+                }
+                
                 _puzzles[x1, y1].FailedSwapEffect(x2 - x1, y2 - y1, 
                     Vector2.Distance(_puzzles[x1, y1].transform.position, _puzzles[x2, y2].transform.position) / 2);
                 return;

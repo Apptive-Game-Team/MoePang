@@ -11,7 +11,9 @@ namespace _01.Scripts._10.System.Combo
         {
             for (int i = 0; i < 1 + ((GameManager.Instance.comboData.comboLevels[info.comboType] - 1) / 2); i++)
             {
-                context.Puzzle.SpawnSpecialPuzzle(SpecialPuzzleType.RowBomb);
+                SpecialPuzzleType randomType =
+                    Random.value < 0.5f ? SpecialPuzzleType.RowBomb : SpecialPuzzleType.ColumnBomb; 
+                context.Puzzle.SpawnSpecialPuzzle(randomType);
             }
         }
 
