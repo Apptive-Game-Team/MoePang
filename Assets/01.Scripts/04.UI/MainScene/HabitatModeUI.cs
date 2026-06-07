@@ -51,9 +51,27 @@ namespace _01.Scripts._04.UI.MainScene
             {
                 modeTitleText.text = GetModeTitleText(mode);
             }
+
+            if (modeDescriptionText != null)
+            {
+                modeDescriptionText.text = GetModeDescriptionText(mode);
+            }
         }
 
         private string GetModeTitleText(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "Meadow Mode",
+                HabitatMode.OceanMode => "Ocean Mode",
+                HabitatMode.DesertMode => "Desert Mode",
+                HabitatMode.ForestMode => "Forest Mode",
+                HabitatMode.PolarMode => "Polar Mode",
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeDescriptionText(HabitatMode mode)
         {
             return mode switch
             {
