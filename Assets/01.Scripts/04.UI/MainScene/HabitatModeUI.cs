@@ -9,7 +9,8 @@ namespace _01.Scripts._04.UI.MainScene
 {
     public class HabitatModeUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI modeText;
+        [SerializeField] private TextMeshProUGUI modeTitleText;
+        [SerializeField] private TextMeshProUGUI modeDescriptionText;
         [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
 
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
@@ -46,13 +47,13 @@ namespace _01.Scripts._04.UI.MainScene
             selectedMode = mode;
             HabitatModeManager.Instance.HabitatMode = mode;
 
-            if (modeText != null)
+            if (modeTitleText != null)
             {
-                modeText.text = GetModeText(mode);
+                modeTitleText.text = GetModeTitleText(mode);
             }
         }
 
-        private string GetModeText(HabitatMode mode)
+        private string GetModeTitleText(HabitatMode mode)
         {
             return mode switch
             {
