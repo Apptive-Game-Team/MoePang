@@ -12,6 +12,7 @@ namespace _01.Scripts._04.UI.MainScene
         [Header("Text Setting")]
         [SerializeField] private TextMeshProUGUI modeTitleText;
         [SerializeField] private TextMeshProUGUI modeDescriptionText;
+        [SerializeField] private TextMeshProUGUI clearRewardText;
         [SerializeField] private TextMeshProUGUI currentBonusTitle;
         [SerializeField] private TextMeshProUGUI currentBonusText;
         [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
@@ -59,9 +60,37 @@ namespace _01.Scripts._04.UI.MainScene
             {
                 modeDescriptionText.text = GetModeDescriptionText(mode);
             }
+
+            if (clearRewardText != null)
+            {
+                clearRewardText.text = GetModeClearRewardText(mode);
+            }
+
+            if (currentBonusTitle != null)
+            {
+                currentBonusTitle.text = GetModeCurrentBonusTitle(mode);
+            }
+
+            if (currentBonusText != null)
+            {
+                currentBonusText.text = GetModeCurrentBonusText(mode);
+            }
         }
 
         private string GetModeTitleText(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "Meadow",
+                HabitatMode.OceanMode => "Ocean",
+                HabitatMode.DesertMode => "Desert",
+                HabitatMode.ForestMode => "Forest",
+                HabitatMode.PolarMode => "Polar",
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeDescriptionText(HabitatMode mode)
         {
             return mode switch
             {
@@ -74,7 +103,33 @@ namespace _01.Scripts._04.UI.MainScene
             };
         }
 
-        private string GetModeDescriptionText(HabitatMode mode)
+        private string GetModeClearRewardText(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "Meadow Mode",
+                HabitatMode.OceanMode => "Ocean Mode",
+                HabitatMode.DesertMode => "Desert Mode",
+                HabitatMode.ForestMode => "Forest Mode",
+                HabitatMode.PolarMode => "Polar Mode",
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeCurrentBonusTitle(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "Meadow Mode",
+                HabitatMode.OceanMode => "Ocean Mode",
+                HabitatMode.DesertMode => "Desert Mode",
+                HabitatMode.ForestMode => "Forest Mode",
+                HabitatMode.PolarMode => "Polar Mode",
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeCurrentBonusText(HabitatMode mode)
         {
             return mode switch
             {
