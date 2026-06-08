@@ -4,6 +4,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace _01.Scripts._04.UI.MainScene
 {
@@ -17,7 +18,14 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private TextMeshProUGUI currentBonusText;
         [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
 
+        [Header("Info Card Setting")]
+        [SerializeField] private GameObject guidePanel;
+        [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private float showTime = 3f;
+        [SerializeField] private float fadeTime = 2f;
+
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
+        private Coroutine guideCoroutine;
 
         private void OnEnable()
         {
@@ -155,6 +163,47 @@ namespace _01.Scripts._04.UI.MainScene
                 HabitatMode.PolarMode => "In Developing...",
                 _ => mode.ToString()
             };
+        }
+
+        public void ShowGuide()
+        {
+            if (guideCoroutine != null)
+            {
+                Debug.Log("ShowGuide Coroutine Stop");
+                StopCoroutine(guideCoroutine);
+            }
+
+            guideCoroutine = StartCoroutine(ShowGuideRoutine());
+        }
+
+        private IEnumerator ShowGuideRoutine()
+        {
+            float previousTimeScale = Time.timeScale;
+            Time.timeScale = 1f;
+
+            Debug.Log("Start ShowGuide Coroutine");
+            guidePanel.SetActive(true);
+            canvasGroup.alpha = 1f;
+
+            yield return new WaitForSeconds(showTime);
+
+            float elapsed = 0f;
+
+            while (elapsed < fadeTime)
+            {
+                elapsed += Time.deltaTime;
+
+                canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeTime);
+
+                yield return null;
+            }
+
+            canvasGroup.alpha = 0f;
+            guidePanel.SetActive(false);
+
+            Time.timeScale = previousTimeScale;
+
+            guideCoroutine = null;
         }
     } 
 }
