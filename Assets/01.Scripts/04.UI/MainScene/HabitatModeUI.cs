@@ -94,11 +94,26 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow Mode",
-                HabitatMode.OceanMode => "Ocean Mode",
-                HabitatMode.DesertMode => "Desert Mode",
-                HabitatMode.ForestMode => "Forest Mode",
-                HabitatMode.PolarMode => "Polar Mode",
+                HabitatMode.MeadowMode =>
+                    "Summoning units requires more stacks\n" +
+                    "<size=30>Stack Cost : 3 -> 6</size>",
+
+                HabitatMode.OceanMode =>
+                    "Enemies gain increased Stats\n" +
+                    "<size=30>All stats × 1.5</size>",
+
+                HabitatMode.DesertMode =>
+                    "A sandstorm periodically obscures the puzzle board\n" +
+                    "<size=30>Every 15s, tiles are hidden for 3s.</size>",
+
+                HabitatMode.ForestMode =>
+                    "Friendly units have reduced Movement Speed and Attack Speed\n" +
+                    "<size=30>Speed & Attack Stats × 0.75</size>",
+
+                HabitatMode.PolarMode =>
+                    "Enemies periodically recover HP\n" +
+                    "<size=30>All enemies restore HP every 15s</size>",
+
                 _ => mode.ToString()
             };
         }
@@ -107,11 +122,11 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow Mode",
-                HabitatMode.OceanMode => "Ocean Mode",
-                HabitatMode.DesertMode => "Desert Mode",
-                HabitatMode.ForestMode => "Forest Mode",
-                HabitatMode.PolarMode => "Polar Mode",
+                HabitatMode.MeadowMode => "Meadow Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.OceanMode => "Ocean Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.DesertMode => "Desert Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.ForestMode => "Forest Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.PolarMode => "Polar Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
                 _ => mode.ToString()
             };
         }
@@ -120,11 +135,11 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow Mode",
-                HabitatMode.OceanMode => "Ocean Mode",
-                HabitatMode.DesertMode => "Desert Mode",
-                HabitatMode.ForestMode => "Forest Mode",
-                HabitatMode.PolarMode => "Polar Mode",
+                HabitatMode.MeadowMode => "Current Meadow Bonus",
+                HabitatMode.OceanMode => "Current Ocean Bonus",
+                HabitatMode.DesertMode => "Current Desert Bonus",
+                HabitatMode.ForestMode => "Current Forest Bonus",
+                HabitatMode.PolarMode => "Current Polar Bonus",
                 _ => mode.ToString()
             };
         }
@@ -133,11 +148,11 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow Mode",
-                HabitatMode.OceanMode => "Ocean Mode",
-                HabitatMode.DesertMode => "Desert Mode",
-                HabitatMode.ForestMode => "Forest Mode",
-                HabitatMode.PolarMode => "Polar Mode",
+                HabitatMode.MeadowMode => "In Developing...",
+                HabitatMode.OceanMode => "In Developing...",
+                HabitatMode.DesertMode => "In Developing...",
+                HabitatMode.ForestMode => "In Developing...",
+                HabitatMode.PolarMode => "In Developing...",
                 _ => mode.ToString()
             };
         }
