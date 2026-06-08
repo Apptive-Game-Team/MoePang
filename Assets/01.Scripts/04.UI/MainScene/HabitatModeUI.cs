@@ -9,8 +9,11 @@ namespace _01.Scripts._04.UI.MainScene
 {
     public class HabitatModeUI : MonoBehaviour
     {
+        [Header("Text Setting")]
         [SerializeField] private TextMeshProUGUI modeTitleText;
         [SerializeField] private TextMeshProUGUI modeDescriptionText;
+        [SerializeField] private TextMeshProUGUI currentBonusTitle;
+        [SerializeField] private TextMeshProUGUI currentBonusText;
         [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
 
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
