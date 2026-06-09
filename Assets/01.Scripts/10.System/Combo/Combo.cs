@@ -9,7 +9,7 @@ namespace _01.Scripts._10.System.Combo
     {
         public Habitat comboType;
         public Sprite comboImage;
-        public int ComboMaxLevel { get; private set; } = 5;
+        public int ComboMaxLevel { get; private set; } = 20;
         [TextArea(3,10)] public string comboDescription;
     }
     

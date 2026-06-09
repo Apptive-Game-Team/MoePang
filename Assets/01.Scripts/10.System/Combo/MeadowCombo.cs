@@ -11,8 +11,9 @@ namespace _01.Scripts._10.System.Combo
         public override void TriggerComboEffect(ComboContext context)
         {
             var types = Enum.GetValues(typeof(Habitat));
+            int spawnCount = 1 + GameManager.Instance.comboData.comboLevels[info.comboType] / 2;
             
-            for (int i = 0; i < GameManager.Instance.comboData.comboLevels[info.comboType]; i++)
+            for (int i = 0; i < spawnCount; i++)
             {
                 context.UnitSpawner.SpawnHighestFriendly((Habitat)types.GetValue(Random.Range(0, types.Length)));
             }
@@ -20,13 +21,14 @@ namespace _01.Scripts._10.System.Combo
 
         public override string DynamicDescription()
         {
-            int level = GameManager.Instance.comboData.comboLevels[info.comboType];
+            int level = 1 + GameManager.Instance.comboData.comboLevels[info.comboType] / 2;
+            int nextLevel = 1 + (1 + GameManager.Instance.comboData.comboLevels[info.comboType]) / 2;
             
             if (level == info.ComboMaxLevel)
             {
                 return string.Format(info.comboDescription, level, "");   
             }
-            return string.Format(info.comboDescription, level, $"/<color=grey>{1 + level}</color>");
+            return string.Format(info.comboDescription, level, $"/<color=grey>{nextLevel}</color>");
         }
     }
 }
