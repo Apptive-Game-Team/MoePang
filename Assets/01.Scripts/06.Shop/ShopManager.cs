@@ -99,6 +99,17 @@ public class ShopManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
+    
+    public void OnClickUnitDescriptioon()
+    {
+        if (currentSelected == null)
+        {
+            return;
+        }
+
+        HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
+    }
 
     public void OnClickUnit(ShopUI clickedUI)
     {
