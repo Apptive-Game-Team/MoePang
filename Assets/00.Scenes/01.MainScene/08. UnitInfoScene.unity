@@ -2697,7 +2697,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 7478875558177199514, guid: 56df590d34d9641549b34efd96ebf959, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2720,7 +2720,7 @@ GameObject:
   - component: {fileID: 3098858884505076933}
   - component: {fileID: 5351012065767449511}
   m_Layer: 5
-  m_Name: LeopardUI
+  m_Name: JaguarUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2764,7 +2764,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3323825646174493067, guid: 71dffbed1d16ae74b81c2f4882b99190, type: 3}
+  m_Sprite: {fileID: -2052584259255378623, guid: 2e8b4e7a4fc654ce8add7781a1c0c71c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2812,7 +2812,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -4390737328930382143, guid: f2b0501a4b1da4f458240c8878587b91, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2947,7 +2947,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 6930034354171277879, guid: 4ff09ea998e264d4594044d22be05820, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2977,7 +2977,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7249245291908599704, guid: 65e27ab25fc9b3340bb3cc78bc568543, type: 3}
+  m_Sprite: {fileID: 5178489613628194549, guid: e1b076241afb949bcacbc8b177d4d33e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3007,7 +3007,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -9158937886154280892, guid: d1df886152f6e46e98f2273bcb59cf2c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3151,7 +3151,7 @@ GameObject:
   - component: {fileID: 2551822515754138563}
   - component: {fileID: 288776305408889591}
   m_Layer: 5
-  m_Name: ElephantImage
+  m_Name: DearImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3177,7 +3177,7 @@ GameObject:
   - component: {fileID: 2591420189408964398}
   - component: {fileID: 332852292335371802}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: ArticWolfImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3214,7 +3214,7 @@ GameObject:
   - component: {fileID: 2459753194007762745}
   - component: {fileID: 381356763579629069}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: FurSealImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3232,7 +3232,7 @@ GameObject:
   - component: {fileID: 2459434509210234455}
   - component: {fileID: 381045839591376739}
   m_Layer: 5
-  m_Name: TigerImage
+  m_Name: RatImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3250,7 +3250,7 @@ GameObject:
   - component: {fileID: 2459146191532106347}
   - component: {fileID: 380749766812404575}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: ElephantImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3586,7 +3586,7 @@ GameObject:
   - component: {fileID: 2613889043013717684}
   - component: {fileID: 229247863160465280}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: CamelImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3821,7 +3821,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -7706235053473104743, guid: b20a2329db523467db5ab7d3ed9ccc46, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3872,7 +3872,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 5450605894840844227, guid: 272ad8504bd734b4aae690d0ae0a92f4, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4099,7 +4099,7 @@ GameObject:
   - component: {fileID: 3636318135332925332}
   - component: {fileID: 1521892971509204640}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: HippoImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4117,7 +4117,7 @@ GameObject:
   - component: {fileID: 3656485214632930211}
   - component: {fileID: 1573555508299022999}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: PolarBearImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4441,7 +4441,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2495478762384288811, guid: edca020f674603b42b1662fcc7790615, type: 3}
+  m_Sprite: {fileID: -772836717887845749, guid: 0f2a70b2ba1b345e0b2c48504e6ae646, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4681,7 +4681,7 @@ GameObject:
   - component: {fileID: 685674469990977055}
   - component: {fileID: 3381100269297329963}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: CapybaraImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4923,7 +4923,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 782019567293051079, guid: 0ced5413c09d904499100b42234d1fea, type: 3}
+  m_Sprite: {fileID: -1146926262069543295, guid: 6a4699dc3bc454ef285a2ce84c8c19f5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5044,7 +5044,7 @@ GameObject:
   - component: {fileID: 164232841141816334}
   - component: {fileID: 2679480621559588154}
   m_Layer: 5
-  m_Name: WhaleImage
+  m_Name: TigerImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5167,7 +5167,7 @@ GameObject:
   - component: {fileID: 447712969265385158}
   - component: {fileID: 2404514389916526578}
   m_Layer: 5
-  m_Name: LionImage
+  m_Name: WolfImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5264,7 +5264,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -7788739554516077055, guid: e39b917d267ae4986b6e6ac7af7af5ab, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5390,7 +5390,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -8694811473036108966, guid: 4808eb8398d3b4082937a69941a41771, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5903,7 +5903,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 6458906532907205883, guid: ae3fbf20726d84c6dbbe561a59d31f04, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5934,7 +5934,7 @@ GameObject:
   - component: {fileID: 2106661044532284447}
   - component: {fileID: 8971060150724520829}
   m_Layer: 5
-  m_Name: OustrichUI
+  m_Name: CamelUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6113,7 +6113,7 @@ GameObject:
   - component: {fileID: 1331764278044345966}
   - component: {fileID: 3824529176515276634}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: JaguarImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6269,7 +6269,7 @@ GameObject:
   - component: {fileID: 1683230241525607649}
   - component: {fileID: 3473433611015292373}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: ArmadilloImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6497,7 +6497,7 @@ GameObject:
   - component: {fileID: 7668599184409173729}
   - component: {fileID: 5549635269602523093}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: LionImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6578,7 +6578,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6636569706016679461, guid: e898fcbeec8d34547a8226225e0efbc9, type: 3}
+  m_Sprite: {fileID: -6456769267347080578, guid: 846b5c39b84f647e489694ca84c97783, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6707,7 +6707,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6636569706016679461, guid: e898fcbeec8d34547a8226225e0efbc9, type: 3}
+  m_Sprite: {fileID: 2863804573302857424, guid: 3a16dceb7691a4bd5a0a5fd9447e6b35, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6827,7 +6827,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -8272413414743661051, guid: 0577a13a78cdf4292a79df78ed5033e6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6943,7 +6943,7 @@ GameObject:
   - component: {fileID: 7173974662893270013}
   - component: {fileID: 4964944233297074889}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: ScorpionImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7053,7 +7053,7 @@ GameObject:
   - component: {fileID: 6997700301539877347}
   - component: {fileID: 5076901287744866519}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: SeaTurtleImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7202,7 +7202,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 745133248259491975, guid: d178748f1b5a2438a9175ae7d929ae70, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7224,7 +7224,7 @@ GameObject:
   - component: {fileID: 7301069497013972141}
   - component: {fileID: 4772277996047893913}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: JellyfishImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7388,7 +7388,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -4890714490481895995, guid: 6f645c7ee44ec43a8906a6876e07e40c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7410,7 +7410,7 @@ GameObject:
   - component: {fileID: 8814804346456687387}
   - component: {fileID: 6718363845472217647}
   m_Layer: 5
-  m_Name: PolarBearImage
+  m_Name: GiraffeImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7672,7 +7672,7 @@ GameObject:
   - component: {fileID: 9186038477277774229}
   - component: {fileID: 6346496394879723681}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: FlogImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7717,7 +7717,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -211078723010820832, guid: 8c4e00ccd211b4627927ca4af894dc07, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7891,7 +7891,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6636569706016679461, guid: e898fcbeec8d34547a8226225e0efbc9, type: 3}
+  m_Sprite: {fileID: 7648452457097641232, guid: b640daadf27db444f933cee83a3a4c5c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -8065,7 +8065,7 @@ GameObject:
   - component: {fileID: 8280775958137535551}
   - component: {fileID: 6161817469818098955}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: AnteaterImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8303,7 +8303,7 @@ GameObject:
   - component: {fileID: 8626529827829830866}
   - component: {fileID: 5827520098930785766}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: PenguinImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8329,7 +8329,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6017295084551238540, guid: a7fbbc6383cc4674a82bce3962e5ee3b, type: 3}
+  m_Sprite: {fileID: -5331034477398026061, guid: d3e89c02bb88a4bbaabe3fc3835d077d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -8865,7 +8865,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: -6718800325079208720, guid: 7053afbdd76ee44ccbd1bc61ace6c69e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -9092,7 +9092,7 @@ GameObject:
   - component: {fileID: 4810710490776122566}
   - component: {fileID: 7325956057071132146}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: WhaleImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9544,7 +9544,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 6919745581798529608, guid: 94806a75af5e24210988dbc585c1f08a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -9585,7 +9585,7 @@ GameObject:
   - component: {fileID: 6450096892385889886}
   - component: {fileID: 9145488649581700970}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: RaindeerImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9772,7 +9772,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6636569706016679461, guid: e898fcbeec8d34547a8226225e0efbc9, type: 3}
+  m_Sprite: {fileID: 7411811416068342857, guid: 9fc614a79dfa44637affd818d877f845, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -10161,7 +10161,7 @@ GameObject:
   - component: {fileID: 5906679762403452604}
   - component: {fileID: 8543513731473592200}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: ArticHareImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10468,7 +10468,7 @@ GameObject:
   - component: {fileID: 6192092613637712117}
   - component: {fileID: 8252475674734756289}
   m_Layer: 5
-  m_Name: AnimalImage
+  m_Name: HyenaImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10512,7 +10512,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6728595972894649458, guid: 5400da2a83d5ac24f88d6e5b532a5e5e, type: 3}
+  m_Sprite: {fileID: 5506270685971696824, guid: 2ebc5b062a0c746cba65fe3c530e6334, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
