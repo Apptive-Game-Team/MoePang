@@ -100,7 +100,7 @@ public class ShopManager : MonoBehaviour
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
     
-    public void OnClickUnitDescriptioon()
+    public void OnClickUnitDescription()
     {
         if (currentSelected == null)
         {

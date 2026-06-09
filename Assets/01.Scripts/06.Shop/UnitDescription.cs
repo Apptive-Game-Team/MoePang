@@ -1,25 +1,66 @@
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
-public class UnitDescription : MonoBehaviour
+namespace _01.Scripts._06.Shop
 {
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private TextMeshProUGUI damageText;
-    [SerializeField] private TextMeshProUGUI hpText;
-
-    private void Start()
+    public class UnitDescription : MonoBehaviour
     {
-        FriendlyUnitData data = HabitatManager.Instance.SelectedUnitData;
+        [Header("Description Setting")]
+        [SerializeField] private Image habitatImage;
+        [SerializeField] private List<Sprite> habitatSprites = new List<Sprite>();
+        [SerializeField] private TextMeshProUGUI unitNameText;
+        [SerializeField] private TextMeshProUGUI descriptionText;
+        [SerializeField] private AnimatorOverrideController unitAnimator;
+        [SerializeField] private TextMeshProUGUI unitStatText;
+        [SerializeField] private TextMeshProUGUI unitUpgradeCostText;
 
-        if (data == null)
+        private void Start()
         {
-            return;
-        }
+            FriendlyUnitData data = HabitatManager.Instance.SelectedUnitData;
 
-        nameText.text = data.UnitName.ToString();
-        descriptionText.text = data.UnitDescriptionText;
-        damageText.text = data.AttackDamage.ToString();
-        hpText.text = data.MaxHp.ToString();
+            if (data == null)
+            {
+                return;
+            }
+        
+            ApplyHabitatImage(data.Habitat);
+
+            unitNameText.text = data.UnitName.ToString();
+            descriptionText.text = data.UnitDescriptionText;
+            unitAnimator = data.AnimatorOverride;
+            unitStatText.text = 
+                $"Current Grade : null\n" +
+                $"Attack Type : {data.AttackType}\n" +
+                $"HP : {data.MaxHp}\n" +
+                $"Damage : {data.AttackDamage}\n" +
+                $"Attack Speed : {data.AttackSpeed}\n" +
+                $"Move Speed : {data.BaseMoveSpeed}";
+            unitUpgradeCostText.text = $"Upgrade : {data.UnitCost}";
+        }
+    
+        private void ApplyHabitatImage(Habitat habitat)
+        {
+            int index = habitat switch
+            {
+                Habitat.Meadow => 0,
+                Habitat.Ocean => 1,
+                Habitat.Desert => 2,
+                Habitat.Forest => 3,
+                Habitat.Polar => 4,
+                _ => -1
+            };
+
+            if (index >= 0 && index < habitatSprites.Count)
+            {
+                habitatImage.sprite = habitatSprites[index];
+                habitatImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                habitatImage.gameObject.SetActive(false);
+            }
+        }
     }
 }
