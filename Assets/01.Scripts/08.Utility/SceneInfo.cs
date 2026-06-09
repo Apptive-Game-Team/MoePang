@@ -12,6 +12,7 @@ namespace _01.Scripts._08.Utility
         Combo,
         HabitatModeSelect,
         UnitInfo,
+        UnitDescription,
     }
     
     public static class SceneInfo
@@ -26,6 +27,7 @@ namespace _01.Scripts._08.Utility
             { SceneType.Combo, "05.ComboScene"},
             { SceneType.HabitatModeSelect, "07.HabitatModeSelect"},
             { SceneType.UnitInfo, "08. UnitInfoScene"},
+            { SceneType.UnitDescription, "09.UnitDescription"},
         };
 
         public static string GetSceneName(SceneType type)
