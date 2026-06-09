@@ -42,6 +42,7 @@ public class ShopManager : MonoBehaviour
     private ItemObject currentItemSelected;
     private bool isBuyPopupActive = false;
 
+    #region  초기 세팅
     private void Awake()
     {
         EnsureActivateAnimalsPanel();
@@ -71,7 +72,7 @@ public class ShopManager : MonoBehaviour
 
     private void Start()
     {
-        goldText.text = $"{GoldManager.Instance.Gold}";
+        //goldText.text = $"{GoldManager.Instance.Gold}";
         animalsTap.SetActive(true);
         upgradeTap.SetActive(false);
         buyPopup.SetActive(false);
@@ -87,6 +88,7 @@ public class ShopManager : MonoBehaviour
     {
         GoldManager.Instance.OnGoldChanged -= OnGoldChanged;
     }
+    #endregion
 
     private void OnGoldChanged()
     {
