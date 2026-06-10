@@ -1633,7 +1633,7 @@ GameObject:
   - component: {fileID: 1095091449}
   - component: {fileID: 1095091448}
   - component: {fileID: 1095091447}
-  - component: {fileID: 1095091446}
+  - component: {fileID: 1095091451}
   m_Layer: 5
   m_Name: DescriptionCanvas
   m_TagString: Untagged
@@ -1641,48 +1641,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1095091446
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1095091445}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35810e493686eee48959abf4256ab140, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemData: {fileID: 11400000, guid: 8eed51bd643eacd48b84347c4675359b, type: 2}
-  goldText: {fileID: 0}
-  buyButtonText: {fileID: 0}
-  panels:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  upgradePanels: []
-  animalsTap: {fileID: 0}
-  upgradeTap: {fileID: 0}
-  itemTap: {fileID: 0}
-  buttonImages:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  buttonSprite:
-  - {fileID: -1685679704073930617, guid: 5edcfcce3cf435a4bac2443c17ecc36c, type: 3}
-  - {fileID: 7968904927735349844, guid: e8e370b10a348aa4eb48e73810b5517b, type: 3}
-  animalsTapButton: {fileID: 0}
-  upgradeTapButton: {fileID: 0}
-  buyPopup: {fileID: 0}
-  costText: {fileID: 0}
-  tooltipText: {fileID: 0}
 --- !u!114 &1095091447
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1770,6 +1728,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1095091451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1095091445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8c7ffb28b81dca46a3fb3868875aa80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  previousButton: {fileID: 0}
+  nextButton: {fileID: 0}
+  stageText: {fileID: 0}
+  goldText: {fileID: 151236307}
+  diaText: {fileID: 1419361467}
+  habitatPanel: {fileID: 0}
 --- !u!1 &1288752878
 GameObject:
   m_ObjectHideFlags: 0

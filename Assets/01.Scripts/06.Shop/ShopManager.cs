@@ -74,8 +74,8 @@ public class ShopManager : MonoBehaviour
     {
         //goldText.text = $"{GoldManager.Instance.Gold}";
         animalsTap.SetActive(true);
-        upgradeTap.SetActive(false);
-        buyPopup.SetActive(false);
+        //if (upgradePanels != null) upgradeTap.SetActive(false);
+        //if (buyPopup != null) buyPopup.SetActive(false);
         UpdateBuyButtonText();
     }
 
@@ -178,6 +178,8 @@ public class ShopManager : MonoBehaviour
 
     private void UpdateBuyButtonText()
     {
+        return;
+        
         if (currentItemSelected != null)
         {
             if (GameManager.Instance.itemData.ItemAmounts[currentItemSelected.type] >= 999)
