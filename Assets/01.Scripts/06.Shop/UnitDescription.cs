@@ -12,7 +12,7 @@ namespace _01.Scripts._06.Shop
         [SerializeField] private List<Sprite> habitatSprites = new List<Sprite>();
         [SerializeField] private TextMeshProUGUI unitNameText;
         [SerializeField] private TextMeshProUGUI descriptionText;
-        [SerializeField] private AnimatorOverrideController unitAnimator;
+        [SerializeField] private Animator unitAnimator;
         [SerializeField] private TextMeshProUGUI unitStatText;
         [SerializeField] private TextMeshProUGUI unitUpgradeCostText;
 
@@ -29,7 +29,8 @@ namespace _01.Scripts._06.Shop
 
             unitNameText.text = data.UnitName.ToString();
             descriptionText.text = data.UnitDescriptionText;
-            unitAnimator = data.AnimatorOverride;
+            unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
+            unitAnimator.Play("Walk", 0, 0f);
             unitStatText.text = 
                 $"Current Grade : null\n" +
                 $"Attack Type : {data.AttackType}\n" +
