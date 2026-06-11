@@ -149,7 +149,8 @@ namespace _01.Scripts._11.HabitatMode
 
         private void ApplyMeadowEffect()
         {
-            spawnStackManager.SetAllStackMaxCount(6);
+            int stackMaxCount = IsHabitatModeEventDay(HabitatMode.MeadowMode) ? 5 : 6;
+            spawnStackManager.SetAllStackMaxCount(stackMaxCount);
             
             Debug.Log("Apply Meadow Mode effect.");
         }
