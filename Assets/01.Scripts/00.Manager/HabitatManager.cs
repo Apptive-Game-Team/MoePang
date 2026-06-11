@@ -9,6 +9,8 @@ public class HabitatManager : SingletonObject<HabitatManager>
 {
     [Header("유닛 리스트")]
     [SerializeField] private FriendlyUnitList unitList;
+    
+    public FriendlyUnitData SelectedUnitData { get; private set; }
 
     //참조
     private Dictionary<FriendlyUnitData, bool> unlockDict = new();
@@ -62,5 +64,10 @@ public class HabitatManager : SingletonObject<HabitatManager>
         if (index == 0) return true;
 
         return IsUnlocked(list[index - 1]);
+    }
+    
+    public void SetSelectedUnit(FriendlyUnitData unitData)
+    {
+        SelectedUnitData = unitData;
     }
 }

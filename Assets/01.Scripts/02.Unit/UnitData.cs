@@ -19,6 +19,9 @@ public abstract class UnitData : ScriptableObject
     [SerializeField] protected float attackDamage;
     [SerializeField] protected float attackSpeed;
     [SerializeField] protected float unitSize = 1f;
+
+    [Header("Shop Data")] 
+    [SerializeField, TextArea(3, 8)] protected string unitDescriptionText;
     
 
     public TeamType Team => team;
@@ -31,4 +34,5 @@ public abstract class UnitData : ScriptableObject
     public float AttackDamage => attackDamage;
     public float AttackSpeed => attackSpeed;
     public float UnitSize => unitSize;
+    public string UnitDescriptionText => unitDescriptionText;
 }

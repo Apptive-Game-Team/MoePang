@@ -22,14 +22,14 @@ public class MainButtonManager : MonoBehaviour
 
     private void Start()
     {
-        stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
-        goldText.text = $"{GoldManager.Instance.Gold}";
-        diaText.text = $"{GoldManager.Instance.Dia}";
+        if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
+        if (goldText != null) goldText.text = $"{GoldManager.Instance.Gold}";
+        if (diaText != null) diaText.text = $"{GoldManager.Instance.Dia}";
 
         StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 
-        previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
-        nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
+        if (previousButton != null) previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
+        if (nextButton != null) nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
     }
 
     public void OnClickPlay()

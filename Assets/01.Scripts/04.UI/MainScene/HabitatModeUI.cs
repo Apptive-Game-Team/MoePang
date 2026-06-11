@@ -4,15 +4,28 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace _01.Scripts._04.UI.MainScene
 {
     public class HabitatModeUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI modeText;
+        [Header("Text Setting")]
+        [SerializeField] private TextMeshProUGUI modeTitleText;
+        [SerializeField] private TextMeshProUGUI modeDescriptionText;
+        [SerializeField] private TextMeshProUGUI clearRewardText;
+        [SerializeField] private TextMeshProUGUI currentBonusTitle;
+        [SerializeField] private TextMeshProUGUI currentBonusText;
         [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
 
+        [Header("Info Card Setting")]
+        [SerializeField] private GameObject guidePanel;
+        [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private float showTime = 3f;
+        [SerializeField] private float fadeTime = 2f;
+
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
+        private Coroutine guideCoroutine;
 
         private void OnEnable()
         {
@@ -46,23 +59,151 @@ namespace _01.Scripts._04.UI.MainScene
             selectedMode = mode;
             HabitatModeManager.Instance.HabitatMode = mode;
 
-            if (modeText != null)
+            if (modeTitleText != null)
             {
-                modeText.text = GetModeText(mode);
+                modeTitleText.text = GetModeTitleText(mode);
+            }
+
+            if (modeDescriptionText != null)
+            {
+                modeDescriptionText.text = GetModeDescriptionText(mode);
+            }
+
+            if (clearRewardText != null)
+            {
+                clearRewardText.text = GetModeClearRewardText(mode);
+            }
+
+            if (currentBonusTitle != null)
+            {
+                currentBonusTitle.text = GetModeCurrentBonusTitle(mode);
+            }
+
+            if (currentBonusText != null)
+            {
+                currentBonusText.text = GetModeCurrentBonusText(mode);
             }
         }
 
-        private string GetModeText(HabitatMode mode)
+        private string GetModeTitleText(HabitatMode mode)
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow Mode",
-                HabitatMode.OceanMode => "Ocean Mode",
-                HabitatMode.DesertMode => "Desert Mode",
-                HabitatMode.ForestMode => "Forest Mode",
-                HabitatMode.PolarMode => "Polar Mode",
+                HabitatMode.MeadowMode => "Meadow",
+                HabitatMode.OceanMode => "Ocean",
+                HabitatMode.DesertMode => "Desert",
+                HabitatMode.ForestMode => "Forest",
+                HabitatMode.PolarMode => "Polar",
                 _ => mode.ToString()
             };
+        }
+
+        private string GetModeDescriptionText(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode =>
+                    "Summoning units requires more stacks\n" +
+                    "<size=30>Stack Cost : 3 -> 6</size>",
+
+                HabitatMode.OceanMode =>
+                    "Enemies gain increased Stats\n" +
+                    "<size=30>All stats × 1.5</size>",
+
+                HabitatMode.DesertMode =>
+                    "A sandstorm periodically obscures the puzzle board\n" +
+                    "<size=30>Every 15s, tiles are hidden for 3s.</size>",
+
+                HabitatMode.ForestMode =>
+                    "Friendly units have reduced Movement Speed and Attack Speed\n" +
+                    "<size=30>Speed & Attack Stats × 0.75</size>",
+
+                HabitatMode.PolarMode =>
+                    "Enemies periodically recover HP\n" +
+                    "<size=30>All enemies restore HP every 15s</size>",
+
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeClearRewardText(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "Meadow Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.OceanMode => "Ocean Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.DesertMode => "Desert Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.ForestMode => "Forest Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                HabitatMode.PolarMode => "Polar Reward :\n" + "Hp + 999 / Attack + 999\n" + "Dia + 999",
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeCurrentBonusTitle(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "Current Meadow Bonus",
+                HabitatMode.OceanMode => "Current Ocean Bonus",
+                HabitatMode.DesertMode => "Current Desert Bonus",
+                HabitatMode.ForestMode => "Current Forest Bonus",
+                HabitatMode.PolarMode => "Current Polar Bonus",
+                _ => mode.ToString()
+            };
+        }
+
+        private string GetModeCurrentBonusText(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => "In Developing...",
+                HabitatMode.OceanMode => "In Developing...",
+                HabitatMode.DesertMode => "In Developing...",
+                HabitatMode.ForestMode => "In Developing...",
+                HabitatMode.PolarMode => "In Developing...",
+                _ => mode.ToString()
+            };
+        }
+
+        public void ShowGuide()
+        {
+            if (guideCoroutine != null)
+            {
+                Debug.Log("ShowGuide Coroutine Stop");
+                StopCoroutine(guideCoroutine);
+            }
+
+            guideCoroutine = StartCoroutine(ShowGuideRoutine());
+        }
+
+        private IEnumerator ShowGuideRoutine()
+        {
+            float previousTimeScale = Time.timeScale;
+            Time.timeScale = 1f;
+
+            Debug.Log("Start ShowGuide Coroutine");
+            guidePanel.SetActive(true);
+            canvasGroup.alpha = 1f;
+
+            yield return new WaitForSeconds(showTime);
+
+            float elapsed = 0f;
+
+            while (elapsed < fadeTime)
+            {
+                elapsed += Time.deltaTime;
+
+                canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeTime);
+
+                yield return null;
+            }
+
+            canvasGroup.alpha = 0f;
+            guidePanel.SetActive(false);
+
+            Time.timeScale = previousTimeScale;
+
+            guideCoroutine = null;
         }
     } 
 }

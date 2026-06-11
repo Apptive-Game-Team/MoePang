@@ -15,11 +15,13 @@ MonoBehaviour:
   team: 0
   unitName: 12
   unitGrade: 3
+  attackType: 0
   animatorOverride: {fileID: 22100000, guid: a749398e4599cb047b6366c131a40d2e, type: 2}
   maxHp: 32
   baseMoveSpeed: 0.3
   attackDamage: 8
   attackSpeed: 1
   unitSize: 1.2
+  unitDescriptionText: "\uB099\uD0C0 \uC785\uB2C8\uB2E4\n\uC9F1 \uAC15\uD569\uB2C8\uB2E4."
   habitat: 2
   unitCost: 100
