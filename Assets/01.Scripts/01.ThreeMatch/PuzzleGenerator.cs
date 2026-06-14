@@ -127,7 +127,7 @@ namespace _01.Scripts._01.ThreeMatch
             public ObstaclePuzzleType type;
             [Range(0, 100)] public int weight;
         }
-
+        
         private void Start()
         {
             AddTask(GenerateBoard);
@@ -793,7 +793,7 @@ namespace _01.Scripts._01.ThreeMatch
         #endregion
         
         /// <summary>
-        /// 퍼즐을 옮겼을 때 완성 되는지 확인하는 함수 및 퍼즐을 맞추고, 퍼즐이 사라지고, 내려오고, 채워지는 함수
+        /// 퍼즐을 옮기는 것과 연관된 함수들
         /// </summary>
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
@@ -807,7 +807,6 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 return;
             }
-            
             
             if (_puzzles[x1, y1] is ObstaclePuzzleObject || _puzzles[x2, y2] is ObstaclePuzzleObject
                 || (maxSwapCount != -1 && _swapCount >= maxSwapCount))
@@ -898,6 +897,11 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 p1.puzzleState = PuzzleState.Idle;
                 p2.puzzleState = PuzzleState.Idle;
+            }
+
+            if (maxSwapCount != -1 && _swapCount >= maxSwapCount)
+            {
+                StageManager.Instance.GameOver();
             }
         }
 
