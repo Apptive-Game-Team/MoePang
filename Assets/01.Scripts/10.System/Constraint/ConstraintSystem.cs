@@ -50,18 +50,23 @@ namespace _01.Scripts._10.System.Constraint
         private ConstraintContext _constraintContext;
         private ConstraintRouletteSystem _constraintRouletteSystem;
 
-        private void Start()
+        private void Awake()
         {
             _constraintContext = new ConstraintContext(puzzle, unitSpawner, spawnStacks);
             _constraintRouletteSystem = GetComponent<ConstraintRouletteSystem>();
-
+            _constraintRouletteSystem.InitializeItems();
+            
+            // 스테이지 조건 추가
             StartCoroutine(StartRoulette());
         }
 
         private IEnumerator StartRoulette()
         {
             rouletteObject.SetActive(true);
+            Time.timeScale = 0f;
             yield return _constraintRouletteSystem.StartRoulette(ApplyConstraint);
+            yield return new WaitForSecondsRealtime(1f);
+            Time.timeScale = 1f;
             rouletteObject.SetActive(false);
         }
 

@@ -30,12 +30,7 @@ namespace _01.Scripts._10.System.Constraint
         private float _totalLoopHeight;
         private float _bottomThreshold; 
 
-        private void Awake()
-        {
-            InitializeItems();
-        }
-
-        private void InitializeItems()
+        public void InitializeItems()
         {
             if (constraintList == null || constraintList.Count == 0)
             {
@@ -62,8 +57,6 @@ namespace _01.Scripts._10.System.Constraint
             }
 
             _totalLoopHeight = _spawnedItems.Count * itemHeight;
-
-            Time.timeScale = 0f;
         }
 
         public IEnumerator StartRoulette(Action<ConstraintType> onComplete)
@@ -82,7 +75,6 @@ namespace _01.Scripts._10.System.Constraint
         private IEnumerator SpinRoutine(Constraint targetData, Action<ConstraintType> onComplete)
         {
             _isSpinning = true;
-            Time.timeScale = 0f;
             
             float fastSpinDuration = spinDuration * 0.6f;
             float timer = 0f;
@@ -148,12 +140,9 @@ namespace _01.Scripts._10.System.Constraint
                 }
             }
             
-            yield return new WaitForSecondsRealtime(1f);
-            Time.timeScale = 1f;
+            onComplete?.Invoke(targetData.type);
             
             _isSpinning = false;
-            
-            onComplete?.Invoke(targetData.type);
         }
 
         private void MoveItemsDown(float distance)

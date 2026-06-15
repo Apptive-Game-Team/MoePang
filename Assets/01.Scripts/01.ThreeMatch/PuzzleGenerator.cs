@@ -158,6 +158,11 @@ namespace _01.Scripts._01.ThreeMatch
 
                 while (_taskQueue.Count > 0)
                 {
+                    while (Time.timeScale == 0f)
+                    {
+                        yield return new WaitForSecondsRealtime(0.05f);
+                    }
+                    
                     Func<IEnumerator> task = _taskQueue.Dequeue();
                     yield return StartCoroutine(task());
                 }
@@ -176,6 +181,7 @@ namespace _01.Scripts._01.ThreeMatch
         public IEnumerator GenerateBoard()
         {
             _puzzles = new PuzzleObject[x, y];
+            
             yield return SetStartPuzzle();
             
             if (isReset)
