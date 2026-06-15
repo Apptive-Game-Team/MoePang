@@ -24,7 +24,6 @@ public class Castle : MonoBehaviour, IDamageable
     private Vector3 originalPos;
 
     //상태 관리
-    private static bool _isGameEnd;
     protected bool isHitEffect;
 
     //로직 제어
@@ -44,7 +43,6 @@ public class Castle : MonoBehaviour, IDamageable
         currentHp = maxHp;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalPos = transform.localPosition;
-        _isGameEnd = false;
 
         if (UnitTransformQueue.Instance != null)
         {
