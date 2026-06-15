@@ -8,18 +8,45 @@ namespace _01.Scripts._00.Manager
     /// </summary>
     public class CommonCanvasManager : MonoBehaviour
     {
+        public static CommonCanvasManager Instance { get; private set; }
+
         [Header("Text Setting")]
         private TextMeshProUGUI goldText;
         private TextMeshProUGUI diaText;
 
         private void Awake()
         {
+            if (Instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
             FindTextObjects();
         }
 
         private void Start()
         {
             UpdateUI();
+        }
+
+        private void OnEnable()
+        {
+            if (GoldManager.Instance != null)
+            {
+                GoldManager.Instance.OnGoldChanged += UpdateUI;
+                GoldManager.Instance.OnDiaChanged += UpdateUI;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (GoldManager.Instance != null)
+            {
+                GoldManager.Instance.OnGoldChanged -= UpdateUI;
+                GoldManager.Instance.OnDiaChanged -= UpdateUI;
+            }
         }
 
         /// <summary>

@@ -12,7 +12,6 @@ namespace _01.Scripts._04.UI.MainScene
 {
     public class ComboUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI gold;
         [SerializeField] private Button comboOrderButton;
         [SerializeField] private GameObject comboUIPrefab;
         [SerializeField] private GameObject content;
@@ -24,7 +23,6 @@ namespace _01.Scripts._04.UI.MainScene
         private void Awake()
         {
             InitialSetting();
-            OnGoldChanged();
         }
 
         private void InitialSetting()
@@ -127,21 +125,6 @@ namespace _01.Scripts._04.UI.MainScene
             });
         }
         
-        private void OnEnable()
-        {
-            GoldManager.Instance.OnGoldChanged += OnGoldChanged;
-        }
-
-        private void OnDisable()
-        {
-            GoldManager.Instance.OnGoldChanged -= OnGoldChanged;
-        }
-
-        private void OnGoldChanged()
-        {
-            gold.text = $"{GoldManager.Instance.Gold}";
-        }
-
         public void OnOrderChanged()
         {
             List<ComboUIObject> objs = content.transform.GetComponentsInChildren<ComboUIObject>().ToList();
