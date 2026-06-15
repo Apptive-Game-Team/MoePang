@@ -57,7 +57,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private GameObject jokerPuzzlePrefab;
         [SerializeField] private GameObject[] specialPuzzlePrefabs;
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
-        [SerializeField] private Sprite[] normalPuzzleImages;
+        public Sprite[] normalPuzzleImages;
         [SerializeField] private GameObject[] specialPuzzleParticlePrefabs;
         [SerializeField] private GameObject obstacleWarningPrefab;
         [SerializeField] private GameObject goldPrefab;
@@ -92,6 +92,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         public Action OnComboInitialized;
         public Action OnComboDetected;
+        public Action<int> OnSwapCountChanged;
             
         private Vector2Int _lastMovePos;
         private List<MatchGroup> _currentMatchGroups = new();
@@ -827,6 +828,7 @@ namespace _01.Scripts._01.ThreeMatch
             
             _lastMovePos = new Vector2Int(x2, y2);
             _swapCount++;
+            OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
             
             AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
