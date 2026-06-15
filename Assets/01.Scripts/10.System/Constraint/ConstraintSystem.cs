@@ -62,7 +62,6 @@ namespace _01.Scripts._10.System.Constraint
         {
             rouletteObject.SetActive(true);
             yield return _constraintRouletteSystem.StartRoulette(ApplyConstraint);
-            yield return new WaitForSeconds(1f);
             rouletteObject.SetActive(false);
         }
 

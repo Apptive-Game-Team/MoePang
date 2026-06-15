@@ -62,6 +62,8 @@ namespace _01.Scripts._10.System.Constraint
             }
 
             _totalLoopHeight = _spawnedItems.Count * itemHeight;
+
+            Time.timeScale = 0f;
         }
 
         public IEnumerator StartRoulette(Action<ConstraintType> onComplete)
@@ -145,8 +147,10 @@ namespace _01.Scripts._10.System.Constraint
                     yield return null;
                 }
             }
-
+            
+            yield return new WaitForSecondsRealtime(1f);
             Time.timeScale = 1f;
+            
             _isSpinning = false;
             
             onComplete?.Invoke(targetData.type);
