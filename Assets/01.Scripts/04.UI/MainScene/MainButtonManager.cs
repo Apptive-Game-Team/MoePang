@@ -14,17 +14,11 @@ public class MainButtonManager : MonoBehaviour
     
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI stageText;
-    [SerializeField] private TextMeshProUGUI goldText;
-    [SerializeField] private TextMeshProUGUI diaText;
-
-    [Header("컴포넌트")] 
-    [SerializeField] private GameObject habitatPanel;
 
     private void Start()
     {
         if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
-        if (goldText != null) goldText.text = $"{GoldManager.Instance.Gold}";
-        if (diaText != null) diaText.text = $"{GoldManager.Instance.Dia}";
+        
 
         StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 
@@ -36,11 +30,6 @@ public class MainButtonManager : MonoBehaviour
     {
         SceneManager.sceneLoaded += OnPlaySceneLoaded;
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
-    }
-
-    public void SelectHabitatMode()
-    {
-        habitatPanel.SetActive(true);
     }
 
     // 게임 플레이 시 시작돼야 할 사항들
