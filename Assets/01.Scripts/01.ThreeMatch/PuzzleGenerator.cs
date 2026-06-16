@@ -51,16 +51,18 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private float obstacleSpawnDelay = 2f;
         public float obstacleSpawnInterval = 10f;
         [Range(0, 100)] [SerializeField] private float goldTileSpawnRate = 5f;
+        [Range(0, 100)] [SerializeField] private float swapTileSpawnRate = 5f;
         
         [Header("Puzzle Prefabs")]
         [SerializeField] private GameObject[] normalPuzzlePrefabs;
         [SerializeField] private GameObject jokerPuzzlePrefab;
         [SerializeField] private GameObject[] specialPuzzlePrefabs;
         [SerializeField] private GameObject[] obstaclePuzzlePrefabs;
-        [SerializeField] private Sprite[] normalPuzzleImages;
+        public Sprite[] normalPuzzleImages;
         [SerializeField] private GameObject[] specialPuzzleParticlePrefabs;
         [SerializeField] private GameObject obstacleWarningPrefab;
         [SerializeField] private GameObject goldPrefab;
+        [SerializeField] private GameObject swapPrefab;
         
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
@@ -86,15 +88,16 @@ namespace _01.Scripts._01.ThreeMatch
         public int maxSwapCount = -1;
         private Habitat? _lastMovedHabitat;
         public bool isContinuousHabitatBanned;
-        private bool isReset = false;
+        private bool isReset;
         private const string DesertCoverName = "DesertPuzzleCover";
         private Coroutine _desertCoverCoroutine;
 
         public Action OnComboInitialized;
         public Action OnComboDetected;
-            
-        private Vector2Int _lastMovePos;
+        public Action<int> OnSwapCountChanged;
+        
         private List<MatchGroup> _currentMatchGroups = new();
+        private List<PuzzleObject> _bannedPuzzles = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
         
@@ -127,7 +130,7 @@ namespace _01.Scripts._01.ThreeMatch
             public ObstaclePuzzleType type;
             [Range(0, 100)] public int weight;
         }
-
+        
         private void Start()
         {
             AddTask(GenerateBoard);
@@ -155,6 +158,11 @@ namespace _01.Scripts._01.ThreeMatch
 
                 while (_taskQueue.Count > 0)
                 {
+                    while (Time.timeScale == 0f)
+                    {
+                        yield return new WaitForSecondsRealtime(0.05f);
+                    }
+                    
                     Func<IEnumerator> task = _taskQueue.Dequeue();
                     yield return StartCoroutine(task());
                 }
@@ -173,6 +181,7 @@ namespace _01.Scripts._01.ThreeMatch
         public IEnumerator GenerateBoard()
         {
             _puzzles = new PuzzleObject[x, y];
+            
             yield return SetStartPuzzle();
             
             if (isReset)
@@ -286,9 +295,17 @@ namespace _01.Scripts._01.ThreeMatch
                 puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
                 
                 float prob = Random.Range(0, 100f);
+                
                 if (prob < goldTileSpawnRate)
                 {
                     SetGoldTile(puzzle);
+                }
+                else if (prob >= goldTileSpawnRate && prob < goldTileSpawnRate + swapTileSpawnRate)
+                {
+                    if (maxSwapCount != -1)
+                    {
+                        SetSwapTile(puzzle);   
+                    }
                 }
             }
             
@@ -305,9 +322,17 @@ namespace _01.Scripts._01.ThreeMatch
             puzzle.name = $"Puzzle({col + 1}, {row + 1})"; 
             
             float prob = Random.Range(0, 100f);
+            
             if (prob < goldTileSpawnRate)
             {
                 SetGoldTile(puzzle);
+            }
+            else if (prob >= goldTileSpawnRate && prob < goldTileSpawnRate + swapTileSpawnRate)
+            {
+                if (maxSwapCount != -1)
+                {
+                    SetSwapTile(puzzle);   
+                }
             }
             
             return puzzle;
@@ -793,7 +818,7 @@ namespace _01.Scripts._01.ThreeMatch
         #endregion
         
         /// <summary>
-        /// 퍼즐을 옮겼을 때 완성 되는지 확인하는 함수 및 퍼즐을 맞추고, 퍼즐이 사라지고, 내려오고, 채워지는 함수
+        /// 퍼즐을 옮기는 것과 연관된 함수들
         /// </summary>
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
@@ -808,9 +833,11 @@ namespace _01.Scripts._01.ThreeMatch
                 return;
             }
             
-            
             if (_puzzles[x1, y1] is ObstaclePuzzleObject || _puzzles[x2, y2] is ObstaclePuzzleObject
-                || (maxSwapCount != -1 && _swapCount >= maxSwapCount))
+                || (maxSwapCount != -1 && _swapCount >= maxSwapCount)
+                || (isContinuousHabitatBanned && _lastMovedHabitat != null &&
+                    ((_puzzles[x1, y1] is NormalPuzzleObject np1 && np1.GetPuzzleSubType() == (int)_lastMovedHabitat)
+                     || (_puzzles[x2, y2] is NormalPuzzleObject np2 && np2.GetPuzzleSubType() == (int)_lastMovedHabitat))))
             {
                 if (_puzzles[x1, y1] is SpecialPuzzleObject sp1)
                 {
@@ -826,8 +853,8 @@ namespace _01.Scripts._01.ThreeMatch
                 return;
             }
             
-            _lastMovePos = new Vector2Int(x2, y2);
             _swapCount++;
+            OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
             
             AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
@@ -898,6 +925,11 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 p1.puzzleState = PuzzleState.Idle;
                 p2.puzzleState = PuzzleState.Idle;
+            }
+
+            if (maxSwapCount != -1 && _swapCount >= maxSwapCount)
+            {
+                StageManager.Instance.GameOver();
             }
         }
 
@@ -1183,9 +1215,15 @@ namespace _01.Scripts._01.ThreeMatch
                         seq2.Join(t1);
                     }
 
-                    if (targetPuzzle is NormalPuzzleObject no && TryGetGoldTile(no, out GameObject gold))
+                    if (targetPuzzle is NormalPuzzleObject no1 && TryGetGoldTile(no1, out GameObject gold))
                     {
                         GoldMoveEffect(gold);
+                    }
+
+                    if (targetPuzzle is NormalPuzzleObject no2 && TryGetSwapTile(no2))
+                    {
+                        _swapCount--;
+                        OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
                     }
                     
                     Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f).SetEase(Ease.InSine);
@@ -1197,12 +1235,6 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     if (targetPuzzle == null)
                     {
-                        continue;
-                    }
-
-                    if (_lastMovedHabitat == group.habitat && isContinuousHabitatBanned)
-                    {
-                        Destroy(targetPuzzle.gameObject);
                         continue;
                     }
                     
@@ -1596,6 +1628,12 @@ namespace _01.Scripts._01.ThreeMatch
                 GoldMoveEffect(gold);
             }
             
+            if (po is NormalPuzzleObject no3 && TryGetSwapTile(no3))
+            {
+                _swapCount--;
+                OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
+            }
+            
             yield return po.transform.DOScale(tileScale / 3f, 0.2f).WaitForCompletion();
             
             FlyingTileEffect(po);
@@ -1972,20 +2010,26 @@ namespace _01.Scripts._01.ThreeMatch
         #endregion
         
         /// <summary>
-        /// 골드 관련 함수
+        /// 추가 타일 관련 함수
         /// </summary>
-        #region Gold
+        #region Extra Tile
         private void SetGoldTile(GameObject puzzle)
         {
             GameObject gold = Instantiate(goldPrefab, puzzle.transform.position + new Vector3(0.2f, -0.2f, 0), Quaternion.identity, puzzle.transform);
             gold.name = "Gold";
         }
 
+        private void SetSwapTile(GameObject puzzle)
+        {
+            GameObject swap = Instantiate(swapPrefab, puzzle.transform.position + new Vector3(0.2f, -0.2f, 0), Quaternion.identity, puzzle.transform);
+            swap.name = "Swap";
+        }
+
         private bool TryGetGoldTile(NormalPuzzleObject puzzle, out GameObject gold)
         {
             Transform goldTr = puzzle.transform.Find("Gold");
             
-            if (goldTr != null)
+            if (goldTr)
             {
                 gold = goldTr.gameObject;
                 return true;
@@ -1993,6 +2037,13 @@ namespace _01.Scripts._01.ThreeMatch
             
             gold = null;
             return false;
+        }
+
+        private bool TryGetSwapTile(NormalPuzzleObject puzzle)
+        {
+            Transform swapTr = puzzle.transform.Find("Swap");
+
+            return swapTr;
         }
 
         private void GoldMoveEffect(GameObject gold)

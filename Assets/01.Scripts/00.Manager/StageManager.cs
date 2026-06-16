@@ -1,4 +1,5 @@
 using _01.Scripts._00.Manager;
+using _01.Scripts._04.UI.InGame;
 using System;
 using UnityEngine;
 
@@ -64,5 +65,15 @@ public class StageManager : SingletonObject<StageManager>
     public bool CheckClearedStage()
     {
         return CurrentStage < MaxStage;
+    }
+
+    public void GameClear()
+    {
+        FindAnyObjectByType<GameClearUI>(FindObjectsInactive.Include).gameObject.SetActive(true);
+    }
+
+    public void GameOver()
+    {
+        FindAnyObjectByType<GameOverUI>(FindObjectsInactive.Include).gameObject.SetActive(true);
     }
 }
