@@ -19,23 +19,16 @@ public class Castle : MonoBehaviour, IDamageable
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
 
-    //외부 참조
-    private GameObject _gameClearUI;
-    private GameObject _gameOverUI;
-
     //내부 컴포넌트
     private SpriteRenderer spriteRenderer;
     private Vector3 originalPos;
 
     //상태 관리
-    private static bool _isGameEnd;
     protected bool isHitEffect;
 
     //로직 제어
     private Tween damageTween;
-
-    //프로퍼티
-    private GameObject EndUI => team == TeamType.Friendly ? _gameOverUI : _gameClearUI;
+    
     public float CurrentHp => currentHp;
     public Transform GetTransform() => transform;
     public string GetName() => name;
@@ -50,15 +43,11 @@ public class Castle : MonoBehaviour, IDamageable
         currentHp = maxHp;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalPos = transform.localPosition;
-        _isGameEnd = false;
 
         if (UnitTransformQueue.Instance != null)
         {
             UnitTransformQueue.Instance.RegisterCastle(team, this);
         }
-        
-        _gameClearUI = FindAnyObjectByType<GameClearUI>(FindObjectsInactive.Include).gameObject;
-        _gameOverUI = FindAnyObjectByType<GameOverUI>(FindObjectsInactive.Include).gameObject;
     }
 
     #region 피격 & 피격 연출
@@ -134,10 +123,13 @@ public class Castle : MonoBehaviour, IDamageable
     {
         Debug.Log("타워가 아파요 ㅠ");
 
-        if (!_isGameEnd)
+        if (team == TeamType.Friendly)
         {
-            _isGameEnd = true;
-            EndUI.SetActive(true);
+            StageManager.Instance.GameOver();
+        }
+        else
+        {
+            StageManager.Instance.GameClear();
         }
     }
 }

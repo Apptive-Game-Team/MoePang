@@ -5,7 +5,7 @@ namespace _01.Scripts._10.System.Constraint
     public abstract class Constraint : ScriptableObject
     {
         public ConstraintType type;
-        [SerializeField, TextArea] private string constraintDescription;
+        [TextArea] public string constraintDescription;
 
         public abstract void ApplyConstraint(ConstraintContext context);
     }
