@@ -8,7 +8,8 @@ namespace _01.Scripts._06.Shop
     {
         Joker,
         DestroyObstacle,
-        CreateLineBomb
+        CreateLineBomb,
+        RaiseSpawnProb,
     }
 
     [Serializable]

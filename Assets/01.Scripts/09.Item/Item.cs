@@ -2,6 +2,7 @@ using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._06.Shop;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -15,25 +16,29 @@ namespace _01.Scripts._09.Item
         public ItemType itemType;
 
         private PuzzleGenerator _generator;
+        private UnitSpawner _spawner;
         private int _itemAmount;
         private TextMeshProUGUI _itemAmountText;
         private GameObject _draggedIcon;
         private Image _originalImage;
         private PuzzleObject _targetTile;
         private Color _targetTileColor;
+        private bool _isItemApplying;
 
         private void Awake()
         {
             _originalImage = GetComponent<Image>();
             _itemAmountText = GetComponentInChildren<TextMeshProUGUI>();
-            
-            SetItemAmountText();
         }
 
-        public void Init(ItemType type, PuzzleGenerator generator)
+        public void Init(ItemType type, PuzzleGenerator generator, UnitSpawner spawner)
         {
             itemType = type;
             _generator = generator;
+            _spawner = spawner;
+            
+            SetItemAmountText();
+            SetRaiseSpawnProbItem();
         }
 
         private void SetItemAmountText()
@@ -41,10 +46,31 @@ namespace _01.Scripts._09.Item
             _itemAmount = GameManager.Instance.itemData.ItemAmounts[itemType];
             _itemAmountText.text = _itemAmount.ToString();
         }
+
+        private void SetRaiseSpawnProbItem()
+        {
+            if (itemType == ItemType.RaiseSpawnProb)
+            {
+                Button button = GetComponent<Button>();
+                button.onClick.AddListener(() =>
+                {
+                    if (_itemAmount == 0 || _isItemApplying)
+                    {
+                        return;
+                    }
+                    ApplyItemEffect();
+                });
+            }
+        }
         
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (_itemAmount == 0)
+            {
+                return;
+            }
+
+            if (itemType == ItemType.RaiseSpawnProb)
             {
                 return;
             }
@@ -74,6 +100,11 @@ namespace _01.Scripts._09.Item
             }
             
             if (_itemAmount == 0)
+            {
+                return;
+            }
+            
+            if (itemType == ItemType.RaiseSpawnProb)
             {
                 return;
             }
@@ -178,7 +209,7 @@ namespace _01.Scripts._09.Item
             return true;
         }
 
-        private void ApplyItemEffect(PuzzleObject tile)
+        private void ApplyItemEffect(PuzzleObject tile = null)
         {
             switch (itemType)
             {
@@ -191,12 +222,39 @@ namespace _01.Scripts._09.Item
                 case ItemType.CreateLineBomb:
                     StartCoroutine(_generator.UseCreateLineBombItem(tile));
                     break;
+                case ItemType.RaiseSpawnProb:
+                    StartCoroutine(ApplyRaiseSpawnProbItem());
+                    break;
             }
 
             _itemAmount--;
             _itemAmountText.text = _itemAmount.ToString();
             GameManager.Instance.itemData.ItemAmounts[itemType] = _itemAmount;
             GameManager.Instance.SaveItemData();
+        }
+
+        private IEnumerator ApplyRaiseSpawnProbItem()
+        {
+            _isItemApplying = true;
+            
+            List<List<int>> originProb = _spawner.friendlySpawnWeights;
+            List<List<int>> raisedProb = new()
+            {
+                new List<int> { 100 },
+                new List<int> { 50, 50 },
+                new List<int> { 40, 30, 30 },
+                new List<int> { 30, 20, 30, 20 },
+                new List<int> { 10, 10, 30, 25, 25 },
+            };
+            _spawner.friendlySpawnWeights = raisedProb;
+            print("아군 고등급 기물 소환 확률 증가");
+            
+            yield return new WaitForSeconds(10f);
+
+            _spawner.friendlySpawnWeights = originProb;
+            print("소환 확률 초기화");
+            
+            _isItemApplying = false;
         }
     }
 }

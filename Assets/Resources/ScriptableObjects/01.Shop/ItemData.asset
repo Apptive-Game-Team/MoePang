@@ -15,13 +15,18 @@ MonoBehaviour:
   items:
   - type: 0
     price: 30
-    sprite: {fileID: -2052584259255378623, guid: 2e8b4e7a4fc654ce8add7781a1c0c71c, type: 3}
+    sprite: {fileID: 7676808934620305286, guid: cf53ee61a0fed4fc1908b84d3dbe7e09, type: 3}
     itemDescription: "\uC870\uCEE4 \uD0C0\uC77C\uB85C \uBC14\uAFC9\uB2C8\uB2E4."
   - type: 1
     price: 30
-    sprite: {fileID: 4045745022003245275, guid: 31c5d6e591987490887df4f1af2395d2, type: 3}
+    sprite: {fileID: -1576368278330301823, guid: 2630f9aeb663a4955a7088e604f2e333, type: 3}
     itemDescription: "\uC7A5\uC560\uBB3C\uC744 \uBD80\uC229\uB2C8\uB2E4."
   - type: 2
     price: 30
-    sprite: {fileID: -5500669689791413271, guid: 9306bdcb937f344d2adf92b485cb964a, type: 3}
+    sprite: {fileID: 5720866707491858327, guid: 5a3389326b20c4e3684ec62ccc026c39, type: 3}
     itemDescription: "\uD589 \uD639\uC740 \uC5F4 \uD3ED\uD0C4\uC744 \uC0DD\uC131\uD569\uB2C8\uB2E4."
+  - type: 3
+    price: 30
+    sprite: {fileID: 6610348951678344521, guid: 7a2010da24920844f86d4080ab4d83e5, type: 3}
+    itemDescription: "\uACE0\uB4F1\uAE09 \uAE30\uBB3C\uC758 \uC18C\uD658 \uD655\uB960\uC744
+      \uC99D\uAC00\uC2DC\uD0A8\uB2E4."
