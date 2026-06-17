@@ -34,9 +34,16 @@ namespace _01.Scripts._11.HabitatMode
         [SerializeField] private float polarEventFriendlyStatMultiplier = 0.85f;
         [SerializeField] private float polarFriendlyBuffDuration = 9999f;
 
+        private bool isHabitatBattle = false;
         private SpawnStackManager spawnStackManager;
         private PuzzleGenerator puzzleGenerator;
         private Coroutine desertPuzzleCoverCoroutine;
+
+        public bool IsHabitatBattle
+        {
+            get => IsHabitatBattle;
+            set => isHabitatBattle = value;
+        }
         
         public event Action<HabitatMode> HabitatModeApplied;
 
@@ -48,6 +55,7 @@ namespace _01.Scripts._11.HabitatMode
 
         private void OnEnable()
         {
+            isHabitatBattle = false;
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
@@ -58,13 +66,20 @@ namespace _01.Scripts._11.HabitatMode
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (scene.name != SceneInfo.GetSceneName(SceneType.HabitatBattle))
+            if (scene.name != SceneInfo.GetSceneName(SceneType.MatchAndBattle))
+            {
+                return;
+            }
+
+            if (!isHabitatBattle)
             {
                 return;
             }
             
             spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
             puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+            
+            Debug.Log("Habitat Battle Start!");
 
             ApplyHabitatModeEffect();
         }
