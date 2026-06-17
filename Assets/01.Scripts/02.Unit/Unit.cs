@@ -150,8 +150,16 @@ public class Unit : MonoBehaviour, IDamageable
         if (animator == null) animator = GetComponent<Animator>();
 
         originalScale = transform.localScale;
-        spriteRenderer.sortingOrder = UnitSortingManager.GetNextOrder();
+        spriteRenderer.sortingOrder = GetSortingOrderByY();
         animator.runtimeAnimatorController = data.AnimatorOverride;
+    }
+    
+    private int GetSortingOrderByY()
+    {
+        const int baseOrder = 1000;
+        const int precision = 100;
+
+        return baseOrder - Mathf.RoundToInt(transform.position.y * precision);
     }
 
     /// <summary>
