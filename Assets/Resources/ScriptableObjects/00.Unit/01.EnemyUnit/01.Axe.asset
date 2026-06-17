@@ -15,9 +15,11 @@ MonoBehaviour:
   team: 1
   unitName: 26
   unitGrade: 0
-  animatorOverride: {fileID: 22100000, guid: 4337cd8ac80f65f43876a32966405af6, type: 2}
+  attackType: 0
+  animatorOverride: {fileID: 22100000, guid: 00f61be9c22999c42ae6df5777a3ff37, type: 2}
   maxHp: 16
   baseMoveSpeed: 0.3
   attackDamage: 4
   attackSpeed: 1.5
   unitSize: 0.8
+  unitDescriptionText: 
