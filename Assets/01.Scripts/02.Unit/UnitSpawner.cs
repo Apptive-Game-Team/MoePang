@@ -24,6 +24,7 @@ public class UnitSpawner : MonoBehaviour
     [SerializeField] private Transform enemySpawnPosition;
 
     private List<List<int>> _enemySpawnWeights;
+    public List<List<int>> friendlySpawnWeights;
     public float enemySpawnInterval = 3f;
 
     private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
@@ -34,6 +35,15 @@ public class UnitSpawner : MonoBehaviour
         {
             new(){70, 30, 0},
             new(){60, 30, 10},
+        };
+
+        friendlySpawnWeights = new List<List<int>>()
+        {
+            new() { 100 },
+            new() { 60, 40 },
+            new() { 50, 30, 20 },
+            new() { 40, 30, 20, 10 },
+            new() { 25, 25, 20, 15, 15 },
         };
     }
 
@@ -130,44 +140,27 @@ public class UnitSpawner : MonoBehaviour
     private FriendlyUnitData GetWeightedFriendlyUnit(List<FriendlyUnitData> unlockedUnits)
     {
         int count = unlockedUnits.Count;
+        count = Mathf.Min(count, 5);
 
-        // 1개면 하나만
-        if (count == 1)
-        {
-            return unlockedUnits[0];
-        }
+        List<FriendlyUnitData> recent = unlockedUnits.Count > 5 
+            ? unlockedUnits.Skip(unlockedUnits.Count - 5).Take(count).ToList() 
+            : unlockedUnits;
 
-        // 2개면 60 / 40
-        if (count == 2)
-        {
-            int roll = UnityEngine.Random.Range(0, 100);
-
-            return roll < 60
-                ? unlockedUnits[0]
-                : unlockedUnits[1];
-        }
-
-        // 3개 이상이면 최근 3개 60/ 30 / 10
-        List<FriendlyUnitData> recentThree = unlockedUnits
-            .Skip(count - 3)
-            .Take(3)
-            .ToList();
-
-        int[] weights = { 60, 30, 10 };
-        int random = UnityEngine.Random.Range(0, 100);
+        List<int> weights = friendlySpawnWeights[count - 1];
+        int random = Random.Range(0, 100);
 
         int cumulative = 0;
-        for (int i = 0; i < recentThree.Count; i++)
+        for (int i = 0; i < recent.Count; i++)
         {
             cumulative += weights[i];
 
             if (random < cumulative)
             {
-                return recentThree[i];
+                return recent[i];
             }
         }
 
-        return recentThree[0];
+        return recent[0];
     }
 
     private void SpawnEnemy()

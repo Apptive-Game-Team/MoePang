@@ -15,6 +15,7 @@ namespace _01.Scripts._09.Item
         [SerializeField] private ItemData itemData;
         [SerializeField] private GameObject itemPrefab;
         [SerializeField] private PuzzleGenerator generator;
+        [SerializeField] private UnitSpawner unitSpawner;
 
         private void Awake()
         {
@@ -22,8 +23,7 @@ namespace _01.Scripts._09.Item
             {
                 GameObject item = Instantiate(itemPrefab, transform);
                 item.GetComponent<Image>().sprite = itemData.items.First(info => info.type == type).sprite;
-                item.GetComponentInChildren<TextMeshProUGUI>().text = GameManager.Instance.itemData.ItemAmounts[type].ToString();
-                item.GetComponent<Item>().Init(type, generator);
+                item.GetComponent<Item>().Init(type, generator, unitSpawner);
             }
         }
     }
