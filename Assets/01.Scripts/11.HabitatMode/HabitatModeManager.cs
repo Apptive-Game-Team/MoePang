@@ -41,7 +41,7 @@ namespace _01.Scripts._11.HabitatMode
 
         public bool IsHabitatBattle
         {
-            get => IsHabitatBattle;
+            get => isHabitatBattle;
             set => isHabitatBattle = value;
         }
         

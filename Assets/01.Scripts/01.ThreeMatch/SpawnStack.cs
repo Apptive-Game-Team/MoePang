@@ -52,10 +52,7 @@ namespace _01.Scripts._01.ThreeMatch
         
         private void SetupStackSlots()
         {
-            bool isHabitatBattleScene =
-                SceneManager.GetActiveScene().name == SceneInfo.GetSceneName(SceneType.HabitatBattle);
-
-            if (!isHabitatBattleScene)
+            if (!HabitatModeManager.Instance.IsHabitatBattle)
             {
                 StackMaxCount = 3;
                 EnsureStackSlotCount(StackMaxCount);
