@@ -872,6 +872,10 @@ MonoBehaviour:
   - {fileID: 1269356620}
   - {fileID: 1261480035}
   - {fileID: 869903353}
+  rouletteObject: {fileID: 0}
+  constraintText: {fileID: 0}
+  constraintImage: {fileID: 0}
+  constraintCount: {fileID: 0}
   constraintApplyInterval: 0
 --- !u!4 &361443551
 Transform:
@@ -4643,6 +4647,7 @@ MonoBehaviour:
   itemData: {fileID: 11400000, guid: 8eed51bd643eacd48b84347c4675359b, type: 2}
   itemPrefab: {fileID: 8709265319849823124, guid: 21c6983aefaaee643bb16c1f67cbdc2e, type: 3}
   generator: {fileID: 1669581474}
+  unitSpawner: {fileID: 0}
 --- !u!1 &1588839768
 GameObject:
   m_ObjectHideFlags: 0
@@ -4923,6 +4928,7 @@ MonoBehaviour:
   obstacleSpawnDelay: 2
   obstacleSpawnInterval: 10
   goldTileSpawnRate: 5
+  swapTileSpawnRate: 5
   normalPuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: bbfad23826be9bc448c6cd1d199a6fde, type: 3}
   - {fileID: 2857731521102525544, guid: 060c10bf6e317334890b69ac17dd404d, type: 3}
@@ -4952,6 +4958,7 @@ MonoBehaviour:
   - {fileID: 1888854068479400938, guid: 6e7d4520d58b9df41944bc8fd2e925c9, type: 3}
   obstacleWarningPrefab: {fileID: 2444415622454818781, guid: ce1e179ce44092440bb8c160c2f8210e, type: 3}
   goldPrefab: {fileID: 4336401594318408796, guid: f9a06fa307e97174cba5cc3bc6a14784, type: 3}
+  swapPrefab: {fileID: 0}
   spawnStackManager: {fileID: 1195533400}
   isDebug: 0
   resetRectanglePrefab: {fileID: 0}
@@ -6561,9 +6568,9 @@ SceneRoots:
   - {fileID: 974673700}
   - {fileID: 1932597497}
   - {fileID: 669149732}
-  - {fileID: 1096094146}
   - {fileID: 1986820698}
   - {fileID: 1953625089}
   - {fileID: 2097611655}
+  - {fileID: 1096094146}
   - {fileID: 2040074868}
   - {fileID: 361443551}
