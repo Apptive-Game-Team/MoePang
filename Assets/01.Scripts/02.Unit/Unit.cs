@@ -592,7 +592,8 @@ public class Unit : MonoBehaviour, IDamageable
         var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
         if (effectRenderer != null)
         {
-            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+            effectRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            effectRenderer.sortingOrder = 30000 + Random.Range(0, 501);
         }
 
         var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
