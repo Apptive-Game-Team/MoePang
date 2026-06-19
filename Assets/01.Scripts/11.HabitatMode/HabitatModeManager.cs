@@ -19,6 +19,8 @@ namespace _01.Scripts._11.HabitatMode
         
         [Header("Desert Debuff")]
         [SerializeField] private GameObject desertPuzzleCoverPrefab;
+        [SerializeField] private GameObject desertSandStormPrefab;
+        [SerializeField] private GameObject desertSandParticlePrefab;
         [SerializeField] private float desertPuzzleCoverInterval = 15f;
         [SerializeField] private float desertEventPuzzleCoverInterval = 25f;
         [SerializeField] private float desertPuzzleCoverDuration = 5f;
@@ -84,11 +86,11 @@ namespace _01.Scripts._11.HabitatMode
                     return;
                 }
 
-                puzzleGenerator.StartDesertPuzzleCover(
-                    desertPuzzleCoverPrefab,
+                StartCoroutine(puzzleGenerator.StartDesertPuzzleCover(
+                    desertPuzzleCoverPrefab, desertSandStormPrefab, desertSandParticlePrefab,
                     desertPuzzleCoverDuration,
                     desertPuzzleCoverRefreshInterval
-                );
+                ));
             }
         }
 
@@ -211,11 +213,11 @@ namespace _01.Scripts._11.HabitatMode
 
                 if (puzzleGenerator != null)
                 {
-                    puzzleGenerator.StartDesertPuzzleCover(
-                        desertPuzzleCoverPrefab,
+                    StartCoroutine(puzzleGenerator.StartDesertPuzzleCover(
+                        desertPuzzleCoverPrefab, desertSandStormPrefab, desertSandParticlePrefab,
                         desertPuzzleCoverDuration,
                         desertPuzzleCoverRefreshInterval
-                    );
+                    ));
                 }
             }
         }

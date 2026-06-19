@@ -36,6 +36,7 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [Header("Puzzle Settings")]
         [SerializeField] private RectTransform puzzleFrame;
+        [SerializeField] private GameObject downParticleFrame;
         [SerializeField] private GameObject particleFrame;
         [SerializeField] private GoldUI goldUI;
         [SerializeField] private int x;
@@ -91,6 +92,8 @@ namespace _01.Scripts._01.ThreeMatch
         private bool isReset;
         private const string DesertCoverName = "DesertPuzzleCover";
         private Coroutine _desertCoverCoroutine;
+        private GameObject _desertSandStorm;
+        private ParticleSystem _desertSandParticle;
 
         public Action OnComboInitialized;
         public Action OnComboDetected;
@@ -701,43 +704,54 @@ namespace _01.Scripts._01.ThreeMatch
         /// 집을 지켜라 사막모드 퍼즐 가리개
         /// </summary>
         #region PuzzleHide
-        public void StartDesertPuzzleCover(GameObject coverPrefab, float duration, float refreshInterval = 0.1f)
+        public IEnumerator StartDesertPuzzleCover(GameObject coverPrefab, GameObject sandStormPrefab, GameObject sandParticlePrefab, 
+            float duration, float refreshInterval = 0.1f)
         {
             if (coverPrefab == null)
             {
-                return;
+                yield break;
             }
 
             if (_desertCoverCoroutine != null)
             {
                 StopCoroutine(_desertCoverCoroutine);
-                ClearDesertPuzzleCovers();
+                yield return ClearDesertPuzzleCovers();
             }
 
-            _desertCoverCoroutine = StartCoroutine(DesertPuzzleCoverRoutine(coverPrefab, duration, refreshInterval));
+            _desertCoverCoroutine = StartCoroutine(DesertPuzzleCoverRoutine(coverPrefab, sandStormPrefab, sandParticlePrefab, duration, refreshInterval));
+
+            yield return _desertCoverCoroutine;
         }
         
-        private IEnumerator DesertPuzzleCoverRoutine(GameObject coverPrefab, float duration, float refreshInterval)
+        private IEnumerator DesertPuzzleCoverRoutine(GameObject coverPrefab, GameObject sandStormPrefab, GameObject sandParticlePrefab,
+            float duration, float refreshInterval)
         {
+            _desertSandParticle = Instantiate(sandParticlePrefab, downParticleFrame.transform).GetComponent<ParticleSystem>();
+            _desertSandParticle.Play();
+            
+            _desertSandStorm = Instantiate(sandStormPrefab, downParticleFrame.transform);
+            Material mat = _desertSandStorm.GetComponent<SpriteRenderer>().material;
+            mat.DOFloat(1, "_Appear", 1f).WaitForCompletion();
+            
             float timer = 0f;
 
             while (timer < duration)
             {
-                AttachDesertCoversToCurrentPuzzles(coverPrefab);
+                StartCoroutine(AttachDesertCoversToCurrentPuzzles(coverPrefab));
 
                 timer += refreshInterval;
                 yield return new WaitForSeconds(refreshInterval);
             }
 
-            ClearDesertPuzzleCovers();
+            StartCoroutine(ClearDesertPuzzleCovers());
             _desertCoverCoroutine = null;
         }
         
-        private void AttachDesertCoversToCurrentPuzzles(GameObject coverPrefab)
+        private IEnumerator AttachDesertCoversToCurrentPuzzles(GameObject coverPrefab)
         {
             if (_puzzles == null)
             {
-                return;
+                yield break;
             }
 
             for (int i = 0; i < x; i++)
@@ -786,14 +800,27 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                 }
             }
+            
+            Material targetMaterial = _puzzles[0, 0].transform.Find(DesertCoverName).GetChild(0).GetComponent<Image>().material;
+            yield return targetMaterial.DOFloat(1f, "_Appear", 1.0f).WaitForCompletion();
         }
         
-        private void ClearDesertPuzzleCovers()
+        private IEnumerator ClearDesertPuzzleCovers()
         {
             if (_puzzles == null)
             {
-                return;
+                yield break;
             }
+
+            ParticleSystem.EmissionModule emission = _desertSandParticle.emission;
+            emission.enabled = false;
+            
+            Material mat = _desertSandStorm.GetComponent<SpriteRenderer>().material;
+            mat.DOFloat(0, "_Appear", 1f).WaitForCompletion();
+            Destroy(_desertSandStorm);
+            
+            Material targetMaterial = _puzzles[0, 0].transform.Find(DesertCoverName).GetChild(0).GetComponent<Image>().material;
+            yield return targetMaterial.DOFloat(0f, "_Appear", 1.0f).WaitForCompletion();
 
             for (int i = 0; i < x; i++)
             {
@@ -814,6 +841,8 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                 }
             }
+            
+            Destroy(_desertSandParticle.gameObject);
         }
         #endregion
         

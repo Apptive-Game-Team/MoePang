@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace _01.Scripts._04.UI.InGame
 {
     public class BattleUIController : MonoBehaviour
     {
         [Header("Components")]
+        [SerializeField] private RawImage battleRawImage;
         [SerializeField] private SpriteRenderer battleBackgroundSr;
         
         [Header("Zoom")]
@@ -48,11 +50,21 @@ namespace _01.Scripts._04.UI.InGame
             {
                 zoomDelta = Input.mouseScrollDelta.y;
                 zoomScreenPos = Input.mousePosition;
+
+                if (!IsPointerInsideBattleCamera(zoomScreenPos))
+                {
+                    return;
+                }
             }
             else if (Input.touchCount == 2)
             {
                 Touch touchZero = Input.GetTouch(0);
                 Touch touchOne = Input.GetTouch(1);
+
+                if (!IsPointerInsideBattleCamera(touchZero.position))
+                {
+                    return;
+                }
                 
                 Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
                 Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
@@ -86,6 +98,19 @@ namespace _01.Scripts._04.UI.InGame
             transform.position = pos;
 
             ClampCameraInsideBackground();
+        }
+        
+        private bool IsPointerInsideBattleCamera(Vector2 screenPosition)
+        {
+            if (battleRawImage == null)
+            {
+                return false;
+            }
+            
+            Canvas canvas = battleRawImage.canvas;
+            Camera uiCam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+
+            return RectTransformUtility.RectangleContainsScreenPoint(battleRawImage.rectTransform, screenPosition, uiCam);
         }
 
         private void HandleDrag()
