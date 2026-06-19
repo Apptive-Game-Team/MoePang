@@ -16,7 +16,6 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private TextMeshProUGUI clearRewardText;
         [SerializeField] private TextMeshProUGUI currentBonusTitle;
         [SerializeField] private TextMeshProUGUI currentBonusText;
-        [SerializeField] private SceneType startScene = SceneType.HabitatBattle;
 
         [Header("Info Card Setting")]
         [SerializeField] private GameObject guidePanel;
@@ -45,8 +44,9 @@ namespace _01.Scripts._04.UI.MainScene
 
         public void StartMode()
         {
+            HabitatModeManager.Instance.IsHabitatBattle = true;
             HabitatModeManager.Instance.HabitatMode = selectedMode;
-            SceneManager.LoadScene(SceneInfo.GetSceneName(startScene));
+            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }
 
         public void ClosePanel()

@@ -25,11 +25,6 @@ namespace _01.Scripts._08.Utility
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }
 
-        public void HabitatBattleMoveButton()
-        {
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.HabitatBattle));
-        }
-
         public void ComboMoveButton()
         {
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Combo));

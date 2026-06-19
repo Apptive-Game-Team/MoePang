@@ -1,4 +1,5 @@
 using _01.Scripts._08.Utility;
+using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,7 +19,6 @@ public class MainButtonManager : MonoBehaviour
     private void Start()
     {
         if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
-        
 
         StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
 
@@ -28,6 +28,7 @@ public class MainButtonManager : MonoBehaviour
 
     public void OnClickPlay()
     {
+        HabitatModeManager.Instance.IsHabitatBattle = false;
         SceneManager.sceneLoaded += OnPlaySceneLoaded;
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
     }

@@ -1075,7 +1075,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1729968275}
         m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
         m_MethodName: OnClickPrevStage
         m_Mode: 1
@@ -1374,7 +1374,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1729968275}
         m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
         m_MethodName: OnClickPlay
         m_Mode: 1
@@ -1452,7 +1452,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1729968275}
         m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
         m_MethodName: OnClickNextStage
         m_Mode: 1

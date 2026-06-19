@@ -2,6 +2,7 @@ using _01.Scripts._04.UI.InGame;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// 각 팀의 성 관리 스크립트
@@ -15,6 +16,7 @@ public class Castle : MonoBehaviour, IDamageable
 
     [Header("피격 연출")]
     [SerializeField] private GameObject hitEffectPrefab;
+    [SerializeField] private int maxHitEffectCount = 5;
     [SerializeField] private float shakeStrength = 0.05f;
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
@@ -24,10 +26,10 @@ public class Castle : MonoBehaviour, IDamageable
     private Vector3 originalPos;
 
     //상태 관리
-    protected bool isHitEffect;
 
     //로직 제어
     private Tween damageTween;
+    private readonly List<GameObject> activeHitEffects = new List<GameObject>();
     
     public float CurrentHp => currentHp;
     public Transform GetTransform() => transform;
@@ -54,6 +56,7 @@ public class Castle : MonoBehaviour, IDamageable
     public void TakeDamage(float damage)
     {
         currentHp -= damage;
+        StartCoroutine(PlayHitEffect());
 
         if (damageTween != null && damageTween.IsActive() && damageTween.IsPlaying())
         {
@@ -64,7 +67,6 @@ public class Castle : MonoBehaviour, IDamageable
         }
 
         PlayDamageEffect();
-        StartCoroutine(PlayHitEffect());
 
         if (currentHp <= 0)
         {
@@ -74,11 +76,12 @@ public class Castle : MonoBehaviour, IDamageable
 
     private IEnumerator PlayHitEffect()
     {
-        if (hitEffectPrefab == null || isHitEffect) yield return null;
+        if (hitEffectPrefab == null)
+            yield break;
 
-        isHitEffect = true;
-
-        hitEffectPrefab.SetActive(true);
+        activeHitEffects.RemoveAll(effect => effect == null);
+        if (activeHitEffects.Count >= maxHitEffectCount)
+            yield break;
 
         Vector3 randomPos = new Vector3(
             Random.Range(-0.3f, 0.3f),
@@ -86,21 +89,28 @@ public class Castle : MonoBehaviour, IDamageable
             0
         );
         Vector3 spawnPos = transform.position + randomPos;
-        hitEffectPrefab.transform.position = spawnPos;
+        GameObject hitEffect = Instantiate(
+            hitEffectPrefab,
+            spawnPos,
+            hitEffectPrefab.transform.rotation,
+            hitEffectPrefab.transform.parent
+        );
+        activeHitEffects.Add(hitEffect);
+        hitEffect.SetActive(true);
 
-        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        var effectRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
         if (effectRenderer != null)
         {
             effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
         }
 
-        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
+        var ps = hitEffect.GetComponent<ParticleSystem>();
         float duration = (ps != null) ? ps.main.duration : 1.0f;
 
         yield return new WaitForSeconds(duration);
 
-        hitEffectPrefab.SetActive(false);
-        isHitEffect = false;
+        activeHitEffects.Remove(hitEffect);
+        Destroy(hitEffect);
     }
 
     private void PlayDamageEffect()

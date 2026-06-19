@@ -6,13 +6,12 @@ namespace _01.Scripts._08.Utility
     {
         Title,
         Main,
-        Shop,
         MatchAndBattle,
-        HabitatBattle,
-        Combo,
-        HabitatModeSelect,
         UnitInfo,
         UnitDescription,
+        Combo,
+        HabitatModeSelect,
+        Shop,
     }
     
     public static class SceneInfo
@@ -21,13 +20,12 @@ namespace _01.Scripts._08.Utility
         {
             { SceneType.Title , "00.TitleScene"},
             { SceneType.Main, "01.MainScene"},
-            { SceneType.Shop, "06.ShopSceneR"},
-            { SceneType.MatchAndBattle, "03.3match&Battle"},
-            { SceneType.HabitatBattle, "04.HabitatBattle"},
+            { SceneType.MatchAndBattle, "02.3match&Battle"},
+            { SceneType.UnitInfo, "03. UnitInfoScene"},
+            { SceneType.UnitDescription, "04.UnitDescription"},
             { SceneType.Combo, "05.ComboScene"},
-            { SceneType.HabitatModeSelect, "07.HabitatModeSelect"},
-            { SceneType.UnitInfo, "08. UnitInfoScene"},
-            { SceneType.UnitDescription, "09.UnitDescription"},
+            { SceneType.HabitatModeSelect, "06.HabitatModeSelect"},
+            { SceneType.Shop, "07.ShopSceneR"},
         };
 
         public static string GetSceneName(SceneType type)

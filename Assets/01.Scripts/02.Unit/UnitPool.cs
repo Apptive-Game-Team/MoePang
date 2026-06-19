@@ -44,8 +44,9 @@ public class UnitPool : MonoBehaviour
             unit.SetPool(this);
             unit.SetOriginPrefab(prefab);
         }
-
-        unit.transform.position = spawnPos.position;
+        
+        float randYPos = Random.Range(0f, 0.2f);
+        unit.transform.position = spawnPos.position + new Vector3(0f, randYPos, 0f);
         
         unit.gameObject.SetActive(true);
         
