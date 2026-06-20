@@ -651,6 +651,8 @@ MonoBehaviour:
   oceanEventEnemyStatMultiplier: 1.25
   oceanEnemyBuffDuration: 9999
   desertPuzzleCoverPrefab: {fileID: 1359563286638045153, guid: 3da9cd6a51334cc4ea040d76bb071850, type: 3}
+  desertSandStormPrefab: {fileID: 0}
+  desertSandParticlePrefab: {fileID: 0}
   desertPuzzleCoverInterval: 25
   desertEventPuzzleCoverInterval: 25
   desertPuzzleCoverDuration: 5
