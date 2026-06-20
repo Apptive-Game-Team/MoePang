@@ -3598,6 +3598,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02425d68cbd9e0644adb98e12e9a54ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  battleRawImage: {fileID: 683930344}
   battleBackgroundSr: {fileID: 777223921}
   zoomSpeed: 0.1
   minOrthographicSize: 0.2
@@ -5691,6 +5692,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puzzleFrame: {fileID: 107939015}
+  downParticleFrame: {fileID: 0}
   particleFrame: {fileID: 1740276909}
   goldUI: {fileID: 596817571}
   x: 7
