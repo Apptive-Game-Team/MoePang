@@ -50,6 +50,8 @@ public class UnitTransformQueue : MonoBehaviour
     public void Insert(Unit unit)
     {
         if (unit == null) return;
+        if (!unit.gameObject.activeInHierarchy) return;
+        if (unit.CurrentHp <= 0f) return;
 
         Remove(unit, false);
 
@@ -232,7 +234,7 @@ public class UnitTransformQueue : MonoBehaviour
             LinkedListNode<QueueEntry> next = node.Next;
             Unit unit = node.Value.Unit;
 
-            if (unit == null || !unit.gameObject.activeInHierarchy)
+            if (unit == null || !unit.gameObject.activeInHierarchy || unit.CurrentHp <= 0f)
             {
                 if (unit != null)
                     unitOrders.Remove(unit);
