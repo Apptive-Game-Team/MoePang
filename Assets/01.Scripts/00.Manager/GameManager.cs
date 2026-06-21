@@ -245,7 +245,7 @@ namespace _01.Scripts._00.Manager
 
             playData.goldAmount = goldManager.Gold;
             
-            playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
+            playData.clearedStage = Mathf.Min(49, Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1));
             stageManager.SetMaxStage(playData.clearedStage);
 
             StageData stageData = playData.stagesData[stageManager.CurrentStage];
