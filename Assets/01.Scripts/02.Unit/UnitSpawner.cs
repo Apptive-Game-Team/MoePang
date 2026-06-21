@@ -34,7 +34,7 @@ public class UnitSpawner : MonoBehaviour
         _enemySpawnWeights = new List<List<int>>()
         {
             new(){70, 30, 0},
-            new(){60, 30, 10},
+            new(){50, 30, 20},
         };
 
         friendlySpawnWeights = new List<List<int>>()
@@ -186,6 +186,11 @@ public class UnitSpawner : MonoBehaviour
     private EnemyUnitData SetEnemyData(List<EnemyUnitData> list)
     {
         int stage = StageManager.Instance.CurrentStage;
+
+        if (stage >= 16)
+        {
+            return list[3];
+        }
 
         if (stage >= 50)
         {
