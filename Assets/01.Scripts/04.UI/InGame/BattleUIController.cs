@@ -125,6 +125,11 @@ namespace _01.Scripts._04.UI.InGame
             {
                 _isDragging = false;
             }
+            
+            if (!IsPointerInsideBattleCamera(Input.mousePosition))
+            {
+                return;
+            }
 
             if (_isDragging)
             {
