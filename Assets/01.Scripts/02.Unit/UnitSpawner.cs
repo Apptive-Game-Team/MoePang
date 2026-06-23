@@ -40,10 +40,10 @@ public class UnitSpawner : MonoBehaviour
         friendlySpawnWeights = new List<List<int>>()
         {
             new() { 100 },
-            new() { 60, 40 },
-            new() { 50, 30, 20 },
-            new() { 40, 30, 20, 10 },
-            new() { 25, 25, 20, 15, 15 },
+            new() { 70, 30 },
+            new() { 60, 30, 10 },
+            new() { 50, 30, 15, 5 },
+            new() { 35, 25, 18, 14, 8 },
         };
     }
 
