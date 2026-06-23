@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ public class ShopUI : MonoBehaviour
 
     [Header("UI 정보")]
     [SerializeField] private Image unlockImage;
+    [SerializeField] private TextMeshProUGUI levelImage;
     [SerializeField] private Image backgroundImage;
 
     //참조
@@ -41,7 +43,15 @@ public class ShopUI : MonoBehaviour
         bool unlocked = HabitatManager.Instance.IsUnlocked(unitData);
 
         unlockImage.gameObject.SetActive(!unlocked);
+        levelImage.gameObject.SetActive(unlocked);
         backgroundImage.gameObject.SetActive(unlocked);
+        
+        SetLevelText();
+    }
+
+    private void SetLevelText()
+    {
+        levelImage.text = $"Lv.{unitData.UnitLevel}";
     }
 
     public void OnClick()
