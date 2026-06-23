@@ -237,7 +237,7 @@ public class ShopManager : MonoBehaviour
 
         if (HabitatManager.Instance.IsUnlocked(unit))
         {
-            buyButtonText.text = "Level Up";
+            buyButtonText.text = $"Level Up : {unit.UnitCost}";
             return;
         }
 
@@ -247,7 +247,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        buyButtonText.text = "Buy";
+        buyButtonText.text = $"Buy : {unit.UnlockCost}";
     }
 
     public void OnClickBuy()
@@ -333,7 +333,7 @@ public class ShopManager : MonoBehaviour
             HabitatManager.Instance.IncreaseUnitLevel(unit);
             Debug.Log($"Level up succeeded: {unit.UnitName}, level: {unit.UnitLevel}, remaining gold: {GoldManager.Instance.Gold}");
             RefreshUnitDescription();
-            SetBuyButtonText("Level Up");
+            SetBuyButtonText($"Level Up : {unit.UnitCost}");
             return;
         }
 
@@ -346,7 +346,7 @@ public class ShopManager : MonoBehaviour
         }
 
         RefreshUnitDescription();
-        SetBuyButtonText("Level Up");
+        SetBuyButtonText($"Level Up : {unit.UnitCost}");
     }
 
     private int GetUnitPurchaseCost(FriendlyUnitData unit)
