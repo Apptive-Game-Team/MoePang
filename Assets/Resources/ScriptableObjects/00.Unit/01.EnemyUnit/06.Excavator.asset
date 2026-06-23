@@ -17,8 +17,10 @@ MonoBehaviour:
   unitGrade: 0
   attackType: 2
   animatorOverride: {fileID: 22100000, guid: c3e1f93e69177b64593a59dbce8c6dd5, type: 2}
-  maxHp: 40
+  maxHp: 36
   baseMoveSpeed: 0.2
-  attackDamage: 8
+  attackDamage: 9
   attackSpeed: 0.5
   unitSize: 0.6
+  unitLevel: 1
+  unitDescriptionText: 
