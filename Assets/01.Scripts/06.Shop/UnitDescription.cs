@@ -44,7 +44,9 @@ namespace _01.Scripts._06.Shop
                 $"Damage : {data.AttackDamage}\n" +
                 $"Attack Speed : {data.AttackSpeed}\n" +
                 $"Move Speed : {data.BaseMoveSpeed}";
-            unitUpgradeCostText.text = $"Level Up";
+            bool unlocked = HabitatManager.Instance.IsUnlocked(data);
+            int cost = unlocked ? data.UnitCost : data.UnlockCost;
+            unitUpgradeCostText.text = unlocked ? $"Level Up : {cost}" : $"Unlock : {cost}";
         }
     
         private void ApplyHabitatImage(Habitat habitat)

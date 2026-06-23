@@ -29,6 +29,19 @@ public static class BalanceFormula
         return GetUnitUpgradeCostUntilLevel5(grade, nextLevel);
     }
 
+    public static int GetUnitUnlockCost(int grade)
+    {
+        return grade switch
+        {
+            1 => 0,
+            2 => 50,
+            3 => 100,
+            4 => 200,
+            5 => 400,
+            _ => 0
+        };
+    }
+
     public static float GetUnitMaxHp(float baseHp, float level, int grade, int maxStage)
     {
         float hp = baseHp + GetUnitUpgradeValue(

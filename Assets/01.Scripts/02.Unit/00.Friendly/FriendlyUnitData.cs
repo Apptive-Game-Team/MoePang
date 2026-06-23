@@ -12,6 +12,7 @@ public class FriendlyUnitData : UnitData
     public override float MaxHp => BalanceFormula.GetUnitMaxHp(maxHp, UnitLevel, UnitGrade, GetMaxStage());
     public override float AttackDamage => BalanceFormula.GetUnitAttackDamage(attackDamage, UnitLevel, UnitGrade, GetMaxStage());
     public int UnitCost => BalanceFormula.GetUnitUpgradeCost(UnitGrade, UnitLevel);
+    public int UnlockCost => BalanceFormula.GetUnitUnlockCost(UnitGrade);
     public float BaseUnitLevel => unitLevel;
     public float UnitLevel
     {
