@@ -10,8 +10,24 @@ public class EnemyUnit : Unit
 
         enemyData = data as EnemyUnitData;
 
+        ApplyStageStatMultiplier();
+
         direction = -1f;
 
         targetLayer = LayerMask.GetMask("Friendly");
+    }
+
+    private void ApplyStageStatMultiplier()
+    {
+        if (enemyData == null || StageManager.Instance == null)
+        {
+            return;
+        }
+
+        int currentStage = StageManager.Instance.CurrentStage + 1;
+        float stageMaxHp = BalanceFormula.GetEnemyMaxHp(maxHp, currentStage);
+        float stageAttackDamage = BalanceFormula.GetEnemyAttackDamage(attackDamage, currentStage);
+
+        ApplyBaseHpAndAttackDamage(stageMaxHp, stageAttackDamage);
     }
 }

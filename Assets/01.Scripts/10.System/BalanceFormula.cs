@@ -3,6 +3,12 @@ using UnityEngine;
 public static class BalanceFormula
 {
     private const int StageBonusStartMaxStage = 51;
+    private const int EnemyStageScaleStartStage = 51;
+    private const int EnemyStageScaleBaseStage = 50;
+    private const int EnemyStageScaleExtraStartStage = 200;
+    private const int EnemyStageScaleExtraInterval = 50;
+    private const float EnemyStage200HpMultiplier = 5.5f;
+    private const float EnemyStage200AttackDamageMultiplier = 4f;
     private const int EarlyLevelLimit = 50;
     private const int UnitUpgradeCostIncreaseAfterLevel5 = 10;
 
@@ -77,6 +83,28 @@ public static class BalanceFormula
         return 1f;
     }
 
+    public static float GetEnemyMaxHp(float baseHp, int currentStage)
+    {
+        return Mathf.Ceil(baseHp * GetEnemyHpMultiplier(currentStage));
+    }
+
+    public static float GetEnemyAttackDamage(float baseAttackDamage, int currentStage)
+    {
+        return Mathf.Ceil(baseAttackDamage * GetEnemyAttackDamageMultiplier(currentStage));
+    }
+
+    public static float GetEnemyHpMultiplier(int currentStage)
+    {
+        float multiplier = GetEnemyBaseHpMultiplier(currentStage);
+        return multiplier * GetEnemyBossStageMultiplier(currentStage);
+    }
+
+    public static float GetEnemyAttackDamageMultiplier(int currentStage)
+    {
+        float multiplier = GetEnemyBaseAttackDamageMultiplier(currentStage);
+        return multiplier * GetEnemyBossStageMultiplier(currentStage);
+    }
+
     private static int GetUnitUpgradeCostUntilLevel5(int grade, int nextLevel)
     {
         return grade switch
@@ -123,6 +151,61 @@ public static class BalanceFormula
             },
             _ => GetUnitUpgradeCostUntilLevel5(1, nextLevel)
         };
+    }
+
+    private static float GetEnemyBaseHpMultiplier(int currentStage)
+    {
+        if (currentStage < EnemyStageScaleStartStage)
+        {
+            return 1f;
+        }
+
+        if (currentStage > EnemyStageScaleExtraStartStage)
+        {
+            return EnemyStage200HpMultiplier + GetEnemyExtraMultiplierAfterStage200(currentStage);
+        }
+
+        return 1f + 0.03f * (currentStage - EnemyStageScaleBaseStage);
+    }
+
+    private static float GetEnemyBaseAttackDamageMultiplier(int currentStage)
+    {
+        if (currentStage < EnemyStageScaleStartStage)
+        {
+            return 1f;
+        }
+
+        if (currentStage > EnemyStageScaleExtraStartStage)
+        {
+            return EnemyStage200AttackDamageMultiplier + GetEnemyExtraMultiplierAfterStage200(currentStage);
+        }
+
+        return 1f + 0.02f * (currentStage - EnemyStageScaleBaseStage);
+    }
+
+    private static float GetEnemyExtraMultiplierAfterStage200(int currentStage)
+    {
+        return Mathf.FloorToInt((currentStage - EnemyStageScaleExtraStartStage) / (float)EnemyStageScaleExtraInterval);
+    }
+
+    private static float GetEnemyBossStageMultiplier(int currentStage)
+    {
+        if (currentStage < EnemyStageScaleStartStage)
+        {
+            return 1f;
+        }
+
+        if (currentStage % 10 == 0)
+        {
+            return 1.2f;
+        }
+
+        if (currentStage % 5 == 0)
+        {
+            return 1.1f;
+        }
+
+        return 1f;
     }
 
     private static float GetUnitUpgradeValue(float level, int maxStage, float beforeStage51Value, float afterStage51Value)

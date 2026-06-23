@@ -788,6 +788,15 @@ public class Unit : MonoBehaviour, IDamageable
     public void UnitHpMultiplier(float value)
     {
         maxHp *= value;
+        currentHp *= value;
+    }
+
+    protected void ApplyBaseHpAndAttackDamage(float newMaxHp, float newAttackDamage)
+    {
+        maxHp = newMaxHp;
+        currentHp = maxHp;
+        attackDamage = newAttackDamage;
+        _originAttackDamage = attackDamage;
     }
     #endregion
 }
