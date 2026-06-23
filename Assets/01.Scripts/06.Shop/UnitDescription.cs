@@ -18,21 +18,27 @@ namespace _01.Scripts._06.Shop
 
         private void Start()
         {
+            RefreshDescription();
+        }
+
+        public void RefreshDescription()
+        {
             FriendlyUnitData data = HabitatManager.Instance.SelectedUnitData;
 
             if (data == null)
             {
                 return;
             }
-        
             ApplyHabitatImage(data.Habitat);
 
             unitNameText.text = data.UnitName.ToString();
             descriptionText.text = data.UnitDescriptionText;
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
             unitAnimator.Play("Walk", 0, 0f);
-            unitStatText.text = 
-                $"Current Grade : null\n" +
+
+            unitStatText.text =
+                $"Level : {data.UnitLevel}\n" +
+                $"Current Grade : {data.UnitGrade}\n" +
                 $"Attack Type : {data.AttackType}\n" +
                 $"HP : {data.MaxHp}\n" +
                 $"Damage : {data.AttackDamage}\n" +

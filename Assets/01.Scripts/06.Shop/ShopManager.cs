@@ -36,6 +36,9 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI costText;
     [SerializeField] private TextMeshProUGUI tooltipText;
 
+    [Header("설명 UI")]
+    [SerializeField] private UnitDescription unitDescription;
+
     private ShopUI currentSelected;
     private UpgradeUI currentUpgradeSelected;
     private ItemObject currentItemSelected;
@@ -327,6 +330,7 @@ public class ShopManager : MonoBehaviour
         {
             HabitatManager.Instance.IncreaseUnitLevel(unit);
             Debug.Log($"Level up succeeded: {unit.UnitName}, level: {unit.UnitLevel}, remaining gold: {GoldManager.Instance.Gold}");
+            RefreshUnitDescription();
             SetBuyButtonText("Level Up");
             return;
         }
@@ -339,7 +343,21 @@ public class ShopManager : MonoBehaviour
             currentSelected.RefreshUnlockState();
         }
 
+        RefreshUnitDescription();
         SetBuyButtonText("Level Up");
+    }
+
+    private void RefreshUnitDescription()
+    {
+        if (unitDescription == null)
+        {
+            unitDescription = FindObjectOfType<UnitDescription>();
+        }
+
+        if (unitDescription != null)
+        {
+            unitDescription.RefreshDescription();
+        }
     }
 
     private void SetBuyButtonText(string text)
