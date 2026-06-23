@@ -234,7 +234,7 @@ public class ShopManager : MonoBehaviour
 
         if (HabitatManager.Instance.IsUnlocked(unit))
         {
-            buyButtonText.text = "구매완료";
+            buyButtonText.text = "Level Up";
             return;
         }
 
@@ -305,14 +305,9 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        if (HabitatManager.Instance.IsUnlocked(unit))
-        {
-            Debug.Log($"Buy skipped: {unit.UnitName} is already unlocked.");
-            SetBuyButtonText("구매완료");
-            return;
-        }
+        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
 
-        if (!HabitatManager.Instance.CanUnlock(unit))
+        if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
         {
             Debug.LogWarning($"Buy failed: {unit.UnitName} cannot be unlocked yet.");
             SetBuyButtonText("앞에꺼사.");
@@ -327,6 +322,15 @@ public class ShopManager : MonoBehaviour
         }
 
         GoldManager.Instance.AdjustGold(-unit.UnitCost);
+
+        if (isUnlocked)
+        {
+            HabitatManager.Instance.IncreaseUnitLevel(unit);
+            Debug.Log($"Level up succeeded: {unit.UnitName}, level: {unit.UnitLevel}, remaining gold: {GoldManager.Instance.Gold}");
+            SetBuyButtonText("Level Up");
+            return;
+        }
+
         HabitatManager.Instance.Unlock(unit);
         Debug.Log($"Buy succeeded: {unit.UnitName}, remaining gold: {GoldManager.Instance.Gold}");
 
@@ -335,7 +339,7 @@ public class ShopManager : MonoBehaviour
             currentSelected.RefreshUnlockState();
         }
 
-        SetBuyButtonText("구매완료");
+        SetBuyButtonText("Level Up");
     }
 
     private void SetBuyButtonText(string text)

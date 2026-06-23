@@ -1,5 +1,6 @@
 using UnityEditor.Animations;
 using UnityEngine;
+using _01.Scripts._00.Manager;
 
 /// <summary>
 /// 유닛 설정 데이터
@@ -36,5 +37,21 @@ public abstract class UnitData : ScriptableObject
     public float AttackSpeed => attackSpeed;
     public float UnitSize => unitSize;
     public string UnitDescriptionText => unitDescriptionText;
-    public float UnitLevel => unitLevel;
+    public float BaseUnitLevel => unitLevel;
+    public float UnitLevel
+    {
+        get
+        {
+            if (this is FriendlyUnitData friendlyUnit)
+            {
+                GameManager gameManager = FindObjectOfType<GameManager>();
+                if (gameManager != null && gameManager.unitData != null)
+                {
+                    return gameManager.unitData.GetUnitLevel(friendlyUnit);
+                }
+            }
+
+            return unitLevel;
+        }
+    }
 }

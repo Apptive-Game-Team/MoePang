@@ -3,10 +3,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "FriendlyUnitData", menuName = "Unit/FriendlyUnitData")]
 public class FriendlyUnitData : UnitData
 {
+    private const int DefaultUnitCost = 100;
+
     [Header("Friendly Only")]
     [SerializeField] private Habitat habitat;
-    [SerializeField] private int unitCost;
 
     public Habitat Habitat => habitat;
-    public int UnitCost => unitCost;
+    public int UnitCost => DefaultUnitCost;
 }
