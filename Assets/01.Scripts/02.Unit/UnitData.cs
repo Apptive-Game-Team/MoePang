@@ -1,6 +1,5 @@
 using UnityEditor.Animations;
 using UnityEngine;
-using _01.Scripts._00.Manager;
 
 /// <summary>
 /// 유닛 설정 데이터
@@ -21,8 +20,7 @@ public abstract class UnitData : ScriptableObject
     [SerializeField] protected float attackSpeed;
     [SerializeField] protected float unitSize = 1f;
 
-    [Header("Shop Data")] 
-    [SerializeField] protected float unitLevel = 1f;
+    [Header("Description")]
     [SerializeField, TextArea(3, 8)] protected string unitDescriptionText;
     
 
@@ -31,32 +29,10 @@ public abstract class UnitData : ScriptableObject
     public int UnitGrade => unitGrade;
     public AttackType AttackType => attackType;
     public AnimatorOverrideController AnimatorOverride => animatorOverride;
-    public float MaxHp => BalanceFormula.GetUnitMaxHp(maxHp, UnitLevel, UnitGrade, GetMaxStage());
+    public virtual float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
-    public float AttackDamage => BalanceFormula.GetUnitAttackDamage(attackDamage, UnitLevel, UnitGrade, GetMaxStage());
+    public virtual float AttackDamage => attackDamage;
     public float AttackSpeed => attackSpeed;
     public float UnitSize => unitSize;
     public string UnitDescriptionText => unitDescriptionText;
-    public float BaseUnitLevel => unitLevel;
-    public float UnitLevel
-    {
-        get
-        {
-            if (this is FriendlyUnitData friendlyUnit)
-            {
-                GameManager gameManager = FindObjectOfType<GameManager>();
-                if (gameManager != null && gameManager.unitData != null)
-                {
-                    return gameManager.unitData.GetUnitLevel(friendlyUnit);
-                }
-            }
-
-            return unitLevel;
-        }
-    }
-    private int GetMaxStage()
-    {
-        StageManager stageManager = FindObjectOfType<StageManager>();
-        return stageManager != null ? stageManager.MaxStage : 0;
-    }
 }
