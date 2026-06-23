@@ -186,10 +186,11 @@ public class UnitSpawner : MonoBehaviour
     private EnemyUnitData SetEnemyData(List<EnemyUnitData> list)
     {
         int stage = StageManager.Instance.CurrentStage;
+        int currentStage = stage + 1;
 
-        if (stage >= 50)
+        if (currentStage >= 51)
         {
-            return list[^1];
+            return GetWeightedEnemyUnitByGrade(list, currentStage);
         }
         
         int cycleStep = stage % 10;
@@ -217,5 +218,38 @@ public class UnitSpawner : MonoBehaviour
         }
 
         return list[enemyStart];
+    }
+
+    private EnemyUnitData GetWeightedEnemyUnitByGrade(List<EnemyUnitData> list, int currentStage)
+    {
+        int totalWeight = 0;
+        List<int> weights = new();
+
+        foreach (EnemyUnitData unit in list)
+        {
+            int weight = BalanceFormula.GetEnemySpawnWeight(unit.UnitGrade, currentStage);
+            weights.Add(weight);
+            totalWeight += weight;
+        }
+
+        if (totalWeight <= 0)
+        {
+            return list[^1];
+        }
+
+        int pivot = Random.Range(1, totalWeight + 1);
+        int cumulative = 0;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            cumulative += weights[i];
+
+            if (pivot <= cumulative)
+            {
+                return list[i];
+            }
+        }
+
+        return list[^1];
     }
 }

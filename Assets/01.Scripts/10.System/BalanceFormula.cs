@@ -3,6 +3,10 @@ using UnityEngine;
 public static class BalanceFormula
 {
     private const int StageBonusStartMaxStage = 51;
+    private const int EnemySpawnWeightStartStage = 51;
+    private const int EnemySpawnWeightDynamicStartStage = 101;
+    private const int EnemySpawnWeightDynamicInterval = 10;
+    private const int EnemySpawnMinimumWeight = 2;
     private const int EnemyStageScaleStartStage = 51;
     private const int EnemyStageScaleBaseStage = 50;
     private const int EnemyStageScaleExtraStartStage = 200;
@@ -105,6 +109,33 @@ public static class BalanceFormula
         return multiplier * GetEnemyBossStageMultiplier(currentStage);
     }
 
+    public static int GetEnemySpawnWeight(int grade, int currentStage)
+    {
+        int[] weights = GetEnemySpawnWeights(currentStage);
+        int index = Mathf.Clamp(grade, 1, weights.Length) - 1;
+        return weights[index];
+    }
+
+    public static int[] GetEnemySpawnWeights(int currentStage)
+    {
+        int[] weights = GetEnemySpawnBaseWeights(currentStage);
+
+        if (currentStage < EnemySpawnWeightDynamicStartStage)
+        {
+            return weights;
+        }
+
+        int step = (currentStage - EnemySpawnWeightDynamicStartStage) / EnemySpawnWeightDynamicInterval + 1;
+
+        for (int i = 0; i < step; i++)
+        {
+            int decreased = DecreaseLowEnemySpawnWeights(weights);
+            IncreaseHighEnemySpawnWeights(weights, decreased);
+        }
+
+        return weights;
+    }
+
     private static int GetUnitUpgradeCostUntilLevel5(int grade, int nextLevel)
     {
         return grade switch
@@ -151,6 +182,64 @@ public static class BalanceFormula
             },
             _ => GetUnitUpgradeCostUntilLevel5(1, nextLevel)
         };
+    }
+
+    private static int[] GetEnemySpawnBaseWeights(int currentStage)
+    {
+        if (currentStage < EnemySpawnWeightStartStage)
+        {
+            return new[] { 100, 0, 0, 0, 0, 0, 0, 0, 0 };
+        }
+
+        if (currentStage <= 60)
+        {
+            return new[] { 18, 16, 14, 13, 12, 10, 8, 6, 3 };
+        }
+
+        if (currentStage <= 70)
+        {
+            return new[] { 14, 14, 13, 13, 12, 11, 10, 8, 5 };
+        }
+
+        if (currentStage <= 80)
+        {
+            return new[] { 10, 11, 11, 12, 12, 12, 12, 10, 10 };
+        }
+
+        if (currentStage <= 90)
+        {
+            return new[] { 7, 8, 9, 10, 11, 12, 13, 14, 16 };
+        }
+
+        return new[] { 4, 5, 6, 7, 9, 11, 14, 18, 26 };
+    }
+
+    private static int DecreaseLowEnemySpawnWeights(int[] weights)
+    {
+        int decreased = 0;
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (weights[i] <= EnemySpawnMinimumWeight)
+            {
+                weights[i] = EnemySpawnMinimumWeight;
+                continue;
+            }
+
+            weights[i]--;
+            decreased++;
+        }
+
+        return decreased;
+    }
+
+    private static void IncreaseHighEnemySpawnWeights(int[] weights, int amount)
+    {
+        for (int i = 6; i < weights.Length && amount > 0; i++)
+        {
+            weights[i]++;
+            amount--;
+        }
     }
 
     private static float GetEnemyBaseHpMultiplier(int currentStage)
