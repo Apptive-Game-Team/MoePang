@@ -44,7 +44,7 @@ namespace _01.Scripts._06.Shop
                 $"Damage : {data.AttackDamage}\n" +
                 $"Attack Speed : {data.AttackSpeed}\n" +
                 $"Move Speed : {data.BaseMoveSpeed}";
-            unitUpgradeCostText.text = $"Upgrade : {data.UnitCost}";
+            unitUpgradeCostText.text = $"Level Up";
         }
     
         private void ApplyHabitatImage(Habitat habitat)

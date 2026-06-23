@@ -14,16 +14,32 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Image unlockImage;
     [SerializeField] private TextMeshProUGUI levelImage;
     [SerializeField] private Image backgroundImage;
+    [SerializeField] private float selectedScale = 1.08f;
 
     //참조
     private ShopManager shopManager;
     private bool isSelected = false;
+    private Vector3 unlockImageOriginScale;
+    private Vector3 backgroundImageOriginScale;
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
     public bool IsSelected => isSelected;
     public bool IsUnlocked => HabitatManager.Instance.IsUnlocked(unitData);
     public float UnitCost => unitData.UnitCost;
+
+    private void Awake()
+    {
+        if (unlockImage != null)
+        {
+            unlockImageOriginScale = unlockImage.transform.localScale;
+        }
+
+        if (backgroundImage != null)
+        {
+            backgroundImageOriginScale = backgroundImage.transform.localScale;
+        }
+    }
 
     private void Start()
     {
@@ -62,12 +78,25 @@ public class ShopUI : MonoBehaviour
     public void Select()
     {
         isSelected = true;
-        backgroundImage.color = Color.black;
+        SetImageScale(selectedScale);
     }
 
     public void Deselect()
     {
         isSelected = false;
-        backgroundImage.color = Color.white;
+        SetImageScale(1f);
+    }
+
+    private void SetImageScale(float scale)
+    {
+        if (unlockImage != null)
+        {
+            unlockImage.transform.localScale = unlockImageOriginScale * scale;
+        }
+
+        if (backgroundImage != null)
+        {
+            backgroundImage.transform.localScale = backgroundImageOriginScale * scale;
+        }
     }
 }
