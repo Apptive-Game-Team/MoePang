@@ -2,13 +2,21 @@ using UnityEngine;
 
 public static class BalanceFormula
 {
-    private const int DefaultUnitUpgradeCost = 100;
     private const int StageBonusStartMaxStage = 51;
     private const int EarlyLevelLimit = 50;
+    private const int UnitUpgradeCostIncreaseAfterLevel5 = 10;
 
     public static int GetUnitUpgradeCost(int grade, float level)
     {
-        return DefaultUnitUpgradeCost;
+        int nextLevel = Mathf.Max(2, Mathf.FloorToInt(level) + 1);
+        int level5Cost = GetUnitUpgradeCostUntilLevel5(grade, 5);
+
+        if (nextLevel > 5)
+        {
+            return level5Cost + (nextLevel - 5) * UnitUpgradeCostIncreaseAfterLevel5;
+        }
+
+        return GetUnitUpgradeCostUntilLevel5(grade, nextLevel);
     }
 
     public static float GetUnitMaxHp(float baseHp, float level, int grade, int maxStage)
@@ -67,6 +75,54 @@ public static class BalanceFormula
     public static float GetUnitAttackDamageIncreaseAfterStage51(int grade)
     {
         return 1f;
+    }
+
+    private static int GetUnitUpgradeCostUntilLevel5(int grade, int nextLevel)
+    {
+        return grade switch
+        {
+            1 => nextLevel switch
+            {
+                2 => 30,
+                3 => 40,
+                4 => 50,
+                5 => 60,
+                _ => 30
+            },
+            2 => nextLevel switch
+            {
+                2 => 35,
+                3 => 55,
+                4 => 65,
+                5 => 75,
+                _ => 35
+            },
+            3 => nextLevel switch
+            {
+                2 => 40,
+                3 => 65,
+                4 => 75,
+                5 => 85,
+                _ => 40
+            },
+            4 => nextLevel switch
+            {
+                2 => 45,
+                3 => 75,
+                4 => 85,
+                5 => 95,
+                _ => 45
+            },
+            5 => nextLevel switch
+            {
+                2 => 50,
+                3 => 85,
+                4 => 95,
+                5 => 105,
+                _ => 50
+            },
+            _ => GetUnitUpgradeCostUntilLevel5(1, nextLevel)
+        };
     }
 
     private static float GetUnitUpgradeValue(float level, int maxStage, float beforeStage51Value, float afterStage51Value)
