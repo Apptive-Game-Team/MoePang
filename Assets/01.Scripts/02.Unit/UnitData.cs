@@ -31,9 +31,9 @@ public abstract class UnitData : ScriptableObject
     public int UnitGrade => unitGrade;
     public AttackType AttackType => attackType;
     public AnimatorOverrideController AnimatorOverride => animatorOverride;
-    public float MaxHp => maxHp + UnitLevel * 3f;
-    public float BaseMoveSpeed => baseMoveSpeed;
-    public float AttackDamage => attackDamage + UnitLevel;
+    public float MaxHp => ApplyStageBonus(maxHp + UnitLevel * 3f);
+    public float BaseMoveSpeed => baseMoveSpeed;ㄴ
+    public float AttackDamage => ApplyStageBonus(attackDamage + UnitLevel);
     public float AttackSpeed => attackSpeed;
     public float UnitSize => unitSize;
     public string UnitDescriptionText => unitDescriptionText;
@@ -53,5 +53,16 @@ public abstract class UnitData : ScriptableObject
 
             return unitLevel;
         }
+    }
+    private float ApplyStageBonus(float value)
+    {
+        StageManager stageManager = FindObjectOfType<StageManager>();
+
+        if (stageManager != null && stageManager.MaxStage >= 51)
+        {
+            return Mathf.Ceil(value * 1.25f);
+        }
+
+        return value;
     }
 }
