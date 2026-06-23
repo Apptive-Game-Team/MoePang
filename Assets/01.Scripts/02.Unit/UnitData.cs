@@ -29,7 +29,7 @@ public abstract class UnitData : ScriptableObject
     public UnitName UnitName => unitName;
     public int UnitGrade => unitGrade;
     public AttackType AttackType => attackType;
-    public AnimatorOverrideController AnimatorOverride => animatorㄴOverride;
+    public AnimatorOverrideController AnimatorOverride => animatorOverride;
     public float MaxHp => maxHp + UnitLevel * 3f;
     public float BaseMoveSpeed => baseMoveSpeed;
     public float AttackDamage => attackDamage + UnitLevel;
