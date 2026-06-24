@@ -9,6 +9,7 @@ namespace _01.Scripts._00.Manager
     public class PlayData
     {
         public int goldAmount;
+        public int diaAmount;
         public int clearedStage;
         public List<StageData> stagesData;
 
@@ -284,6 +285,7 @@ namespace _01.Scripts._00.Manager
             int usedTileCount = stageManager.UsedTileCount;
 
             playData.goldAmount = goldManager.Gold;
+            playData.diaAmount = goldManager.Dia;
             
             playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
             stageManager.SetMaxStage(playData.clearedStage);
@@ -335,6 +337,7 @@ namespace _01.Scripts._00.Manager
         public void SaveGoldData()
         {
             playData.goldAmount = GoldManager.Instance.Gold;
+            playData.diaAmount = GoldManager.Instance.Dia;
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
         }
     }
