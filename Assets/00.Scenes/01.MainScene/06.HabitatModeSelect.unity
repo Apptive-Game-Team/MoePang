@@ -3942,7 +3942,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 5852971551011846815}
   m_OnClick:
     m_PersistentCalls:
@@ -4297,7 +4297,6 @@ MonoBehaviour:
   clearRewardText: {fileID: 2103761824}
   currentBonusTitle: {fileID: 1231100304}
   currentBonusText: {fileID: 1338546263}
-  startScene: 4
   guidePanel: {fileID: 1511187554}
   canvasGroup: {fileID: 1511187558}
   showTime: 3

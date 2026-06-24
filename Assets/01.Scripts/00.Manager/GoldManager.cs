@@ -44,7 +44,12 @@ public class GoldManager : SingletonObject<GoldManager>
 
     public void AddStageClearedGold()
     {
-        int amount = StageManager.Instance.CheckClearedStage() ? 20 : 100;
-        AdjustGold(amount);
+        int stage = StageManager.Instance.CurrentStage + 1;
+
+        float amount = StageManager.Instance.CheckClearedStage()
+            ? 20f + 4f * Mathf.Sqrt(stage - 1)
+            : 100f + 20f * (Mathf.Sqrt(stage) - 1f);
+
+        AdjustGold(Mathf.CeilToInt(amount));
     }
 }

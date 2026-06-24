@@ -41,9 +41,12 @@ namespace _01.Scripts._00.Manager
     public class UnitData : IConvertable
     {
         public Dictionary<FriendlyUnitData, bool> UnlockedUnits = new();
+        public Dictionary<FriendlyUnitData, int> UnitLevels = new();
         
         [SerializeField] private List<FriendlyUnitData> unitKeys;
         [SerializeField] private List<bool> unitValues;
+        [SerializeField] private List<FriendlyUnitData> unitLevelKeys;
+        [SerializeField] private List<int> unitLevelValues;
 
         public UnitData() { }
 
@@ -59,6 +62,7 @@ namespace _01.Scripts._00.Manager
                 foreach (FriendlyUnitData unit in units)
                 {
                     UnlockedUnits[unit] = false;
+                    UnitLevels[unit] = Mathf.Max(1, Mathf.RoundToInt(unit.BaseUnitLevel));
                 }
 
                 if (units.Count > 0)
@@ -74,11 +78,47 @@ namespace _01.Scripts._00.Manager
         public void BeforeSave()
         {
             GameManager.DictionaryToLists(UnlockedUnits, out unitKeys, out unitValues);
+            GameManager.DictionaryToLists(UnitLevels, out unitLevelKeys, out unitLevelValues);
         }
 
         public void AfterLoad()
         {
             UnlockedUnits = GameManager.ListsToDictionary(unitKeys, unitValues);
+            UnitLevels = GameManager.ListsToDictionary(unitLevelKeys, unitLevelValues);
+
+            foreach (var unit in UnlockedUnits.Keys)
+            {
+                if (!UnitLevels.ContainsKey(unit))
+                {
+                    UnitLevels[unit] = Mathf.Max(1, Mathf.RoundToInt(unit.BaseUnitLevel));
+                }
+            }
+        }
+
+        public int GetUnitLevel(FriendlyUnitData unit)
+        {
+            if (unit == null)
+            {
+                return 1;
+            }
+
+            if (!UnitLevels.TryGetValue(unit, out int level))
+            {
+                level = Mathf.Max(1, Mathf.RoundToInt(unit.BaseUnitLevel));
+                UnitLevels[unit] = level;
+            }
+
+            return level;
+        }
+
+        public void IncreaseUnitLevel(FriendlyUnitData unit)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+
+            UnitLevels[unit] = GetUnitLevel(unit) + 1;
         }
     }
 

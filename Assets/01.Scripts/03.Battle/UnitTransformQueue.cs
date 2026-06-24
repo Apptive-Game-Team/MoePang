@@ -50,6 +50,8 @@ public class UnitTransformQueue : MonoBehaviour
     public void Insert(Unit unit)
     {
         if (unit == null) return;
+        if (!unit.gameObject.activeInHierarchy) return;
+        if (unit.CurrentHp <= 0f) return;
 
         Remove(unit, false);
 
@@ -100,31 +102,55 @@ public class UnitTransformQueue : MonoBehaviour
     {
         RemoveInvalidUnits(team);
 
+        Unit frontUnit = null;
+
         if (teamLists[team].Count > 0)
-            return teamLists[team].First.Value.Unit;
+            frontUnit = teamLists[team].First.Value.Unit;
 
-        if (teamCastles.ContainsKey(team))
-            return teamCastles[team];
+        teamCastles.TryGetValue(team, out IDamageable castle);
 
-        return null;
+        if (frontUnit == null)
+            return castle;
+
+        if (castle == null)
+            return frontUnit;
+
+        float unitX = frontUnit.transform.position.x;
+        float castleX = castle.GetTransform().position.x;
+
+        bool castleIsFront =
+            team == TeamType.Friendly
+                ? castleX > unitX
+                : castleX < unitX;
+
+        return castleIsFront ? castle : frontUnit;
     }
 
     public List<IDamageable> PeekTargets(TeamType team, int count)
     {
         RemoveInvalidUnits(team);
 
-        List<IDamageable> targets = new List<IDamageable>(count);
+        List<IDamageable> targets = new();
 
         foreach (QueueEntry entry in teamLists[team])
-        {
             targets.Add(entry.Unit);
 
-            if (targets.Count >= count)
-                return targets;
-        }
+        if (teamCastles.TryGetValue(team, out IDamageable castle))
+            targets.Add(castle);
 
-        if (targets.Count < count && teamCastles.ContainsKey(team))
-            targets.Add(teamCastles[team]);
+        targets.Sort((a, b) =>
+        {
+            float ax = a.GetTransform().position.x;
+            float bx = b.GetTransform().position.x;
+
+            if (team == TeamType.Friendly)
+                return bx.CompareTo(ax);
+
+            return ax.CompareTo(bx);
+        });
+
+        if (targets.Count > count)
+            targets.RemoveRange(count, targets.Count - count);
 
         return targets;
     }
@@ -232,7 +258,7 @@ public class UnitTransformQueue : MonoBehaviour
             LinkedListNode<QueueEntry> next = node.Next;
             Unit unit = node.Value.Unit;
 
-            if (unit == null || !unit.gameObject.activeInHierarchy)
+            if (unit == null || !unit.gameObject.activeInHierarchy || unit.CurrentHp <= 0f)
             {
                 if (unit != null)
                     unitOrders.Remove(unit);

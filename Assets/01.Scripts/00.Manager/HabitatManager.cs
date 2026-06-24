@@ -34,6 +34,17 @@ public class HabitatManager : SingletonObject<HabitatManager>
         return unlockDict.TryGetValue(unit, out var unlocked) && unlocked;
     }
 
+    public int GetUnitLevel(FriendlyUnitData unit)
+    {
+        return GameManager.Instance.unitData.GetUnitLevel(unit);
+    }
+
+    public void IncreaseUnitLevel(FriendlyUnitData unit)
+    {
+        GameManager.Instance.unitData.IncreaseUnitLevel(unit);
+        GameManager.Instance.SaveUnitData();
+    }
+
     /// <summary>
     /// 유닛 해금
     /// </summary>

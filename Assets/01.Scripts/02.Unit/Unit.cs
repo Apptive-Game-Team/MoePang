@@ -353,12 +353,45 @@ public class Unit : MonoBehaviour, IDamageable
     {
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         IDamageable target = UTQ.Peek(enemyTeam);
+        if (target == null)
+        {
+            Debug.Log($"[AttackTarget] attacker={name}, attackerTeam={team}, target=null");
+        }
+        else
+        {
+            Transform targetTransform = target.GetTransform();
+            Collider2D targetCollider = targetTransform != null
+                ? targetTransform.GetComponent<Collider2D>()
+                : null;
+
+            Vector2 targetPoint = targetTransform != null
+                ? targetTransform.position
+                : Vector2.zero;
+
+            if (targetCollider != null)
+                targetPoint = targetCollider.ClosestPoint(transform.position);
+
+            float forwardDistance = (targetPoint.x - transform.position.x) * direction;
+            bool inRange = forwardDistance >= 0f && forwardDistance <= attackRange;
+
+            Debug.Log(
+                $"[AttackTarget] " +
+                $"attacker={name}, attackerTeam={team}, attackerPos={transform.position}, direction={direction}, " +
+                $"target={target.GetName()}, targetType={target.GetType().Name}, targetTeam={target.GetTeam()}, " +
+                $"targetHp={target.CurrentHp}, targetPos={(targetTransform != null ? targetTransform.position.ToString() : "null")}, " +
+                $"collider={(targetCollider != null ? targetCollider.GetType().Name : "null")}, " +
+                $"closestPoint={targetPoint}, forwardDistance={forwardDistance}, attackRange={attackRange}, inRange={inRange}"
+            );
+        }
 
         if (target != null)
         {
             if (!IsTargetInAttackRange(target))
+            {
+                Debug.Log("1번 오류");
                 return;
-
+            }
+            
             target.TakeDamage(attackDamage);
         }
 
@@ -463,7 +496,10 @@ public class Unit : MonoBehaviour, IDamageable
             damageAnimRoutine = StartCoroutine(DamageAnimationCoroutine());
 
             if (currentHp <= 0)
+            {
+                UTQ.RemoveUnit(team, this);
                 ChangeState(UnitState.Die);
+            }
         }
     }
 
@@ -533,6 +569,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (currentHp <= 0)
         {
+            currentHp = 0f;
             UTQ.RemoveUnit(team, this);
             ChangeState(UnitState.Die);
         }
@@ -751,6 +788,15 @@ public class Unit : MonoBehaviour, IDamageable
     public void UnitHpMultiplier(float value)
     {
         maxHp *= value;
+        currentHp *= value;
+    }
+
+    protected void ApplyBaseHpAndAttackDamage(float newMaxHp, float newAttackDamage)
+    {
+        maxHp = newMaxHp;
+        currentHp = maxHp;
+        attackDamage = newAttackDamage;
+        _originAttackDamage = attackDamage;
     }
     #endregion
 }

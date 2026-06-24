@@ -20,7 +20,7 @@ public abstract class UnitData : ScriptableObject
     [SerializeField] protected float attackSpeed;
     [SerializeField] protected float unitSize = 1f;
 
-    [Header("Shop Data")] 
+    [Header("Description")]
     [SerializeField, TextArea(3, 8)] protected string unitDescriptionText;
     
 
@@ -29,9 +29,9 @@ public abstract class UnitData : ScriptableObject
     public int UnitGrade => unitGrade;
     public AttackType AttackType => attackType;
     public AnimatorOverrideController AnimatorOverride => animatorOverride;
-    public float MaxHp => maxHp;
+    public virtual float MaxHp => maxHp;
     public float BaseMoveSpeed => baseMoveSpeed;
-    public float AttackDamage => attackDamage;
+    public virtual float AttackDamage => attackDamage;
     public float AttackSpeed => attackSpeed;
     public float UnitSize => unitSize;
     public string UnitDescriptionText => unitDescriptionText;

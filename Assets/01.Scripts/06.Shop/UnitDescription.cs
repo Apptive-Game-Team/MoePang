@@ -18,27 +18,35 @@ namespace _01.Scripts._06.Shop
 
         private void Start()
         {
+            RefreshDescription();
+        }
+
+        public void RefreshDescription()
+        {
             FriendlyUnitData data = HabitatManager.Instance.SelectedUnitData;
 
             if (data == null)
             {
                 return;
             }
-        
             ApplyHabitatImage(data.Habitat);
 
             unitNameText.text = data.UnitName.ToString();
             descriptionText.text = data.UnitDescriptionText;
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
             unitAnimator.Play("Walk", 0, 0f);
-            unitStatText.text = 
-                $"Current Grade : null\n" +
+
+            unitStatText.text =
+                $"Level : {data.UnitLevel}\n" +
+                $"Current Grade : {data.UnitGrade}\n" +
                 $"Attack Type : {data.AttackType}\n" +
                 $"HP : {data.MaxHp}\n" +
                 $"Damage : {data.AttackDamage}\n" +
                 $"Attack Speed : {data.AttackSpeed}\n" +
                 $"Move Speed : {data.BaseMoveSpeed}";
-            unitUpgradeCostText.text = $"Upgrade : {data.UnitCost}";
+            bool unlocked = HabitatManager.Instance.IsUnlocked(data);
+            int cost = unlocked ? data.UnitCost : data.UnlockCost;
+            unitUpgradeCostText.text = unlocked ? $"Level Up : {cost}" : $"Unlock : {cost}";
         }
     
         private void ApplyHabitatImage(Habitat habitat)
