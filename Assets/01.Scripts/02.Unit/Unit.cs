@@ -313,11 +313,15 @@ public class Unit : MonoBehaviour, IDamageable
     /// <summary>
     /// 상대방이 공격범위에 들어왔는지 판별
     /// </summary>
-    protected virtual bool IsOtherInRange()
+    /*protected virtual bool IsOtherInRange()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right * direction, attackRange, targetLayer);
 
         return hit.collider != (null);
+    }*/
+    protected virtual bool IsOtherInRange()
+    {
+        return GetRaycastTarget() != null;
     }
     
     /// <summary>
@@ -349,7 +353,7 @@ public class Unit : MonoBehaviour, IDamageable
     /// <summary>
     /// 근접 공격
     /// </summary>
-    protected virtual void MeleeAttack()
+    /*protected virtual void MeleeAttack()
     {
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         IDamageable target = UTQ.Peek(enemyTeam);
@@ -399,6 +403,53 @@ public class Unit : MonoBehaviour, IDamageable
         {
             Debug.Log($"[{team}] {name} 공격했지만 타겟 없음");
         }
+    }*/
+    protected virtual void MeleeAttack()
+    {
+        IDamageable target = GetRaycastTarget();
+
+        if (target == null)
+        {
+            TeamType enemyTeam = team == TeamType.Friendly ? TeamType.Enemy : TeamType.Friendly;
+            target = UTQ.Peek(enemyTeam);
+        }
+
+        if (target == null)
+        {
+            Debug.Log($"[{team}] {name} 공격했지만 대상 없음");
+            return;
+        }
+
+        if (!IsTargetInAttackRange(target))
+        {
+            Debug.Log($"[AttackBlocked] target={target.GetName()}, type={target.GetType().Name}");
+            return;
+        }
+
+        target.TakeDamage(attackDamage);
+    }
+
+    private IDamageable GetRaycastTarget()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position,
+            Vector2.right * direction,
+            attackRange,
+            targetLayer
+        );
+
+        if (hit.collider == null)
+            return null;
+
+        IDamageable target = hit.collider.GetComponentInParent<IDamageable>();
+
+        if (target == null)
+            return null;
+
+        if (target.GetTeam() == team)
+            return null;
+
+        return target;
     }
 
     private bool IsTargetInAttackRange(IDamageable target)
