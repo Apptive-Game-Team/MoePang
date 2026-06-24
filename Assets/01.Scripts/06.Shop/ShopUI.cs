@@ -72,10 +72,16 @@ public class ShopUI : MonoBehaviour
 
     public void OnClick()
     {
-        if (!IsUnlocked)
+        if (!IsUnlocked && HabitatManager.Instance.CanUnlock(unitData))
         {
             SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             shopManager.UnlockUnit(unitData, RefreshUnlockState);
+            return;
+        }
+        
+        if (!HabitatManager.Instance.CanUnlock(unitData))
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             return;
         }
         
