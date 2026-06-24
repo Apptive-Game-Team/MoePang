@@ -36,6 +36,9 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI costText;
     [SerializeField] private TextMeshProUGUI tooltipText;
 
+    [Header("설명 UI")]
+    [SerializeField] private UnitDescription unitDescription;
+
     private ShopUI currentSelected;
     private UpgradeUI currentUpgradeSelected;
     private ItemObject currentItemSelected;
@@ -234,7 +237,7 @@ public class ShopManager : MonoBehaviour
 
         if (HabitatManager.Instance.IsUnlocked(unit))
         {
-            buyButtonText.text = "구매완료";
+            buyButtonText.text = $"Level Up : {unit.UnitCost}";
             return;
         }
 
@@ -244,7 +247,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        buyButtonText.text = "Buy";
+        buyButtonText.text = $"Buy : {unit.UnlockCost}";
     }
 
     public void OnClickBuy()
@@ -260,7 +263,8 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Buy requested: {unit.UnitName}, cost: {unit.UnitCost}, gold: {GoldManager.Instance.Gold}");
+        int cost = GetUnitPurchaseCost(unit);
+        Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
         BuyUnitImmediately(unit);
     }
 
@@ -305,28 +309,34 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        if (HabitatManager.Instance.IsUnlocked(unit))
-        {
-            Debug.Log($"Buy skipped: {unit.UnitName} is already unlocked.");
-            SetBuyButtonText("구매완료");
-            return;
-        }
+        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+        int cost = GetUnitPurchaseCost(unit);
 
-        if (!HabitatManager.Instance.CanUnlock(unit))
+        if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
         {
             Debug.LogWarning($"Buy failed: {unit.UnitName} cannot be unlocked yet.");
             SetBuyButtonText("앞에꺼사.");
             return;
         }
 
-        if (!GoldManager.Instance.TrySpendGold(unit.UnitCost))
+        if (!GoldManager.Instance.TrySpendGold(cost))
         {
-            Debug.LogWarning($"Buy failed: not enough gold. Current: {GoldManager.Instance.Gold}, Cost: {unit.UnitCost}");
+            Debug.LogWarning($"Buy failed: not enough gold. Current: {GoldManager.Instance.Gold}, Cost: {cost}");
             SetBuyButtonText("돈없엉");
             return;
         }
 
-        GoldManager.Instance.AdjustGold(-unit.UnitCost);
+        GoldManager.Instance.AdjustGold(-cost);
+
+        if (isUnlocked)
+        {
+            HabitatManager.Instance.IncreaseUnitLevel(unit);
+            Debug.Log($"Level up succeeded: {unit.UnitName}, level: {unit.UnitLevel}, remaining gold: {GoldManager.Instance.Gold}");
+            RefreshUnitDescription();
+            SetBuyButtonText($"Level Up : {unit.UnitCost}");
+            return;
+        }
+
         HabitatManager.Instance.Unlock(unit);
         Debug.Log($"Buy succeeded: {unit.UnitName}, remaining gold: {GoldManager.Instance.Gold}");
 
@@ -335,7 +345,31 @@ public class ShopManager : MonoBehaviour
             currentSelected.RefreshUnlockState();
         }
 
-        SetBuyButtonText("구매완료");
+        RefreshUnitDescription();
+        SetBuyButtonText($"Level Up : {unit.UnitCost}");
+    }
+
+    private int GetUnitPurchaseCost(FriendlyUnitData unit)
+    {
+        if (unit == null)
+        {
+            return 0;
+        }
+
+        return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
+    }
+
+    private void RefreshUnitDescription()
+    {
+        if (unitDescription == null)
+        {
+            unitDescription = FindObjectOfType<UnitDescription>();
+        }
+
+        if (unitDescription != null)
+        {
+            unitDescription.RefreshDescription();
+        }
     }
 
     private void SetBuyButtonText(string text)

@@ -40,10 +40,10 @@ public class UnitSpawner : MonoBehaviour
         friendlySpawnWeights = new List<List<int>>()
         {
             new() { 100 },
-            new() { 60, 40 },
-            new() { 50, 30, 20 },
-            new() { 40, 30, 20, 10 },
-            new() { 25, 25, 20, 15, 15 },
+            new() { 70, 30 },
+            new() { 60, 30, 10 },
+            new() { 50, 30, 15, 5 },
+            new() { 35, 25, 18, 14, 8 },
         };
     }
 
@@ -186,10 +186,11 @@ public class UnitSpawner : MonoBehaviour
     private EnemyUnitData SetEnemyData(List<EnemyUnitData> list)
     {
         int stage = StageManager.Instance.CurrentStage;
+        int currentStage = stage + 1;
 
-        if (stage >= 50)
+        if (currentStage >= 51)
         {
-            return list[^1];
+            return GetWeightedEnemyUnitByGrade(list, currentStage);
         }
         
         int cycleStep = stage % 10;
@@ -217,5 +218,38 @@ public class UnitSpawner : MonoBehaviour
         }
 
         return list[enemyStart];
+    }
+
+    private EnemyUnitData GetWeightedEnemyUnitByGrade(List<EnemyUnitData> list, int currentStage)
+    {
+        int totalWeight = 0;
+        List<int> weights = new();
+
+        foreach (EnemyUnitData unit in list)
+        {
+            int weight = BalanceFormula.GetEnemySpawnWeight(unit.UnitGrade, currentStage);
+            weights.Add(weight);
+            totalWeight += weight;
+        }
+
+        if (totalWeight <= 0)
+        {
+            return list[^1];
+        }
+
+        int pivot = Random.Range(1, totalWeight + 1);
+        int cumulative = 0;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            cumulative += weights[i];
+
+            if (pivot <= cumulative)
+            {
+                return list[i];
+            }
+        }
+
+        return list[^1];
     }
 }
