@@ -18,6 +18,7 @@ public class GoldManager : SingletonObject<GoldManager>
         base.Awake();
         
         gold = GameManager.Instance.playData.goldAmount;
+        dia = GameManager.Instance.playData.diaAmount;
     }
 
     public bool TrySpendGold(int amount)

@@ -244,7 +244,7 @@ namespace _01.Scripts._09.Item
                 new List<int> { 50, 50 },
                 new List<int> { 40, 30, 30 },
                 new List<int> { 30, 20, 30, 20 },
-                new List<int> { 10, 10, 30, 25, 25 },
+                new List<int> { 15, 18, 20, 22, 25 },
             };
             _spawner.friendlySpawnWeights = raisedProb;
             print("아군 고등급 기물 소환 확률 증가");

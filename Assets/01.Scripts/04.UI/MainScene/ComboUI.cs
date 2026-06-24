@@ -61,16 +61,17 @@ namespace _01.Scripts._04.UI.MainScene
                 {
                     if (comboLevels[type] < combo.info.ComboMaxLevel)
                     {
-                        if (!GoldManager.Instance.TrySpendGold(comboLevels[type] * 100))
+                        if (!GoldManager.Instance.TrySpendDia(comboLevels[type] * 100))
                         {
                             return;
                         }
                         
                         upgradeUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
-                            $"Level {type.ToString()} 콤보를 업그레이드 하시겠습니까?";
+                            $"{comboLevels[type] * 100}D\nLevel {type.ToString()} 콤보를 업그레이드 하시겠습니까?";
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
                         {
+                            GoldManager.Instance.AdjustDia(-comboLevels[type] * 100);
                             combo.UpgradeCombo();
                             GameManager.Instance.SaveGoldData();
                             GameManager.Instance.SaveComboData();
