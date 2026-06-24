@@ -33,23 +33,38 @@ namespace _01.Scripts._06.Shop
 
         private void RegisterUpgradeButton()
         {
+            if (_castleLevel >= 21)
+            {
+                castleUpgradeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Max Level";
+                castleUpgradeButton.interactable = false;
+            }
+            
+            int cost = _castleLevel <= 5
+                ? _castleLevel * castleData.BaseCost
+                : 600 + castleData.BaseCost * (_castleLevel - 6);
+            
             castleUpgradeButton.onClick.AddListener(() =>
             {
-                if (GoldManager.Instance.TrySpendGold(_castleLevel * castleData.BaseCost))
+                if (GoldManager.Instance.TrySpendGold(cost))
                 {
-                    _upgradePopup.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text =
-                        (_castleLevel * castleData.BaseCost) + "G";
+                    _upgradePopup.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = cost + "G";
                     _upgradePopup.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "강화하시겠습니까?";
                     _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.RemoveAllListeners();
                     _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
                     {
-                        GoldManager.Instance.AdjustGold(-_castleLevel * castleData.BaseCost);
+                        GoldManager.Instance.AdjustGold(-cost);
                         
                         _castleLevel++;
                         GameManager.Instance.castleData.castleLevel = _castleLevel;
                         GameManager.Instance.SaveCastleData();
 
                         UpdateText();
+                        
+                        if (_castleLevel >= 21)
+                        {
+                            castleUpgradeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Max Level";
+                            castleUpgradeButton.interactable = false;
+                        }
                         
                         _upgradePopup.SetActive(false);    
                     });

@@ -237,11 +237,11 @@ namespace _01.Scripts._01.ThreeMatch
                         continue;
                     }
                     
-                    float distance = Vector3.Distance(po.transform.position, targetPos);
+                    float distance = Vector3.Distance(po.transform.localPosition, targetPos);
                     float duration = distance / dropSpeed;
                     float startAt = columnDropDelay * i + rowDropDelay * j;
                     
-                    Tween fallTween = po.transform.DOMove(targetPos, duration)
+                    Tween fallTween = po.transform.DOLocalMove(targetPos, duration)
                         .SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
@@ -278,7 +278,8 @@ namespace _01.Scripts._01.ThreeMatch
             GameObject puzzle;
             if (isObstacle)
             {
-                puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], puzzleFrame);
+                puzzle.transform.localPosition = CalculateDropPos(col, row);
                 PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                 Habitat randomType = GetValidRandomType(col, row);
                 switch (po)
@@ -295,7 +296,8 @@ namespace _01.Scripts._01.ThreeMatch
             else
             {
                 Habitat randomType = GetValidRandomType(col, row);
-                puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], CalculateDropPos(col, row), Quaternion.identity, puzzleFrame);
+                puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], puzzleFrame);
+                puzzle.transform.localPosition = CalculateDropPos(col, row);
                 
                 float prob = Random.Range(0, 100f);
                 
@@ -321,7 +323,8 @@ namespace _01.Scripts._01.ThreeMatch
             var randomType = (Habitat)types.GetValue(Random.Range(0, types.Length));
             
             Vector3 startPos = CalculateDropPos(col, spawnOrder);
-            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], startPos, Quaternion.identity, puzzleFrame);
+            GameObject puzzle = Instantiate(normalPuzzlePrefabs[(int)randomType], puzzleFrame);
+            puzzle.transform.localPosition = startPos;
             puzzle.name = $"Puzzle({col + 1}, {row + 1})"; 
             
             float prob = Random.Range(0, 100f);
@@ -466,8 +469,7 @@ namespace _01.Scripts._01.ThreeMatch
             float offsetX = (x - 1) * space / 2f;
             float offsetY = (y - 1) * space / 2f;
             
-            return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
-                ,puzzleFrame.transform.position.y + row * space - offsetY, 0f);
+            return new Vector3(col * space - offsetX, row * space - offsetY, 0f);
         }
 
         private Vector3 CalculateDropPos(int col, int spawnOrder)
@@ -477,8 +479,7 @@ namespace _01.Scripts._01.ThreeMatch
             
             float spawnY = (y + spawnOrder) * space - offsetY;
 
-            return new Vector3(puzzleFrame.transform.position.x + col * space - offsetX
-                ,puzzleFrame.transform.position.y + spawnY, 0f);
+            return new Vector3(col * space - offsetX, spawnY, 0f);
         }
         #endregion
 
@@ -1240,7 +1241,7 @@ namespace _01.Scripts._01.ThreeMatch
 
                     if (group.resultType != null)
                     {
-                        Tween t1 = targetPuzzle.transform.DOMove(destination, 0.2f);
+                        Tween t1 = targetPuzzle.transform.DOLocalMove(destination, 0.2f);
                         seq2.Join(t1);
                     }
 
@@ -1302,7 +1303,7 @@ namespace _01.Scripts._01.ThreeMatch
                 if (group.resultType != null)
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
-                    newPuzzle.transform.position = destination;
+                    newPuzzle.transform.localPosition = destination;
                     newPuzzle.name = $"Puzzle({group.spawnPos.x + 1},{group.spawnPos.y + 1})";
                     newPuzzle.transform.localScale = Vector3.zero;
             
@@ -1383,11 +1384,11 @@ namespace _01.Scripts._01.ThreeMatch
 
                             Vector3 targetPos = CalculatePos(i, j);
                             
-                            float distance = Vector3.Distance(targetPo.transform.position, targetPos);
+                            float distance = Vector3.Distance(targetPo.transform.localPosition, targetPos);
                             float duration = distance / dropSpeed;
                             float startAt = columnDropDelay * i + rowDropDelay * j;
                             
-                            Tween fallTween = targetPo.transform.DOMove(targetPos, duration)
+                            Tween fallTween = targetPo.transform.DOLocalMove(targetPos, duration)
                                 .SetEase(Ease.InSine)
                                 .OnComplete(() => 
                                 {
@@ -1681,7 +1682,7 @@ namespace _01.Scripts._01.ThreeMatch
                 float speed = 7.5f;
                 float duration = distance / speed;
                 float jumpPower = distance * 0.3f;
-                    
+                
                 DOTween.To(
                         () => 0f,
                         t => {
