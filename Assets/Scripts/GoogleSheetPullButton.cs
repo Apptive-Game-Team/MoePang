@@ -2,8 +2,8 @@ using UnityEditor.Localization.Plugins.Google;
 using UnityEditor.Localization.Reporting;
 using UnityEditor.Localization;
 using UnityEditor;
-using UnityEngine;
 
+#if UNITY_EDITOR
 [InitializeOnLoad]
 public class GoogleSheetPullButton : Editor
 {
@@ -26,3 +26,4 @@ public class GoogleSheetPullButton : Editor
         //Debug.Log("Pulled localization data from Google Sheets.");
     }
 }
+#endif
