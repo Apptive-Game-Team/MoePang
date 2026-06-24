@@ -146,6 +146,7 @@ public class ShopManager : MonoBehaviour
 
     public void OnClickBack()
     {
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 
@@ -156,6 +157,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
@@ -167,6 +169,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         if (currentSelected == clickedUI)
         {
             currentSelected.Deselect();
@@ -195,6 +198,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         if (currentUpgradeSelected == clickedUI)
         {
             currentUpgradeSelected.Deselect();
@@ -216,6 +220,7 @@ public class ShopManager : MonoBehaviour
 
     public void OnClickItem(ItemObject clickedUI)
     {
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         currentItemSelected = currentItemSelected == clickedUI ? null : clickedUI;
         UpdateBuyButtonText();
     }
@@ -263,6 +268,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         int cost = GetUnitPurchaseCost(unit);
         Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
         BuyUnitImmediately(unit);
@@ -271,6 +277,9 @@ public class ShopManager : MonoBehaviour
     public void ConfirmPurchase()
     {
         FriendlyUnitData unit = GetSelectedUnit();
+        
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
 
         if (unit != null)
         {
@@ -420,6 +429,8 @@ public class ShopManager : MonoBehaviour
             itemTap.SetActive(false);
         }
 
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SetButtonSprite(0, 0);
         SetButtonSprite(2, 0);
 
@@ -447,6 +458,8 @@ public class ShopManager : MonoBehaviour
             itemTap.SetActive(false);
         }
 
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SetButtonSprite(1, 0);
         SetButtonSprite(2, 0);
 
@@ -474,6 +487,8 @@ public class ShopManager : MonoBehaviour
             animalsTap.SetActive(false);
         }
 
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SetButtonSprite(1, 0);
         SetButtonSprite(0, 0);
 

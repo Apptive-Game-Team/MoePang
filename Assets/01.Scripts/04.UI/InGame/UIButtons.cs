@@ -8,11 +8,13 @@ namespace _01.Scripts._04.UI.InGame
     {
         public void HomeButton()
         {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
         }
         
         public void NextStageButton()
         {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             StageManager.Instance.AddStage(1);
             StageManager.Instance.StartStage();
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
@@ -20,6 +22,7 @@ namespace _01.Scripts._04.UI.InGame
 
         public void RestartButton()
         {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             StageManager.Instance.StartStage();
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }

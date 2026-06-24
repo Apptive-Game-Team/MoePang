@@ -69,12 +69,15 @@ namespace _01.Scripts._06.Shop
                         _upgradePopup.SetActive(false);    
                     });
                     
+                    SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
                     _upgradePopup.SetActive(true);
                 }
             });
 
             _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
+                // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
         }
