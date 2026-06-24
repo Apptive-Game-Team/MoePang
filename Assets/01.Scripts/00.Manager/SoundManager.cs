@@ -204,6 +204,28 @@ public class SoundManager : SingletonObject<SoundManager>
         // 기존 PlayBgm 호출
         PlayBgm(randomBgm, isLoop);
     }
+    public void StartBGMRandomLoop(BGM[] bgmList)
+    {
+        if (isBGMLooping) return;
+
+        StopCoroutine("BGMRandomLoopByList");
+        StartCoroutine(BGMRandomLoopByList(bgmList));
+        isBGMLooping = true;
+    }
+
+    IEnumerator BGMRandomLoopByList(BGM[] bgmList)
+    {
+        while (true)
+        {
+            if (!bgmPlayer.isPlaying)
+            {
+                BGM randomBgm = bgmList[UnityEngine.Random.Range(0, bgmList.Length)];
+                PlayBgm(randomBgm, false);
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
+    }
     // BGM을 멈춤
     public void StopBgm()
     {
