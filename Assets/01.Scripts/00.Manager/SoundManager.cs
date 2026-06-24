@@ -100,6 +100,14 @@ public class SoundManager : SingletonObject<SoundManager>
         base.Awake();
         Init();
     }
+
+    private void Start()
+    {
+        MasterSoundVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        BGMSoundVolume = PlayerPrefs.GetFloat("BGMVolume", 1f);
+        SFXSoundVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+    }
+    
     // 초기화 BGM은 메인과 버퍼 2개가 있으며 SFX는 채널수를 지정해서 그 갯수만큼 만듦
     public void Init()
     {
