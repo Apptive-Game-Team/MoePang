@@ -532,8 +532,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Upgrade :  999'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 540a99f3404b4a1439eb58a78320f939, type: 2}
-  m_sharedMaterial: {fileID: -7741939688891927508, guid: 540a99f3404b4a1439eb58a78320f939, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c79b04c8355c26a4696edd187a415dd4, type: 2}
+  m_sharedMaterial: {fileID: 1039494504195763692, guid: c79b04c8355c26a4696edd187a415dd4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -795,6 +795,7 @@ MonoBehaviour:
   buyPopup: {fileID: 0}
   costText: {fileID: 0}
   tooltipText: {fileID: 0}
+  unitDescription: {fileID: 0}
 --- !u!1 &1343039498
 GameObject:
   m_ObjectHideFlags: 0
