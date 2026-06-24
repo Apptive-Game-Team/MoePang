@@ -1,7 +1,5 @@
 using _01.Scripts._00.Manager;
-using NUnit.Framework.Constraints;
 using System.Collections;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
