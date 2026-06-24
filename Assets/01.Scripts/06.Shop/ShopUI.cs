@@ -74,6 +74,8 @@ public class ShopUI : MonoBehaviour
     {
         if (!IsUnlocked)
         {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            shopManager.UnlockUnit(unitData, RefreshUnlockState);
             return;
         }
         

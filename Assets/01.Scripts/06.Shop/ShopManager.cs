@@ -1,6 +1,7 @@
 ﻿using _01.Scripts._00.Manager;
 using _01.Scripts._06.Shop;
 using _01.Scripts._08.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -26,6 +27,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private GameObject itemTap;
     [SerializeField] private Image[] buttonImages;
     [SerializeField] private Sprite[] buttonSprite;
+    [SerializeField] private Image unlockPanel;
 
     [Header("버튼")]
     [SerializeField] private Button animalsTapButton;
@@ -512,5 +514,43 @@ public class ShopManager : MonoBehaviour
         {
             buttonImages[imageIndex].sprite = buttonSprite[spriteIndex];
         }
+    }
+
+    public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
+    {
+        unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"{unitData.UnlockCost}G\n해금하시겠습니까?";
+        
+        Button yesButton = unlockPanel.transform.GetChild(2).GetComponent<Button>();
+
+        if (GoldManager.Instance.TrySpendGold(unitData.UnlockCost))
+        {
+            yesButton.onClick.RemoveAllListeners();
+            yesButton.onClick.AddListener(() =>
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                GoldManager.Instance.AdjustGold(-unitData.UnlockCost);
+                HabitatManager.Instance.Unlock(unitData);
+                refreshAction.Invoke();
+                if (currentSelected != null)
+                {
+                    currentSelected.RefreshUnlockState();
+                }
+                unlockPanel.gameObject.SetActive(false);
+            });
+        }
+        else
+        {
+            yesButton.interactable = false;
+        }
+        
+        Button noButton = unlockPanel.transform.GetChild(3).GetComponent<Button>();
+        noButton.onClick.RemoveAllListeners();
+        noButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            unlockPanel.gameObject.SetActive(false);
+        });
+        
+        unlockPanel.gameObject.SetActive(true);
     }
 }
