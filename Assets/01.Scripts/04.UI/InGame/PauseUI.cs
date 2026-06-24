@@ -10,5 +10,10 @@ namespace _01.Scripts._04.UI.InGame
             Time.timeScale = show ? 0 : 1;
             gameObject.SetActive(show);
         }
+
+        private void OnDisable()
+        {
+            Time.timeScale = 1;
+        }
     }
 }
