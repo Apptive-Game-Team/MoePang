@@ -315,14 +315,14 @@ public class ShopManager : MonoBehaviour
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
         {
             Debug.LogWarning($"Buy failed: {unit.UnitName} cannot be unlocked yet.");
-            SetBuyButtonText("앞에꺼사.");
+            SetBuyButtonText("해금 불가");
             return;
         }
 
         if (!GoldManager.Instance.TrySpendGold(cost))
         {
             Debug.LogWarning($"Buy failed: not enough gold. Current: {GoldManager.Instance.Gold}, Cost: {cost}");
-            SetBuyButtonText("돈없엉");
+            SetBuyButtonText("골드 부족");
             return;
         }
 

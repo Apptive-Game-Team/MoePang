@@ -72,6 +72,11 @@ public class ShopUI : MonoBehaviour
 
     public void OnClick()
     {
+        if (!IsUnlocked)
+        {
+            return;
+        }
+        
         shopManager.OnClickUnit(this);
     }
 
