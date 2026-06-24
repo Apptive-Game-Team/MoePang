@@ -24,19 +24,20 @@ namespace _01.Scripts._06.Shop
 
             foreach (ItemObject item in items)
             {
-                item.Init(itemData.items.Find(i => i.type == item.type));
+                ItemInfo info = itemData.items.Find(i => i.type == item.type);
+                item.Init(info);
                 item.UpdateAmount();
                 
                 item.transform.GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
-                    if (GoldManager.Instance.TrySpendGold(100))
+                    if (GoldManager.Instance.TrySpendGold(info.price))
                     {
-                        _upgradePopup.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = 100 + "G";
+                        _upgradePopup.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = info.price + "G";
                         _upgradePopup.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "구매하시겠습니까?";
                         _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.RemoveAllListeners();
                         _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
                         {
-                            GoldManager.Instance.AdjustGold(-100);
+                            GoldManager.Instance.AdjustGold(-info.price);
 
                             GameManager.Instance.itemData.ItemAmounts[item.type]++;
                             GameManager.Instance.SaveItemData();
