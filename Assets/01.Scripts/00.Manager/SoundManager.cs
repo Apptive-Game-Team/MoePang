@@ -9,6 +9,8 @@ public enum BGM
 {
     //규칙 : BGM0_Default
     BGM0_Default,
+    BGM1_Title1,
+    BGM1_Title2,
 
     Count //Count체크용 enum, 삭제 금지
 }
@@ -18,6 +20,7 @@ public enum SFX
 {
     //규칙 : SFX0_Default
     SFX0_Default,
+    SFX1_ButtonClick,
 
     Count //Count체크용 enum, 삭제 금지
 }
