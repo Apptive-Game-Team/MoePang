@@ -10,7 +10,7 @@ namespace _01.Scripts._11.HabitatMode
 {
     public class HabitatModeManager : SingletonObject<HabitatModeManager>
     {
-        [SerializeField] private HabitatMode habitatMode = HabitatMode.MeadowMode;
+        public HabitatMode habitatMode = HabitatMode.MeadowMode;
         
         [Header("Ocean Debuff")]
         [SerializeField] private float oceanEnemyStatMultiplier = 1.5f;
@@ -73,13 +73,13 @@ namespace _01.Scripts._11.HabitatMode
                 return;
             }
 
+            spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
+            puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+            
             if (!isHabitatBattle)
             {
                 return;
             }
-            
-            spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
-            puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
             
             Debug.Log("Habitat Battle Start!");
 
@@ -135,6 +135,8 @@ namespace _01.Scripts._11.HabitatMode
 
         public bool IsHabitatModeEventDay(HabitatMode mode)
         {
+            return false;
+            
             DayOfWeek koreaDay = GetKoreaDayOfWeek();
 
             if (koreaDay == DayOfWeek.Saturday || koreaDay == DayOfWeek.Sunday)

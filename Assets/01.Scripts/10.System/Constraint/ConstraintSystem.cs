@@ -1,4 +1,6 @@
 using _01.Scripts._01.ThreeMatch;
+using _01.Scripts._11.HabitatMode;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,6 +46,7 @@ namespace _01.Scripts._10.System.Constraint
         [SerializeField] private TextMeshProUGUI constraintText;
         [SerializeField] private Image constraintImage;
         [SerializeField] private TextMeshProUGUI constraintCount;
+        [SerializeField] private TextMeshProUGUI highConstraintText;
         
         [Header("Constraint Settings")]
         [SerializeField] private int constraintApplyInterval;
@@ -55,22 +58,31 @@ namespace _01.Scripts._10.System.Constraint
             _constraintContext = new ConstraintContext(puzzle, unitSpawner, spawnStacks);
             _constraintRouletteSystem = GetComponent<ConstraintRouletteSystem>();
             _constraintRouletteSystem.InitializeItems();
-            
-            // 스테이지 조건 추가
-            StartCoroutine(StartRoulette());
+
+            bool setMiddleConstraint = StageManager.Instance.CurrentStage % 10 == 4;
+            if (setMiddleConstraint)
+            {
+                StartCoroutine(StartRoulette());
+            }
+
+            bool setHighConstraint = StageManager.Instance.CurrentStage % 10 == 9;
+            if (setHighConstraint)
+            {
+                StartCoroutine(ApplyHighConstraint());
+            }
         }
 
         private IEnumerator StartRoulette()
         {
             rouletteObject.SetActive(true);
             Time.timeScale = 0f;
-            yield return _constraintRouletteSystem.StartRoulette(ApplyConstraint);
+            yield return _constraintRouletteSystem.StartRoulette(ApplyMiddleConstraint);
             yield return new WaitForSecondsRealtime(1f);
             Time.timeScale = 1f;
             rouletteObject.SetActive(false);
         }
 
-        private void ApplyConstraint(ConstraintType type)
+        private void ApplyMiddleConstraint(ConstraintType type)
         {
             Constraint constraint = constraints.First(c => c.type == type);
             constraint.ApplyConstraint(_constraintContext);
@@ -96,6 +108,54 @@ namespace _01.Scripts._10.System.Constraint
         private void RegisterSwapCountConstraint(int count)
         {
             constraintCount.text = count.ToString();
+        }
+
+        private IEnumerator ApplyHighConstraint()
+        {
+            Time.timeScale = 0f;
+            
+            HabitatMode type = (HabitatMode)(StageManager.Instance.CurrentStage / 10);
+            SetHighConstraintText(type);
+            highConstraintText.transform.parent.gameObject.SetActive(true);
+            
+            CanvasGroup cg = highConstraintText.GetComponentInParent<CanvasGroup>();
+            Sequence sq = DOTween.Sequence();
+            sq.SetUpdate(true);
+            sq.Append(cg.DOFade(1f, 0.5f));
+            sq.Append(cg.DOFade(0f, 0.5f));
+            sq.Append(cg.DOFade(1f, 0.5f));
+            sq.Append(cg.DOFade(0f, 0.5f));
+            sq.Append(cg.DOFade(1f, 0.5f));
+
+            yield return new WaitForSecondsRealtime(3f);
+            
+            HabitatModeManager.Instance.habitatMode = type;
+            HabitatModeManager.Instance.ApplyHabitatModeEffect();
+
+            highConstraintText.transform.parent.gameObject.SetActive(false);
+            Time.timeScale = 1f;
+        }
+
+        private void SetHighConstraintText(HabitatMode mode)
+        {
+            switch (mode)
+            {
+                case HabitatMode.MeadowMode:
+                    highConstraintText.text = "기물을 소환하는데 더 많은 스택을 필요로 합니다.";
+                    break;
+                case HabitatMode.OceanMode:
+                    highConstraintText.text = "적의 공격속도, 공격력, 이동속도가 증가합니다.";
+                    break;
+                case HabitatMode.DesertMode:
+                    highConstraintText.text = "일정 시간마다 모래바람이 불어 퍼즐 테이블이 잠시 가려집니다.";
+                    break;
+                case HabitatMode.ForestMode:
+                    highConstraintText.text = "적의 체력이 일정 시간마다 회복됩니다.";
+                    break;
+                case HabitatMode.PolarMode:
+                    highConstraintText.text = "아군의 이동속도와 공격속도가 느려집니다.";
+                    break;
+            }
         }
     }
 }

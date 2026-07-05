@@ -1,6 +1,7 @@
 ﻿using _01.Scripts._00.Manager;
 using _01.Scripts._06.Shop;
 using _01.Scripts._08.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -26,6 +27,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private GameObject itemTap;
     [SerializeField] private Image[] buttonImages;
     [SerializeField] private Sprite[] buttonSprite;
+    [SerializeField] private Image unlockPanel;
 
     [Header("버튼")]
     [SerializeField] private Button animalsTapButton;
@@ -146,6 +148,7 @@ public class ShopManager : MonoBehaviour
 
     public void OnClickBack()
     {
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 
@@ -156,6 +159,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
@@ -167,6 +171,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         if (currentSelected == clickedUI)
         {
             currentSelected.Deselect();
@@ -195,6 +200,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         if (currentUpgradeSelected == clickedUI)
         {
             currentUpgradeSelected.Deselect();
@@ -216,6 +222,7 @@ public class ShopManager : MonoBehaviour
 
     public void OnClickItem(ItemObject clickedUI)
     {
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         currentItemSelected = currentItemSelected == clickedUI ? null : clickedUI;
         UpdateBuyButtonText();
     }
@@ -263,6 +270,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         int cost = GetUnitPurchaseCost(unit);
         Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
         BuyUnitImmediately(unit);
@@ -271,6 +279,9 @@ public class ShopManager : MonoBehaviour
     public void ConfirmPurchase()
     {
         FriendlyUnitData unit = GetSelectedUnit();
+        
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
 
         if (unit != null)
         {
@@ -315,14 +326,14 @@ public class ShopManager : MonoBehaviour
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
         {
             Debug.LogWarning($"Buy failed: {unit.UnitName} cannot be unlocked yet.");
-            SetBuyButtonText("앞에꺼사.");
+            SetBuyButtonText("해금 불가");
             return;
         }
 
         if (!GoldManager.Instance.TrySpendGold(cost))
         {
             Debug.LogWarning($"Buy failed: not enough gold. Current: {GoldManager.Instance.Gold}, Cost: {cost}");
-            SetBuyButtonText("돈없엉");
+            SetBuyButtonText("골드 부족");
             return;
         }
 
@@ -420,6 +431,8 @@ public class ShopManager : MonoBehaviour
             itemTap.SetActive(false);
         }
 
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SetButtonSprite(0, 0);
         SetButtonSprite(2, 0);
 
@@ -447,6 +460,8 @@ public class ShopManager : MonoBehaviour
             itemTap.SetActive(false);
         }
 
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SetButtonSprite(1, 0);
         SetButtonSprite(2, 0);
 
@@ -474,6 +489,8 @@ public class ShopManager : MonoBehaviour
             animalsTap.SetActive(false);
         }
 
+        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SetButtonSprite(1, 0);
         SetButtonSprite(0, 0);
 
@@ -497,5 +514,43 @@ public class ShopManager : MonoBehaviour
         {
             buttonImages[imageIndex].sprite = buttonSprite[spriteIndex];
         }
+    }
+
+    public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
+    {
+        unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"{unitData.UnlockCost}G\n해금하시겠습니까?";
+        
+        Button yesButton = unlockPanel.transform.GetChild(2).GetComponent<Button>();
+
+        if (GoldManager.Instance.TrySpendGold(unitData.UnlockCost))
+        {
+            yesButton.onClick.RemoveAllListeners();
+            yesButton.onClick.AddListener(() =>
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                GoldManager.Instance.AdjustGold(-unitData.UnlockCost);
+                HabitatManager.Instance.Unlock(unitData);
+                refreshAction.Invoke();
+                if (currentSelected != null)
+                {
+                    currentSelected.RefreshUnlockState();
+                }
+                unlockPanel.gameObject.SetActive(false);
+            });
+        }
+        else
+        {
+            yesButton.interactable = false;
+        }
+        
+        Button noButton = unlockPanel.transform.GetChild(3).GetComponent<Button>();
+        noButton.onClick.RemoveAllListeners();
+        noButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            unlockPanel.gameObject.SetActive(false);
+        });
+        
+        unlockPanel.gameObject.SetActive(true);
     }
 }

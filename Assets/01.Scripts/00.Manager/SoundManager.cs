@@ -9,6 +9,8 @@ public enum BGM
 {
     //규칙 : BGM0_Default
     BGM0_Default,
+    BGM1_Title1,
+    BGM1_Title2,
 
     Count //Count체크용 enum, 삭제 금지
 }
@@ -18,6 +20,7 @@ public enum SFX
 {
     //규칙 : SFX0_Default
     SFX0_Default,
+    SFX1_ButtonClick,
 
     Count //Count체크용 enum, 삭제 금지
 }
@@ -97,6 +100,14 @@ public class SoundManager : SingletonObject<SoundManager>
         base.Awake();
         Init();
     }
+
+    private void Start()
+    {
+        MasterSoundVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        BGMSoundVolume = PlayerPrefs.GetFloat("BGMVolume", 1f);
+        SFXSoundVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+    }
+    
     // 초기화 BGM은 메인과 버퍼 2개가 있으며 SFX는 채널수를 지정해서 그 갯수만큼 만듦
     public void Init()
     {
@@ -200,6 +211,28 @@ public class SoundManager : SingletonObject<SoundManager>
 
         // 기존 PlayBgm 호출
         PlayBgm(randomBgm, isLoop);
+    }
+    public void StartBGMRandomLoop(BGM[] bgmList)
+    {
+        if (isBGMLooping) return;
+
+        StopCoroutine("BGMRandomLoopByList");
+        StartCoroutine(BGMRandomLoopByList(bgmList));
+        isBGMLooping = true;
+    }
+
+    IEnumerator BGMRandomLoopByList(BGM[] bgmList)
+    {
+        while (true)
+        {
+            if (!bgmPlayer.isPlaying)
+            {
+                BGM randomBgm = bgmList[UnityEngine.Random.Range(0, bgmList.Length)];
+                PlayBgm(randomBgm, false);
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
     }
     // BGM을 멈춤
     public void StopBgm()

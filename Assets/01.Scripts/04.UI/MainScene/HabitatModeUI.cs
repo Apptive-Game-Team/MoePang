@@ -44,6 +44,8 @@ namespace _01.Scripts._04.UI.MainScene
 
         public void StartMode()
         {
+            // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             HabitatModeManager.Instance.IsHabitatBattle = true;
             HabitatModeManager.Instance.HabitatMode = selectedMode;
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
@@ -51,11 +53,15 @@ namespace _01.Scripts._04.UI.MainScene
 
         public void ClosePanel()
         {
+            // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             gameObject.SetActive(false);
         }
 
         private void SelectMode(HabitatMode mode)
         {
+            // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             selectedMode = mode;
             HabitatModeManager.Instance.HabitatMode = mode;
 
@@ -173,6 +179,8 @@ namespace _01.Scripts._04.UI.MainScene
                 StopCoroutine(guideCoroutine);
             }
 
+            // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             guideCoroutine = StartCoroutine(ShowGuideRoutine());
         }
 

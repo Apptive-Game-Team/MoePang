@@ -65,7 +65,7 @@ namespace _01.Scripts._04.UI.MainScene
                         {
                             return;
                         }
-                        
+                        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
                         upgradeUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
                             $"{comboLevels[type] * 100}D\nLevel {type.ToString()} 콤보를 업그레이드 하시겠습니까?";
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
@@ -112,6 +112,7 @@ namespace _01.Scripts._04.UI.MainScene
             {
                 _isComboOrdering = !_isComboOrdering;
                 
+                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
                 comboOrderButton.GetComponentInChildren<TextMeshProUGUI>().text = _isComboOrdering ? "콤보 정렬 완료" : "콤보 정렬";
                 foreach (ComboUIObject ui in content.transform.GetComponentsInChildren<ComboUIObject>())
                 {

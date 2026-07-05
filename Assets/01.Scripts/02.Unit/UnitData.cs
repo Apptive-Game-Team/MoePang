@@ -1,4 +1,3 @@
-using UnityEditor.Animations;
 using UnityEngine;
 
 /// <summary>

@@ -248,6 +248,10 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(itemData, "ItemData");
             SaveLoadManager.Instance.LoadData(comboData, "ComboData");
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
+            
+            SoundManager.Instance.StartBGMRandomLoop(
+                new BGM[] { BGM.BGM1_Title1, BGM.BGM1_Title2 }
+            );
         }
         
         public static void DictionaryToLists<TKey, TValue>(Dictionary<TKey, TValue> dict, out List<TKey> keys, out List<TValue> values)
