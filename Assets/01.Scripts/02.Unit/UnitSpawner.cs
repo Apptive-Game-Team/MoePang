@@ -187,11 +187,6 @@ public class UnitSpawner : MonoBehaviour
     {
         int stage = StageManager.Instance.CurrentStage;
 
-        if (stage >= 16)
-        {
-            return list[3];
-        }
-
         if (stage >= 50)
         {
             return list[^1];
