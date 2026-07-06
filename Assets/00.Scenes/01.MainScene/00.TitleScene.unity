@@ -367,6 +367,7 @@ MonoBehaviour:
   unitList: {fileID: 11400000, guid: 8e580ec5e42e6724692e5ad18959cef8, type: 2}
   playData:
     goldAmount: 0
+    diaAmount: 0
     clearedStage: -1
     stagesData:
     - stageNum: 0
@@ -574,6 +575,8 @@ MonoBehaviour:
   unitData:
     unitKeys: []
     unitValues: 
+    unitLevelKeys: []
+    unitLevelValues: 
   itemData:
     items: 
     amounts: 
