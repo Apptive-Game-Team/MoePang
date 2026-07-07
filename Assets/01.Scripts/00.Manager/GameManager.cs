@@ -2,6 +2,7 @@ using _01.Scripts._06.Shop;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using _01.Scripts._11.HabitatMode;
 
 namespace _01.Scripts._00.Manager
 {
@@ -12,6 +13,12 @@ namespace _01.Scripts._00.Manager
         public int diaAmount;
         public int clearedStage;
         public List<StageData> stagesData;
+        
+        public int clearedMeadowHabitatStage;
+        public int clearedOceanHabitatStage;
+        public int clearedDesertHabitatStage;
+        public int clearedForestHabitatStage;
+        public int clearedPolarHabitatStage;
 
         public PlayData()
         {
@@ -291,8 +298,23 @@ namespace _01.Scripts._00.Manager
             playData.goldAmount = goldManager.Gold;
             playData.diaAmount = goldManager.Dia;
             
-            playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
-            stageManager.SetMaxStage(playData.clearedStage);
+            if (HabitatModeManager.Instance != null && HabitatModeManager.Instance.IsHabitatBattle)
+            {
+                HabitatMode mode = HabitatModeManager.Instance.HabitatMode;
+                int clearedHabitatStage = stageManager.CurrentHabitatStage + 1;
+
+                SetClearedHabitatStage(
+                    mode,
+                    Mathf.Max(GetClearedHabitatStage(mode), clearedHabitatStage)
+                );
+
+                stageManager.SetMaxHabitatStage(mode, GetClearedHabitatStage(mode));
+            }
+            else
+            {
+                playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
+                stageManager.SetMaxStage(playData.clearedStage);
+            }
 
             StageData stageData = playData.stagesData[stageManager.CurrentStage];
             stageData.stageNum = stageManager.CurrentStage + 1;
@@ -343,6 +365,41 @@ namespace _01.Scripts._00.Manager
             playData.goldAmount = GoldManager.Instance.Gold;
             playData.diaAmount = GoldManager.Instance.Dia;
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
+        }
+        
+        public int GetClearedHabitatStage(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => playData.clearedMeadowHabitatStage,
+                HabitatMode.OceanMode => playData.clearedOceanHabitatStage,
+                HabitatMode.DesertMode => playData.clearedDesertHabitatStage,
+                HabitatMode.ForestMode => playData.clearedForestHabitatStage,
+                HabitatMode.PolarMode => playData.clearedPolarHabitatStage,
+                _ => playData.clearedMeadowHabitatStage
+            };
+        }
+
+        private void SetClearedHabitatStage(HabitatMode mode, int stage)
+        {
+            switch (mode)
+            {
+                case HabitatMode.MeadowMode:
+                    playData.clearedMeadowHabitatStage = stage;
+                    break;
+                case HabitatMode.OceanMode:
+                    playData.clearedOceanHabitatStage = stage;
+                    break;
+                case HabitatMode.DesertMode:
+                    playData.clearedDesertHabitatStage = stage;
+                    break;
+                case HabitatMode.ForestMode:
+                    playData.clearedForestHabitatStage = stage;
+                    break;
+                case HabitatMode.PolarMode:
+                    playData.clearedPolarHabitatStage = stage;
+                    break;
+            }
         }
     }
 }

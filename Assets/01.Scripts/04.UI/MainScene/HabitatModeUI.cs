@@ -22,6 +22,11 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private float showTime = 3f;
         [SerializeField] private float fadeTime = 2f;
+        
+        [Header("Stage Card Setting")]
+        [SerializeField] private GameObject previousStageButton;
+        [SerializeField] private GameObject nextStageButton;
+        [SerializeField] private TextMeshProUGUI stageText;
 
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
         private Coroutine guideCoroutine;
@@ -53,7 +58,21 @@ namespace _01.Scripts._04.UI.MainScene
             SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             HabitatModeManager.Instance.IsHabitatBattle = true;
             HabitatModeManager.Instance.HabitatMode = selectedMode;
+            
+            
+            StageManager.Instance.SetHabitatStage(
+                selectedMode,
+                StageManager.Instance.GetHabitatStage(selectedMode)
+            );
+
+            SceneManager.sceneLoaded += OnHabitatPlaySceneLoaded;
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+        }
+        
+        private void OnHabitatPlaySceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            StageManager.Instance.StartStage();
+            SceneManager.sceneLoaded -= OnHabitatPlaySceneLoaded;
         }
 
         public void ClosePanel()
@@ -93,6 +112,48 @@ namespace _01.Scripts._04.UI.MainScene
             if (currentBonusText != null)
             {
                 currentBonusText.text = GetModeCurrentBonusText(mode);
+            }
+            
+            StageManager.Instance.SetHabitatStage(
+                selectedMode,
+                StageManager.Instance.GetHabitatStage(selectedMode)
+            );
+            
+            RefreshStageUI();
+        }
+        
+        public void OnClickNextStage()
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            StageManager.Instance.AddHabitatStage(selectedMode, 1);
+            RefreshStageUI();
+        }
+
+        public void OnClickPrevStage()
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            StageManager.Instance.AddHabitatStage(selectedMode, -1);
+            RefreshStageUI();
+        }
+
+        private void RefreshStageUI()
+        {
+            int currentStage = StageManager.Instance.GetHabitatStage(selectedMode);
+            int maxStage = StageManager.Instance.GetMaxHabitatStage(selectedMode);
+
+            if (stageText != null)
+            {
+                stageText.text = $"Stage : {currentStage + 1}";
+            }
+
+            if (previousStageButton != null)
+            {
+                previousStageButton.SetActive(currentStage > 0);
+            }
+
+            if (nextStageButton != null)
+            {
+                nextStageButton.SetActive(currentStage < maxStage);
             }
         }
 

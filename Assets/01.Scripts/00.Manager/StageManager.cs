@@ -11,27 +11,20 @@ public class StageManager : SingletonObject<StageManager>
     public float CurrentTime { get; private set; }
     public int UsedTileCount { get; private set; }
     public bool IsTimerRunning { get; private set; }
+    
+    public int MaxMeadowHabitatStage { get; private set; }
+    public int MaxOceanHabitatStage { get; private set; }
+    public int MaxDesertHabitatStage { get; private set; }
+    public int MaxForestHabitatStage { get; private set; }
+    public int MaxPolarHabitatStage { get; private set; }
+    
     public int CurrentMeadowHabitatStage { get; private set; }
     public int CurrentOceanHabitatStage { get; private set; }
     public int CurrentDesertHabitatStage { get; private set; }
     public int CurrentForestHabitatStage { get; private set; }
     public int CurrentPolarHabitatStage { get; private set; }
 
-    public int CurrentHabitatStage
-    {
-        get
-        {
-            return HabitatModeManager.Instance.HabitatMode switch
-            {
-                HabitatMode.MeadowMode => CurrentMeadowHabitatStage,
-                HabitatMode.OceanMode => CurrentOceanHabitatStage,
-                HabitatMode.DesertMode => CurrentDesertHabitatStage,
-                HabitatMode.ForestMode => CurrentForestHabitatStage,
-                HabitatMode.PolarMode => CurrentPolarHabitatStage,
-                _ => CurrentMeadowHabitatStage
-            };
-        }
-    }
+    public int CurrentHabitatStage => GetHabitatStage(HabitatModeManager.Instance.HabitatMode);
     
     public int DifficultyStage
     {
@@ -55,6 +48,18 @@ public class StageManager : SingletonObject<StageManager>
         
         MaxStage = GameManager.Instance.playData.clearedStage;
         CurrentStage = MaxStage;
+        
+        MaxMeadowHabitatStage = GameManager.Instance.playData.clearedMeadowHabitatStage;
+        MaxOceanHabitatStage = GameManager.Instance.playData.clearedOceanHabitatStage;
+        MaxDesertHabitatStage = GameManager.Instance.playData.clearedDesertHabitatStage;
+        MaxForestHabitatStage = GameManager.Instance.playData.clearedForestHabitatStage;
+        MaxPolarHabitatStage = GameManager.Instance.playData.clearedPolarHabitatStage;
+
+        CurrentMeadowHabitatStage = MaxMeadowHabitatStage;
+        CurrentOceanHabitatStage = MaxOceanHabitatStage;
+        CurrentDesertHabitatStage = MaxDesertHabitatStage;
+        CurrentForestHabitatStage = MaxForestHabitatStage;
+        CurrentPolarHabitatStage = MaxPolarHabitatStage;
     }
     
     private void Update()
@@ -113,9 +118,35 @@ public class StageManager : SingletonObject<StageManager>
         FindAnyObjectByType<GameOverUI>(FindObjectsInactive.Include).gameObject.SetActive(true);
     }
     
+    public int GetHabitatStage(HabitatMode mode)
+    {
+        return mode switch
+        {
+            HabitatMode.MeadowMode => CurrentMeadowHabitatStage,
+            HabitatMode.OceanMode => CurrentOceanHabitatStage,
+            HabitatMode.DesertMode => CurrentDesertHabitatStage,
+            HabitatMode.ForestMode => CurrentForestHabitatStage,
+            HabitatMode.PolarMode => CurrentPolarHabitatStage,
+            _ => CurrentMeadowHabitatStage
+        };
+    }
+    
+    public int GetMaxHabitatStage(HabitatMode mode)
+    {
+        return mode switch
+        {
+            HabitatMode.MeadowMode => MaxMeadowHabitatStage,
+            HabitatMode.OceanMode => MaxOceanHabitatStage,
+            HabitatMode.DesertMode => MaxDesertHabitatStage,
+            HabitatMode.ForestMode => MaxForestHabitatStage,
+            HabitatMode.PolarMode => MaxPolarHabitatStage,
+            _ => MaxMeadowHabitatStage
+        };
+    }
+    
     public void SetHabitatStage(HabitatMode mode, int stage)
     {
-        stage = Mathf.Max(0, stage);
+        stage = Mathf.Clamp(stage, 0, GetMaxHabitatStage(mode));
 
         switch (mode)
         {
@@ -142,16 +173,27 @@ public class StageManager : SingletonObject<StageManager>
         SetHabitatStage(mode, GetHabitatStage(mode) + num);
     }
 
-    public int GetHabitatStage(HabitatMode mode)
+    public void SetMaxHabitatStage(HabitatMode mode, int stage)
     {
-        return mode switch
+        stage = Mathf.Max(0, stage);
+
+        switch (mode)
         {
-            HabitatMode.MeadowMode => CurrentMeadowHabitatStage,
-            HabitatMode.OceanMode => CurrentOceanHabitatStage,
-            HabitatMode.DesertMode => CurrentDesertHabitatStage,
-            HabitatMode.ForestMode => CurrentForestHabitatStage,
-            HabitatMode.PolarMode => CurrentPolarHabitatStage,
-            _ => CurrentMeadowHabitatStage
-        };
+            case HabitatMode.MeadowMode:
+                MaxMeadowHabitatStage = stage;
+                break;
+            case HabitatMode.OceanMode:
+                MaxOceanHabitatStage = stage;
+                break;
+            case HabitatMode.DesertMode:
+                MaxDesertHabitatStage = stage;
+                break;
+            case HabitatMode.ForestMode:
+                MaxForestHabitatStage = stage;
+                break;
+            case HabitatMode.PolarMode:
+                MaxPolarHabitatStage = stage;
+                break;
+        }
     }
 }
