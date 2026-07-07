@@ -44,6 +44,11 @@ namespace _01.Scripts._04.UI.MainScene
 
         public void StartMode()
         {
+            if (StageManager.Instance.MaxStage <= 50)
+            {
+                Debug.Log("아직 50스테이지 안깼어, 근데 일단은 실행됨");
+            }
+            
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
             SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             HabitatModeManager.Instance.IsHabitatBattle = true;
