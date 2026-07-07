@@ -172,12 +172,9 @@ public class ShopManager : MonoBehaviour
         }
 
         SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        
         if (currentSelected == clickedUI)
         {
-            currentSelected.Deselect();
-            currentSelected = null;
-            HabitatManager.Instance.SetSelectedUnit(null);
-            UpdateBuyButtonText();
             return;
         }
 
