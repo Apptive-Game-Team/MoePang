@@ -196,7 +196,7 @@ public class UnitSpawner : MonoBehaviour
 
     private EnemyUnitData SetEnemyData(List<EnemyUnitData> list)
     {
-        int stage = StageManager.Instance.CurrentStage;
+        int stage = StageManager.Instance.DifficultyStage;
 
         if (stage >= 50)
         {

@@ -24,7 +24,7 @@ public class EnemyUnit : Unit
             return;
         }
 
-        int currentStage = StageManager.Instance.CurrentStage + 1;
+        int currentStage = StageManager.Instance.DifficultyStage + 1;
         float stageMaxHp = BalanceFormula.GetEnemyMaxHp(maxHp, currentStage);
         float stageAttackDamage = BalanceFormula.GetEnemyAttackDamage(attackDamage, currentStage);
 
