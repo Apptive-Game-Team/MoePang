@@ -637,7 +637,7 @@ public class Unit : MonoBehaviour, IDamageable
     }
 
     /// <summary>
-    /// 피격 시 DoSclae & 반짝거리는 Animation
+    /// 피격 시 Dosclae & 반짝거리는 Animation
     /// </summary>
     /// <returns></returns>
     protected IEnumerator DamageAnimationCoroutine()
