@@ -72,4 +72,34 @@ public class GoldManager : SingletonObject<GoldManager>
 
         AdjustGold(Mathf.CeilToInt(amount));
     }
+    
+    public int AddStageClearedDia()
+    {
+        if (HabitatModeManager.Instance == null ||
+            !HabitatModeManager.Instance.IsHabitatBattle)
+        {
+            return 0;
+        }
+
+        HabitatMode mode = HabitatModeManager.Instance.HabitatMode;
+        int currentStage = StageManager.Instance.GetHabitatStage(mode);
+        int stage = currentStage + 1;
+
+        bool alreadyCleared =
+            currentStage < StageManager.Instance.GetMaxHabitatStage(mode);
+
+        float amount = alreadyCleared
+            ? 5f + stage
+            : 10f + 3f * stage;
+
+        if (HabitatModeManager.Instance.IsHabitatModeEventDay(mode))
+        {
+            amount *= 1.5f;
+        }
+
+        int diaAmount = Mathf.RoundToInt(amount);
+        AdjustDia(diaAmount);
+
+        return diaAmount;
+    }
 }

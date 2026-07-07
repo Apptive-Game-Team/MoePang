@@ -10,6 +10,8 @@ namespace _01.Scripts._04.UI.InGame
         [SerializeField] private TextMeshProUGUI stageText;
         [SerializeField] private TextMeshProUGUI timeText;
         [SerializeField] private TextMeshProUGUI coinText;
+        [SerializeField] private GameObject diaInfo;
+        [SerializeField] private TextMeshProUGUI diaText;
 
         protected override void OnEnable()
         {
@@ -22,6 +24,17 @@ namespace _01.Scripts._04.UI.InGame
             
             stageManager.StopStage();
             goldManager.AddStageClearedGold();
+            
+            int diaAmount = 0;
+            bool isHabitatBattle =
+                HabitatModeManager.Instance != null &&
+                HabitatModeManager.Instance.IsHabitatBattle;
+
+            if (isHabitatBattle)
+            {
+                diaAmount = goldManager.AddStageClearedDia();
+            }
+            
             GameManager.Instance.SavePlayData();
             
             // UI
@@ -45,6 +58,15 @@ namespace _01.Scripts._04.UI.InGame
             }
             timeText.text = $"{minutes}:{seconds:00}";
             coinText.text = $"{goldManager.Gold}";
+            if (diaInfo != null)
+            {
+                diaInfo.SetActive(isHabitatBattle);
+            }
+
+            if (diaText != null)
+            {
+                diaText.text = $"{diaAmount}";
+            }
         }
         
         private string GetHabitatName(HabitatMode mode)
