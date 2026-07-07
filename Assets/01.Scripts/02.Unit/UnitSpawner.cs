@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using _01.Scripts._11.HabitatMode;
 
 /// <summary>
 /// 유닛 스폰하는 스크립트
@@ -112,7 +113,17 @@ public class UnitSpawner : MonoBehaviour
             return;
         }
 
-        FriendlyUnitData data = GetWeightedFriendlyUnit(unitList);
+        FriendlyUnitData data;
+        
+        //서식지 모드 시 마지막 단계 유닛 소환
+        if (HabitatModeManager.Instance.IsHabitatBattle)
+        {
+            data = unitList[^1];
+        }
+        else
+        {
+            data = GetWeightedFriendlyUnit(unitList);
+        }
 
         UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
     }
