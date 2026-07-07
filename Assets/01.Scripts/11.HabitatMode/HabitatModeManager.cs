@@ -67,6 +67,7 @@ namespace _01.Scripts._11.HabitatMode
 
         private void OnDisable()
         {
+            StopHabitatModeEffects();
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
@@ -82,6 +83,7 @@ namespace _01.Scripts._11.HabitatMode
             
             if (!isHabitatBattle)
             {
+                StopHabitatModeEffects();
                 return;
             }
             
@@ -89,29 +91,20 @@ namespace _01.Scripts._11.HabitatMode
 
             ApplyHabitatModeEffect();
         }
-        
-        private void Update()
+        private void StopHabitatModeEffects()
         {
-            if (Input.GetKeyDown(KeyCode.H))
+            if (desertPuzzleCoverCoroutine != null)
             {
-                if (puzzleGenerator == null)
-                {
-                    puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
-                }
+                StopCoroutine(desertPuzzleCoverCoroutine);
+                desertPuzzleCoverCoroutine = null;
+            }
 
-                if (puzzleGenerator == null)
-                {
-                    Debug.LogWarning("PuzzleGenerator not found.");
-                    return;
-                }
-
-                StartCoroutine(puzzleGenerator.StartDesertPuzzleCover(
-                    desertPuzzleCoverPrefab, desertSandStormPrefab, desertSandParticlePrefab,
-                    desertPuzzleCoverDuration,
-                    desertPuzzleCoverRefreshInterval
-                ));
+            if (BuffManager.Instance != null)
+            {
+                BuffManager.Instance.StopEnemyHealOverTime();
             }
         }
+        
 
         public void ApplyHabitatModeEffect()
         {
