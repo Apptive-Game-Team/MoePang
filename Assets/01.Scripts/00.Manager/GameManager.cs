@@ -325,6 +325,11 @@ namespace _01.Scripts._00.Manager
                 time : Mathf.Min(stageData.minUsedTime, time);
             
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
+            
+            if (StageManager.Instance != null)
+            {
+                StageManager.Instance.RefreshFromPlayData();
+            }
         }
         
         public void SaveCastleData()

@@ -140,6 +140,7 @@ namespace _01.Scripts._04.UI.MainScene
         {
             int currentStage = StageManager.Instance.GetHabitatStage(selectedMode);
             int maxStage = StageManager.Instance.GetMaxHabitatStage(selectedMode);
+            Debug.Log($"서식지모드 UI : currentStage : {currentStage}, maxStage : {maxStage}");
 
             if (stageText != null)
             {

@@ -196,4 +196,22 @@ public class StageManager : SingletonObject<StageManager>
                 break;
         }
     }
+    
+    public void RefreshFromPlayData()
+    {
+        MaxStage = GameManager.Instance.playData.clearedStage;
+        CurrentStage = Mathf.Clamp(CurrentStage, 0, MaxStage);
+
+        MaxMeadowHabitatStage = GameManager.Instance.playData.clearedMeadowHabitatStage;
+        MaxOceanHabitatStage = GameManager.Instance.playData.clearedOceanHabitatStage;
+        MaxDesertHabitatStage = GameManager.Instance.playData.clearedDesertHabitatStage;
+        MaxForestHabitatStage = GameManager.Instance.playData.clearedForestHabitatStage;
+        MaxPolarHabitatStage = GameManager.Instance.playData.clearedPolarHabitatStage;
+
+        CurrentMeadowHabitatStage = Mathf.Clamp(CurrentMeadowHabitatStage, 0, MaxMeadowHabitatStage);
+        CurrentOceanHabitatStage = Mathf.Clamp(CurrentOceanHabitatStage, 0, MaxOceanHabitatStage);
+        CurrentDesertHabitatStage = Mathf.Clamp(CurrentDesertHabitatStage, 0, MaxDesertHabitatStage);
+        CurrentForestHabitatStage = Mathf.Clamp(CurrentForestHabitatStage, 0, MaxForestHabitatStage);
+        CurrentPolarHabitatStage = Mathf.Clamp(CurrentPolarHabitatStage, 0, MaxPolarHabitatStage);
+    }
 }
