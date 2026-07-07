@@ -3380,8 +3380,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
+      - m_Target: {fileID: 5971528190623865385}
+        m_TargetAssemblyTypeName: _01.Scripts._04.UI.MainScene.HabitatModeUI, Assembly-CSharp
         m_MethodName: OnClickPrevStage
         m_Mode: 1
         m_Arguments:
@@ -3942,7 +3942,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 5852971551011846815}
   m_OnClick:
     m_PersistentCalls:
@@ -4100,8 +4100,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MainButtonManager, Assembly-CSharp
+      - m_Target: {fileID: 5971528190623865385}
+        m_TargetAssemblyTypeName: _01.Scripts._04.UI.MainScene.HabitatModeUI, Assembly-CSharp
         m_MethodName: OnClickNextStage
         m_Mode: 1
         m_Arguments:
@@ -4301,6 +4301,9 @@ MonoBehaviour:
   canvasGroup: {fileID: 1511187558}
   showTime: 3
   fadeTime: 2
+  previousStageButton: {fileID: 1906997923189694580}
+  nextStageButton: {fileID: 8386085727605257562}
+  stageText: {fileID: 1684028642370474151}
 --- !u!222 &6030742027029601758
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4428,8 +4431,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 220828036352594897}
-  - {fileID: 4070488189407489188}
   - {fileID: 2394143198581243915}
+  - {fileID: 4070488189407489188}
   m_Father: {fileID: 1998951882}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &6613450923871953524

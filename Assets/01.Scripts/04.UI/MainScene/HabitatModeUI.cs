@@ -22,6 +22,11 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private float showTime = 3f;
         [SerializeField] private float fadeTime = 2f;
+        
+        [Header("Stage Card Setting")]
+        [SerializeField] private GameObject previousStageButton;
+        [SerializeField] private GameObject nextStageButton;
+        [SerializeField] private TextMeshProUGUI stageText;
 
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
         private Coroutine guideCoroutine;
@@ -44,11 +49,30 @@ namespace _01.Scripts._04.UI.MainScene
 
         public void StartMode()
         {
+            if (StageManager.Instance.MaxStage <= 50)
+            {
+                Debug.Log("아직 50스테이지 안깼어, 근데 일단은 실행됨");
+            }
+            
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
             SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             HabitatModeManager.Instance.IsHabitatBattle = true;
             HabitatModeManager.Instance.HabitatMode = selectedMode;
+            
+            
+            StageManager.Instance.SetHabitatStage(
+                selectedMode,
+                StageManager.Instance.GetHabitatStage(selectedMode)
+            );
+
+            SceneManager.sceneLoaded += OnHabitatPlaySceneLoaded;
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+        }
+        
+        private void OnHabitatPlaySceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            StageManager.Instance.StartStage();
+            SceneManager.sceneLoaded -= OnHabitatPlaySceneLoaded;
         }
 
         public void ClosePanel()
@@ -88,6 +112,49 @@ namespace _01.Scripts._04.UI.MainScene
             if (currentBonusText != null)
             {
                 currentBonusText.text = GetModeCurrentBonusText(mode);
+            }
+            
+            StageManager.Instance.SetHabitatStage(
+                selectedMode,
+                StageManager.Instance.GetHabitatStage(selectedMode)
+            );
+            
+            RefreshStageUI();
+        }
+        
+        public void OnClickNextStage()
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            StageManager.Instance.AddHabitatStage(selectedMode, 1);
+            RefreshStageUI();
+        }
+
+        public void OnClickPrevStage()
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            StageManager.Instance.AddHabitatStage(selectedMode, -1);
+            RefreshStageUI();
+        }
+
+        private void RefreshStageUI()
+        {
+            int currentStage = StageManager.Instance.GetHabitatStage(selectedMode);
+            int maxStage = StageManager.Instance.GetMaxHabitatStage(selectedMode);
+            Debug.Log($"서식지모드 UI : currentStage : {currentStage}, maxStage : {maxStage}");
+
+            if (stageText != null)
+            {
+                stageText.text = $"Stage : {currentStage + 1}";
+            }
+
+            if (previousStageButton != null)
+            {
+                previousStageButton.SetActive(currentStage > 0);
+            }
+
+            if (nextStageButton != null)
+            {
+                nextStageButton.SetActive(currentStage < maxStage);
             }
         }
 
