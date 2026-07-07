@@ -1799,7 +1799,8 @@ namespace _01.Scripts._01.ThreeMatch
         private IEnumerator SpawnObstacleWarning(int curX, int curY)
         {
             Vector2 pos = CalculatePos(curX, curY);
-            GameObject warningOb = Instantiate(obstacleWarningPrefab, pos, Quaternion.identity, puzzleFrame);
+            GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
+            warningOb.transform.localPosition = pos;
             yield return warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
                 .SetLoops(4, LoopType.Yoyo)
                 .OnComplete(() =>
