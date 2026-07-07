@@ -8,6 +8,10 @@ using System.Collections;
 
 namespace _01.Scripts._11.HabitatMode
 {
+    /// <summary>
+    /// 서식지모드 담당 스크립트
+    /// <para>1. 요일별 버프 / 디버프 관리</para>
+    /// </summary>
     public class HabitatModeManager : SingletonObject<HabitatModeManager>
     {
         public HabitatMode habitatMode = HabitatMode.MeadowMode;
@@ -135,8 +139,6 @@ namespace _01.Scripts._11.HabitatMode
 
         public bool IsHabitatModeEventDay(HabitatMode mode)
         {
-            return false;
-            
             DayOfWeek koreaDay = GetKoreaDayOfWeek();
 
             if (koreaDay == DayOfWeek.Saturday || koreaDay == DayOfWeek.Sunday)
@@ -166,6 +168,10 @@ namespace _01.Scripts._11.HabitatMode
             return DateTime.UtcNow.AddHours(9).DayOfWeek;
         }
 
+        /// <summary>
+        /// 초원 모드 버프
+        /// <para>Stack 갯수 변경 : 5 or 6</para>
+        /// </summary>
         private void ApplyMeadowEffect()
         {
             int stackMaxCount = IsHabitatModeEventDay(HabitatMode.MeadowMode) ? 5 : 6;
@@ -174,6 +180,10 @@ namespace _01.Scripts._11.HabitatMode
             Debug.Log("Apply Meadow Mode effect.");
         }
 
+        /// <summary>
+        /// 바다 모드 버프
+        /// <para>적 능력치 상승</para>
+        /// </summary>
         private void ApplyOceanEffect()
         {
             float statMultiplier = IsHabitatModeEventDay(HabitatMode.OceanMode)
@@ -201,6 +211,10 @@ namespace _01.Scripts._11.HabitatMode
             Debug.Log("Apply Ocean Mode effect.");
         }
 
+        /// <summary>
+        /// 사막 모드 버프
+        /// <para>일정시간마다 모래바람이 발생</para>
+        /// </summary>
         private void ApplyDesertEffect()
         {
             if (desertPuzzleCoverCoroutine != null)
@@ -239,6 +253,10 @@ namespace _01.Scripts._11.HabitatMode
             }
         }
 
+        /// <summary>
+        /// 숲 모드 버프
+        /// <para>일정 주기로 적이 회복</para>
+        /// </summary>
         private void ApplyForestEffect()
         {
             float healInterval = IsHabitatModeEventDay(HabitatMode.ForestMode)
@@ -250,6 +268,10 @@ namespace _01.Scripts._11.HabitatMode
             Debug.Log("Apply Forest Mode effect.");
         }
 
+        /// <summary>
+        /// 극지방 모드 버프
+        /// <para>아군 수치 하향</para>
+        /// </summary>
         private void ApplyPolarEffect()
         {
             float statMultiplier = IsHabitatModeEventDay(HabitatMode.PolarMode)
