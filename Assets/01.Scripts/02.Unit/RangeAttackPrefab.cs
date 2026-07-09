@@ -31,9 +31,6 @@ public class RangeAttackPrefab : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if ((targetLayer.value & (1 << other.gameObject.layer)) == 0)
-            return;
-
         IDamageable target = other.GetComponentInParent<IDamageable>();
         if (target == null) return;
         if (target.GetTeam() == ownerTeam) return;
