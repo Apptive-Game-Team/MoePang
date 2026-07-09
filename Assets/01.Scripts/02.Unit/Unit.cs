@@ -24,6 +24,7 @@ public enum AttackType
     MeleeAttack,
     RangeAttack,
     TripleAttack,
+    LongMeleeAttack,
 }
 
 /// <summary>
@@ -62,6 +63,9 @@ public class Unit : MonoBehaviour, IDamageable
     [SerializeField] protected AttackType attackType = AttackType.MeleeAttack;
     [SerializeField] protected float direction; //이동 방향
     [SerializeField] protected float damageDuration = 0.3f; //데미지 지속 시간
+    
+    [Header("Long Melee Attack")]
+    [SerializeField] protected RangeAttackPrefab attackProjectilePrefab;
     
     private List<Buff> _activeBuffs = new();
     
@@ -331,6 +335,10 @@ public class Unit : MonoBehaviour, IDamageable
             case AttackType.MeleeAttack:
                 MeleeAttack();
                 break;
+            
+            case AttackType.LongMeleeAttack:
+                LongMeleeAttack();
+                break;
 
             case AttackType.RangeAttack:
                 RangeAttack();
@@ -462,6 +470,42 @@ public class Unit : MonoBehaviour, IDamageable
         return forwardDistance >= 0f && forwardDistance <= attackRange;
     }
     
+    protected virtual void LongMeleeAttack()
+    {
+        IDamageable target = GetRaycastTarget();
+
+        if (target == null)
+        {
+            TeamType enemyTeam = team == TeamType.Friendly ? TeamType.Enemy : TeamType.Friendly;
+            target = UTQ.Peek(enemyTeam);
+        }
+
+        if (target == null) return;
+        if (!IsTargetInAttackRange(target)) return;
+
+        FireProjectile(target);
+    }
+    
+    protected virtual void FireProjectile(IDamageable target)
+    {
+        if (attackProjectilePrefab == null) return;
+
+        RangeAttackPrefab projectile = Instantiate(
+            attackProjectilePrefab,
+            transform.position,
+            Quaternion.identity
+        );
+
+        Vector2 fireDirection = Vector2.right * direction;
+
+        projectile.Init(
+            attackDamage,
+            team,
+            targetLayer,
+            fireDirection
+        );
+    }
+    
     /// <summary>
     /// 원거리 공격
     /// </summary>
@@ -485,6 +529,8 @@ public class Unit : MonoBehaviour, IDamageable
             target.TakeDamage(attackDamage);
         }
     }
+    
+    
 
     protected virtual void TripleAttack()
     {
