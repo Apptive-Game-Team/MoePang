@@ -138,7 +138,6 @@ public class Unit : MonoBehaviour, IDamageable
 
     protected virtual void SetProceedStat()
     {
-        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
         currentHp = maxHp;
     }
 
