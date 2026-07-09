@@ -492,9 +492,18 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (attackProjectilePrefab == null) return;
 
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponent<SpriteRenderer>();
+
+        float unitHeight = spriteRenderer != null
+            ? spriteRenderer.bounds.size.y
+            : unitSize;
+
+        Vector3 spawnPosition = transform.position + Vector3.up * (unitHeight * 0.5f);
+
         RangeAttackPrefab projectile = Instantiate(
             attackProjectilePrefab,
-            transform.position,
+            spawnPosition,
             Quaternion.identity
         );
 
