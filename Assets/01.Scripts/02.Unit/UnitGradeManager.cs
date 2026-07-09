@@ -28,7 +28,8 @@ public class UnitGradeManager : MonoBehaviour
                 break;
             
             case 3:
-                unit.AttackRangeMultiplier(2f);
+                //unit.AttackRangeMultiplier(2f);
+                unit.AttackRangeMultiplier(1.2f); //Debugging용 수정
                 break;
             
             case 4:
