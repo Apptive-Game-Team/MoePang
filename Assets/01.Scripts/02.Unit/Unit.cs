@@ -138,6 +138,8 @@ public class Unit : MonoBehaviour, IDamageable
         _originMoveSpeed = moveSpeed;
         _originAttackDamage = attackDamage;
         _originAttackSpeed = attackSpeed;
+        
+        attackProjectilePrefab = data.RangeAttackPrefab;
     }
 
     protected virtual void SetProceedStat()

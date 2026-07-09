@@ -19,6 +19,9 @@ public abstract class UnitData : ScriptableObject
     [SerializeField] protected float attackSpeed;
     [SerializeField] protected float unitSize = 1f;
 
+    [Header("Attack Prefab")]
+    [SerializeField] protected RangeAttackPrefab rangeAttackPrefab;
+    
     [Header("Description")]
     [SerializeField, TextArea(3, 8)] protected string unitDescriptionText;
     
@@ -33,5 +36,6 @@ public abstract class UnitData : ScriptableObject
     public virtual float AttackDamage => attackDamage;
     public float AttackSpeed => attackSpeed;
     public float UnitSize => unitSize;
+    public RangeAttackPrefab RangeAttackPrefab => rangeAttackPrefab;
     public string UnitDescriptionText => unitDescriptionText;
 }
