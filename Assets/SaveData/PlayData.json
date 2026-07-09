@@ -1,6 +1,6 @@
 {
-    "goldAmount": 597,
-    "diaAmount": 0,
+    "goldAmount": 99473,
+    "diaAmount": 20,
     "clearedStage": 3,
     "stagesData": [
         {
@@ -22,10 +22,10 @@
             "maxUsedTile": 15
         },
         {
-            "stageNum": 0,
-            "minUsedTime": 0.0,
-            "minUsedTile": 0,
-            "maxUsedTile": 0
+            "stageNum": 4,
+            "minUsedTime": 19.545034408569337,
+            "minUsedTile": 13,
+            "maxUsedTile": 13
         },
         {
             "stageNum": 0,
@@ -307,6 +307,6 @@
     "clearedMeadowHabitatStage": 0,
     "clearedOceanHabitatStage": 3,
     "clearedDesertHabitatStage": 0,
-    "clearedForestHabitatStage": 0,
+    "clearedForestHabitatStage": 1,
     "clearedPolarHabitatStage": 0
 }
