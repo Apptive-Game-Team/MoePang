@@ -24,6 +24,12 @@ public class FriendlyUnit : Unit
         targetLayer = LayerMask.GetMask("Enemy");
     }
     
+    protected override void SetProceedStat()
+    {
+        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
+        base.SetProceedStat();
+    }
+    
     private void ApplyHabitatClearBonus()
     {
         if (GameManager.Instance == null || GameManager.Instance.playData == null)

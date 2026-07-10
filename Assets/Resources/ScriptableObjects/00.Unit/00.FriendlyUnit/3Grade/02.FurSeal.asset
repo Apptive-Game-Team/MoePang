@@ -15,13 +15,14 @@ MonoBehaviour:
   team: 0
   unitName: 7
   unitGrade: 3
-  attackType: 0
+  attackType: 3
   animatorOverride: {fileID: 22100000, guid: da6beff7d888afe4fbea348c45417682, type: 2}
   maxHp: 32
   baseMoveSpeed: 0.3
   attackDamage: 8
   attackSpeed: 1
   unitSize: 1.2
+  rangeAttackPrefab: {fileID: 2165397184028096948, guid: ac39b9c7c7c059445b120bf4f7a49cd5, type: 3}
   unitDescriptionText: "\uBC14\uB2E4\uD45C\uBC94 \uC785\uB2C8\uB2E4."
   habitat: 1
   unitLevel: 1
