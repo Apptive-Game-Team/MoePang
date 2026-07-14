@@ -32,11 +32,20 @@ public class UnitSpawner : MonoBehaviour
 
     private void Awake()
     {
-        _enemySpawnWeights = new List<List<int>>()
-        {
-            new(){70, 30, 0},
-            new(){50, 30, 20},
-        };
+        _enemySpawnWeights = StageManager.Instance.CurrentStage < 50 ?
+            new List<List<int>>()
+            {
+                new(){70, 30, 0},
+                new(){50, 30, 20},
+            } : 
+            new List<List<int>>()
+            {
+                new() { 18, 16, 14, 13, 12, 10, 8, 6, 3 },
+                new() { 14, 14, 13, 13, 12, 11, 10, 8, 5 },
+                new() { 10, 11, 11, 12, 12, 12, 12, 10, 10 },
+                new() { 7, 8, 9, 10, 11, 12, 13, 14, 16 },
+                new() { 4, 5, 6, 7, 9, 11, 14, 18, 26 }
+            };
 
         friendlySpawnWeights = StageManager.Instance.CurrentStage < 50 ? 
             new List<List<int>>() 
@@ -210,33 +219,58 @@ public class UnitSpawner : MonoBehaviour
 
         if (stage >= 50)
         {
-            return list[^1];
-        }
-        
-        int cycleStep = stage % 10;
-        int subIndex = (cycleStep < 3) ? 0 : (cycleStep < 6 ? 1 : 2);
-        int index = stage / 10 * 3 + subIndex;
-
-        int enemyStart = index / 2;
-        int enemyWeightsStep = index % 2;
-        
-        List<int> enemyWeight = _enemySpawnWeights[enemyWeightsStep];
-
-        int totalWeight = enemyWeight.Sum();
-
-        int pivot = Random.Range(1, totalWeight + 1);
-        int cumulative = 0;
-
-        for (int i = 0; i < enemyWeight.Count; i++)
-        {
-            cumulative += enemyWeight[i];
-            if (pivot <= cumulative)
+            if (stage < 100)
             {
-                int targetIndex = Mathf.Clamp(enemyStart + i, 0, list.Count - 1);
-                return list[targetIndex];
+                List<int> weight = _enemySpawnWeights[stage / 10 - 5];
+                
+                int totalWeight = weight.Sum();
+                int pivot = Random.Range(1, totalWeight + 1);
+                int cumulative = 0;
+
+                for (int i = 0; i < weight.Count; i++)
+                {
+                    cumulative += weight[i];
+                    if (pivot <= cumulative)
+                    {
+                        int targetIndex = Mathf.Clamp(i, 0, list.Count - 1);
+                        return list[targetIndex];
+                    }
+                }
+
+                return list[0];
+            }
+            else
+            {
+                
             }
         }
 
-        return list[enemyStart];
+        {
+            int cycleStep = stage % 10;
+            int subIndex = (cycleStep < 3) ? 0 : (cycleStep < 6 ? 1 : 2);
+            int index = stage / 10 * 3 + subIndex;
+
+            int enemyStart = index / 2;
+            int enemyWeightsStep = index % 2;
+
+            List<int> enemyWeight = _enemySpawnWeights[enemyWeightsStep];
+
+            int totalWeight = enemyWeight.Sum();
+
+            int pivot = Random.Range(1, totalWeight + 1);
+            int cumulative = 0;
+
+            for (int i = 0; i < enemyWeight.Count; i++)
+            {
+                cumulative += enemyWeight[i];
+                if (pivot <= cumulative)
+                {
+                    int targetIndex = Mathf.Clamp(enemyStart + i, 0, list.Count - 1);
+                    return list[targetIndex];
+                }
+            }
+
+            return list[enemyStart];
+        }
     }
 }
