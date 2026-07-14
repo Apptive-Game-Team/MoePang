@@ -5,13 +5,17 @@ using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
 {
+    /// <summary>
+    /// 성 업그레이드 스크립트
+    /// </summary>
     public class CastleUpgradeUI : MonoBehaviour
     {
+        [Header("Castle Upgrade Settings")]
         [SerializeField] private TextMeshProUGUI castleLevel;
         [SerializeField] private TextMeshProUGUI castleDescription;
         [SerializeField] private Button castleUpgradeButton;
+        
         private GameObject _upgradePopup;
-
         private int _castleLevel;
 
         private void Awake()
@@ -23,6 +27,9 @@ namespace _01.Scripts._06.Shop
             RegisterUpgradeButton();
         }
 
+        /// <summary>
+        /// 성 UI 텍스트 최신화
+        /// </summary>
         private void UpdateText()
         {
             castleLevel.text = $"LV{_castleLevel}";
@@ -75,7 +82,6 @@ namespace _01.Scripts._06.Shop
 
             _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
-                // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
                 SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
