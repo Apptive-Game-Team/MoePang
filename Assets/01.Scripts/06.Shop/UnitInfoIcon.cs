@@ -3,9 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 상점에 Unit Icon 스크립트
+/// UnitInfoScene의 Unit Icon Script
 /// </summary>
-public class ShopUI : MonoBehaviour
+public class UnitInfoIcon : MonoBehaviour
 {
     [Header("Unit Data")]
     [SerializeField] private FriendlyUnitData unitData;
@@ -24,9 +24,7 @@ public class ShopUI : MonoBehaviour
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
-    public bool IsSelected => isSelected;
     public bool IsUnlocked => HabitatManager.Instance.IsUnlocked(unitData);
-    public float UnitCost => unitData.UnitCost;
 
     private void Awake()
     {
@@ -46,13 +44,41 @@ public class ShopUI : MonoBehaviour
         RefreshUnlockState();
     }
 
+    /// <summary>
+    /// ShopManager에서 Script 연결
+    /// </summary>
     public void SetManager(ShopManager manager)
     {
         shopManager = manager;
     }
+    
+    public void Select()
+    {
+        isSelected = true;
+        SetImageScale(selectedScale);
+    }
+
+    public void Deselect()
+    {
+        isSelected = false;
+        SetImageScale(1f);
+    }
+    
+    private void SetImageScale(float scale)
+    {
+        if (unlockImage != null)
+        {
+            unlockImage.transform.localScale = unlockImageOriginScale * scale;
+        }
+
+        if (backgroundImage != null)
+        {
+            backgroundImage.transform.localScale = backgroundImageOriginScale * scale;
+        }
+    }
 
     /// <summary>
-    /// 해금상태 UI 갱신
+    /// 씬 갱신시 Image Update
     /// </summary>
     public void RefreshUnlockState()
     {
@@ -62,11 +88,6 @@ public class ShopUI : MonoBehaviour
         levelImage.gameObject.SetActive(unlocked);
         backgroundImage.gameObject.SetActive(unlocked);
         
-        SetLevelText();
-    }
-
-    private void SetLevelText()
-    {
         levelImage.text = $"Lv.{unitData.UnitLevel}";
     }
 
@@ -86,30 +107,5 @@ public class ShopUI : MonoBehaviour
         }
         
         shopManager.OnClickUnit(this);
-    }
-
-    public void Select()
-    {
-        isSelected = true;
-        SetImageScale(selectedScale);
-    }
-
-    public void Deselect()
-    {
-        isSelected = false;
-        SetImageScale(1f);
-    }
-
-    private void SetImageScale(float scale)
-    {
-        if (unlockImage != null)
-        {
-            unlockImage.transform.localScale = unlockImageOriginScale * scale;
-        }
-
-        if (backgroundImage != null)
-        {
-            backgroundImage.transform.localScale = backgroundImageOriginScale * scale;
-        }
     }
 }

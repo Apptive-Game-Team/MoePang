@@ -41,7 +41,7 @@ public class ShopManager : MonoBehaviour
     [Header("설명 UI")]
     [SerializeField] private UnitDescription unitDescription;
 
-    private ShopUI currentSelected;
+    private UnitInfoIcon currentSelected;
     private UpgradeUI currentUpgradeSelected;
     private ItemObject currentItemSelected;
     private bool isBuyPopupActive;
@@ -109,7 +109,7 @@ public class ShopManager : MonoBehaviour
                 continue;
             }
 
-            ShopUI[] ui = panel.GetComponentsInChildren<ShopUI>(true);
+            UnitInfoIcon[] ui = panel.GetComponentsInChildren<UnitInfoIcon>(true);
             foreach (var temp in ui)
             {
                 temp.SetManager(this);
@@ -164,7 +164,7 @@ public class ShopManager : MonoBehaviour
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
 
-    public void OnClickUnit(ShopUI clickedUI)
+    public void OnClickUnit(UnitInfoIcon clickedUI)
     {
         if (isBuyPopupActive)
         {
