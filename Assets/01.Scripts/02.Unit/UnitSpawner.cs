@@ -38,14 +38,21 @@ public class UnitSpawner : MonoBehaviour
             new(){50, 30, 20},
         };
 
-        friendlySpawnWeights = new List<List<int>>()
-        {
-            new() { 100 },
-            new() { 60, 40 },
-            new() { 50, 30, 20 },
-            new() { 40, 30, 20, 10 },
-            new() { 25, 25, 20, 15, 15 },
-        };
+        friendlySpawnWeights = StageManager.Instance.CurrentStage < 50 ? 
+            new List<List<int>>() 
+            {
+                new() { 100 },
+                new() { 60, 40 },
+                new() { 60, 30, 10 }
+            } : 
+            new List<List<int>>() 
+            {
+                new() { 100 },
+                new() { 70, 30 },
+                new() { 60, 30, 10 },
+                new() { 50, 30, 15, 5 },
+                new() { 35, 25, 18, 14, 8 }, 
+            };
     }
 
     private void Start()
@@ -150,11 +157,14 @@ public class UnitSpawner : MonoBehaviour
     /// </summary>
     private FriendlyUnitData GetWeightedFriendlyUnit(List<FriendlyUnitData> unlockedUnits)
     {
-        int count = unlockedUnits.Count;
-        count = Mathf.Min(count, 5);
+        bool isTutorial = StageManager.Instance.CurrentStage < 50;
+        
+        int count = isTutorial ? Mathf.Min(3, unlockedUnits.Count) : unlockedUnits.Count;
 
-        List<FriendlyUnitData> recent = unlockedUnits.Count > 5 
-            ? unlockedUnits.Skip(unlockedUnits.Count - 5).Take(count).ToList() 
+        List<FriendlyUnitData> recent = isTutorial
+            ? unlockedUnits.Count > count
+                ? unlockedUnits.Skip(unlockedUnits.Count - count).Take(count).ToList()
+                : unlockedUnits
             : unlockedUnits;
 
         List<int> weights = friendlySpawnWeights[count - 1];
