@@ -46,11 +46,11 @@ public enum UnitName
 
     //Enemy
     Farmer,
-    Axe,
     SlingShot,
+    Axe,
     Chainsaw,
-    Forklift,
     Shotgun,
+    Forklift,
     Excavator,
     Logger,
     HeavyEquipment,
