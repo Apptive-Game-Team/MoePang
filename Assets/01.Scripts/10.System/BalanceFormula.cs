@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class BalanceFormula
 {
-    #region 스테이지 진행에 따른 아군 유닛 능력치 상승치 Fomula
+    #region 스테이지 진행에 따른 아군 유닛 능력치 상승치 Formula
     
     private const int EarlyLevelLimit = 50;
     private const int StageBonusStartMaxStage = 51;
@@ -56,7 +56,7 @@ public static class BalanceFormula
     /// <summary>
     /// 아군 유닛 51스테이지 이전 Unit Hp 증가량
     /// </summary>
-    public static float GetUnitHpIncreaseBeforeStage51(int grade)
+    private static float GetUnitHpIncreaseBeforeStage51(int grade)
     {
         return grade switch
         {
@@ -72,7 +72,7 @@ public static class BalanceFormula
     /// <summary>
     /// 아군 유닛 51스테이지 이후 Unit Hp 증가량
     /// </summary>
-    public static float GetUnitHpIncreaseAfterStage51(int grade)
+    private static float GetUnitHpIncreaseAfterStage51(int grade)
     {
         return grade switch
         {
@@ -88,7 +88,7 @@ public static class BalanceFormula
     /// <summary>
     /// 아군 유닛 51스테이지 이전 AttackDamage 증가량
     /// </summary>
-    public static float GetUnitAttackDamageIncreaseBeforeStage51(int grade)
+    private static float GetUnitAttackDamageIncreaseBeforeStage51(int grade)
     {
         return 1f;
     }
@@ -96,14 +96,14 @@ public static class BalanceFormula
     /// <summary>
     /// 아군 유닛 51스테이지 이후 AttackDamage 증가량
     /// </summary>
-    public static float GetUnitAttackDamageIncreaseAfterStage51(int grade)
+    private static float GetUnitAttackDamageIncreaseAfterStage51(int grade)
     {
         return 1f;
     }
     
     #endregion
     
-    #region 스테이지 진행에 따른 적군 유닛 능력치 상승 Fomula
+    #region 스테이지 진행에 따른 적군 유닛 능력치 상승 Formula
     
     private const float EnemyStage200HpMultiplier = 5.5f;
     private const float EnemyStage200AttackDamageMultiplier = 4f;
@@ -131,7 +131,7 @@ public static class BalanceFormula
     /// <summary>
     /// 기본 체력 성장 배율에 보스 스테이지 보정 배율 곱연산
     /// </summary>
-    public static float GetEnemyHpMultiplier(int currentStage)
+    private static float GetEnemyHpMultiplier(int currentStage)
     {
         float multiplier = GetEnemyBaseHpMultiplier(currentStage);
         return multiplier * GetEnemyBossStageMultiplier(currentStage);
@@ -140,7 +140,7 @@ public static class BalanceFormula
     /// <summary>
     /// 기본 공격력 성장 배율에 보스 스테이지 보정 배율 곱연산
     /// </summary>
-    public static float GetEnemyAttackDamageMultiplier(int currentStage)
+    private static float GetEnemyAttackDamageMultiplier(int currentStage)
     {
         float multiplier = GetEnemyBaseAttackDamageMultiplier(currentStage);
         return multiplier * GetEnemyBossStageMultiplier(currentStage);
@@ -216,7 +216,116 @@ public static class BalanceFormula
     }
     #endregion
     
-    #region 유닛 해금/업그레이드 비용 Fomula
+    #region 유닛 소환 가중치 Formula
+    
+    private const int EnemySpawnWeightDynamicStartStage = 101;
+    private const int EnemySpawnWeightDynamicInterval = 10;
+    private const int EnemySpawnWeightStartStage = 51;
+    private const int EnemySpawnMinimumWeight = 2;
+    
+    /// <summary>
+    /// 현재 스테이지에서 해당 등급 적군의 등장 가중치 반환
+    /// </summary>
+    public static int GetEnemySpawnWeight(int grade, int currentStage)
+    {
+        int[] weights = GetEnemySpawnWeights(currentStage);
+        int index = Mathf.Clamp(grade, 1, weights.Length) - 1;
+        return weights[index];
+    }
+    
+    /// <summary>
+    /// 현재 스테이지 기준 전체 적군 등급별 등장 가중치 배열 반환
+    /// </summary>
+    private static int[] GetEnemySpawnWeights(int currentStage)
+    {
+        int[] weights = GetEnemySpawnBaseWeights(currentStage);
+
+        if (currentStage < EnemySpawnWeightDynamicStartStage)
+        {
+            return weights;
+        }
+
+        int step = (currentStage - EnemySpawnWeightDynamicStartStage) / EnemySpawnWeightDynamicInterval + 1;
+
+        for (int i = 0; i < step; i++)
+        {
+            int decreased = DecreaseLowEnemySpawnWeights(weights);
+            IncreaseHighEnemySpawnWeights(weights, decreased);
+        }
+
+        return weights;
+    }
+    
+    /// <summary>
+    /// 스테이지 구간에 따른 적군 등장 가중치 배열
+    /// </summary>
+    private static int[] GetEnemySpawnBaseWeights(int currentStage)
+    {
+        if (currentStage < EnemySpawnWeightStartStage)
+        {
+            return new[] { 100, 0, 0, 0, 0, 0, 0, 0, 0 };
+        }
+
+        if (currentStage <= 60)
+        {
+            return new[] { 18, 16, 14, 13, 12, 10, 8, 6, 3 };
+        }
+
+        if (currentStage <= 70)
+        {
+            return new[] { 14, 14, 13, 13, 12, 11, 10, 8, 5 };
+        }
+
+        if (currentStage <= 80)
+        {
+            return new[] { 10, 11, 11, 12, 12, 12, 12, 10, 10 };
+        }
+
+        if (currentStage <= 90)
+        {
+            return new[] { 7, 8, 9, 10, 11, 12, 13, 14, 16 };
+        }
+
+        return new[] { 4, 5, 6, 7, 9, 11, 14, 18, 26 };
+    }
+    
+    /// <summary>
+    /// 낮은 등급 적군의 등장 가중치를 최소값까지 감소시키고 감소한 총량 반환
+    /// </summary>
+    private static int DecreaseLowEnemySpawnWeights(int[] weights)
+    {
+        int decreased = 0;
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (weights[i] <= EnemySpawnMinimumWeight)
+            {
+                weights[i] = EnemySpawnMinimumWeight;
+                continue;
+            }
+
+            weights[i]--;
+            decreased++;
+        }
+
+        return decreased;
+    }
+
+    /// <summary>
+    /// 낮은 등급에서 감소한 가중치만큼 높은 등급 적군의 등장 가중치 증가
+    /// </summary>
+    private static void IncreaseHighEnemySpawnWeights(int[] weights, int amount)
+    {
+        for (int i = 6; i < weights.Length && amount > 0; i++)
+        {
+            weights[i]++;
+            amount--;
+        }
+    }
+    
+    #endregion
+    
+    #region 유닛 해금/업그레이드 비용 Formula
     
     private const int UnitUpgradeCostIncreaseAfterLevel5 = 10;
     
@@ -305,7 +414,7 @@ public static class BalanceFormula
 
     #endregion
     
-    #region 성 체력 업그레이드 스탯/비용 Fomula
+    #region 성 체력 업그레이드 스탯/비용 Formula
     
     private const int castleHpIncreasePerLevel = 10;
     private const int castleHpBaseCost = 100;
@@ -313,93 +422,4 @@ public static class BalanceFormula
     public static int CastleHpBaseCost => castleHpBaseCost;
     
     #endregion
-
-    public static int GetEnemySpawnWeight(int grade, int currentStage)
-    {
-        int[] weights = GetEnemySpawnWeights(currentStage);
-        int index = Mathf.Clamp(grade, 1, weights.Length) - 1;
-        return weights[index];
-    }
-
-    private const int EnemySpawnWeightDynamicStartStage = 101;
-    private const int EnemySpawnWeightDynamicInterval = 10;
-    public static int[] GetEnemySpawnWeights(int currentStage)
-    {
-        int[] weights = GetEnemySpawnBaseWeights(currentStage);
-
-        if (currentStage < EnemySpawnWeightDynamicStartStage)
-        {
-            return weights;
-        }
-
-        int step = (currentStage - EnemySpawnWeightDynamicStartStage) / EnemySpawnWeightDynamicInterval + 1;
-
-        for (int i = 0; i < step; i++)
-        {
-            int decreased = DecreaseLowEnemySpawnWeights(weights);
-            IncreaseHighEnemySpawnWeights(weights, decreased);
-        }
-
-        return weights;
-    }
-
-    private const int EnemySpawnWeightStartStage = 51;
-    private static int[] GetEnemySpawnBaseWeights(int currentStage)
-    {
-        if (currentStage < EnemySpawnWeightStartStage)
-        {
-            return new[] { 100, 0, 0, 0, 0, 0, 0, 0, 0 };
-        }
-
-        if (currentStage <= 60)
-        {
-            return new[] { 18, 16, 14, 13, 12, 10, 8, 6, 3 };
-        }
-
-        if (currentStage <= 70)
-        {
-            return new[] { 14, 14, 13, 13, 12, 11, 10, 8, 5 };
-        }
-
-        if (currentStage <= 80)
-        {
-            return new[] { 10, 11, 11, 12, 12, 12, 12, 10, 10 };
-        }
-
-        if (currentStage <= 90)
-        {
-            return new[] { 7, 8, 9, 10, 11, 12, 13, 14, 16 };
-        }
-
-        return new[] { 4, 5, 6, 7, 9, 11, 14, 18, 26 };
-    }
-
-    private const int EnemySpawnMinimumWeight = 2;
-    private static int DecreaseLowEnemySpawnWeights(int[] weights)
-    {
-        int decreased = 0;
-
-        for (int i = 0; i < 3; i++)
-        {
-            if (weights[i] <= EnemySpawnMinimumWeight)
-            {
-                weights[i] = EnemySpawnMinimumWeight;
-                continue;
-            }
-
-            weights[i]--;
-            decreased++;
-        }
-
-        return decreased;
-    }
-
-    private static void IncreaseHighEnemySpawnWeights(int[] weights, int amount)
-    {
-        for (int i = 6; i < weights.Length && amount > 0; i++)
-        {
-            weights[i]++;
-            amount--;
-        }
-    }
 }
