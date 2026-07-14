@@ -91,21 +91,23 @@ public class UnitInfoIcon : MonoBehaviour
         levelImage.text = $"Lv.{unitData.UnitLevel}";
     }
 
+    /// <summary>
+    /// Unit Icon Click
+    /// </summary>
     public void OnClick()
     {
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         if (!IsUnlocked && HabitatManager.Instance.CanUnlock(unitData))
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             shopManager.UnlockUnit(unitData, RefreshUnlockState);
             return;
         }
         
         if (!HabitatManager.Instance.CanUnlock(unitData))
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             return;
         }
         
-        shopManager.OnClickUnit(this);
+        shopManager.UnitClicked(this);
     }
 }

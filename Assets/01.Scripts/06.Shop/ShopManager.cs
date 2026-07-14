@@ -12,48 +12,57 @@ using ItemData = _01.Scripts._06.Shop.ItemData;
 
 public class ShopManager : MonoBehaviour
 {
-    [Header("데이터")]
-    [SerializeField] private ItemData itemData;
-
     [Header("패널")]
     [SerializeField] private List<GameObject> panels;
-    [SerializeField] private List<GameObject> upgradePanels;
-    [SerializeField] private Image[] buttonImages;
-    [SerializeField] private Sprite[] buttonSprite;
     [SerializeField] private Image unlockPanel;
-
-    [Header("구매 팝업")]
-    [SerializeField] private GameObject buyPopup;
-    [SerializeField] private TextMeshProUGUI costText;
-    [SerializeField] private TextMeshProUGUI tooltipText;
-
-    [Header("설명 UI")]
-    [SerializeField] private UnitDescription unitDescription;
-
+    
+    private UnitDescription unitDescription;
     private UnitInfoIcon currentSelected;
-    private UpgradeUI currentUpgradeSelected;
     private ItemObject currentItemSelected;
     private bool isBuyPopupActive;
 
+    #region 초기 세팅
     private void Awake()
     {
         InitializeShopPanels();
     }
-
-    private void Start()
+    
+    private void InitializeShopPanels()
     {
-        if (buyPopup != null)
+        if (panels == null)
         {
-            buyPopup.SetActive(false);
+            return;
+        }
+
+        foreach (var panel in panels)
+        {
+            if (panel == null)
+            {
+                continue;
+            }
+
+            UnitInfoIcon[] ui = panel.GetComponentsInChildren<UnitInfoIcon>(true);
+            foreach (var temp in ui)
+            {
+                temp.SetManager(this);
+            }
         }
     }
+    #endregion
 
+    #region 버튼 연결 함수
+    /// <summary>
+    /// MainScene 복귀
+    /// </summary>
     public void OnClickBack()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
-
+    
+    /// <summary>
+    /// Description Scene(유닛 상세정보) 이동
+    /// </summary>
     public void OnClickUnitDescription()
     {
         if (currentSelected == null)
@@ -65,16 +74,13 @@ public class ShopManager : MonoBehaviour
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
-
-    public void OnClickUnit(UnitInfoIcon clickedUI)
+    #endregion
+    
+    /// <summary>
+    /// 유닛이 클릭됐을 때 실행되는 함수 (UnitInfoIcon의 OnClick 다음에 실행)
+    /// </summary>
+    public void UnitClicked(UnitInfoIcon clickedUI)
     {
-        if (isBuyPopupActive)
-        {
-            return;
-        }
-
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
-        
         if (currentSelected == clickedUI)
         {
             return;
@@ -88,30 +94,6 @@ public class ShopManager : MonoBehaviour
         currentSelected = clickedUI;
         currentSelected.Select();
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
-    }
-
-    public void OnClickUpgrade(UpgradeUI clickedUI)
-    {
-        if (clickedUI == null)
-        {
-            return;
-        }
-
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
-        if (currentUpgradeSelected == clickedUI)
-        {
-            currentUpgradeSelected.Deselect();
-            currentUpgradeSelected = null;
-            return;
-        }
-
-        if (currentUpgradeSelected != null)
-        {
-            currentUpgradeSelected.Deselect();
-        }
-
-        currentUpgradeSelected = clickedUI;
-        currentUpgradeSelected.Select();
     }
     
     public void OnClickBuy()
@@ -132,32 +114,6 @@ public class ShopManager : MonoBehaviour
         BuyUnitImmediately(unit);
     }
 
-    public void ConfirmPurchase()
-    {
-        FriendlyUnitData unit = GetSelectedUnit();
-        
-        // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
-
-        if (unit != null)
-        {
-            BuyUnitImmediately(unit);
-            ClosePopup();
-            return;
-        }
-
-        ClosePopup();
-    }
-
-    public void ClosePopup()
-    {
-        if (buyPopup != null)
-        {
-            isBuyPopupActive = false;
-            buyPopup.SetActive(false);
-        }
-    }
-    
     public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
     {
         unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"{unitData.UnlockCost}G\n해금하시겠습니까?";
@@ -194,49 +150,6 @@ public class ShopManager : MonoBehaviour
         });
         
         unlockPanel.gameObject.SetActive(true);
-    }
-
-    private void InitializeShopPanels()
-    {
-        if (panels == null)
-        {
-            return;
-        }
-
-        foreach (var panel in panels)
-        {
-            if (panel == null)
-            {
-                continue;
-            }
-
-            UnitInfoIcon[] ui = panel.GetComponentsInChildren<UnitInfoIcon>(true);
-            foreach (var temp in ui)
-            {
-                temp.SetManager(this);
-            }
-
-            UpgradeUI[] upgradeUI = panel.GetComponentsInChildren<UpgradeUI>(true);
-            foreach (var temp in upgradeUI)
-            {
-                temp.SetManager(this);
-            }
-
-            if (itemData == null)
-            {
-                continue;
-            }
-
-            ItemObject[] itemUI = panel.GetComponentsInChildren<ItemObject>(true);
-            foreach (var temp in itemUI)
-            {
-                var data = itemData.items.FirstOrDefault(info => info.type == temp.type);
-                if (data != null)
-                {
-                    temp.Init(data);
-                }
-            }
-        }
     }
 
     private FriendlyUnitData GetSelectedUnit()

@@ -10719,32 +10719,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: 8eed51bd643eacd48b84347c4675359b, type: 2}
-  goldText: {fileID: 0}
-  buyButtonText: {fileID: 0}
   panels:
   - {fileID: 7370229266735024278}
   - {fileID: 6968147406304925131}
   - {fileID: 2468929376266534267}
   - {fileID: 4100944427714346943}
   - {fileID: 6224633744199782439}
-  upgradePanels: []
-  animalsTap: {fileID: 7642787536018982649}
-  upgradeTap: {fileID: 0}
-  itemTap: {fileID: 0}
-  buttonImages:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   buttonSprite:
   - {fileID: -1685679704073930617, guid: 5edcfcce3cf435a4bac2443c17ecc36c, type: 3}
   - {fileID: 7968904927735349844, guid: e8e370b10a348aa4eb48e73810b5517b, type: 3}
   unlockPanel: {fileID: 683871908}
-  animalsTapButton: {fileID: 0}
-  upgradeTapButton: {fileID: 0}
-  buyPopup: {fileID: 0}
-  costText: {fileID: 0}
-  tooltipText: {fileID: 0}
-  unitDescription: {fileID: 0}
 --- !u!114 &6520796058391456199
 MonoBehaviour:
   m_ObjectHideFlags: 0
