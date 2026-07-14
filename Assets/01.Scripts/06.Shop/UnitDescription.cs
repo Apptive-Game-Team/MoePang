@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
 {
+    /// <summary>
+    /// Unit Description Scene의 유닛 설명 표시 스크립트
+    /// </summary>
     public class UnitDescription : MonoBehaviour
     {
         [Header("Description Setting")]
@@ -49,6 +52,9 @@ namespace _01.Scripts._06.Shop
             unitUpgradeCostText.text = unlocked ? $"Level Up : {cost}" : $"Unlock : {cost}";
         }
     
+        /// <summary>
+        /// 좌측 상단 서식지 이미지 변경
+        /// </summary>
         private void ApplyHabitatImage(Habitat habitat)
         {
             int index = habitat switch
