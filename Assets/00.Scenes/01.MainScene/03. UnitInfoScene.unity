@@ -10718,16 +10718,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35810e493686eee48959abf4256ab140, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemData: {fileID: 11400000, guid: 8eed51bd643eacd48b84347c4675359b, type: 2}
   panels:
   - {fileID: 7370229266735024278}
   - {fileID: 6968147406304925131}
   - {fileID: 2468929376266534267}
   - {fileID: 4100944427714346943}
   - {fileID: 6224633744199782439}
-  buttonSprite:
-  - {fileID: -1685679704073930617, guid: 5edcfcce3cf435a4bac2443c17ecc36c, type: 3}
-  - {fileID: 7968904927735349844, guid: e8e370b10a348aa4eb48e73810b5517b, type: 3}
   unlockPanel: {fileID: 683871908}
 --- !u!114 &6520796058391456199
 MonoBehaviour:
@@ -12011,7 +12007,6 @@ GameObject:
   - component: {fileID: 5500676013160179078}
   - component: {fileID: 8615559980721502542}
   - component: {fileID: 6510420462542934735}
-  - component: {fileID: 9014983380594387319}
   m_Layer: 5
   m_Name: ShopCanvas
   m_TagString: Untagged
@@ -13017,21 +13012,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 3
   m_TargetDisplay: 0
---- !u!114 &9014983380594387319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7902786896348171952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8c7ffb28b81dca46a3fb3868875aa80, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  previousButton: {fileID: 0}
-  nextButton: {fileID: 0}
-  stageText: {fileID: 0}
 --- !u!1 &9033948440936560233
 GameObject:
   m_ObjectHideFlags: 0

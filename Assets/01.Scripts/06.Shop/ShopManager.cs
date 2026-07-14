@@ -74,6 +74,28 @@ public class ShopManager : MonoBehaviour
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
+    
+    /// <summary>
+    /// 유닛 강화 버튼
+    /// </summary>
+    public void OnClickUnitUpgrade()
+    {
+        Debug.Log("ShopManager.OnClickBuy called");
+
+        FriendlyUnitData unit = GetSelectedUnit();
+
+        if (unit == null)
+        {
+            Debug.LogWarning("Buy failed: selected unit is null.");
+            return;
+        }
+
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        
+        int cost = GetUnitPurchaseCost(unit);
+        Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
+        BuyUnitImmediately(unit);
+    }
     #endregion
     
     /// <summary>
@@ -95,25 +117,10 @@ public class ShopManager : MonoBehaviour
         currentSelected.Select();
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
     }
-    
-    public void OnClickBuy()
-    {
-        Debug.Log("ShopManager.OnClickBuy called");
 
-        FriendlyUnitData unit = GetSelectedUnit();
-
-        if (unit == null)
-        {
-            Debug.LogWarning("Buy failed: selected unit is null.");
-            return;
-        }
-
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
-        int cost = GetUnitPurchaseCost(unit);
-        Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
-        BuyUnitImmediately(unit);
-    }
-
+    /// <summary>
+    /// 유닛 해금 함수
+    /// </summary>
     public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
     {
         unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"{unitData.UnlockCost}G\n해금하시겠습니까?";
@@ -152,6 +159,9 @@ public class ShopManager : MonoBehaviour
         unlockPanel.gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// 선택된 유닛 확인 (Description Scene)
+    /// </summary>
     private FriendlyUnitData GetSelectedUnit()
     {
         if (currentSelected != null)
@@ -161,7 +171,23 @@ public class ShopManager : MonoBehaviour
 
         return HabitatManager.Instance != null ? HabitatManager.Instance.SelectedUnitData : null;
     }
+    
+    /// <summary>
+    /// 유닛 강화비용 계산 함수
+    /// </summary>
+    private int GetUnitPurchaseCost(FriendlyUnitData unit)
+    {
+        if (unit == null)
+        {
+            return 0;
+        }
 
+        return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
+    }
+
+    /// <summary>
+    /// 유닛 강화 함수
+    /// </summary>
     private void BuyUnitImmediately(FriendlyUnitData unit)
     {
         if (unit == null)
@@ -206,16 +232,9 @@ public class ShopManager : MonoBehaviour
         RefreshUnitDescription();
     }
 
-    private int GetUnitPurchaseCost(FriendlyUnitData unit)
-    {
-        if (unit == null)
-        {
-            return 0;
-        }
-
-        return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
-    }
-
+    /// <summary>
+    /// Unit Description 텍스트 최신화
+    /// </summary>
     private void RefreshUnitDescription()
     {
         if (unitDescription == null)
