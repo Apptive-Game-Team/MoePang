@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c327d1620960b7a4cb0c00d79973c2e9, type: 3}
-  m_Name: 02.SlingShot
+  m_Name: 02.Axe
   m_EditorClassIdentifier: 
   team: 1
   unitName: 27
   unitGrade: 3
   attackType: 0
-  animatorOverride: {fileID: 22100000, guid: 3ebba4e8d23b64d44be99989470ab445, type: 2}
+  animatorOverride: {fileID: 22100000, guid: 19d6da1fb85ddd2429d8e872628d1c56, type: 2}
   maxHp: 20
   baseMoveSpeed: 0.3
   attackDamage: 5
   attackSpeed: 1
   unitSize: 1.2
+  rangeAttackPrefab: {fileID: 0}
   unitDescriptionText: 
