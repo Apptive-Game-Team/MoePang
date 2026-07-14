@@ -42,8 +42,8 @@ public class UpgradeUI : MonoBehaviour
 
     public void Refresh()
     {
-        int level = UpgradeManager.Instance.GetLevel(data);
+        /*int level = UpgradeManager.Instance.GetLevel(data);
 
-        levelText.text = $"{data.UpgradeType} Lv.{level}/{data.MaxLevel}";
+        levelText.text = $"{data.UpgradeType} Lv.{level}/{data.MaxLevel}";*/
     }
 }
