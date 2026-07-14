@@ -16,6 +16,11 @@ public static class BalanceFormula
     private const int EarlyLevelLimit = 50;
     private const int UnitUpgradeCostIncreaseAfterLevel5 = 10;
 
+    private const int castleHpIncreasePerLevel = 10;
+    private const int castleHpBaseCost = 100;
+    public static int CastleHpIncreasePerLevel => castleHpIncreasePerLevel;
+    public static int CastleHpBaseCost => castleHpBaseCost;
+
     public static int GetUnitUpgradeCost(int grade, float level)
     {
         int nextLevel = Mathf.Max(2, Mathf.FloorToInt(level) + 1);

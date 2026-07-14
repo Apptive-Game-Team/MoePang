@@ -2020,7 +2020,7 @@ MonoBehaviour:
   - {fileID: 3984614524170727816}
   - {fileID: 6469171962680253968}
   - {fileID: 5006912680512151251}
-  - {fileID: 707424447618107930}
+  - {fileID: 0}
   - {fileID: 4442773429231896026}
   - {fileID: 8760506939719807458}
   - {fileID: 2609316883190637917}
@@ -2035,11 +2035,13 @@ MonoBehaviour:
   buttonSprite:
   - {fileID: -1685679704073930617, guid: 5edcfcce3cf435a4bac2443c17ecc36c, type: 3}
   - {fileID: 7968904927735349844, guid: e8e370b10a348aa4eb48e73810b5517b, type: 3}
+  unlockPanel: {fileID: 0}
   animalsTapButton: {fileID: 2389490655649004364}
   upgradeTapButton: {fileID: 2637260147310304017}
   buyPopup: {fileID: 7867407077823513979}
   costText: {fileID: 8879017983213885205}
   tooltipText: {fileID: 5459530029264803767}
+  unitDescription: {fileID: 0}
 --- !u!1 &7329019276566251726
 GameObject:
   m_ObjectHideFlags: 0
@@ -2481,7 +2483,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1856378745516649164}
-  - {fileID: 6155937890288139781}
   m_Father: {fileID: 3896221214311519596}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5056,113 +5057,6 @@ RectTransform:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2154767770994713469, guid: 989cef6146694954fbb766760c972be6, type: 3}
   m_PrefabInstance: {fileID: 4909020629793029485}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &5474268999026523535
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 930096161128013742}
-    m_Modifications:
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_Pivot.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 800
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 400
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4767557665500755861, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-      propertyPath: m_Name
-      value: CastleHpDownUpgradeUI
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
---- !u!1 &707424447618107930 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4767557665500755861, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-  m_PrefabInstance: {fileID: 5474268999026523535}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &6155937890288139781 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 2204171460414882698, guid: 9e4beb5b9b6b5144cb6710256fc87efa, type: 3}
-  m_PrefabInstance: {fileID: 5474268999026523535}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5700612223842894926
 PrefabInstance:

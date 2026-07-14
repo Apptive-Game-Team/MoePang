@@ -7,7 +7,6 @@ namespace _01.Scripts._06.Shop
 {
     public class CastleUpgradeUI : MonoBehaviour
     {
-        [SerializeField] private UpgradeData castleData;
         [SerializeField] private TextMeshProUGUI castleLevel;
         [SerializeField] private TextMeshProUGUI castleDescription;
         [SerializeField] private Button castleUpgradeButton;
@@ -27,8 +26,8 @@ namespace _01.Scripts._06.Shop
         private void UpdateText()
         {
             castleLevel.text = $"LV{_castleLevel}";
-            castleDescription.text = $"현재 서식지의 체력 : {_castleLevel * castleData.IncreasePerLevel}\n" +
-                                     $"강화 시 : {(_castleLevel + 1) * castleData.IncreasePerLevel}";
+            castleDescription.text = $"현재 서식지의 체력 : {_castleLevel * BalanceFormula.CastleHpIncreasePerLevel}\n" +
+                                     $"강화 시 : {(_castleLevel + 1) * BalanceFormula.CastleHpIncreasePerLevel}";
         }
 
         private void RegisterUpgradeButton()
@@ -40,8 +39,8 @@ namespace _01.Scripts._06.Shop
             }
             
             int cost = _castleLevel <= 5
-                ? _castleLevel * castleData.BaseCost
-                : 600 + castleData.BaseCost * (_castleLevel - 6);
+                ? _castleLevel * BalanceFormula.CastleHpBaseCost
+                : 600 + BalanceFormula.CastleHpBaseCost * (_castleLevel - 6);
             
             castleUpgradeButton.onClick.AddListener(() =>
             {

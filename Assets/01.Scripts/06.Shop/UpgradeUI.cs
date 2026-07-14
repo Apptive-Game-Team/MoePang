@@ -4,14 +4,11 @@ using UnityEngine.UI;
 
 public class UpgradeUI : MonoBehaviour
 {
-    [SerializeField] private UpgradeData data;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TextMeshProUGUI levelText;
 
     private ShopManager shopManager;
     private bool isSelected;
-
-    public UpgradeData Data => data;
 
     void Start()
     {
