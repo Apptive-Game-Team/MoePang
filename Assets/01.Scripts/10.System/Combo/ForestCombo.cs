@@ -10,7 +10,7 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            int level = GameManager.Instance.comboData.comboLevels[info.comboType];
+            int level = GameManager.Instance.comboData.ComboLevels[info.comboType];
             float mul = 0.1f + level * 0.02f;
             
             FriendlyUnit[] allies = FindObjectsByType<FriendlyUnit>(FindObjectsSortMode.None);
@@ -22,7 +22,7 @@ namespace _01.Scripts._10.System.Combo
 
         public override string DynamicDescription()
         {
-            int level = GameManager.Instance.comboData.comboLevels[info.comboType];
+            int level = GameManager.Instance.comboData.ComboLevels[info.comboType];
             int mul1 = 10 + level * 2;
             int mul2 = 10 + (level + 1) * 2;
             

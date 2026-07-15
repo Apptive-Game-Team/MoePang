@@ -45,21 +45,27 @@ public class StageManager : SingletonObject<StageManager>
     protected override void Awake()
     {
         base.Awake();
-        
-        MaxStage = GameManager.Instance.playData.clearedStage;
-        CurrentStage = MaxStage;
-        
-        MaxMeadowHabitatStage = GameManager.Instance.playData.clearedMeadowHabitatStage;
-        MaxOceanHabitatStage = GameManager.Instance.playData.clearedOceanHabitatStage;
-        MaxDesertHabitatStage = GameManager.Instance.playData.clearedDesertHabitatStage;
-        MaxForestHabitatStage = GameManager.Instance.playData.clearedForestHabitatStage;
-        MaxPolarHabitatStage = GameManager.Instance.playData.clearedPolarHabitatStage;
 
-        CurrentMeadowHabitatStage = MaxMeadowHabitatStage;
-        CurrentOceanHabitatStage = MaxOceanHabitatStage;
-        CurrentDesertHabitatStage = MaxDesertHabitatStage;
-        CurrentForestHabitatStage = MaxForestHabitatStage;
-        CurrentPolarHabitatStage = MaxPolarHabitatStage;
+        PlayData playData = GameManager.Instance.playData;
+        MaxStage = playData.MaxStages[StageType.Normal];
+        MaxMeadowHabitatStage = playData.MaxStages[StageType.Meadow];
+        MaxOceanHabitatStage = playData.MaxStages[StageType.Ocean];
+        MaxDesertHabitatStage = playData.MaxStages[StageType.Desert];
+        MaxForestHabitatStage = playData.MaxStages[StageType.Forest];
+        MaxPolarHabitatStage = playData.MaxStages[StageType.Polar];
+
+        CurrentStage = MaxStage - 1 == playData.lastPlayedStages[(int)StageType.Normal] 
+            ? MaxStage : playData.lastPlayedStages[(int)StageType.Normal];
+        CurrentMeadowHabitatStage = MaxMeadowHabitatStage - 1 == playData.lastPlayedStages[(int)StageType.Meadow] 
+            ? MaxMeadowHabitatStage : playData.lastPlayedStages[(int)StageType.Meadow];
+        CurrentOceanHabitatStage = MaxOceanHabitatStage - 1 == playData.lastPlayedStages[(int)StageType.Ocean] 
+            ? MaxOceanHabitatStage : playData.lastPlayedStages[(int)StageType.Ocean];
+        CurrentDesertHabitatStage = MaxDesertHabitatStage - 1 == playData.lastPlayedStages[(int)StageType.Desert] 
+            ? MaxDesertHabitatStage : playData.lastPlayedStages[(int)StageType.Desert];
+        CurrentForestHabitatStage = MaxForestHabitatStage - 1 == playData.lastPlayedStages[(int)StageType.Forest] 
+            ? MaxForestHabitatStage : playData.lastPlayedStages[(int)StageType.Forest];
+        CurrentPolarHabitatStage = MaxPolarHabitatStage - 1 == playData.lastPlayedStages[(int)StageType.Polar] 
+            ? MaxPolarHabitatStage : playData.lastPlayedStages[(int)StageType.Polar];
     }
     
     private void Update()
@@ -199,19 +205,11 @@ public class StageManager : SingletonObject<StageManager>
     
     public void RefreshFromPlayData()
     {
-        MaxStage = GameManager.Instance.playData.clearedStage;
-        CurrentStage = Mathf.Clamp(CurrentStage, 0, MaxStage);
-
-        MaxMeadowHabitatStage = GameManager.Instance.playData.clearedMeadowHabitatStage;
-        MaxOceanHabitatStage = GameManager.Instance.playData.clearedOceanHabitatStage;
-        MaxDesertHabitatStage = GameManager.Instance.playData.clearedDesertHabitatStage;
-        MaxForestHabitatStage = GameManager.Instance.playData.clearedForestHabitatStage;
-        MaxPolarHabitatStage = GameManager.Instance.playData.clearedPolarHabitatStage;
-
-        CurrentMeadowHabitatStage = Mathf.Clamp(CurrentMeadowHabitatStage, 0, MaxMeadowHabitatStage);
-        CurrentOceanHabitatStage = Mathf.Clamp(CurrentOceanHabitatStage, 0, MaxOceanHabitatStage);
-        CurrentDesertHabitatStage = Mathf.Clamp(CurrentDesertHabitatStage, 0, MaxDesertHabitatStage);
-        CurrentForestHabitatStage = Mathf.Clamp(CurrentForestHabitatStage, 0, MaxForestHabitatStage);
-        CurrentPolarHabitatStage = Mathf.Clamp(CurrentPolarHabitatStage, 0, MaxPolarHabitatStage);
+        CurrentStage = MaxStage - 1 == CurrentStage ? MaxStage : CurrentStage;
+        CurrentMeadowHabitatStage = MaxMeadowHabitatStage - 1 == CurrentMeadowHabitatStage ?  MaxMeadowHabitatStage : CurrentMeadowHabitatStage;
+        CurrentOceanHabitatStage = MaxOceanHabitatStage - 1 == CurrentOceanHabitatStage ? MaxOceanHabitatStage : CurrentOceanHabitatStage;
+        CurrentDesertHabitatStage = MaxDesertHabitatStage - 1 == CurrentDesertHabitatStage ? MaxDesertHabitatStage : CurrentDesertHabitatStage;
+        CurrentForestHabitatStage = MaxForestHabitatStage - 1 == CurrentForestHabitatStage ? MaxForestHabitatStage : CurrentForestHabitatStage;
+        CurrentPolarHabitatStage = MaxPolarHabitatStage - 1 == CurrentPolarHabitatStage ? MaxPolarHabitatStage : CurrentPolarHabitatStage;
     }
 }

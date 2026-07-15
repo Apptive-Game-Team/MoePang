@@ -18,10 +18,7 @@ public class MainButtonManager : MonoBehaviour
 
     private void Start()
     {
-        if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.MaxStage + 1}";
-
-        StageManager.Instance.SetStage(StageManager.Instance.MaxStage);
-
+        if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
         if (previousButton != null) previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
         if (nextButton != null) nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
     }

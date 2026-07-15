@@ -36,7 +36,7 @@ namespace _01.Scripts._04.UI.MainScene
                 Combo combo = combos.Find(c => c.info.comboType == type);
                 GameObject comboUI = Instantiate(comboUIPrefab, content.transform);
                 ComboUIObject obj = comboUI.GetComponent<ComboUIObject>();
-                var comboLevels = GameManager.Instance.comboData.comboLevels;
+                var comboLevels = GameManager.Instance.comboData.ComboLevels;
                 
                 obj.Initialize(this);
                 obj.habitat = type;

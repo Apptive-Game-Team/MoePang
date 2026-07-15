@@ -8,8 +8,8 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            float multiplier = 0.9f - GameManager.Instance.comboData.comboLevels[info.comboType] * 0.025f;
-            float duration = 5f + GameManager.Instance.comboData.comboLevels[info.comboType] * 0.25f;
+            float multiplier = 0.9f - GameManager.Instance.comboData.ComboLevels[info.comboType] * 0.025f;
+            float duration = 5f + GameManager.Instance.comboData.ComboLevels[info.comboType] * 0.25f;
             
             BuffManager.Instance.ApplyEnemyBuff(StatType.AttackSpeed, multiplier, duration);
             BuffManager.Instance.ApplyEnemyBuff(StatType.MoveSpeed, multiplier, duration);
@@ -17,7 +17,7 @@ namespace _01.Scripts._10.System.Combo
 
         public override string DynamicDescription()
         {
-            int level = GameManager.Instance.comboData.comboLevels[info.comboType];
+            int level = GameManager.Instance.comboData.ComboLevels[info.comboType];
             float mul1 = 1 - level * 0.1f;
             float mul2 = 1 - (level + 1) * 0.1f;
             

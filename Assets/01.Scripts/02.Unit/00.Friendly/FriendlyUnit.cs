@@ -53,15 +53,15 @@ public class FriendlyUnit : Unit
         );
     }
 
-    private int GetClearedHabitatStage(Habitat habitat)
+    private int GetClearedHabitatStage(Habitat type)
     {
-        return habitat switch
+        return type switch
         {
-            Habitat.Meadow => GameManager.Instance.playData.clearedMeadowHabitatStage,
-            Habitat.Ocean => GameManager.Instance.playData.clearedOceanHabitatStage,
-            Habitat.Desert => GameManager.Instance.playData.clearedDesertHabitatStage,
-            Habitat.Forest => GameManager.Instance.playData.clearedForestHabitatStage,
-            Habitat.Polar => GameManager.Instance.playData.clearedPolarHabitatStage,
+            Habitat.Meadow => GameManager.Instance.playData.MaxStages[StageType.Meadow],
+            Habitat.Ocean => GameManager.Instance.playData.MaxStages[StageType.Ocean],
+            Habitat.Desert => GameManager.Instance.playData.MaxStages[StageType.Desert],
+            Habitat.Forest => GameManager.Instance.playData.MaxStages[StageType.Forest],
+            Habitat.Polar => GameManager.Instance.playData.MaxStages[StageType.Polar],
             _ => 0
         };
     }
