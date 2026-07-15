@@ -1,5 +1,6 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
+using _01.Scripts._02.Unit;
 using _01.Scripts._06.Shop;
 using System;
 using System.Linq;

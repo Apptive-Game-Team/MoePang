@@ -1,5 +1,6 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
+using _01.Scripts._02.Unit;
 using _01.Scripts._06.Shop;
 using System;
 using System.Collections;
@@ -7,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 
 namespace _01.Scripts._09.Item
@@ -237,21 +239,21 @@ namespace _01.Scripts._09.Item
         {
             _isItemApplying = true;
             
-            List<List<int>> originProb = _spawner.friendlySpawnWeights;
-            List<List<int>> raisedProb = new()
+            int[][] originProb = BalanceFormula.FriendlyWeights;
+            int[][] raisedProb =
             {
-                new List<int> { 100 },
-                new List<int> { 50, 50 },
-                new List<int> { 40, 30, 30 },
-                new List<int> { 30, 20, 30, 20 },
-                new List<int> { 15, 18, 20, 22, 25 },
+                new [] { 100 },
+                new [] { 50, 50 },
+                new [] { 40, 30, 30 },
+                new [] { 30, 20, 30, 20 },
+                new [] { 15, 18, 20, 22, 25 },
             };
-            _spawner.friendlySpawnWeights = raisedProb;
+            BalanceFormula.FriendlyWeights = raisedProb;
             print("아군 고등급 기물 소환 확률 증가");
             
             yield return new WaitForSeconds(10f);
 
-            _spawner.friendlySpawnWeights = originProb;
+            BalanceFormula.FriendlyWeights = originProb;
             print("소환 확률 초기화");
             
             _isItemApplying = false;

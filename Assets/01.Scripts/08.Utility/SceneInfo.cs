@@ -21,7 +21,7 @@ namespace _01.Scripts._08.Utility
             { SceneType.Title , "00.TitleScene"},
             { SceneType.Main, "01.MainScene"},
             { SceneType.MatchAndBattle, "02.3match&Battle"},
-            { SceneType.UnitInfo, "03. UnitInfoScene"},
+            { SceneType.UnitInfo, "03.UnitInfoScene"},
             { SceneType.UnitDescription, "04.UnitDescription"},
             { SceneType.Combo, "05.ComboScene"},
             { SceneType.HabitatModeSelect, "06.HabitatModeSelect"},
