@@ -3,9 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 상점에 Unit Icon 스크립트
+/// UnitInfoScene의 Unit Icon Script
 /// </summary>
-public class ShopUI : MonoBehaviour
+public class UnitInfoIcon : MonoBehaviour
 {
     [Header("Unit Data")]
     [SerializeField] private FriendlyUnitData unitData;
@@ -24,9 +24,7 @@ public class ShopUI : MonoBehaviour
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
-    public bool IsSelected => isSelected;
     public bool IsUnlocked => HabitatManager.Instance.IsUnlocked(unitData);
-    public float UnitCost => unitData.UnitCost;
 
     private void Awake()
     {
@@ -46,48 +44,14 @@ public class ShopUI : MonoBehaviour
         RefreshUnlockState();
     }
 
+    /// <summary>
+    /// ShopManager에서 Script 연결
+    /// </summary>
     public void SetManager(ShopManager manager)
     {
         shopManager = manager;
     }
-
-    /// <summary>
-    /// 해금상태 UI 갱신
-    /// </summary>
-    public void RefreshUnlockState()
-    {
-        bool unlocked = HabitatManager.Instance.IsUnlocked(unitData);
-
-        unlockImage.gameObject.SetActive(!unlocked);
-        levelImage.gameObject.SetActive(unlocked);
-        backgroundImage.gameObject.SetActive(unlocked);
-        
-        SetLevelText();
-    }
-
-    private void SetLevelText()
-    {
-        levelImage.text = $"Lv.{unitData.UnitLevel}";
-    }
-
-    public void OnClick()
-    {
-        if (!IsUnlocked && HabitatManager.Instance.CanUnlock(unitData))
-        {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
-            shopManager.UnlockUnit(unitData, RefreshUnlockState);
-            return;
-        }
-        
-        if (!HabitatManager.Instance.CanUnlock(unitData))
-        {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
-            return;
-        }
-        
-        shopManager.OnClickUnit(this);
-    }
-
+    
     public void Select()
     {
         isSelected = true;
@@ -99,7 +63,7 @@ public class ShopUI : MonoBehaviour
         isSelected = false;
         SetImageScale(1f);
     }
-
+    
     private void SetImageScale(float scale)
     {
         if (unlockImage != null)
@@ -111,5 +75,39 @@ public class ShopUI : MonoBehaviour
         {
             backgroundImage.transform.localScale = backgroundImageOriginScale * scale;
         }
+    }
+
+    /// <summary>
+    /// 씬 갱신시 Image Update
+    /// </summary>
+    public void RefreshUnlockState()
+    {
+        bool unlocked = HabitatManager.Instance.IsUnlocked(unitData);
+
+        unlockImage.gameObject.SetActive(!unlocked);
+        levelImage.gameObject.SetActive(unlocked);
+        backgroundImage.gameObject.SetActive(unlocked);
+        
+        levelImage.text = $"Lv.{unitData.UnitLevel}";
+    }
+
+    /// <summary>
+    /// Unit Icon Click
+    /// </summary>
+    public void OnClick()
+    {
+        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        if (!IsUnlocked && HabitatManager.Instance.CanUnlock(unitData))
+        {
+            shopManager.UnlockUnit(unitData, RefreshUnlockState);
+            return;
+        }
+        
+        if (!HabitatManager.Instance.CanUnlock(unitData))
+        {
+            return;
+        }
+        
+        shopManager.UnitClicked(this);
     }
 }

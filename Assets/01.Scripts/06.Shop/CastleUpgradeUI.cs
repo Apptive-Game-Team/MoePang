@@ -5,14 +5,17 @@ using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
 {
+    /// <summary>
+    /// 성 업그레이드 스크립트
+    /// </summary>
     public class CastleUpgradeUI : MonoBehaviour
     {
-        [SerializeField] private UpgradeData castleData;
+        [Header("Castle Upgrade Settings")]
         [SerializeField] private TextMeshProUGUI castleLevel;
         [SerializeField] private TextMeshProUGUI castleDescription;
         [SerializeField] private Button castleUpgradeButton;
+        
         private GameObject _upgradePopup;
-
         private int _castleLevel;
 
         private void Awake()
@@ -24,11 +27,14 @@ namespace _01.Scripts._06.Shop
             RegisterUpgradeButton();
         }
 
+        /// <summary>
+        /// 성 UI 텍스트 최신화
+        /// </summary>
         private void UpdateText()
         {
             castleLevel.text = $"LV{_castleLevel}";
-            castleDescription.text = $"현재 서식지의 체력 : {_castleLevel * castleData.IncreasePerLevel}\n" +
-                                     $"강화 시 : {(_castleLevel + 1) * castleData.IncreasePerLevel}";
+            castleDescription.text = $"현재 서식지의 체력 : {_castleLevel * BalanceFormula.CastleHpIncreasePerLevel}\n" +
+                                     $"강화 시 : {(_castleLevel + 1) * BalanceFormula.CastleHpIncreasePerLevel}";
         }
 
         private void RegisterUpgradeButton()
@@ -40,8 +46,8 @@ namespace _01.Scripts._06.Shop
             }
             
             int cost = _castleLevel <= 5
-                ? _castleLevel * castleData.BaseCost
-                : 600 + castleData.BaseCost * (_castleLevel - 6);
+                ? _castleLevel * BalanceFormula.CastleHpBaseCost
+                : 600 + BalanceFormula.CastleHpBaseCost * (_castleLevel - 6);
             
             castleUpgradeButton.onClick.AddListener(() =>
             {
@@ -76,7 +82,6 @@ namespace _01.Scripts._06.Shop
 
             _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
-                // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
                 SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
