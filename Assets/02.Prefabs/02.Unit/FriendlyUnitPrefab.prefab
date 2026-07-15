@@ -105,6 +105,7 @@ MonoBehaviour:
   widthMultiplier: 0.75
   heightMultiplier: 0.22
   yOffset: -0.08
+  lockWorldY: 1
 --- !u!1 &4294546345608406822
 GameObject:
   m_ObjectHideFlags: 0
@@ -170,6 +171,7 @@ MonoBehaviour:
   attackType: 0
   direction: 0
   damageDuration: 0.3
+  attackProjectilePrefab: {fileID: 0}
   habitat: 0
 --- !u!212 &-6855850505076423706
 SpriteRenderer:
@@ -236,7 +238,7 @@ Animator:
   m_GameObject: {fileID: 4294546345608406822}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 22100000, guid: 0d9c5f60398544d4a903bb0cdb014c2a, type: 2}
+  m_Controller: {fileID: 22100000, guid: 66ac524389331004f9d0fc700bcb50f9, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -292,7 +294,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.1, y: 20}
+  m_Size: {x: 0.1, y: 100}
   m_EdgeRadius: 0
 --- !u!1001 &5226420016150567541
 PrefabInstance:
