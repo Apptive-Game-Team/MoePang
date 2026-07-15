@@ -94,17 +94,11 @@ public class AnteaterTongue : RangeAttackPrefab
 
     private void SetLength(float length)
     {
-        tongueVisual.localPosition = Vector3.zero;
+        tongueVisual.localPosition = new Vector3(length * 0.5f, 0f, 0f);
 
         Vector3 scale = originalVisualScale;
-        scale.x = originalVisualScale.x * (length / spriteUnitLength);
+        scale.x = length / spriteUnitLength;
         tongueVisual.localScale = scale;
-
-        if (tongueCollider != null)
-        {
-            tongueCollider.offset = new Vector2(length * 0.5f, 0f);
-            tongueCollider.size = new Vector2(length, tongueWidth);
-        }
     }
 
     protected override void OnTriggerEnter2D(Collider2D other)
