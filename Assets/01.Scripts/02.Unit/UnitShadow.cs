@@ -13,10 +13,29 @@ public class UnitShadow : MonoBehaviour
     [SerializeField] private float widthMultiplier = 0.75f;
     [SerializeField] private float heightMultiplier = 0.22f;
     [SerializeField] private float yOffset = -0.08f;
+    
+    [SerializeField] private bool lockWorldY = true;
+    private float fixedWorldY;
 
     private void Start()
     {
+        if (shadowRenderer != null)
+        {
+            fixedWorldY = shadowRenderer.transform.position.y;
+        }
+        
         ApplyShadowSize();
+    }
+    
+    private void LateUpdate()
+    {
+        if (!lockWorldY || shadowRenderer == null)
+            return;
+
+        Transform shadow = shadowRenderer.transform;
+        Vector3 position = shadow.position;
+        position.y = fixedWorldY;
+        shadow.position = position;
     }
 
     private void ApplyShadowSize()
