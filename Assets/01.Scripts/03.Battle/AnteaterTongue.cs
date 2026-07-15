@@ -10,6 +10,7 @@ public class AnteaterTongue : RangeAttackPrefab
     [SerializeField] private float retractSpeed = 18f;
     [SerializeField] private float tongueWidth = 0.25f;
     [SerializeField] private float spriteUnitLength = 1f;
+    [SerializeField] private Vector2 spawnOffset = new Vector2(0.3f, -0.15f);
 
     private Vector3 originalVisualScale;
     private float currentLength;
@@ -43,6 +44,9 @@ public class AnteaterTongue : RangeAttackPrefab
         this.direction = direction.normalized;
         initialized = true;
 
+        float sign = this.direction.x >= 0f ? 1f : -1f;
+        transform.position += new Vector3(spawnOffset.x * sign, spawnOffset.y, 0f);
+        
         currentLength = 0f;
         retracting = false;
         damaged = false;
