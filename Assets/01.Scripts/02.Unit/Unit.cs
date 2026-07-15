@@ -77,6 +77,11 @@ public class Unit : MonoBehaviour, IDamageable
     protected UnitData data;
     protected SpriteRenderer spriteRenderer;
     protected Animator animator;
+    
+    //북극 여우 공격
+    private float articFoxJumpHeight = 1.2f;
+    private float articFoxLandingOffset = 0.35f;
+    private float articFoxReturnDuration = 0.2f;
 
     //상태 관리
     protected bool isAttacking;
@@ -295,19 +300,26 @@ public class Unit : MonoBehaviour, IDamageable
             animator.SetTrigger("Attack");
         }
 
-        yield return new WaitForSeconds(segment);
-
-        AttackByType();
-        
-        yield return new WaitForSeconds(segment);
-
-        if (animator != null)
+        if (data.UnitName == UnitName.ArticFox)
         {
-            animator.SetBool("Idle", true);
-            animator.SetBool("Walk", false);
+            yield return StartCoroutine(ArticFoxAttackCoroutine(segment));
         }
+        else
+        {
+            yield return new WaitForSeconds(segment);
 
-        yield return new WaitForSeconds(segment);
+            AttackByType();
+
+            yield return new WaitForSeconds(segment);
+
+            if (animator != null)
+            {
+                animator.SetBool("Idle", true);
+                animator.SetBool("Walk", false);
+            }
+
+            yield return new WaitForSeconds(segment);
+        }
 
         isAttacking = false;
         attackRoutine = null;
@@ -565,6 +577,63 @@ public class Unit : MonoBehaviour, IDamageable
     protected virtual Vector2 GetAttackBoxSize()
     {
         return new Vector2(attackRange, unitSize);
+    }
+    
+    /// <summary>
+    /// 북극여우 공격
+    /// </summary>
+    private IEnumerator ArticFoxAttackCoroutine(float segment)
+    {
+        IDamageable target = GetRaycastTarget();
+
+        if (target == null)
+        {
+            TeamType enemyTeam = team == TeamType.Friendly ? TeamType.Enemy : TeamType.Friendly;
+            target = UTQ.Peek(enemyTeam);
+        }
+
+        if (target == null)
+            yield break;
+
+        Vector3 originPosition = transform.position;
+        Vector3 targetPosition = target.GetTransform().position;
+
+        float landingX = targetPosition.x - direction * articFoxLandingOffset;
+        Vector3 landingPosition = new Vector3(
+            landingX,
+            originPosition.y,
+            originPosition.z
+        );
+
+        float middleX = (originPosition.x + landingPosition.x) * 0.5f;
+        Vector3 jumpPeakPosition = new Vector3(
+            middleX,
+            originPosition.y + articFoxJumpHeight,
+            originPosition.z
+        );
+
+        yield return transform
+            .DOMove(jumpPeakPosition, segment)
+            .SetEase(Ease.OutQuad)
+            .WaitForCompletion();
+
+        AttackByType();
+
+        yield return transform
+            .DOMove(landingPosition, segment)
+            .SetEase(Ease.InQuad)
+            .WaitForCompletion();
+
+        if (animator != null)
+        {
+            animator.SetBool("Idle", true);
+            animator.SetBool("Walk", false);
+        }
+
+        yield return transform
+            .DOMove(originPosition, articFoxReturnDuration)
+            .SetEase(Ease.OutQuad)
+            .WaitForCompletion();
     }
     
     #endregion
