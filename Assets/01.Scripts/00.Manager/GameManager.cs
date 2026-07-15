@@ -35,8 +35,8 @@ namespace _01.Scripts._00.Manager
         public Dictionary<StageType, Dictionary<int, StageData>> StageData = new();
         [SerializeField] private List<StageType> stageTypeKeys;
         [SerializeField] private List<StageDataList> stageTypeValues;
-        
-        public List<int> lastPlayedStages = new();
+
+        public List<int> selectedStage = new();
 
         public PlayData()
         {
@@ -44,7 +44,7 @@ namespace _01.Scripts._00.Manager
             {
                 MaxStages[type] = 0;
                 StageData[type] = new Dictionary<int, StageData>();
-                lastPlayedStages.Add(0);
+                selectedStage.Add(0);
             }
         }
 
@@ -379,6 +379,8 @@ namespace _01.Scripts._00.Manager
             {
                 HabitatMode mode = HabitatModeManager.Instance.HabitatMode;
                 stageType = GetStageTypeWithHabitat(mode);
+                playData.selectedStage[(int)stageType] = playData.MaxStages[stageType] == stageManager.CurrentHabitatStage ?
+                    playData.MaxStages[stageType] + 1 : stageManager.CurrentStage;
                 playData.MaxStages[stageType] = Mathf.Max(playData.MaxStages[stageType], stageManager.CurrentHabitatStage + 1);
                 currentStage = stageManager.CurrentHabitatStage;
                 stageManager.SetMaxHabitatStage(mode, Mathf.Max(stageManager.GetMaxHabitatStage(mode), stageManager.CurrentHabitatStage + 1));
@@ -386,6 +388,8 @@ namespace _01.Scripts._00.Manager
             else
             {
                 stageType = StageType.Normal;
+                playData.selectedStage[(int)stageType] = playData.MaxStages[stageType] == stageManager.CurrentStage ?
+                    playData.MaxStages[stageType] + 1 : stageManager.CurrentStage;
                 playData.MaxStages[stageType] = Mathf.Max(playData.MaxStages[stageType], stageManager.CurrentStage + 1);
                 currentStage = stageManager.CurrentStage;
                 stageManager.SetMaxStage(Mathf.Max(stageManager.MaxStage, stageManager.CurrentStage + 1));
@@ -405,8 +409,6 @@ namespace _01.Scripts._00.Manager
                 time : Mathf.Min(stageData.minUsedTime, time);
             
             playData.StageData[stageType][currentStage] = stageData;
-            
-            playData.lastPlayedStages[(int)stageType] = currentStage;
             
             playData.BeforeSave();
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
@@ -459,7 +461,7 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
         }
 
-        private StageType GetStageTypeWithHabitat(HabitatMode mode)
+        public StageType GetStageTypeWithHabitat(HabitatMode mode)
         {
             return mode switch
             {
