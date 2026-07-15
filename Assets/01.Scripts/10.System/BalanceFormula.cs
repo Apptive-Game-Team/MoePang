@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class BalanceFormula
@@ -224,6 +226,52 @@ public static class BalanceFormula
     private const int EnemySpawnMinimumWeight = 2;
     
     /// <summary>
+    /// 아군 소환 확률 가중치
+    /// </summary>
+    public static int[] GetFriendlySpawnWeights(List<FriendlyUnitData> unlockedUnits)
+    {
+        int currentStage = StageManager.Instance.CurrentStage;
+        int unlockedCount = unlockedUnits.Count;
+
+        int[] result = new int[unlockedCount];
+
+        if (currentStage < 50)
+        {
+            int[][] weights =
+            {
+                new[] {100},
+                new[] {60, 40},
+                new[] {60, 30, 10}
+            };
+
+            int useCount = Mathf.Min(unlockedCount, 3);
+            int startIndex = Mathf.Max(0, unlockedCount - 3);
+
+            int[] selectedWeights = weights[useCount - 1];
+
+            for (int i = 0; i < useCount; i++)
+            {
+                result[startIndex + i] = selectedWeights[i];
+            }
+        }
+        else
+        {
+            int[][] weights =
+            {
+                new[] {100},
+                new[] {70, 30},
+                new[] {60, 30, 10},
+                new[] {50, 30, 15, 5},
+                new[] {35, 25, 18, 14, 8}
+            };
+
+            Array.Copy(weights[unlockedCount - 1], result, unlockedCount);
+        }
+
+        return result;
+    }
+    
+    /// <summary>
     /// 현재 스테이지에서 해당 등급 적군의 등장 가중치 반환
     /// </summary>
     public static int GetEnemySpawnWeight(int grade, int currentStage)
@@ -263,7 +311,32 @@ public static class BalanceFormula
     {
         if (currentStage < EnemySpawnWeightStartStage)
         {
-            return new[] { 100, 0, 0, 0, 0, 0, 0, 0, 0 };
+            int cycleStep = currentStage % 10;
+            int subIndex = (cycleStep < 3) ? 0 : (cycleStep < 6 ? 1 : 2);
+            int index = currentStage / 10 * 3 + subIndex;
+
+            int enemyStart = index / 2;
+            int enemyWeightsStep = index % 2;
+
+            int[][] localWeights =
+            {
+                new[] { 70, 30, 0 },
+                new[] { 50, 30, 20 }
+            };
+
+            int[] result = new int[9];
+
+            for (int i = 0; i < localWeights[enemyWeightsStep].Length; i++)
+            {
+                int targetIndex = enemyStart + i;
+
+                if (targetIndex < result.Length)
+                {
+                    result[targetIndex] = localWeights[enemyWeightsStep][i];
+                }
+            }
+
+            return result;
         }
 
         if (currentStage <= 60)
