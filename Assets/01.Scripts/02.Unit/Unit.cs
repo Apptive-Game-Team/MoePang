@@ -296,12 +296,6 @@ public class Unit : MonoBehaviour, IDamageable
         isAttacking = true;
 
         float segment = 1f / attackSpeed / 3f;
-        animator.speed = attackSpeed;
-
-        if (animator != null)
-        {
-            animator.SetTrigger("Attack");
-        }
 
         if (data.UnitName == UnitName.ArticFox)
         {
@@ -309,6 +303,13 @@ public class Unit : MonoBehaviour, IDamageable
         }
         else
         {
+            animator.speed = attackSpeed;
+
+            if (animator != null)
+            {
+                animator.SetTrigger("Attack");
+            }
+
             yield return new WaitForSeconds(segment);
 
             AttackByType();
@@ -597,7 +598,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (target == null)
             yield break;
-        
+
         Vector3 originPosition = transform.position;
         articFoxAttackOriginPosition = originPosition;
         isArticFoxAttackMoving = true;
@@ -618,13 +619,28 @@ public class Unit : MonoBehaviour, IDamageable
             originPosition.z
         );
 
+        // Attack 애니메이션 0~10프레임: 하늘로 뜸
+        if (animator != null)
+        {
+            animator.SetBool("Idle", false);
+            animator.SetBool("Walk", false);
+            animator.speed = attackSpeed * 0.5f;
+            animator.Play("Attack", 0, 0f);
+            animator.Update(0f);
+        }
+
         articFoxAttackTween = transform
             .DOMove(jumpPeakPosition, segment)
             .SetEase(Ease.OutQuad);
 
         yield return articFoxAttackTween.WaitForCompletion();
 
-        AttackByType();
+        // Attack 애니메이션 10~20프레임: 내려가며 돌진
+        if (animator != null)
+        {
+            animator.Play("Attack", 0, 0.5f);
+            animator.Update(0f);
+        }
 
         articFoxAttackTween = transform
             .DOMove(landingPosition, segment)
@@ -632,8 +648,13 @@ public class Unit : MonoBehaviour, IDamageable
 
         yield return articFoxAttackTween.WaitForCompletion();
 
+        // 착지 시점에 공격 판정
+        AttackByType();
+
+        // 잠깐 Idle로 복귀
         if (animator != null)
         {
+            animator.speed = 1f;
             animator.SetBool("Idle", true);
             animator.SetBool("Walk", false);
         }
