@@ -82,6 +82,9 @@ public class Unit : MonoBehaviour, IDamageable
     private float articFoxJumpHeight = 1.2f;
     private float articFoxLandingOffset = 0.35f;
     private float articFoxReturnDuration = 0.2f;
+    private bool isArticFoxAttackMoving;
+    private Vector3 articFoxAttackOriginPosition;
+    private Tween articFoxAttackTween;
 
     //상태 관리
     protected bool isAttacking;
@@ -594,8 +597,11 @@ public class Unit : MonoBehaviour, IDamageable
 
         if (target == null)
             yield break;
-
+        
         Vector3 originPosition = transform.position;
+        articFoxAttackOriginPosition = originPosition;
+        isArticFoxAttackMoving = true;
+
         Vector3 targetPosition = target.GetTransform().position;
 
         float landingX = targetPosition.x - direction * articFoxLandingOffset;
@@ -612,17 +618,19 @@ public class Unit : MonoBehaviour, IDamageable
             originPosition.z
         );
 
-        yield return transform
+        articFoxAttackTween = transform
             .DOMove(jumpPeakPosition, segment)
-            .SetEase(Ease.OutQuad)
-            .WaitForCompletion();
+            .SetEase(Ease.OutQuad);
+
+        yield return articFoxAttackTween.WaitForCompletion();
 
         AttackByType();
 
-        yield return transform
+        articFoxAttackTween = transform
             .DOMove(landingPosition, segment)
-            .SetEase(Ease.InQuad)
-            .WaitForCompletion();
+            .SetEase(Ease.InQuad);
+
+        yield return articFoxAttackTween.WaitForCompletion();
 
         if (animator != null)
         {
@@ -630,10 +638,29 @@ public class Unit : MonoBehaviour, IDamageable
             animator.SetBool("Walk", false);
         }
 
-        yield return transform
+        articFoxAttackTween = transform
             .DOMove(originPosition, articFoxReturnDuration)
-            .SetEase(Ease.OutQuad)
-            .WaitForCompletion();
+            .SetEase(Ease.OutQuad);
+
+        yield return articFoxAttackTween.WaitForCompletion();
+
+        isArticFoxAttackMoving = false;
+        articFoxAttackTween = null;
+    }
+    
+    private void ResetArticFoxAttackPositionIfNeeded()
+    {
+        if (!isArticFoxAttackMoving) return;
+
+        if (articFoxAttackTween != null && articFoxAttackTween.IsActive())
+        {
+            articFoxAttackTween.Kill();
+            articFoxAttackTween = null;
+        }
+
+        transform.position = articFoxAttackOriginPosition;
+
+        isArticFoxAttackMoving = false;
     }
     
     #endregion
@@ -694,6 +721,8 @@ public class Unit : MonoBehaviour, IDamageable
 
     protected virtual IEnumerator DamageCoroutine()
     {
+        ResetArticFoxAttackPositionIfNeeded();
+
         isDamaging = true;
 
         StopAttack();

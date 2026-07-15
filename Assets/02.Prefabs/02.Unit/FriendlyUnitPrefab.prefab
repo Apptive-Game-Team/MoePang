@@ -105,6 +105,7 @@ MonoBehaviour:
   widthMultiplier: 0.75
   heightMultiplier: 0.22
   yOffset: -0.08
+  lockWorldY: 1
 --- !u!1 &4294546345608406822
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,7 +125,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2518640252429261255
 Transform:
   m_ObjectHideFlags: 0
@@ -170,6 +171,7 @@ MonoBehaviour:
   attackType: 0
   direction: 0
   damageDuration: 0.3
+  attackProjectilePrefab: {fileID: 0}
   habitat: 0
 --- !u!212 &-6855850505076423706
 SpriteRenderer:
@@ -292,7 +294,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.1, y: 20}
+  m_Size: {x: 0.1, y: 100}
   m_EdgeRadius: 0
 --- !u!1001 &5226420016150567541
 PrefabInstance:
