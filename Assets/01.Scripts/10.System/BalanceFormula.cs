@@ -224,6 +224,22 @@ public static class BalanceFormula
     private const int EnemySpawnWeightDynamicInterval = 10;
     private const int EnemySpawnWeightStartStage = 51;
     private const int EnemySpawnMinimumWeight = 2;
+
+    public static int[][] FriendlyTutorialWeights =
+    {
+        new[] { 100 }, 
+        new[] { 60, 40 }, 
+        new[] { 60, 30, 10 }
+    };
+
+    public static int[][] FriendlyWeights =
+    {
+        new[] {100},
+        new[] {70, 30},
+        new[] {60, 30, 10},
+        new[] {50, 30, 15, 5},
+        new[] {35, 25, 18, 14, 8}
+    };
     
     /// <summary>
     /// 아군 소환 확률 가중치
@@ -237,17 +253,10 @@ public static class BalanceFormula
 
         if (currentStage < 50)
         {
-            int[][] weights =
-            {
-                new[] {100},
-                new[] {60, 40},
-                new[] {60, 30, 10}
-            };
-
             int useCount = Mathf.Min(unlockedCount, 3);
             int startIndex = Mathf.Max(0, unlockedCount - 3);
 
-            int[] selectedWeights = weights[useCount - 1];
+            int[] selectedWeights = FriendlyTutorialWeights[useCount - 1];
 
             for (int i = 0; i < useCount; i++)
             {
@@ -256,16 +265,7 @@ public static class BalanceFormula
         }
         else
         {
-            int[][] weights =
-            {
-                new[] {100},
-                new[] {70, 30},
-                new[] {60, 30, 10},
-                new[] {50, 30, 15, 5},
-                new[] {35, 25, 18, 14, 8}
-            };
-
-            Array.Copy(weights[unlockedCount - 1], result, unlockedCount);
+            Array.Copy(FriendlyWeights[unlockedCount - 1], result, unlockedCount);
         }
 
         return result;
