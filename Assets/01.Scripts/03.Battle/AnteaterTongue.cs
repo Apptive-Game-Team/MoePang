@@ -115,6 +115,7 @@ public class AnteaterTongue : RangeAttackPrefab
 
         target.TakeDamage(damage);
         damaged = true;
-        retracting = true;
+        Destroy(gameObject);
+        //retracting = true;
     }
 }
