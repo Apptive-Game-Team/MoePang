@@ -35,8 +35,6 @@ namespace _01.Scripts._04.UI.InGame
                 diaAmount = goldManager.AddStageClearedDia();
             }
             
-            GameManager.Instance.SavePlayData();
-            
             // UI
             int minutes = Mathf.FloorToInt(time / 60);
             int seconds = Mathf.FloorToInt(time % 60);
@@ -67,6 +65,8 @@ namespace _01.Scripts._04.UI.InGame
             {
                 diaText.text = $"{diaAmount}";
             }
+            
+            GameManager.Instance.SavePlayData();
         }
         
         private string GetHabitatName(HabitatMode mode)

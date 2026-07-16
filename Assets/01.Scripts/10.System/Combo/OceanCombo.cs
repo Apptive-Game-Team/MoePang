@@ -8,8 +8,15 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            float multiplier = 1.2f + GameManager.Instance.comboData.comboLevels[info.comboType] * 0.04f;
-            float duration = 5f + GameManager.Instance.comboData.comboLevels[info.comboType] * 0.25f;
+            if (GameManager.Instance.playData.MaxStages[StageType.Ocean] < 5)
+            {
+                return;
+            }
+            
+            Debug.Log("Ocean Combo Applied");
+            
+            float multiplier = 1.2f + GameManager.Instance.comboData.ComboLevels[info.comboType] * 0.04f;
+            float duration = 5f + GameManager.Instance.comboData.ComboLevels[info.comboType] * 0.25f;
             
             BuffManager.Instance.ApplyAllyBuff(StatType.AttackDamage, multiplier, duration);
             BuffManager.Instance.ApplyAllyBuff(StatType.AttackSpeed, multiplier, duration);
@@ -18,7 +25,7 @@ namespace _01.Scripts._10.System.Combo
 
         public override string DynamicDescription()
         {
-            int level = GameManager.Instance.comboData.comboLevels[info.comboType];
+            int level = GameManager.Instance.comboData.ComboLevels[info.comboType];
             float mul1 = 1 + level * 0.2f;
             float mul2 = 1 + (level + 1) * 0.2f;
             

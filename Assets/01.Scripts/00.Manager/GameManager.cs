@@ -6,28 +6,107 @@ using _01.Scripts._11.HabitatMode;
 
 namespace _01.Scripts._00.Manager
 {
+    public interface IConvertable
+    {
+        public void BeforeSave();
+        public void AfterLoad();
+    }
+
+    public enum StageType
+    {
+        Normal,
+        Meadow,
+        Ocean,
+        Desert,
+        Forest,
+        Polar,
+    }
+    
     [Serializable]
-    public class PlayData
+    public class PlayData : IConvertable
     {
         public int goldAmount;
         public int diaAmount;
-        public int clearedStage;
-        public List<StageData> stagesData;
         
-        public int clearedMeadowHabitatStage;
-        public int clearedOceanHabitatStage;
-        public int clearedDesertHabitatStage;
-        public int clearedForestHabitatStage;
-        public int clearedPolarHabitatStage;
+        public Dictionary<StageType, int> MaxStages = new();
+        [SerializeField] private List<StageType> clearedStageKeys;
+        [SerializeField] private List<int> clearedStageValues;
+
+        public Dictionary<StageType, Dictionary<int, StageData>> StageData = new();
+        [SerializeField] private List<StageType> stageTypeKeys;
+        [SerializeField] private List<StageDataList> stageTypeValues;
+
+        public List<int> selectedStage = new();
 
         public PlayData()
         {
-            stagesData = new List<StageData>();
-            for (int i = 0; i < 50; i++)
+            foreach (StageType type in Enum.GetValues(typeof(StageType)))
             {
-                stagesData.Add(new StageData());
+                MaxStages[type] = 0;
+                StageData[type] = new Dictionary<int, StageData>();
+                selectedStage.Add(0);
             }
         }
+
+        public void BeforeSave()
+        {
+            GameManager.DictionaryToLists(
+                MaxStages,
+                out clearedStageKeys,
+                out clearedStageValues
+            );
+            
+            stageTypeKeys = new List<StageType>();
+            stageTypeValues = new List<StageDataList>();
+
+            foreach (KeyValuePair<StageType, Dictionary<int, StageData>> pair in StageData)
+            {
+                stageTypeKeys.Add(pair.Key);
+
+                stageTypeValues.Add(new StageDataList
+                {
+                    stages = new List<StageData>(pair.Value.Values)
+                });
+            }
+        }
+
+        public void AfterLoad()
+        {
+            MaxStages = GameManager.ListsToDictionary(
+                clearedStageKeys,
+                clearedStageValues
+            );
+            
+            StageData = new Dictionary<StageType, Dictionary<int, StageData>>();
+
+            for (int i = 0; i < stageTypeKeys.Count; i++)
+            {
+                Dictionary<int, StageData> stageDict = new();
+
+                foreach (StageData stage in stageTypeValues[i].stages)
+                {
+                    stageDict[stage.stageNum - 1] = stage;
+                }
+
+                StageData[stageTypeKeys[i]] = stageDict;
+            }
+            
+            foreach (StageType type in Enum.GetValues(typeof(StageType)))
+            {
+                MaxStages.TryAdd(type, 0);
+
+                if (!StageData.ContainsKey(type))
+                {
+                    StageData[type] = new Dictionary<int, StageData>();
+                }
+            }
+        }
+    }
+
+    [Serializable]
+    public class StageDataList
+    {
+        public List<StageData> stages = new();
     }
     
     [Serializable]
@@ -39,11 +118,6 @@ namespace _01.Scripts._00.Manager
         public int maxUsedTile;
     }
 
-    public interface IConvertable
-    {
-        public void BeforeSave();
-        public void AfterLoad();
-    }
 
     [Serializable]
     public class UnitData : IConvertable
@@ -177,29 +251,29 @@ namespace _01.Scripts._00.Manager
             Habitat.Polar
         };
         
-        public Dictionary<Habitat, int> comboLevels = new();
+        public Dictionary<Habitat, int> ComboLevels = new();
 
         [SerializeField] private List<Habitat> combos;
         [SerializeField] private List<int> levels;
 
         public ComboData()
         {
-            comboLevels.Clear();
+            ComboLevels.Clear();
 
             foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
             {
-                comboLevels.Add(habitat, 1);
+                ComboLevels.Add(habitat, 1);
             }
         }
         
         public void BeforeSave()
         {
-            GameManager.DictionaryToLists(comboLevels, out combos, out levels);
+            GameManager.DictionaryToLists(ComboLevels, out combos, out levels);
         }
 
         public void AfterLoad()
         {
-            comboLevels = GameManager.ListsToDictionary(combos, levels);
+            ComboLevels = GameManager.ListsToDictionary(combos, levels);
         }
     }
 
@@ -257,7 +331,7 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
             
             SoundManager.Instance.StartBGMRandomLoop(
-                new BGM[] { BGM.BGM1_Title1, BGM.BGM1_Title2 }
+                new[] { BGM.BGM1_Title1, BGM.BGM1_Title2 }
             );
         }
         
@@ -297,33 +371,46 @@ namespace _01.Scripts._00.Manager
 
             playData.goldAmount = goldManager.Gold;
             playData.diaAmount = goldManager.Dia;
+
+            StageType stageType;
+            int currentStage;
             
             if (HabitatModeManager.Instance != null && HabitatModeManager.Instance.IsHabitatBattle)
             {
                 HabitatMode mode = HabitatModeManager.Instance.HabitatMode;
-                int clearedHabitatStage = stageManager.CurrentHabitatStage + 1;
-
-                SetClearedHabitatStage(
-                    mode,
-                    Mathf.Max(GetClearedHabitatStage(mode), clearedHabitatStage)
-                );
-
-                stageManager.SetMaxHabitatStage(mode, GetClearedHabitatStage(mode));
+                stageType = GetStageTypeWithHabitat(mode);
+                playData.selectedStage[(int)stageType] = playData.MaxStages[stageType] == stageManager.CurrentHabitatStage ?
+                    playData.MaxStages[stageType] + 1 : stageManager.CurrentStage;
+                playData.MaxStages[stageType] = Mathf.Max(playData.MaxStages[stageType], stageManager.CurrentHabitatStage + 1);
+                currentStage = stageManager.CurrentHabitatStage;
+                stageManager.SetMaxHabitatStage(mode, Mathf.Max(stageManager.GetMaxHabitatStage(mode), stageManager.CurrentHabitatStage + 1));
             }
             else
             {
-                playData.clearedStage = Mathf.Max(playData.clearedStage, stageManager.CurrentStage + 1);
-                stageManager.SetMaxStage(playData.clearedStage);
+                stageType = StageType.Normal;
+                playData.selectedStage[(int)stageType] = playData.MaxStages[stageType] == stageManager.CurrentStage ?
+                    playData.MaxStages[stageType] + 1 : stageManager.CurrentStage;
+                playData.MaxStages[stageType] = Mathf.Max(playData.MaxStages[stageType], stageManager.CurrentStage + 1);
+                currentStage = stageManager.CurrentStage;
+                stageManager.SetMaxStage(Mathf.Max(stageManager.MaxStage, stageManager.CurrentStage + 1));
             }
-
-            StageData stageData = playData.stagesData[stageManager.CurrentStage];
-            stageData.stageNum = stageManager.CurrentStage + 1;
+            
+            if (!playData.StageData[stageType]
+                    .TryGetValue(currentStage, out StageData stageData))
+            {
+                stageData = new StageData();
+            }
+            
+            stageData.stageNum = currentStage + 1;
             stageData.maxUsedTile = Mathf.Max(stageData.maxUsedTile, usedTileCount);
             stageData.minUsedTile = stageData.minUsedTile == 0 ?
                 usedTileCount : Mathf.Min(stageData.maxUsedTile, usedTileCount);
             stageData.minUsedTime = stageData.minUsedTime == 0 ?
                 time : Mathf.Min(stageData.minUsedTime, time);
             
+            playData.StageData[stageType][currentStage] = stageData;
+            
+            playData.BeforeSave();
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
             
             if (StageManager.Instance != null)
@@ -369,42 +456,35 @@ namespace _01.Scripts._00.Manager
         {
             playData.goldAmount = GoldManager.Instance.Gold;
             playData.diaAmount = GoldManager.Instance.Dia;
+            
+            playData.BeforeSave();
             SaveLoadManager.Instance.SaveData(playData, "PlayData");
+        }
+
+        public StageType GetStageTypeWithHabitat(HabitatMode mode)
+        {
+            return mode switch
+            {
+                HabitatMode.MeadowMode => StageType.Meadow,
+                HabitatMode.OceanMode => StageType.Ocean,
+                HabitatMode.DesertMode => StageType.Desert,
+                HabitatMode.ForestMode => StageType.Forest,
+                HabitatMode.PolarMode => StageType.Polar,
+                _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
+            };
         }
         
         public int GetClearedHabitatStage(HabitatMode mode)
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => playData.clearedMeadowHabitatStage,
-                HabitatMode.OceanMode => playData.clearedOceanHabitatStage,
-                HabitatMode.DesertMode => playData.clearedDesertHabitatStage,
-                HabitatMode.ForestMode => playData.clearedForestHabitatStage,
-                HabitatMode.PolarMode => playData.clearedPolarHabitatStage,
-                _ => playData.clearedMeadowHabitatStage
+                HabitatMode.MeadowMode => playData.MaxStages[StageType.Meadow],
+                HabitatMode.OceanMode => playData.MaxStages[StageType.Ocean],
+                HabitatMode.DesertMode => playData.MaxStages[StageType.Desert],
+                HabitatMode.ForestMode => playData.MaxStages[StageType.Forest],
+                HabitatMode.PolarMode => playData.MaxStages[StageType.Polar],
+                _ => playData.MaxStages[StageType.Meadow]
             };
-        }
-
-        private void SetClearedHabitatStage(HabitatMode mode, int stage)
-        {
-            switch (mode)
-            {
-                case HabitatMode.MeadowMode:
-                    playData.clearedMeadowHabitatStage = stage;
-                    break;
-                case HabitatMode.OceanMode:
-                    playData.clearedOceanHabitatStage = stage;
-                    break;
-                case HabitatMode.DesertMode:
-                    playData.clearedDesertHabitatStage = stage;
-                    break;
-                case HabitatMode.ForestMode:
-                    playData.clearedForestHabitatStage = stage;
-                    break;
-                case HabitatMode.PolarMode:
-                    playData.clearedPolarHabitatStage = stage;
-                    break;
-            }
         }
     }
 }

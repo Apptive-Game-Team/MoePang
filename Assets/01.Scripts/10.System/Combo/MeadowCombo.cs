@@ -10,8 +10,15 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
+            if (GameManager.Instance.playData.MaxStages[StageType.Meadow] < 5)
+            {
+                return;
+            }
+            
+            Debug.Log("Meadow Combo Applied");
+            
             var types = Enum.GetValues(typeof(Habitat));
-            int spawnCount = 1 + GameManager.Instance.comboData.comboLevels[info.comboType] / 2;
+            int spawnCount = 1 + GameManager.Instance.comboData.ComboLevels[info.comboType] / 2;
             
             for (int i = 0; i < spawnCount; i++)
             {
@@ -21,8 +28,8 @@ namespace _01.Scripts._10.System.Combo
 
         public override string DynamicDescription()
         {
-            int level = 1 + GameManager.Instance.comboData.comboLevels[info.comboType] / 2;
-            int nextLevel = 1 + (1 + GameManager.Instance.comboData.comboLevels[info.comboType]) / 2;
+            int level = 1 + GameManager.Instance.comboData.ComboLevels[info.comboType] / 2;
+            int nextLevel = 1 + (1 + GameManager.Instance.comboData.ComboLevels[info.comboType]) / 2;
             
             if (level == info.ComboMaxLevel)
             {

@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._08.Utility;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,11 +19,24 @@ namespace _01.Scripts._04.UI.InGame
             SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
             if (HabitatModeManager.Instance != null && HabitatModeManager.Instance.IsHabitatBattle)
             {
-                StageManager.Instance.AddHabitatStage(HabitatModeManager.Instance.HabitatMode, 1);
+                StageType stageType =
+                    GameManager.Instance.GetStageTypeWithHabitat(HabitatModeManager.Instance.HabitatMode);
+                
+                if (GameManager.Instance.playData.selectedStage[(int)stageType] <
+                    GameManager.Instance.playData.MaxStages[stageType])
+                {
+                    StageManager.Instance.AddHabitatStage(HabitatModeManager.Instance.HabitatMode, 1);
+                }
             }
             else
             {
-                StageManager.Instance.AddStage(1);
+                StageType stageType = StageType.Normal;
+                
+                if (GameManager.Instance.playData.selectedStage[(int)stageType] <
+                    GameManager.Instance.playData.MaxStages[stageType])
+                {
+                    StageManager.Instance.AddStage(1);
+                }
             }
             StageManager.Instance.StartStage();
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));

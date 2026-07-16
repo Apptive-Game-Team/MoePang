@@ -1,5 +1,6 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._10.System.Combo;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -30,13 +31,24 @@ namespace _01.Scripts._04.UI.MainScene
             // 콤보 버튼 UI 설정
             CanvasGroup scrollRectCG = content.transform.parent.parent.GetComponent<CanvasGroup>();
             ScrollRect scrollRect = content.transform.parent.parent.GetComponent<ScrollRect>();
+            int correctionValue = 0;
+
+            SortComboSequence();
             
             foreach (var (type,idx) in GameManager.Instance.comboData.comboSequence.Select((value, index) => (value, index)))
             {
                 Combo combo = combos.Find(c => c.info.comboType == type);
+
+                StageType stageType = GetStageTypeWithHabitat(combo.info.comboType);
+                if (GameManager.Instance.playData.MaxStages[stageType] < 5)
+                {
+                    correctionValue++;
+                    continue;
+                }
+                
                 GameObject comboUI = Instantiate(comboUIPrefab, content.transform);
                 ComboUIObject obj = comboUI.GetComponent<ComboUIObject>();
-                var comboLevels = GameManager.Instance.comboData.comboLevels;
+                var comboLevels = GameManager.Instance.comboData.ComboLevels;
                 
                 obj.Initialize(this);
                 obj.habitat = type;
@@ -48,7 +60,7 @@ namespace _01.Scripts._04.UI.MainScene
                 Button comboUpgradeButton =  comboUI.transform.GetChild(5).GetComponent<Button>();
                 TextMeshProUGUI upgradeText = comboUpgradeButton.GetComponentInChildren<TextMeshProUGUI>();
                 
-                comboOrder.text = (idx + 1).ToString();
+                comboOrder.text = (idx + 1 - correctionValue).ToString();
                 comboImage.sprite = combo.info.comboImage;
                 comboLevel.text = $"LV{comboLevels[type]}";
                 comboDescription.text = combo.DynamicDescription();
@@ -127,6 +139,29 @@ namespace _01.Scripts._04.UI.MainScene
             });
         }
         
+        private void SortComboSequence()
+        {
+            List<Habitat> visible = new();
+            List<Habitat> hidden = new();
+
+            foreach (Habitat habitat in GameManager.Instance.comboData.comboSequence)
+            {
+                StageType stageType = GetStageTypeWithHabitat(habitat);
+
+                if (GameManager.Instance.playData.MaxStages[stageType] >= 5)
+                {
+                    visible.Add(habitat);
+                }
+                else
+                {
+                    hidden.Add(habitat);
+                }
+            }
+
+            GameManager.Instance.comboData.comboSequence =
+                visible.Concat(hidden).ToList();
+        }
+        
         public void OnOrderChanged()
         {
             List<ComboUIObject> objs = content.transform.GetComponentsInChildren<ComboUIObject>().ToList();
@@ -137,6 +172,19 @@ namespace _01.Scripts._04.UI.MainScene
                 GameManager.Instance.comboData.comboSequence[i] = list[i];
                 objs[i].gameObject.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = (i + 1).ToString();
             }
+        }
+
+        private StageType GetStageTypeWithHabitat(Habitat habitat)
+        {
+            return habitat switch
+            {
+                Habitat.Meadow => StageType.Meadow,
+                Habitat.Ocean => StageType.Ocean,
+                Habitat.Desert => StageType.Desert,
+                Habitat.Forest => StageType.Forest,
+                Habitat.Polar => StageType.Polar,
+                _ => throw new ArgumentOutOfRangeException(nameof(habitat), habitat, null)
+            };
         }
     }
 }

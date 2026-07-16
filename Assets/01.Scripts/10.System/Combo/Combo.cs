@@ -19,7 +19,7 @@ namespace _01.Scripts._10.System.Combo
 
         public void UpgradeCombo()
         {
-            GameManager.Instance.comboData.comboLevels[info.comboType]++;
+            GameManager.Instance.comboData.ComboLevels[info.comboType]++;
         }
         
         public abstract void TriggerComboEffect(ComboContext context);
