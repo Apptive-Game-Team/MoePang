@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
+  m_LocalScale: {x: 0.03, y: 0.03, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -104,6 +104,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   lifeTime: 3
+  spriteRenderer: {fileID: 0}
+  animationFrames:
+  - {fileID: 4565161514921864962, guid: f0e4f30502fb6456084d4c4170e9aad2, type: 3}
+  - {fileID: -6157086738566947640, guid: d539adbfc66f1459fbb6f29afbd96902, type: 3}
+  - {fileID: -7617133663410573576, guid: e9178220acfb040c98367b6f925c08c6, type: 3}
+  - {fileID: -64840630083488858, guid: ef79bf59121884afcba732759cac4b80, type: 3}
+  framesPerSecond: 12
 --- !u!61 &-915935630845749949
 BoxCollider2D:
   m_ObjectHideFlags: 0

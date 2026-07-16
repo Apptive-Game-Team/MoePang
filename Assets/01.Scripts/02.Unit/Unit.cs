@@ -77,6 +77,14 @@ public class Unit : MonoBehaviour, IDamageable
     protected UnitData data;
     protected SpriteRenderer spriteRenderer;
     protected Animator animator;
+    
+    //북극 여우 공격
+    private float articFoxJumpHeight = 1.2f;
+    private float articFoxLandingOffset = 0.35f;
+    private float articFoxReturnDuration = 0.2f;
+    private bool isArticFoxAttackMoving;
+    private Vector3 articFoxAttackOriginPosition;
+    private Tween articFoxAttackTween;
 
     //상태 관리
     protected bool isAttacking;
@@ -288,26 +296,34 @@ public class Unit : MonoBehaviour, IDamageable
         isAttacking = true;
 
         float segment = 1f / attackSpeed / 3f;
-        animator.speed = attackSpeed;
 
-        if (animator != null)
+        if (data.UnitName == UnitName.ArticFox)
         {
-            animator.SetTrigger("Attack");
+            yield return StartCoroutine(ArticFoxAttackCoroutine(segment));
         }
-
-        yield return new WaitForSeconds(segment);
-
-        AttackByType();
-        
-        yield return new WaitForSeconds(segment);
-
-        if (animator != null)
+        else
         {
-            animator.SetBool("Idle", true);
-            animator.SetBool("Walk", false);
-        }
+            animator.speed = attackSpeed;
 
-        yield return new WaitForSeconds(segment);
+            if (animator != null)
+            {
+                animator.SetTrigger("Attack");
+            }
+
+            yield return new WaitForSeconds(segment);
+
+            AttackByType();
+
+            yield return new WaitForSeconds(segment);
+
+            if (animator != null)
+            {
+                animator.SetBool("Idle", true);
+                animator.SetBool("Walk", false);
+            }
+
+            yield return new WaitForSeconds(segment);
+        }
 
         isAttacking = false;
         attackRoutine = null;
@@ -567,6 +583,107 @@ public class Unit : MonoBehaviour, IDamageable
         return new Vector2(attackRange, unitSize);
     }
     
+    /// <summary>
+    /// 북극여우 공격
+    /// </summary>
+    private IEnumerator ArticFoxAttackCoroutine(float segment)
+    {
+        IDamageable target = GetRaycastTarget();
+
+        if (target == null)
+        {
+            TeamType enemyTeam = team == TeamType.Friendly ? TeamType.Enemy : TeamType.Friendly;
+            target = UTQ.Peek(enemyTeam);
+        }
+
+        if (target == null)
+            yield break;
+
+        Vector3 originPosition = transform.position;
+        articFoxAttackOriginPosition = originPosition;
+        isArticFoxAttackMoving = true;
+
+        Vector3 targetPosition = target.GetTransform().position;
+
+        float landingX = targetPosition.x - direction * articFoxLandingOffset;
+        Vector3 landingPosition = new Vector3(
+            landingX,
+            originPosition.y,
+            originPosition.z
+        );
+
+        float middleX = (originPosition.x + landingPosition.x) * 0.5f;
+        Vector3 jumpPeakPosition = new Vector3(
+            middleX,
+            originPosition.y + articFoxJumpHeight,
+            originPosition.z
+        );
+
+        // Attack 애니메이션 0~10프레임: 하늘로 뜸
+        if (animator != null)
+        {
+            animator.SetBool("Idle", false);
+            animator.SetBool("Walk", false);
+            animator.speed = attackSpeed * 0.5f;
+            animator.Play("Attack", 0, 0f);
+            animator.Update(0f);
+        }
+
+        articFoxAttackTween = transform
+            .DOMove(jumpPeakPosition, segment)
+            .SetEase(Ease.OutQuad);
+
+        yield return articFoxAttackTween.WaitForCompletion();
+
+        // Attack 애니메이션 10~20프레임: 내려가며 돌진
+        if (animator != null)
+        {
+            animator.Play("Attack", 0, 0.5f);
+            animator.Update(0f);
+        }
+
+        articFoxAttackTween = transform
+            .DOMove(landingPosition, segment)
+            .SetEase(Ease.InQuad);
+
+        yield return articFoxAttackTween.WaitForCompletion();
+
+        // 착지 시점에 공격 판정
+        AttackByType();
+
+        // 잠깐 Idle로 복귀
+        if (animator != null)
+        {
+            animator.speed = 1f;
+            animator.SetBool("Idle", true);
+            animator.SetBool("Walk", false);
+        }
+
+        articFoxAttackTween = transform
+            .DOMove(originPosition, articFoxReturnDuration)
+            .SetEase(Ease.OutQuad);
+
+        yield return articFoxAttackTween.WaitForCompletion();
+
+        isArticFoxAttackMoving = false;
+        articFoxAttackTween = null;
+    }
+    
+    private void ResetArticFoxAttackPositionIfNeeded()
+    {
+        if (!isArticFoxAttackMoving) return;
+
+        if (articFoxAttackTween != null && articFoxAttackTween.IsActive())
+        {
+            articFoxAttackTween.Kill();
+            articFoxAttackTween = null;
+        }
+
+        transform.position = articFoxAttackOriginPosition;
+
+        isArticFoxAttackMoving = false;
+    }
+    
     #endregion
 
     #region TakeDamage & DamageState
@@ -625,6 +742,8 @@ public class Unit : MonoBehaviour, IDamageable
 
     protected virtual IEnumerator DamageCoroutine()
     {
+        ResetArticFoxAttackPositionIfNeeded();
+
         isDamaging = true;
 
         StopAttack();
