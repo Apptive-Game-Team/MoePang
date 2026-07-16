@@ -62,8 +62,6 @@ namespace _01.Scripts._10.System.Combo
                 return;
             }
             
-            print($"{GameManager.Instance.comboData.comboSequence[_continuousComboCount - 2]} combo Applied");
-            
             combos.First(c => c.info.comboType == GameManager.Instance.comboData.comboSequence[_continuousComboCount - 2]).TriggerComboEffect(_context);
         }
     }
