@@ -16,10 +16,11 @@ MonoBehaviour:
   unitName: 31
   unitGrade: 7
   attackType: 2
-  animatorOverride: {fileID: 22100000, guid: 00f61be9c22999c42ae6df5777a3ff37, type: 2}
+  animatorOverride: {fileID: 22100000, guid: 784839c87659aee40b072ca5cf813628, type: 2}
   maxHp: 36
   baseMoveSpeed: 0.2
   attackDamage: 9
   attackSpeed: 0.5
   unitSize: 0.6
+  rangeAttackPrefab: {fileID: 0}
   unitDescriptionText: 
