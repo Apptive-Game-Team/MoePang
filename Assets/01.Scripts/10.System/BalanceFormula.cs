@@ -228,7 +228,7 @@ public static class BalanceFormula
     public static int[][] FriendlyTutorialWeights =
     {
         new[] { 100 }, 
-        new[] { 60, 40 }, 
+        new[] { 70, 30 }, 
         new[] { 60, 30, 10 }
     };
 
