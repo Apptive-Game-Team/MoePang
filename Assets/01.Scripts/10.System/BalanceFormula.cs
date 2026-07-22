@@ -65,7 +65,7 @@ public static class BalanceFormula
             1 => 3f,
             2 => 4f,
             3 => 5f,
-            4 => 7f,
+            4 => 6f,
             5 => 6f,
             _ => 3f
         };
@@ -81,7 +81,7 @@ public static class BalanceFormula
             1 => 4f,
             2 => 4f,
             3 => 5f,
-            4 => 10f,
+            4 => 7f,
             5 => 7f,
             _ => 4f
         };
