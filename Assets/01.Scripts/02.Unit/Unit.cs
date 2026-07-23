@@ -160,6 +160,12 @@ public class Unit : MonoBehaviour, IDamageable
         animator.runtimeAnimatorController = data.AnimatorOverride;
 
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
+        
+        UnitShadow shadow = GetComponentInChildren<UnitShadow>(true);
+        if (shadow != null)
+        {
+            shadow.Refresh();
+        }
     }
 
     private int GetSortingOrderByY()

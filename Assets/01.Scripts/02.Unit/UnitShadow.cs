@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -19,14 +20,24 @@ public class UnitShadow : MonoBehaviour
 
     private void Start()
     {
+        Refresh();
+    }
+
+    private void OnEnable()
+    {
+        Refresh();
+    }
+    
+    public void Refresh()
+    {
         if (shadowRenderer != null)
         {
             fixedWorldY = shadowRenderer.transform.position.y;
         }
-        
+
         ApplyShadowSize();
     }
-    
+
     private void LateUpdate()
     {
         if (!lockWorldY || shadowRenderer == null)
