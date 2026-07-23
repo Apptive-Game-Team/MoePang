@@ -34,6 +34,9 @@ public class FriendlyUnit : Unit
         attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, friendlyData.UnitLevel, unitGrade, currentStage);
     }
 
+    /// <summary>
+    /// 콤보강화로 인한 스탯 증가
+    /// </summary>
     private void ApplyHabitatClearBonus()
     {
         if (GameManager.Instance == null || GameManager.Instance.playData == null)
@@ -45,6 +48,7 @@ public class FriendlyUnit : Unit
 
         if (clearedStage <= 0)
         {
+            FinalStatApply(maxHp, attackDamage);
             return;
         }
 
