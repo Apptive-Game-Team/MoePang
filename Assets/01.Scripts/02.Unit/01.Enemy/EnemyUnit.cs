@@ -28,6 +28,6 @@ public class EnemyUnit : Unit
         float stageMaxHp = BalanceFormula.GetEnemyMaxHp(maxHp, currentStage);
         float stageAttackDamage = BalanceFormula.GetEnemyAttackDamage(attackDamage, currentStage);
 
-        ApplyBaseHpAndAttackDamage(stageMaxHp, stageAttackDamage);
+        FinalStatApply(stageMaxHp, stageAttackDamage);
     }
 }

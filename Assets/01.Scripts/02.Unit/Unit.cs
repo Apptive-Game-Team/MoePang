@@ -117,10 +117,7 @@ public class Unit : MonoBehaviour, IDamageable
         this.data = data;
 
         SetBaseStat();
-        SaveOriginalStat();
         SetVisual();
-
-        SetProceedStat();
 
         UTQ.ResetAndInsert(this);
         BuffManager.Instance.RegisterUnit(this);
@@ -151,16 +148,6 @@ public class Unit : MonoBehaviour, IDamageable
     }
 
     /// <summary>
-    /// 수치 계산용 Original Stat 저장
-    /// </summary>
-    protected virtual void SaveOriginalStat()
-    {
-        _originMoveSpeed = moveSpeed;
-        _originAttackDamage = attackDamage;
-        _originAttackSpeed = attackSpeed;
-    }
-
-    /// <summary>
     /// Sprite/Animation Visual Setting
     /// </summary>
     protected virtual void SetVisual()
@@ -183,10 +170,18 @@ public class Unit : MonoBehaviour, IDamageable
         return baseOrder - Mathf.RoundToInt(transform.position.y * precision);
     }
 
-
-    protected virtual void SetProceedStat()
+    /// <summary>
+    /// 최종적으로 적용되는 공격력/방어력
+    /// </summary>
+    protected void FinalStatApply(float newMaxHp, float newAttackDamage)
     {
+        maxHp = newMaxHp;
         currentHp = maxHp;
+        attackDamage = newAttackDamage;
+
+        _originMoveSpeed = moveSpeed;
+        _originAttackDamage = attackDamage;
+        _originAttackSpeed = attackSpeed;
     }
 
     /// <summary>
@@ -1003,16 +998,6 @@ public class Unit : MonoBehaviour, IDamageable
         moveSpeed = _originMoveSpeed;
         attackSpeed = _originAttackSpeed;
         attackDamage = _originAttackDamage;
-    }
-    #endregion
-    
-    #region UnitSetting
-    protected void ApplyBaseHpAndAttackDamage(float newMaxHp, float newAttackDamage)
-    {
-        maxHp = newMaxHp;
-        currentHp = maxHp;
-        attackDamage = newAttackDamage;
-        _originAttackDamage = attackDamage;
     }
     #endregion
 }

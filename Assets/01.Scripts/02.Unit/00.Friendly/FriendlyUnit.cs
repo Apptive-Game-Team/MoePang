@@ -23,12 +23,7 @@ public class FriendlyUnit : Unit
 
         targetLayer = LayerMask.GetMask("Enemy");
     }
-    
-    protected override void SetProceedStat()
-    {
-        base.SetProceedStat();
-    }
-    
+
     private void ApplyHabitatClearBonus()
     {
         if (GameManager.Instance == null || GameManager.Instance.playData == null)
@@ -46,7 +41,7 @@ public class FriendlyUnit : Unit
         float bonusMaxHp = clearedStage * 10f;
         float bonusAttackDamage = clearedStage * 1f;
 
-        ApplyBaseHpAndAttackDamage(
+        FinalStatApply(
             maxHp + bonusMaxHp,
             attackDamage + bonusAttackDamage
         );

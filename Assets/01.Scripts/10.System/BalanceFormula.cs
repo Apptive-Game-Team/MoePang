@@ -116,6 +116,7 @@ public static class BalanceFormula
     
     /// <summary>
     /// 현재 스테이지 배율을 적용한 적 최종 MaxHp 계산
+    /// <para>스테이지 강화 배율 => 허들 스테이지 여부 강화 배율 적용</para>
     /// </summary>
     public static float GetEnemyMaxHp(float baseHp, int currentStage)
     {
