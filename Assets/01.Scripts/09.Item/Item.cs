@@ -239,13 +239,21 @@ namespace _01.Scripts._09.Item
         {
             _isItemApplying = true;
             
+            int[][] originTutorialProb = BalanceFormula.FriendlyWeights;
+            int[][] raisedTutorialProb =
+            {
+                new[] { 100 }, 
+                new[] { 45, 55 }, 
+                new[] { 27, 34, 39 }
+            };
+            
             int[][] originProb = BalanceFormula.FriendlyWeights;
             int[][] raisedProb =
             {
                 new [] { 100 },
-                new [] { 50, 50 },
-                new [] { 40, 30, 30 },
-                new [] { 30, 20, 30, 20 },
+                new [] { 45, 55 },
+                new [] { 27, 34, 39 },
+                new [] { 20, 23, 27, 30 },
                 new [] { 15, 18, 20, 22, 25 },
             };
             BalanceFormula.FriendlyWeights = raisedProb;
