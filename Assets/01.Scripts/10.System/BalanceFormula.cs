@@ -65,7 +65,7 @@ public static class BalanceFormula
             1 => 3f,
             2 => 4f,
             3 => 5f,
-            4 => 7f,
+            4 => 6f,
             5 => 6f,
             _ => 3f
         };
@@ -81,7 +81,7 @@ public static class BalanceFormula
             1 => 4f,
             2 => 4f,
             3 => 5f,
-            4 => 10f,
+            4 => 7f,
             5 => 7f,
             _ => 4f
         };
@@ -228,7 +228,7 @@ public static class BalanceFormula
     public static int[][] FriendlyTutorialWeights =
     {
         new[] { 100 }, 
-        new[] { 60, 40 }, 
+        new[] { 70, 30 }, 
         new[] { 60, 30, 10 }
     };
 
@@ -309,57 +309,39 @@ public static class BalanceFormula
     /// </summary>
     private static int[] GetEnemySpawnBaseWeights(int currentStage)
     {
-        if (currentStage < EnemySpawnWeightStartStage)
+        if (currentStage <= 50)
         {
-            int cycleStep = currentStage % 10;
-            int subIndex = (cycleStep < 3) ? 0 : (cycleStep < 6 ? 1 : 2);
-            int index = currentStage / 10 * 3 + subIndex;
-
-            int enemyStart = index / 2;
-            int enemyWeightsStep = index % 2;
-
-            int[][] localWeights =
-            {
-                new[] { 70, 30, 0 },
-                new[] { 50, 30, 20 }
-            };
-
             int[] result = new int[9];
 
-            for (int i = 0; i < localWeights[enemyWeightsStep].Length; i++)
-            {
-                int targetIndex = enemyStart + i;
+            int step = (currentStage <= 3) ? 0 :
+                       (currentStage <= 6) ? 1 :
+                       ((currentStage - 1) * 2 - 1) / 7;
 
-                if (targetIndex < result.Length)
-                {
-                    result[targetIndex] = localWeights[enemyWeightsStep][i];
-                }
+            int startIndex = step / 2;
+
+            if (step % 2 == 0)
+            {
+                result[startIndex] = 70;
+                result[startIndex + 1] = 30;
+            }
+            else
+            {
+                result[startIndex] = 50;
+                result[startIndex + 1] = 30;
+                result[startIndex + 2] = 20;
             }
 
             return result;
         }
 
-        if (currentStage <= 60)
+        return currentStage switch
         {
-            return new[] { 18, 16, 14, 13, 12, 10, 8, 6, 3 };
-        }
-
-        if (currentStage <= 70)
-        {
-            return new[] { 14, 14, 13, 13, 12, 11, 10, 8, 5 };
-        }
-
-        if (currentStage <= 80)
-        {
-            return new[] { 10, 11, 11, 12, 12, 12, 12, 10, 10 };
-        }
-
-        if (currentStage <= 90)
-        {
-            return new[] { 7, 8, 9, 10, 11, 12, 13, 14, 16 };
-        }
-
-        return new[] { 4, 5, 6, 7, 9, 11, 14, 18, 26 };
+            <= 60 => new[] { 18, 16, 14, 13, 12, 10, 8, 6, 3 },
+            <= 70 => new[] { 14, 14, 13, 13, 12, 11, 10, 8, 5 },
+            <= 80 => new[] { 10, 11, 11, 12, 12, 12, 12, 10, 10 },
+            <= 90 => new[] { 7, 8, 9, 10, 11, 12, 13, 14, 16 },
+            _ => new[] { 4, 5, 6, 7, 9, 11, 14, 18, 26 }
+        };
     }
     
     /// <summary>
