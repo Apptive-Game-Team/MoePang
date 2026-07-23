@@ -40,6 +40,8 @@ public class UnitShadow : MonoBehaviour
 
     private void LateUpdate()
     {
+        ApplyShadowSize();
+        
         if (!lockWorldY || shadowRenderer == null)
             return;
 
