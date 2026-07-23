@@ -1974,26 +1974,15 @@ namespace _01.Scripts._01.ThreeMatch
             );
 
             _puzzles[curX, curY].puzzleState = PuzzleState.Swapping;
-            
-            Vector3 currentPos = po.transform.position;
-            ObstaclePuzzleObject ob = po as ObstaclePuzzleObject;
-            Habitat type = ob.habitat;
             _puzzles[curX, curY] = null;
-            Destroy(po.gameObject);
-            
-            GameObject newPuzzle = Instantiate(normalPuzzlePrefabs[(int)type], puzzleFrame);
-            newPuzzle.transform.position = currentPos;
-            newPuzzle.name = $"Puzzle({curX + 1},{curY + 1})";
-            newPuzzle.transform.localScale = Vector3.zero;
-            
-            PuzzleObject puzzle = newPuzzle.GetComponent<PuzzleObject>();
-            _puzzles[curX, curY] = puzzle;
-            puzzle.Init(this, curX, curY);
-            puzzle.puzzleState = PuzzleState.Idle;
-            puzzle.isMatched = false;
-            
-            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
-                .SetEase(Ease.InSine);
+
+            Tween t = po.transform.DOScale(0, 0.2f)
+                .SetEase(Ease.InSine)
+                .OnComplete(() =>
+                {
+                    Destroy(po.gameObject);
+                });
+
             yield return t.WaitForCompletion();
             
             AddTask(() => MatchPuzzle());
