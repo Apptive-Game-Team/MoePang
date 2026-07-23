@@ -19,9 +19,18 @@ public class FriendlyUnit : Unit
 
         habitat = friendlyData.Habitat;
 
+        ApplyStageStatMultiplier();
         ApplyHabitatClearBonus();
 
         targetLayer = LayerMask.GetMask("Enemy");
+    }
+
+    private void ApplyStageStatMultiplier()
+    {
+        int currentStage = StageManager.Instance.DifficultyStage + 1;
+
+        //maxHp = BalanceFormula.GetUnitMaxHp(maxHp, data.unitLevel, unitGrade, currentStage);
+        //attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, UnitLevel, unitGrade, currentStage);
     }
 
     private void ApplyHabitatClearBonus()
