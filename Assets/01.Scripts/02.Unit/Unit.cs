@@ -79,7 +79,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected Animator animator;
     
     //북극 여우 공격
-    private float articFoxJumpHeight = 1.2f;
+    private float articFoxJumpHeight = 0.4f;
     private float articFoxLandingOffset = 0.35f;
     private float articFoxReturnDuration = 0.2f;
     private bool isArticFoxAttackMoving;
@@ -622,7 +622,8 @@ public class Unit : MonoBehaviour, IDamageable
 
         Vector3 targetPosition = target.GetTransform().position;
 
-        float landingX = targetPosition.x - direction * articFoxLandingOffset;
+        //float landingX = targetPosition.x - direction * articFoxLandingOffset;
+        float landingX = originPosition.x;
         Vector3 landingPosition = new Vector3(
             landingX,
             originPosition.y,
