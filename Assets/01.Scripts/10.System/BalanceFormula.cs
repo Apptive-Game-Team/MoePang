@@ -485,11 +485,37 @@ public static class BalanceFormula
     #endregion
     
     #region 성 체력 업그레이드 스탯/비용 Formula
-    
+    private const float EnemyCastleBaseHp = 2000f;
+    private const int EnemyCastleStageScaleStartStage = 51;
+    private const int EnemyCastleStageScaleBaseStage = 50;
     private const int castleHpIncreasePerLevel = 10;
     private const int castleHpBaseCost = 100;
     public static int CastleHpIncreasePerLevel => castleHpIncreasePerLevel;
     public static int CastleHpBaseCost => castleHpBaseCost;
+    
+    public static float GetEnemyCastleMaxHp(int currentStage)
+    {
+        float hp = EnemyCastleBaseHp;
+
+        if (currentStage >= EnemyCastleStageScaleStartStage)
+        {
+            hp *= 1f + 0.03f * (currentStage - EnemyCastleStageScaleBaseStage);
+        }
+
+        if (currentStage >= EnemyCastleStageScaleStartStage)
+        {
+            if (currentStage % 10 == 0)
+            {
+                hp *= 1.2f;
+            }
+            else if (currentStage % 5 == 0)
+            {
+                hp *= 1.1f;
+            }
+        }
+
+        return Mathf.Ceil(hp);
+    }
     
     #endregion
 }
