@@ -26,7 +26,6 @@ public class FriendlyUnit : Unit
     
     protected override void SetProceedStat()
     {
-        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
         base.SetProceedStat();
     }
     
