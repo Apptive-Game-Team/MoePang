@@ -117,10 +117,10 @@ public class Unit : MonoBehaviour, IDamageable
         this.data = data;
 
         SetBaseStat();
+        SaveOriginalStat();
         SetVisual();
-        SetProceedStat();
 
-        transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
+        SetProceedStat();
 
         UTQ.ResetAndInsert(this);
         BuffManager.Instance.RegisterUnit(this);
@@ -128,33 +128,41 @@ public class Unit : MonoBehaviour, IDamageable
         ChangeState(UnitState.Move, true);
     }
 
+    /// <summary>
+    /// Base Data 설정
+    /// </summary>
     protected virtual void SetBaseStat()
     {
         team = data.Team;
 
-        unitGrade = data.UnitGrade;
         maxHp = data.MaxHp;
         attackDamage = data.AttackDamage;
+
+        unitGrade = data.UnitGrade;
         attackType = data.AttackType;
         unitSize = data.UnitSize;
 
         moveSpeed = data.BaseMoveSpeed;
         attackSpeed = data.AttackSpeed;
-
         attackRange = unitSize;
-        
+
+        if (data.RangeAttackPrefab != null)
+            attackProjectilePrefab = data.RangeAttackPrefab;
+    }
+
+    /// <summary>
+    /// 수치 계산용 Original Stat 저장
+    /// </summary>
+    protected virtual void SaveOriginalStat()
+    {
         _originMoveSpeed = moveSpeed;
         _originAttackDamage = attackDamage;
         _originAttackSpeed = attackSpeed;
-        
-        attackProjectilePrefab = data.RangeAttackPrefab;
     }
 
-    protected virtual void SetProceedStat()
-    {
-        currentHp = maxHp;
-    }
-
+    /// <summary>
+    /// Sprite/Animation Visual Setting
+    /// </summary>
     protected virtual void SetVisual()
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -163,14 +171,22 @@ public class Unit : MonoBehaviour, IDamageable
         originalScale = transform.localScale;
         spriteRenderer.sortingOrder = GetSortingOrderByY();
         animator.runtimeAnimatorController = data.AnimatorOverride;
+
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
     }
-    
+
     private int GetSortingOrderByY()
     {
         const int baseOrder = 1000;
         const int precision = 100;
 
         return baseOrder - Mathf.RoundToInt(transform.position.y * precision);
+    }
+
+
+    protected virtual void SetProceedStat()
+    {
+        currentHp = maxHp;
     }
 
     /// <summary>
@@ -991,30 +1007,6 @@ public class Unit : MonoBehaviour, IDamageable
     #endregion
     
     #region UnitSetting
-    /// <summary>
-    /// 유닛 공격속도 설정
-    /// </summary>
-    public void AttackSpeedMultiplier(float value)
-    {
-        attackSpeed *= value;
-    }
-    
-    public void AttackRangeMultiplier(float value)
-    {
-        attackRange *= value;
-    }
-
-    public void MoveSpeedMultiplier(float value)
-    {
-        moveSpeed *= value;
-    }
-    
-    public void UnitHpMultiplier(float value)
-    {
-        maxHp *= value;
-        currentHp *= value;
-    }
-
     protected void ApplyBaseHpAndAttackDamage(float newMaxHp, float newAttackDamage)
     {
         maxHp = newMaxHp;
