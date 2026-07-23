@@ -8,13 +8,14 @@ public static class BalanceFormula
     
     private const int EarlyLevelLimit = 50;
     private const int StageBonusStartMaxStage = 51;
+    private const float FriendlyBaseStatMultiplierAfterStage50 = 1.5f;
     
     /// <summary>
     /// 아군 유닛 MaxHp Setting
     /// </summary>
     public static float GetUnitMaxHp(float baseHp, float level, int grade, int maxStage)
     {
-        float hp = baseHp + GetUnitUpgradeValue(
+        float hp = GetFriendlyBaseStat(baseHp, maxStage) + GetUnitUpgradeValue(
             level,
             maxStage,
             GetUnitHpIncreaseBeforeStage51(grade),
@@ -28,13 +29,26 @@ public static class BalanceFormula
     /// </summary>
     public static float GetUnitAttackDamage(float baseAttackDamage, float level, int grade, int maxStage)
     {
-        float attackDamage = baseAttackDamage + GetUnitUpgradeValue(
+        float attackDamage = GetFriendlyBaseStat(baseAttackDamage, maxStage) + GetUnitUpgradeValue(
             level,
             maxStage,
             GetUnitAttackDamageIncreaseBeforeStage51(grade),
             GetUnitAttackDamageIncreaseAfterStage51(grade));
 
         return Mathf.Ceil(attackDamage);
+    }
+    
+    /// <summary>
+    /// 각성 기준 스탯 변화
+    /// </summary>
+    private static float GetFriendlyBaseStat(float baseStat, int maxStage)
+    {
+        if (maxStage < StageBonusStartMaxStage)
+        {
+            return baseStat;
+        }
+
+        return baseStat * FriendlyBaseStatMultiplierAfterStage50;
     }
     
     /// <summary>

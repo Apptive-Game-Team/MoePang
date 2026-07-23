@@ -16,21 +16,22 @@ public class FriendlyUnit : Unit
         friendlyData = data as FriendlyUnitData;
 
         direction = 1f;
-
         habitat = friendlyData.Habitat;
+        targetLayer = LayerMask.GetMask("Enemy");
 
         ApplyStageStatMultiplier();
         ApplyHabitatClearBonus();
-
-        targetLayer = LayerMask.GetMask("Enemy");
     }
 
+    /// <summary>
+    /// 스테이지에 따른 유닛 강화단계에 따른 수치 적용
+    /// </summary>
     private void ApplyStageStatMultiplier()
     {
         int currentStage = StageManager.Instance.DifficultyStage + 1;
 
-        //maxHp = BalanceFormula.GetUnitMaxHp(maxHp, data.unitLevel, unitGrade, currentStage);
-        //attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, UnitLevel, unitGrade, currentStage);
+        maxHp = BalanceFormula.GetUnitMaxHp(maxHp, friendlyData.UnitLevel, unitGrade, currentStage);
+        attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, friendlyData.UnitLevel, unitGrade, currentStage);
     }
 
     private void ApplyHabitatClearBonus()
