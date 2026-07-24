@@ -79,7 +79,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected Animator animator;
     
     //북극 여우 공격
-    private float articFoxJumpHeight = 1.2f;
+    private float articFoxJumpHeight = 0.4f;
     private float articFoxLandingOffset = 0.35f;
     private float articFoxReturnDuration = 0.2f;
     private bool isArticFoxAttackMoving;
@@ -118,9 +118,6 @@ public class Unit : MonoBehaviour, IDamageable
 
         SetBaseStat();
         SetVisual();
-        SetProceedStat();
-
-        transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
 
         UTQ.ResetAndInsert(this);
         BuffManager.Instance.RegisterUnit(this);
@@ -128,33 +125,31 @@ public class Unit : MonoBehaviour, IDamageable
         ChangeState(UnitState.Move, true);
     }
 
+    /// <summary>
+    /// Base Data 설정
+    /// </summary>
     protected virtual void SetBaseStat()
     {
         team = data.Team;
 
-        unitGrade = data.UnitGrade;
         maxHp = data.MaxHp;
         attackDamage = data.AttackDamage;
+
+        unitGrade = data.UnitGrade;
         attackType = data.AttackType;
         unitSize = data.UnitSize;
 
         moveSpeed = data.BaseMoveSpeed;
         attackSpeed = data.AttackSpeed;
-
         attackRange = unitSize;
-        
-        _originMoveSpeed = moveSpeed;
-        _originAttackDamage = attackDamage;
-        _originAttackSpeed = attackSpeed;
-        
-        attackProjectilePrefab = data.RangeAttackPrefab;
+
+        if (data.RangeAttackPrefab != null)
+            attackProjectilePrefab = data.RangeAttackPrefab;
     }
 
-    protected virtual void SetProceedStat()
-    {
-        currentHp = maxHp;
-    }
-
+    /// <summary>
+    /// Sprite/Animation Visual Setting
+    /// </summary>
     protected virtual void SetVisual()
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -163,14 +158,36 @@ public class Unit : MonoBehaviour, IDamageable
         originalScale = transform.localScale;
         spriteRenderer.sortingOrder = GetSortingOrderByY();
         animator.runtimeAnimatorController = data.AnimatorOverride;
+
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
+        
+        UnitShadow shadow = GetComponentInChildren<UnitShadow>(true);
+        if (shadow != null)
+        {
+            shadow.Refresh();
+        }
     }
-    
+
     private int GetSortingOrderByY()
     {
         const int baseOrder = 1000;
         const int precision = 100;
 
         return baseOrder - Mathf.RoundToInt(transform.position.y * precision);
+    }
+
+    /// <summary>
+    /// 최종적으로 적용되는 공격력/방어력
+    /// </summary>
+    protected void FinalStatApply(float newMaxHp, float newAttackDamage)
+    {
+        maxHp = newMaxHp;
+        currentHp = maxHp;
+        attackDamage = newAttackDamage;
+
+        _originMoveSpeed = moveSpeed;
+        _originAttackDamage = attackDamage;
+        _originAttackSpeed = attackSpeed;
     }
 
     /// <summary>
@@ -605,7 +622,8 @@ public class Unit : MonoBehaviour, IDamageable
 
         Vector3 targetPosition = target.GetTransform().position;
 
-        float landingX = targetPosition.x - direction * articFoxLandingOffset;
+        //float landingX = targetPosition.x - direction * articFoxLandingOffset;
+        float landingX = originPosition.x;
         Vector3 landingPosition = new Vector3(
             landingX,
             originPosition.y,
@@ -987,40 +1005,6 @@ public class Unit : MonoBehaviour, IDamageable
         moveSpeed = _originMoveSpeed;
         attackSpeed = _originAttackSpeed;
         attackDamage = _originAttackDamage;
-    }
-    #endregion
-    
-    #region UnitSetting
-    /// <summary>
-    /// 유닛 공격속도 설정
-    /// </summary>
-    public void AttackSpeedMultiplier(float value)
-    {
-        attackSpeed *= value;
-    }
-    
-    public void AttackRangeMultiplier(float value)
-    {
-        attackRange *= value;
-    }
-
-    public void MoveSpeedMultiplier(float value)
-    {
-        moveSpeed *= value;
-    }
-    
-    public void UnitHpMultiplier(float value)
-    {
-        maxHp *= value;
-        currentHp *= value;
-    }
-
-    protected void ApplyBaseHpAndAttackDamage(float newMaxHp, float newAttackDamage)
-    {
-        maxHp = newMaxHp;
-        currentHp = maxHp;
-        attackDamage = newAttackDamage;
-        _originAttackDamage = attackDamage;
     }
     #endregion
 }

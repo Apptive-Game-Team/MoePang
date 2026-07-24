@@ -8,13 +8,14 @@ public static class BalanceFormula
     
     private const int EarlyLevelLimit = 50;
     private const int StageBonusStartMaxStage = 51;
+    private const float FriendlyBaseStatMultiplierAfterStage50 = 1.5f;
     
     /// <summary>
     /// 아군 유닛 MaxHp Setting
     /// </summary>
     public static float GetUnitMaxHp(float baseHp, float level, int grade, int maxStage)
     {
-        float hp = baseHp + GetUnitUpgradeValue(
+        float hp = GetFriendlyBaseStat(baseHp, maxStage) + GetUnitUpgradeValue(
             level,
             maxStage,
             GetUnitHpIncreaseBeforeStage51(grade),
@@ -28,13 +29,26 @@ public static class BalanceFormula
     /// </summary>
     public static float GetUnitAttackDamage(float baseAttackDamage, float level, int grade, int maxStage)
     {
-        float attackDamage = baseAttackDamage + GetUnitUpgradeValue(
+        float attackDamage = GetFriendlyBaseStat(baseAttackDamage, maxStage) + GetUnitUpgradeValue(
             level,
             maxStage,
             GetUnitAttackDamageIncreaseBeforeStage51(grade),
             GetUnitAttackDamageIncreaseAfterStage51(grade));
 
         return Mathf.Ceil(attackDamage);
+    }
+    
+    /// <summary>
+    /// 각성 기준 스탯 변화
+    /// </summary>
+    private static float GetFriendlyBaseStat(float baseStat, int maxStage)
+    {
+        if (maxStage < StageBonusStartMaxStage)
+        {
+            return baseStat;
+        }
+
+        return baseStat * FriendlyBaseStatMultiplierAfterStage50;
     }
     
     /// <summary>
@@ -116,6 +130,7 @@ public static class BalanceFormula
     
     /// <summary>
     /// 현재 스테이지 배율을 적용한 적 최종 MaxHp 계산
+    /// <para>스테이지 강화 배율 => 허들 스테이지 여부 강화 배율 적용</para>
     /// </summary>
     public static float GetEnemyMaxHp(float baseHp, int currentStage)
     {
@@ -470,11 +485,37 @@ public static class BalanceFormula
     #endregion
     
     #region 성 체력 업그레이드 스탯/비용 Formula
-    
+    private const float EnemyCastleBaseHp = 2000f;
+    private const int EnemyCastleStageScaleStartStage = 51;
+    private const int EnemyCastleStageScaleBaseStage = 50;
     private const int castleHpIncreasePerLevel = 10;
     private const int castleHpBaseCost = 100;
     public static int CastleHpIncreasePerLevel => castleHpIncreasePerLevel;
     public static int CastleHpBaseCost => castleHpBaseCost;
+    
+    public static float GetEnemyCastleMaxHp(int currentStage)
+    {
+        float hp = EnemyCastleBaseHp;
+
+        if (currentStage >= EnemyCastleStageScaleStartStage)
+        {
+            hp *= 1f + 0.03f * (currentStage - EnemyCastleStageScaleBaseStage);
+        }
+
+        if (currentStage >= EnemyCastleStageScaleStartStage)
+        {
+            if (currentStage % 10 == 0)
+            {
+                hp *= 1.2f;
+            }
+            else if (currentStage % 5 == 0)
+            {
+                hp *= 1.1f;
+            }
+        }
+
+        return Mathf.Ceil(hp);
+    }
     
     #endregion
 }

@@ -16,20 +16,27 @@ public class FriendlyUnit : Unit
         friendlyData = data as FriendlyUnitData;
 
         direction = 1f;
-
         habitat = friendlyData.Habitat;
-
-        ApplyHabitatClearBonus();
-
         targetLayer = LayerMask.GetMask("Enemy");
+
+        ApplyStageStatMultiplier();
+        ApplyHabitatClearBonus();
     }
-    
-    protected override void SetProceedStat()
+
+    /// <summary>
+    /// 스테이지에 따른 유닛 강화단계에 따른 수치 적용
+    /// </summary>
+    private void ApplyStageStatMultiplier()
     {
-        UnitGradeManager.Instance.SetFriendlyUnitGradeStat(this);
-        base.SetProceedStat();
+        int currentStage = StageManager.Instance.DifficultyStage + 1;
+
+        maxHp = BalanceFormula.GetUnitMaxHp(maxHp, friendlyData.UnitLevel, unitGrade, currentStage);
+        attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, friendlyData.UnitLevel, unitGrade, currentStage);
     }
-    
+
+    /// <summary>
+    /// 콤보강화로 인한 스탯 증가
+    /// </summary>
     private void ApplyHabitatClearBonus()
     {
         if (GameManager.Instance == null || GameManager.Instance.playData == null)
@@ -41,13 +48,14 @@ public class FriendlyUnit : Unit
 
         if (clearedStage <= 0)
         {
+            FinalStatApply(maxHp, attackDamage);
             return;
         }
 
         float bonusMaxHp = clearedStage * 10f;
         float bonusAttackDamage = clearedStage * 1f;
 
-        ApplyBaseHpAndAttackDamage(
+        FinalStatApply(
             maxHp + bonusMaxHp,
             attackDamage + bonusAttackDamage
         );

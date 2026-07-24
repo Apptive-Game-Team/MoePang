@@ -9,8 +9,6 @@ public class FriendlyUnitData : UnitData
     [SerializeField] private float unitLevel = 1f;
 
     public Habitat Habitat => habitat;
-    public override float MaxHp => BalanceFormula.GetUnitMaxHp(maxHp, UnitLevel, UnitGrade, GetMaxStage());
-    public override float AttackDamage => BalanceFormula.GetUnitAttackDamage(attackDamage, UnitLevel, UnitGrade, GetMaxStage());
     public int UnitCost => BalanceFormula.GetUnitUpgradeCost(UnitGrade, UnitLevel);
     public int UnlockCost => BalanceFormula.GetUnitUnlockCost(UnitGrade);
     public float BaseUnitLevel => unitLevel;

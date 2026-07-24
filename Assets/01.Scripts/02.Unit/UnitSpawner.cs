@@ -25,28 +25,17 @@ namespace _01.Scripts._02.Unit
         [SerializeField] private Transform friendlySpawnPosition;
         [SerializeField] private Transform enemySpawnPosition;
     
-        public float enemySpawnInterval = 3f;
+        public float enemySpawnInterval = 5f;
+        private int enemySpawnCount;
 
         private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
 
         private void Start()
         {
+            enemySpawnCount = 0;
             BuildUnlockedUnitDictionary();
 
             StartCoroutine(SpawnEnemyCoroutine());
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                SpawnFriendly(Habitat.Meadow);
-            }
-
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                SpawnEnemy();
-            }
         }
 
         /// <summary>
@@ -164,9 +153,23 @@ namespace _01.Scripts._02.Unit
 
         private IEnumerator SpawnEnemyCoroutine()
         {
-            while (true)
+            yield return new WaitForSeconds(enemySpawnInterval);
+
+            enemySpawnCount++;
+
+            SpawnEnemy();
+
+            if (enemySpawnCount % 5 == 0)
             {
-                yield return new WaitForSeconds(enemySpawnInterval);
+                StartCoroutine(SpawnAdditionalEnemiesCoroutine(2, 0.2f));
+            }
+        }
+        
+        private IEnumerator SpawnAdditionalEnemiesCoroutine(int count, float interval)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                yield return new WaitForSeconds(interval);
                 SpawnEnemy();
             }
         }
