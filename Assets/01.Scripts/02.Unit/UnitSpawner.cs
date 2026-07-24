@@ -25,7 +25,7 @@ namespace _01.Scripts._02.Unit
         [SerializeField] private Transform friendlySpawnPosition;
         [SerializeField] private Transform enemySpawnPosition;
     
-        public float enemySpawnInterval = 3f;
+        public float enemySpawnInterval = 5f;
         private int enemySpawnCount;
 
         private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
