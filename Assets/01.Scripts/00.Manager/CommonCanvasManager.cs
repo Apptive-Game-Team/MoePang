@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace _01.Scripts._00.Manager
 {
@@ -14,6 +17,14 @@ namespace _01.Scripts._00.Manager
         private TextMeshProUGUI goldText;
         private TextMeshProUGUI diaText;
 
+        [Header("Button Settings")] 
+        private Button _optionButton;
+        private Button _unitInfoButton;
+        private Button _comboButton;
+        private Button _habitatModeButton;
+        private Button _shopButton;
+        
+
         private void Awake()
         {
             if (Instance != null)
@@ -24,6 +35,7 @@ namespace _01.Scripts._00.Manager
             Instance = this;
 
             FindTextObjects();
+            SetButtons();
         }
 
         private void Start()
@@ -38,6 +50,8 @@ namespace _01.Scripts._00.Manager
                 GoldManager.Instance.OnGoldChanged += UpdateUI;
                 GoldManager.Instance.OnDiaChanged += UpdateUI;
             }
+
+            UpdateButtons();
         }
 
         private void OnDisable()
@@ -79,6 +93,27 @@ namespace _01.Scripts._00.Manager
         {
             if (goldText != null) goldText.text = $"{GoldManager.Instance.Gold}";
             if (diaText != null) diaText.text = $"{GoldManager.Instance.Dia}";
+        }
+
+        private void SetButtons()
+        {
+            Transform buttons = transform.GetChild(2);
+            
+            _optionButton = buttons.GetChild(0).GetComponent<Button>();
+            _unitInfoButton = buttons.GetChild(1).GetComponent<Button>();
+            _comboButton = buttons.GetChild(2).GetComponent<Button>();
+            _habitatModeButton = buttons.GetChild(3).GetComponent<Button>();
+            _shopButton = buttons.GetChild(4).GetComponent<Button>();
+        }
+
+        private void UpdateButtons()
+        {
+            _comboButton.interactable = CheckComboUnlocked();
+        }
+
+        private bool CheckComboUnlocked()
+        {
+            return GameManager.Instance.playData.MaxStages.Any(stage => stage.Value >= 5);
         }
     }
 }
