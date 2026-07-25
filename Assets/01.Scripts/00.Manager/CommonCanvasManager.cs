@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace _01.Scripts._00.Manager
 {
@@ -14,6 +17,14 @@ namespace _01.Scripts._00.Manager
         private TextMeshProUGUI goldText;
         private TextMeshProUGUI diaText;
 
+        [Header("Button Settings")] 
+        private Button _optionButton;
+        private Button _unitInfoButton;
+        private Button _comboButton;
+        private Button _habitatModeButton;
+        private Button _shopButton;
+        
+
         private void Awake()
         {
             if (Instance != null)
@@ -24,6 +35,8 @@ namespace _01.Scripts._00.Manager
             Instance = this;
 
             FindTextObjects();
+            SetButtons();
+            UpdateButtons();
         }
 
         private void Start()
@@ -79,6 +92,22 @@ namespace _01.Scripts._00.Manager
         {
             if (goldText != null) goldText.text = $"{GoldManager.Instance.Gold}";
             if (diaText != null) diaText.text = $"{GoldManager.Instance.Dia}";
+        }
+
+        private void SetButtons()
+        {
+            Transform buttons = transform.GetChild(2);
+            
+            _optionButton = buttons.Find("OptionButton").GetComponent<Button>();
+            _unitInfoButton = buttons.Find("UnitInfoButton").GetComponent<Button>();
+            _comboButton = buttons.Find("ComboButton").GetComponent<Button>();
+            _habitatModeButton = buttons.Find("HabitatModeButton").GetComponent<Button>();
+            _shopButton = buttons.Find("ReShopButton").GetComponent<Button>();
+        }
+
+        private void UpdateButtons()
+        {
+            _comboButton.interactable = GameManager.Instance.playData.MaxStages.Any(stage => stage.Value >= 5);
         }
     }
 }
