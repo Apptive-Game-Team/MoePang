@@ -36,6 +36,7 @@ namespace _01.Scripts._00.Manager
 
             FindTextObjects();
             SetButtons();
+            UpdateButtons();
         }
 
         private void Start()
@@ -50,8 +51,6 @@ namespace _01.Scripts._00.Manager
                 GoldManager.Instance.OnGoldChanged += UpdateUI;
                 GoldManager.Instance.OnDiaChanged += UpdateUI;
             }
-
-            UpdateButtons();
         }
 
         private void OnDisable()
@@ -99,21 +98,16 @@ namespace _01.Scripts._00.Manager
         {
             Transform buttons = transform.GetChild(2);
             
-            _optionButton = buttons.GetChild(0).GetComponent<Button>();
-            _unitInfoButton = buttons.GetChild(1).GetComponent<Button>();
-            _comboButton = buttons.GetChild(2).GetComponent<Button>();
-            _habitatModeButton = buttons.GetChild(3).GetComponent<Button>();
-            _shopButton = buttons.GetChild(4).GetComponent<Button>();
+            _optionButton = buttons.Find("OptionButton").GetComponent<Button>();
+            _unitInfoButton = buttons.Find("UnitInfoButton").GetComponent<Button>();
+            _comboButton = buttons.Find("ComboButton").GetComponent<Button>();
+            _habitatModeButton = buttons.Find("HabitatModeButton").GetComponent<Button>();
+            _shopButton = buttons.Find("ReShopButton").GetComponent<Button>();
         }
 
         private void UpdateButtons()
         {
-            _comboButton.interactable = CheckComboUnlocked();
-        }
-
-        private bool CheckComboUnlocked()
-        {
-            return GameManager.Instance.playData.MaxStages.Any(stage => stage.Value >= 5);
+            _comboButton.interactable = GameManager.Instance.playData.MaxStages.Any(stage => stage.Value >= 5);
         }
     }
 }
