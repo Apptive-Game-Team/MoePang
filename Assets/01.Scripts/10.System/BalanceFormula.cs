@@ -1,3 +1,4 @@
+using _01.Scripts._11.HabitatMode;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -517,5 +518,22 @@ public static class BalanceFormula
         return Mathf.Ceil(hp);
     }
     
+    #endregion
+
+    #region 100스테이지 이후의 스테이지에 따른 초기 장애물 타일 소환 확률 가중치
+
+    private static int currentStageNum = HabitatModeManager.Instance && HabitatModeManager.Instance.IsHabitatBattle
+        ? StageManager.Instance.CurrentHabitatStage + 50 : StageManager.Instance.CurrentStage;
+    
+    public static int[] InitialObstacleWeights =>
+        currentStageNum switch
+        {
+            <= 109 => new[] { 0, 0, 10,  0,  0, 0, 0 },
+            <= 119 => new[] { 0, 0, 15, 10,  0, 0, 0 },
+            <= 129 => new[] { 0, 0, 15, 10, 10, 0, 0 },
+            <= 139 => new[] { 0, 0, 15, 10, 10, 4, 0 },
+            _      => new[] { 0, 0, 15, 15, 10, 4, 5 }
+        };
+
     #endregion
 }
