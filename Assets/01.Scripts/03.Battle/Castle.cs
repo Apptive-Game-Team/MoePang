@@ -106,29 +106,33 @@ public class Castle : MonoBehaviour, IDamageable
         hitEffect.transform.localScale = hitEffectLocalScale;
         hitEffect.SetActive(true);
 
-        var particleRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
-        var particleSystem = hitEffect.GetComponent<ParticleSystem>();
-        var hitSpriteRenderer = hitEffect.GetComponent<SpriteRenderer>();
+        var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
 
         if (hitSprite != null)
         {
-            if (hitSpriteRenderer == null)
-                hitSpriteRenderer = hitEffect.AddComponent<SpriteRenderer>();
+            Destroy(hitEffect);
 
-            if (particleRenderer != null)
-                particleRenderer.enabled = false;
+            hitEffect = new GameObject("HitSpriteEffect");
+            hitEffect.transform.SetParent(hitEffectPrefab.transform.parent, false);
+            hitEffect.transform.position = spawnPos;
+            hitEffect.transform.rotation = hitEffectPrefab.transform.rotation;
+            hitEffect.transform.localScale = hitEffectLocalScale;
 
-            if (particleSystem != null)
-                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-
-            hitSpriteRenderer.enabled = true;
+            SpriteRenderer hitSpriteRenderer = hitEffect.AddComponent<SpriteRenderer>();
             hitSpriteRenderer.sprite = hitSprite;
             hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
             hitSpriteRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+
+            activeHitEffects[^1] = hitEffect;
         }
-        else if (particleRenderer != null)
+        else
         {
-            particleRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+            var particleRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
+
+            if (particleRenderer != null)
+            {
+                particleRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+            }
         }
 
         float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;

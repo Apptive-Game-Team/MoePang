@@ -853,11 +853,7 @@ public class Unit : MonoBehaviour, IDamageable
     /// </summary>
     private IEnumerator PlayHitEffect(Sprite hitSprite = null)
     {
-        if (hitEffectPrefab == null || isHitEffect) yield break;
-
-        isHitEffect = true;
-
-        hitEffectPrefab.SetActive(true);
+        if (hitEffectPrefab == null) yield break;
 
         float effectRange = 0.4f * unitSize;
         Vector3 randomPos = new Vector3(
@@ -866,29 +862,23 @@ public class Unit : MonoBehaviour, IDamageable
             0
         );
         Vector3 spawnPos = transform.position + randomPos;
+
+        if (hitSprite != null)
+        {
+            yield return PlayHitSpriteEffect(hitSprite, spawnPos);
+            yield break;
+        }
+
+        if (isHitEffect) yield break;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
         hitEffectPrefab.transform.position = spawnPos;
 
         var particleRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
         var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
-        var hitSpriteRenderer = hitEffectPrefab.GetComponent<SpriteRenderer>();
-
-        if (hitSprite != null)
-        {
-            if (hitSpriteRenderer == null)
-                hitSpriteRenderer = hitEffectPrefab.AddComponent<SpriteRenderer>();
-
-            if (particleRenderer != null)
-                particleRenderer.enabled = false;
-
-            if (particleSystem != null)
-                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-
-            hitSpriteRenderer.enabled = true;
-            hitSpriteRenderer.sprite = hitSprite;
-            hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-            hitSpriteRenderer.sortingOrder = 30000 + Random.Range(0, 501);
-        }
-        else if (particleRenderer != null)
+        if (particleRenderer != null)
         {
             particleRenderer.enabled = true;
             particleRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
@@ -899,17 +889,33 @@ public class Unit : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(duration);
 
-        if (hitSpriteRenderer != null)
-        {
-            hitSpriteRenderer.enabled = false;
-            hitSpriteRenderer.sprite = null;
-        }
-
         if (particleRenderer != null)
             particleRenderer.enabled = true;
 
         hitEffectPrefab.SetActive(false);
         isHitEffect = false;
+    }
+
+    private IEnumerator PlayHitSpriteEffect(Sprite hitSprite, Vector3 spawnPos)
+    {
+        GameObject hitSpriteEffect = new GameObject("HitSpriteEffect");
+        Transform effectTransform = hitSpriteEffect.transform;
+        effectTransform.SetParent(hitEffectPrefab.transform.parent, false);
+        effectTransform.position = spawnPos;
+        effectTransform.rotation = hitEffectPrefab.transform.rotation;
+        effectTransform.localScale = hitEffectPrefab.transform.localScale;
+
+        SpriteRenderer hitSpriteRenderer = hitSpriteEffect.AddComponent<SpriteRenderer>();
+        hitSpriteRenderer.sprite = hitSprite;
+        hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+        hitSpriteRenderer.sortingOrder = 30000 + Random.Range(0, 501);
+
+        var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        Destroy(hitSpriteEffect);
     }
 
     /// <summary>
