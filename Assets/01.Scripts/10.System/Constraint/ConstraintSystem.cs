@@ -60,13 +60,13 @@ namespace _01.Scripts._10.System.Constraint
             _constraintRouletteSystem = GetComponent<ConstraintRouletteSystem>();
             _constraintRouletteSystem.InitializeItems();
 
-            bool setMiddleConstraint = StageManager.Instance.CurrentStage % 10 == 4;
+            bool setMiddleConstraint = StageManager.Instance.IsMiddleHurdleStage();
             if (setMiddleConstraint)
             {
                 StartCoroutine(StartRoulette());
             }
 
-            bool setHighConstraint = StageManager.Instance.CurrentStage % 10 == 9;
+            bool setHighConstraint = StageManager.Instance.IsHighHurdleStage();
             if (setHighConstraint)
             {
                 StartCoroutine(ApplyHighConstraint());
