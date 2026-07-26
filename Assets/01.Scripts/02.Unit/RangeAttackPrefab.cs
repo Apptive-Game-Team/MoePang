@@ -13,6 +13,9 @@ public class RangeAttackPrefab : MonoBehaviour
     [SerializeField] protected Sprite[] animationFrames;
     [SerializeField] protected float framesPerSecond = 12f;
 
+    [Header("Hit Effect")]
+    [SerializeField] protected Sprite hitSprite;
+
     protected float damage;
     protected TeamType ownerTeam;
     protected LayerMask targetLayer;
@@ -83,7 +86,7 @@ public class RangeAttackPrefab : MonoBehaviour
         if (target == null) return;
         if (target.GetTeam() == ownerTeam) return;
 
-        target.TakeDamage(damage);
+        target.TakeDamage(damage, hitSprite);
         Destroy(gameObject);
     }
 }

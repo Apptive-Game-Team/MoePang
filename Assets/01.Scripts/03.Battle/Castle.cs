@@ -59,10 +59,10 @@ public class Castle : MonoBehaviour, IDamageable
     }
 
     #region 피격 & 피격 연출
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Sprite hitSprite = null)
     {
         currentHp -= damage;
-        StartCoroutine(PlayHitEffect());
+        StartCoroutine(PlayHitEffect(hitSprite));
 
         if (damageTween != null && damageTween.IsActive() && damageTween.IsPlaying())
         {
@@ -80,7 +80,7 @@ public class Castle : MonoBehaviour, IDamageable
         }
     }
 
-    private IEnumerator PlayHitEffect()
+    private IEnumerator PlayHitEffect(Sprite hitSprite = null)
     {
         if (hitEffectPrefab == null)
             yield break;
@@ -104,14 +104,32 @@ public class Castle : MonoBehaviour, IDamageable
         activeHitEffects.Add(hitEffect);
         hitEffect.SetActive(true);
 
-        var effectRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
-        if (effectRenderer != null)
+        var particleRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
+        var particleSystem = hitEffect.GetComponent<ParticleSystem>();
+        var hitSpriteRenderer = hitEffect.GetComponent<SpriteRenderer>();
+
+        if (hitSprite != null)
         {
-            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+            if (hitSpriteRenderer == null)
+                hitSpriteRenderer = hitEffect.AddComponent<SpriteRenderer>();
+
+            if (particleRenderer != null)
+                particleRenderer.enabled = false;
+
+            if (particleSystem != null)
+                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            hitSpriteRenderer.enabled = true;
+            hitSpriteRenderer.sprite = hitSprite;
+            hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            hitSpriteRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+        else if (particleRenderer != null)
+        {
+            particleRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
         }
 
-        var ps = hitEffect.GetComponent<ParticleSystem>();
-        float duration = (ps != null) ? ps.main.duration : 1.0f;
+        float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;
 
         yield return new WaitForSeconds(duration);
 

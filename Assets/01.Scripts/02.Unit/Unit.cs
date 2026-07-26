@@ -710,11 +710,11 @@ public class Unit : MonoBehaviour, IDamageable
     /// <para>1. 피가 절반 이하로 내려가면 Damage 상태로 전환</para>
     /// <para>2. 피가 0이하로 내려가면 Die 상태로 전환</para>
     /// </summary>
-    public virtual void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage, Sprite hitSprite = null)
     {
         if (isDying || isDamaging) return;
 
-        StartCoroutine(PlayHitEffect());
+        StartCoroutine(PlayHitEffect(hitSprite));
 
         float nextHp = currentHp - damage;
         bool triggerHalf = !halfHpTriggered && nextHp <= maxHp * 0.5f;
@@ -851,9 +851,9 @@ public class Unit : MonoBehaviour, IDamageable
     /// <summary>
     /// 뭉게뭉게 구름 이펙트
     /// </summary>
-    private IEnumerator PlayHitEffect()
+    private IEnumerator PlayHitEffect(Sprite hitSprite = null)
     {
-        if (hitEffectPrefab == null || isHitEffect) yield return null;
+        if (hitEffectPrefab == null || isHitEffect) yield break;
 
         isHitEffect = true;
 
@@ -868,17 +868,45 @@ public class Unit : MonoBehaviour, IDamageable
         Vector3 spawnPos = transform.position + randomPos;
         hitEffectPrefab.transform.position = spawnPos;
 
-        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
-        if (effectRenderer != null)
+        var particleRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
+        var hitSpriteRenderer = hitEffectPrefab.GetComponent<SpriteRenderer>();
+
+        if (hitSprite != null)
         {
-            effectRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-            effectRenderer.sortingOrder = 30000 + Random.Range(0, 501);
+            if (hitSpriteRenderer == null)
+                hitSpriteRenderer = hitEffectPrefab.AddComponent<SpriteRenderer>();
+
+            if (particleRenderer != null)
+                particleRenderer.enabled = false;
+
+            if (particleSystem != null)
+                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            hitSpriteRenderer.enabled = true;
+            hitSpriteRenderer.sprite = hitSprite;
+            hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            hitSpriteRenderer.sortingOrder = 30000 + Random.Range(0, 501);
+        }
+        else if (particleRenderer != null)
+        {
+            particleRenderer.enabled = true;
+            particleRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            particleRenderer.sortingOrder = 30000 + Random.Range(0, 501);
         }
 
-        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
-        float duration = (ps != null) ? ps.main.duration : 1.0f;
+        float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;
 
         yield return new WaitForSeconds(duration);
+
+        if (hitSpriteRenderer != null)
+        {
+            hitSpriteRenderer.enabled = false;
+            hitSpriteRenderer.sprite = null;
+        }
+
+        if (particleRenderer != null)
+            particleRenderer.enabled = true;
 
         hitEffectPrefab.SetActive(false);
         isHitEffect = false;
