@@ -153,15 +153,18 @@ namespace _01.Scripts._02.Unit
 
         private IEnumerator SpawnEnemyCoroutine()
         {
-            yield return new WaitForSeconds(enemySpawnInterval);
-
-            enemySpawnCount++;
-
-            SpawnEnemy();
-
-            if (enemySpawnCount % 5 == 0)
+            while (true)
             {
-                StartCoroutine(SpawnAdditionalEnemiesCoroutine(2, 0.2f));
+                yield return new WaitForSeconds(enemySpawnInterval);
+
+                enemySpawnCount++;
+
+                SpawnEnemy();
+
+                if (enemySpawnCount % 5 == 0)
+                {
+                    StartCoroutine(SpawnAdditionalEnemiesCoroutine(2, 0.2f));
+                }
             }
         }
         
