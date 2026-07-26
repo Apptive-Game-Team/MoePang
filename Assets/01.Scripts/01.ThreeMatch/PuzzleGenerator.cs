@@ -1257,6 +1257,7 @@ namespace _01.Scripts._01.ThreeMatch
                     if (_puzzles[pos.x, pos.y] != null)
                     {
                         _puzzles[pos.x, pos.y].puzzleState = PuzzleState.Matching;
+                        SoundManager.Instance.PlaySFX(SFX.SFX5_TilePop);
                     }
                 }
             }
@@ -1361,7 +1362,6 @@ namespace _01.Scripts._01.ThreeMatch
                     ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
-                        SoundManager.Instance.PlaySFX(SFX.SFX5_TilePop);
                         spawnStackManager.AddStack(group.habitat, 1);
                         StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
