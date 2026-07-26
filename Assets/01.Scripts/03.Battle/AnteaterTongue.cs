@@ -113,7 +113,7 @@ public class AnteaterTongue : RangeAttackPrefab
         if (target == null) return;
         if (target.GetTeam() == ownerTeam) return;
 
-        target.TakeDamage(damage);
+        target.TakeDamage(damage, hitSprite);
         damaged = true;
         Destroy(gameObject);
         //retracting = true;

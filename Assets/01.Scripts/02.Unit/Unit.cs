@@ -710,12 +710,12 @@ public class Unit : MonoBehaviour, IDamageable
     /// <para>1. 피가 절반 이하로 내려가면 Damage 상태로 전환</para>
     /// <para>2. 피가 0이하로 내려가면 Die 상태로 전환</para>
     /// </summary>
-    public virtual void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage, Sprite hitSprite = null)
     {
         if (isDying || isDamaging) return;
 
         SoundManager.Instance.PlaySFX(SFX.SFX8_Hit);
-        StartCoroutine(PlayHitEffect());
+        StartCoroutine(PlayHitEffect(hitSprite));
 
         float nextHp = currentHp - damage;
         bool triggerHalf = !halfHpTriggered && nextHp <= maxHp * 0.5f;
@@ -852,13 +852,9 @@ public class Unit : MonoBehaviour, IDamageable
     /// <summary>
     /// 뭉게뭉게 구름 이펙트
     /// </summary>
-    private IEnumerator PlayHitEffect()
+    private IEnumerator PlayHitEffect(Sprite hitSprite = null)
     {
-        if (hitEffectPrefab == null || isHitEffect) yield return null;
-
-        isHitEffect = true;
-
-        hitEffectPrefab.SetActive(true);
+        if (hitEffectPrefab == null) yield break;
 
         float effectRange = 0.4f * unitSize;
         Vector3 randomPos = new Vector3(
@@ -867,22 +863,60 @@ public class Unit : MonoBehaviour, IDamageable
             0
         );
         Vector3 spawnPos = transform.position + randomPos;
-        hitEffectPrefab.transform.position = spawnPos;
 
-        var effectRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
-        if (effectRenderer != null)
+        if (hitSprite != null)
         {
-            effectRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-            effectRenderer.sortingOrder = 30000 + Random.Range(0, 501);
+            yield return PlayHitSpriteEffect(hitSprite, spawnPos);
+            yield break;
         }
 
-        var ps = hitEffectPrefab.GetComponent<ParticleSystem>();
-        float duration = (ps != null) ? ps.main.duration : 1.0f;
+        if (isHitEffect) yield break;
+
+        isHitEffect = true;
+
+        hitEffectPrefab.SetActive(true);
+        hitEffectPrefab.transform.position = spawnPos;
+
+        var particleRenderer = hitEffectPrefab.GetComponent<ParticleSystemRenderer>();
+        var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
+        if (particleRenderer != null)
+        {
+            particleRenderer.enabled = true;
+            particleRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            particleRenderer.sortingOrder = 30000 + Random.Range(0, 501);
+        }
+
+        float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;
 
         yield return new WaitForSeconds(duration);
 
+        if (particleRenderer != null)
+            particleRenderer.enabled = true;
+
         hitEffectPrefab.SetActive(false);
         isHitEffect = false;
+    }
+
+    private IEnumerator PlayHitSpriteEffect(Sprite hitSprite, Vector3 spawnPos)
+    {
+        GameObject hitSpriteEffect = new GameObject("HitSpriteEffect");
+        Transform effectTransform = hitSpriteEffect.transform;
+        effectTransform.SetParent(hitEffectPrefab.transform.parent, false);
+        effectTransform.position = spawnPos;
+        effectTransform.rotation = hitEffectPrefab.transform.rotation;
+        effectTransform.localScale = hitEffectPrefab.transform.localScale;
+
+        SpriteRenderer hitSpriteRenderer = hitSpriteEffect.AddComponent<SpriteRenderer>();
+        hitSpriteRenderer.sprite = hitSprite;
+        hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+        hitSpriteRenderer.sortingOrder = 30000 + Random.Range(0, 501);
+
+        var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
+        float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;
+
+        yield return new WaitForSeconds(duration);
+
+        Destroy(hitSpriteEffect);
     }
 
     /// <summary>
