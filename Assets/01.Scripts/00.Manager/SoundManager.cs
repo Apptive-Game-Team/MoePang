@@ -10,7 +10,13 @@ public enum BGM
     //규칙 : BGM0_Default
     BGM0_Default,
     BGM1_Title1,
-    BGM1_Title2,
+    BGM2_Title2,
+    BGM3_InGameDefault,
+    BGM4_HurdleStage,
+    BGM5_HurdleStage2,
+    BGM6_StaveHomeMode,
+    BGM7_StaveHomeMode2,
+    BGM8_StaveHomeSelect,
 
     Count //Count체크용 enum, 삭제 금지
 }
@@ -21,6 +27,21 @@ public enum SFX
     //규칙 : SFX0_Default
     SFX0_Default,
     SFX1_ButtonClick,
+    SFX2_ButtonClick,
+    SFX3_CannotMove,
+    SFX4_CircleTile,
+    SFX5_Attack,
+    SFX6_Combo,
+    SFX7_ConsumGoldTile,
+    SFX8_Hit,
+    SFX9_LineTile,
+    SFX10_NegativeSound,
+    SFX11_PositiveSound,
+    SFX12_PurChase,
+    SFX13_SlotMachine,
+    SFX14_StageClear,
+    SFX15_StageFailed,
+    SFX16_TilePop,
 
     Count //Count체크용 enum, 삭제 금지
 }

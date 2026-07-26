@@ -331,7 +331,7 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
             
             SoundManager.Instance.StartBGMRandomLoop(
-                new[] { BGM.BGM1_Title1, BGM.BGM1_Title2 }
+                new[] { BGM.BGM1_Title1, BGM.BGM2_Title2 }
             );
         }
         
