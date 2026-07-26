@@ -17,6 +17,7 @@ public class Castle : MonoBehaviour, IDamageable
     [Header("피격 연출")]
     [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] private int maxHitEffectCount = 5;
+    [SerializeField] private Vector3 hitEffectLocalScale = new Vector3(0.55f, 0.55f, 1f);
     [SerializeField] private float shakeStrength = 0.05f;
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
@@ -59,10 +60,10 @@ public class Castle : MonoBehaviour, IDamageable
     }
 
     #region 피격 & 피격 연출
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Sprite hitSprite = null)
     {
         currentHp -= damage;
-        StartCoroutine(PlayHitEffect());
+        StartCoroutine(PlayHitEffect(hitSprite));
 
         if (damageTween != null && damageTween.IsActive() && damageTween.IsPlaying())
         {
@@ -80,7 +81,7 @@ public class Castle : MonoBehaviour, IDamageable
         }
     }
 
-    private IEnumerator PlayHitEffect()
+    private IEnumerator PlayHitEffect(Sprite hitSprite = null)
     {
         if (hitEffectPrefab == null)
             yield break;
@@ -102,16 +103,39 @@ public class Castle : MonoBehaviour, IDamageable
             hitEffectPrefab.transform.parent
         );
         activeHitEffects.Add(hitEffect);
+        hitEffect.transform.localScale = hitEffectLocalScale;
         hitEffect.SetActive(true);
 
-        var effectRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
-        if (effectRenderer != null)
+        var particleSystem = hitEffectPrefab.GetComponent<ParticleSystem>();
+
+        if (hitSprite != null)
         {
-            effectRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+            Destroy(hitEffect);
+
+            hitEffect = new GameObject("HitSpriteEffect");
+            hitEffect.transform.SetParent(hitEffectPrefab.transform.parent, false);
+            hitEffect.transform.position = spawnPos;
+            hitEffect.transform.rotation = hitEffectPrefab.transform.rotation;
+            hitEffect.transform.localScale = hitEffectLocalScale;
+
+            SpriteRenderer hitSpriteRenderer = hitEffect.AddComponent<SpriteRenderer>();
+            hitSpriteRenderer.sprite = hitSprite;
+            hitSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            hitSpriteRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+
+            activeHitEffects[^1] = hitEffect;
+        }
+        else
+        {
+            var particleRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
+
+            if (particleRenderer != null)
+            {
+                particleRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+            }
         }
 
-        var ps = hitEffect.GetComponent<ParticleSystem>();
-        float duration = (ps != null) ? ps.main.duration : 1.0f;
+        float duration = (particleSystem != null) ? particleSystem.main.duration : 1.0f;
 
         yield return new WaitForSeconds(duration);
 

@@ -106,11 +106,12 @@ MonoBehaviour:
   lifeTime: 3
   spriteRenderer: {fileID: 0}
   animationFrames:
-  - {fileID: 8252335808085242784, guid: 99f11465b18c14462bbb3ca88000b443, type: 3}
-  - {fileID: 8252335808085242784, guid: 99f11465b18c14462bbb3ca88000b443, type: 3}
-  - {fileID: 8252335808085242784, guid: 99f11465b18c14462bbb3ca88000b443, type: 3}
-  - {fileID: 8252335808085242784, guid: 99f11465b18c14462bbb3ca88000b443, type: 3}
+  - {fileID: 1290641641787170169, guid: e506e49fe67aa4ecfad8e5ed6f7deca7, type: 3}
+  - {fileID: 1290641641787170169, guid: e506e49fe67aa4ecfad8e5ed6f7deca7, type: 3}
+  - {fileID: 1290641641787170169, guid: e506e49fe67aa4ecfad8e5ed6f7deca7, type: 3}
+  - {fileID: 1290641641787170169, guid: e506e49fe67aa4ecfad8e5ed6f7deca7, type: 3}
   framesPerSecond: 12
+  hitSprite: {fileID: 8252335808085242784, guid: 99f11465b18c14462bbb3ca88000b443, type: 3}
 --- !u!61 &-915935630845749949
 BoxCollider2D:
   m_ObjectHideFlags: 0
