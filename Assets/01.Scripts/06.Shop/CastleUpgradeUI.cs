@@ -75,14 +75,14 @@ namespace _01.Scripts._06.Shop
                         _upgradePopup.SetActive(false);    
                     });
                     
-                    SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                    SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                     _upgradePopup.SetActive(true);
                 }
             });
 
             _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
-                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
         }

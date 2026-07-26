@@ -25,7 +25,7 @@ public class MainButtonManager : MonoBehaviour
 
     public void OnClickPlay()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         HabitatModeManager.Instance.IsHabitatBattle = false;
         SceneManager.sceneLoaded += OnPlaySceneLoaded;
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
@@ -41,7 +41,7 @@ public class MainButtonManager : MonoBehaviour
 
     public void OnClickShop()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Shop));
     }
 
@@ -50,7 +50,7 @@ public class MainButtonManager : MonoBehaviour
     /// </summary>
     public void OnClickNextStage()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         if (StageManager.Instance != null)
         {
             StageManager.Instance.AddStage(1);
@@ -67,7 +67,7 @@ public class MainButtonManager : MonoBehaviour
     /// </summary>
     public void OnClickPrevStage()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         if (StageManager.Instance != null)
         {
             StageManager.Instance.AddStage(-1);

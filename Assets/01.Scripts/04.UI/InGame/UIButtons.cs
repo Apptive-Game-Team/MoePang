@@ -10,13 +10,13 @@ namespace _01.Scripts._04.UI.InGame
     {
         public void HomeButton()
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
         }
         
         public void NextStageButton()
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             if (HabitatModeManager.Instance != null && HabitatModeManager.Instance.IsHabitatBattle)
             {
                 StageType stageType =
@@ -44,7 +44,7 @@ namespace _01.Scripts._04.UI.InGame
 
         public void RestartButton()
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             StageManager.Instance.StartStage();
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }

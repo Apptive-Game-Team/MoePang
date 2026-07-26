@@ -55,7 +55,7 @@ namespace _01.Scripts._04.UI.MainScene
             }
             
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             HabitatModeManager.Instance.IsHabitatBattle = true;
             HabitatModeManager.Instance.HabitatMode = selectedMode;
             
@@ -78,14 +78,14 @@ namespace _01.Scripts._04.UI.MainScene
         public void ClosePanel()
         {
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             gameObject.SetActive(false);
         }
 
         private void SelectMode(HabitatMode mode)
         {
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             selectedMode = mode;
             HabitatModeManager.Instance.HabitatMode = mode;
 
@@ -124,14 +124,14 @@ namespace _01.Scripts._04.UI.MainScene
         
         public void OnClickNextStage()
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             StageManager.Instance.AddHabitatStage(selectedMode, 1);
             RefreshStageUI();
         }
 
         public void OnClickPrevStage()
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             StageManager.Instance.AddHabitatStage(selectedMode, -1);
             RefreshStageUI();
         }
@@ -247,7 +247,7 @@ namespace _01.Scripts._04.UI.MainScene
             }
 
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             guideCoroutine = StartCoroutine(ShowGuideRoutine());
         }
 

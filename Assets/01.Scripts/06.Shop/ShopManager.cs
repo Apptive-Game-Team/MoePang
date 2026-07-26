@@ -56,7 +56,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void OnClickBack()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
     
@@ -70,7 +70,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
@@ -90,7 +90,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         
         int cost = GetUnitPurchaseCost(unit);
         Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
@@ -132,7 +132,7 @@ public class ShopManager : MonoBehaviour
             yesButton.onClick.RemoveAllListeners();
             yesButton.onClick.AddListener(() =>
             {
-                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 GoldManager.Instance.AdjustGold(-unitData.UnlockCost);
                 HabitatManager.Instance.Unlock(unitData);
                 refreshAction.Invoke();
@@ -152,7 +152,7 @@ public class ShopManager : MonoBehaviour
         noButton.onClick.RemoveAllListeners();
         noButton.onClick.AddListener(() =>
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             unlockPanel.gameObject.SetActive(false);
         });
         

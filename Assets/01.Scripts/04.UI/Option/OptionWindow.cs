@@ -38,7 +38,7 @@ public class OptionWindow : MonoBehaviour
 
     public void OnEndButton()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX0_Default);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         optionButton.interactable = true;
         SceneManager.LoadScene(0);
     }
@@ -54,14 +54,14 @@ public class OptionWindow : MonoBehaviour
 
     public void OnBackButton()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX0_Default);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         optionButton.interactable = true;
         Destroy(this.gameObject);
     }
 
     public void OnTitleButton()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX0_Default);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         SceneManager.LoadScene("00.TitleScene");
     }
 }

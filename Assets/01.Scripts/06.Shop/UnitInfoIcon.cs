@@ -96,7 +96,7 @@ public class UnitInfoIcon : MonoBehaviour
     /// </summary>
     public void OnClick()
     {
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         if (!IsUnlocked && HabitatManager.Instance.CanUnlock(unitData))
         {
             shopManager.UnlockUnit(unitData, RefreshUnlockState);
