@@ -1,4 +1,5 @@
 using _01.Scripts._04.UI.InGame;
+using _01.Scripts._11.HabitatMode;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -123,7 +124,7 @@ namespace _01.Scripts._01.ThreeMatch
         [Serializable]
         private struct ObstacleSpawnData
         {
-            public ObstaclePuzzleType type;
+            public int type;
             public Vector2Int pos;
         }
 
@@ -266,12 +267,33 @@ namespace _01.Scripts._01.ThreeMatch
             bool isObstacle = false;
             ObstaclePuzzleType obstacleType = ObstaclePuzzleType.DeActivated;
 
-            foreach (var data in startObstacles[0].obstacles)
+            int currentStage = HabitatModeManager.Instance && HabitatModeManager.Instance.IsHabitatBattle
+                ? StageManager.Instance.CurrentHabitatStage + 50 : StageManager.Instance.CurrentStage;
+
+            var obstacleSpawnGroups = currentStage >= 100 ? startObstacles[1] : startObstacles[0];
+            
+            foreach (var data in obstacleSpawnGroups.obstacles)
             {
                 if (data.pos.x == col && data.pos.y == row)
                 {
                     isObstacle = true;
-                    obstacleType = data.type;
+                    switch (data.type)
+                    {
+                        case 1:
+                            obstacleType = ObstaclePuzzleType.Fixed;
+                            break;
+                        case 2:
+                            obstacleType = ObstaclePuzzleType.DeActivated;
+                            break;
+                        case 3:
+                            obstacleType = GetRandomObstacleType();
+                            break;
+                        case 4:
+                            obstacleType = Enum.GetValues(typeof(ObstaclePuzzleType)).Length >= 6
+                                ? (ObstaclePuzzleType)5
+                                : GetRandomObstacleType();
+                            break;
+                    }
                 }
             }
 
@@ -315,6 +337,50 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             return puzzle;
+        }
+        
+        private ObstaclePuzzleType GetRandomObstacleType()
+        {
+            if (Enum.GetValues(typeof(ObstaclePuzzleType)).Length <= 2)
+            {
+                return (ObstaclePuzzleType)Random.Range(0, Enum.GetValues(typeof(ObstaclePuzzleType)).Length);
+            }
+            
+            int[] weights = BalanceFormula.InitialObstacleWeights;
+
+            int totalWeight = 0;
+            for (int i = 2;
+                 i <= Enum.GetValues(typeof(ObstaclePuzzleType)).Length - 1;
+                 i++)
+            {
+                if (i == 5)
+                {
+                    continue;
+                }
+
+                totalWeight += weights[i];
+            }
+
+            int random = Random.Range(0, totalWeight);
+
+            for (int i = 2;
+                 i <= Enum.GetValues(typeof(ObstaclePuzzleType)).Length - 1;
+                 i++)
+            {
+                if (i == 5)
+                {
+                    continue;
+                }
+
+                if (random < weights[i])
+                {
+                    return (ObstaclePuzzleType)i;
+                }
+
+                random -= weights[i];
+            }
+
+            return (ObstaclePuzzleType)3;
         }
 
         private GameObject SetRandomPuzzle(int col, int row, int spawnOrder)
