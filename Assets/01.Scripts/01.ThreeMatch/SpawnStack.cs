@@ -111,6 +111,7 @@ namespace _01.Scripts._01.ThreeMatch
         private IEnumerator AddStackProcess(int num)
         {
             AddStackEffect();
+            PlayStackAddedSFX(num);
             
             int totalNewCount = _stackCount + num;
 
@@ -137,6 +138,14 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             yield return new WaitForSeconds(0.1f);
+        }
+
+        private void PlayStackAddedSFX(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX16_FillStack);
+            }
         }
         
         private void AddStackEffect()

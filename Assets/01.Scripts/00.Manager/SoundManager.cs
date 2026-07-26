@@ -41,7 +41,7 @@ public enum SFX
     SFX13_SlotMachine,
     SFX14_StageClear,
     SFX15_StageFailed,
-    SFX16_TilePop,
+    SFX16_FillStack,
 
     Count //Count체크용 enum, 삭제 금지
 }
