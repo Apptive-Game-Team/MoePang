@@ -1511,6 +1511,14 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
+            if (type == SpecialPuzzleType.CircleBomb)
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX4_CircleTile);
+            }
+            if (type == SpecialPuzzleType.RowBomb || type == SpecialPuzzleType.ColumnBomb)
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX9_LineTile);
+            }
             
             GameObject self = _puzzles[curX, curY].gameObject;
             Vector2 center = new (self.transform.position.x, self.transform.position.y);
