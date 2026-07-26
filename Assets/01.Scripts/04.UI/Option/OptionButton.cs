@@ -7,7 +7,7 @@ public class OptionButton : MonoBehaviour
     public void OpenOptions()
     {
         if (optionWindow != null) return;
-        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         optionWindow = Instantiate(Resources.Load<GameObject>("UI/UI_Option"));
 
         if (this.gameObject != null)

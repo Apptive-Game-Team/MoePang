@@ -714,6 +714,7 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (isDying || isDamaging) return;
 
+        SoundManager.Instance.PlaySFX(SFX.SFX8_Hit);
         StartCoroutine(PlayHitEffect(hitSprite));
 
         float nextHp = currentHp - damage;

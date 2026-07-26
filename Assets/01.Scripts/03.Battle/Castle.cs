@@ -62,6 +62,7 @@ public class Castle : MonoBehaviour, IDamageable
     #region 피격 & 피격 연출
     public void TakeDamage(float damage, Sprite hitSprite = null)
     {
+        SoundManager.Instance.PlaySFX(SFX.SFX8_Hit);
         currentHp -= damage;
         StartCoroutine(PlayHitEffect(hitSprite));
 

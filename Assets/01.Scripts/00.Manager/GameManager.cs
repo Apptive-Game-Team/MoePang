@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using _01.Scripts._11.HabitatMode;
+using _01.Scripts._08.Utility;
+using UnityEngine.SceneManagement;
 
 namespace _01.Scripts._00.Manager
 {
@@ -329,10 +331,60 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.LoadData(itemData, "ItemData");
             SaveLoadManager.Instance.LoadData(comboData, "ComboData");
             SaveLoadManager.Instance.LoadData(gameData, "GameData");
-            
-            SoundManager.Instance.StartBGMRandomLoop(
-                new[] { BGM.BGM1_Title1, BGM.BGM1_Title2 }
-            );
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            PlayBGMForScene(SceneManager.GetActiveScene().name);
+        }
+
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            PlayBGMForScene(scene.name);
+        }
+
+        private void PlayBGMForScene(string sceneName)
+        {
+            if (sceneName == SceneInfo.GetSceneName(SceneType.MatchAndBattle))
+            {
+                PlayBattleBGM();
+                return;
+            }
+
+            if (sceneName == SceneInfo.GetSceneName(SceneType.HabitatModeSelect))
+            {
+                SoundManager.Instance.PlayHabitatModeSelectBGM();
+                return;
+            }
+
+            SoundManager.Instance.PlayTitleAndLobbyBGM();
+        }
+
+        private void PlayBattleBGM()
+        {
+            if (HabitatModeManager.Instance != null &&
+                HabitatModeManager.Instance.IsHabitatBattle)
+            {
+                SoundManager.Instance.PlayHabitatModeBGM();
+                return;
+            }
+
+            if (StageManager.Instance.IsHighHurdleStage())
+            {
+                SoundManager.Instance.PlayHighHurdleStageBGM();
+                return;
+            }
+
+            if (StageManager.Instance.IsMiddleHurdleStage())
+            {
+                SoundManager.Instance.PlayMiddleHurdleStageBGM();
+                return;
+            }
+
+            SoundManager.Instance.PlayInGameDefaultBGM();
         }
         
         public static void DictionaryToLists<TKey, TValue>(Dictionary<TKey, TValue> dict, out List<TKey> keys, out List<TValue> values)

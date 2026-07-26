@@ -944,6 +944,7 @@ namespace _01.Scripts._01.ThreeMatch
                     sp2.isBlocked = true;
                 }
                 
+                SoundManager.Instance.PlaySFX(SFX.SFX3_CannotMove);
                 _puzzles[x1, y1].FailedSwapEffect(x2 - x1, y2 - y1, 
                     Vector2.Distance(_puzzles[x1, y1].transform.position, _puzzles[x2, y2].transform.position) / 2);
                 return;
@@ -1256,6 +1257,7 @@ namespace _01.Scripts._01.ThreeMatch
                     if (_puzzles[pos.x, pos.y] != null)
                     {
                         _puzzles[pos.x, pos.y].puzzleState = PuzzleState.Matching;
+                        SoundManager.Instance.PlaySFX(SFX.SFX5_TilePop);
                     }
                 }
             }
@@ -1510,6 +1512,14 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             List<Vector2Int> targets = GetExplosionRange(curX, curY, type);
+            if (type == SpecialPuzzleType.CircleBomb)
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX4_CircleTile);
+            }
+            if (type == SpecialPuzzleType.RowBomb || type == SpecialPuzzleType.ColumnBomb)
+            {
+                SoundManager.Instance.PlaySFX(SFX.SFX9_LineTile);
+            }
             
             GameObject self = _puzzles[curX, curY].gameObject;
             Vector2 center = new (self.transform.position.x, self.transform.position.y);
@@ -2150,8 +2160,9 @@ namespace _01.Scripts._01.ThreeMatch
             seq.OnComplete(() =>
             {
                 GoldManager.Instance.AdjustGold(1);
+                SoundManager.Instance.PlaySFX(SFX.SFX7_ConsumGoldTile);
                 goldUI.AddGoldEffect();
-                 
+                  
                 Destroy(tr.gameObject);
             });
         }

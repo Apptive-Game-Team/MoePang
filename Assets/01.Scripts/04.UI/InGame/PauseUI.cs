@@ -6,7 +6,7 @@ namespace _01.Scripts._04.UI.InGame
     {
         public void ShowPauseUI(bool show)
         {
-            SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             Time.timeScale = show ? 0 : 1;
             gameObject.SetActive(show);
         }

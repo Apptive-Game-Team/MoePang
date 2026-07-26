@@ -59,6 +59,7 @@ namespace _01.Scripts._06.Shop
                     _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
                     {
                         GoldManager.Instance.AdjustGold(-cost);
+                        SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
                         
                         _castleLevel++;
                         GameManager.Instance.castleData.castleLevel = _castleLevel;
@@ -75,14 +76,14 @@ namespace _01.Scripts._06.Shop
                         _upgradePopup.SetActive(false);    
                     });
                     
-                    SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                    SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                     _upgradePopup.SetActive(true);
                 }
             });
 
             _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
-                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
         }

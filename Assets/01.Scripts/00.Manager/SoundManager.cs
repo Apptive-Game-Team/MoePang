@@ -10,7 +10,13 @@ public enum BGM
     //규칙 : BGM0_Default
     BGM0_Default,
     BGM1_Title1,
-    BGM1_Title2,
+    BGM2_Title2,
+    BGM3_InGameDefault,
+    BGM4_HurdleStage,
+    BGM5_HurdleStage2,
+    BGM6_StaveHomeMode,
+    BGM7_StaveHomeMode2,
+    BGM8_StaveHomeSelect,
 
     Count //Count체크용 enum, 삭제 금지
 }
@@ -21,6 +27,21 @@ public enum SFX
     //규칙 : SFX0_Default
     SFX0_Default,
     SFX1_ButtonClick,
+    SFX2_ButtonClick,
+    SFX3_CannotMove,
+    SFX4_CircleTile,
+    SFX5_TilePop,
+    SFX6_Combo,
+    SFX7_ConsumGoldTile,
+    SFX8_Hit,
+    SFX9_LineTile,
+    SFX10_NegativeSound,
+    SFX11_PositiveSound,
+    SFX12_PurChase,
+    SFX13_SlotMachine,
+    SFX14_StageClear,
+    SFX15_StageFailed,
+    SFX16_FillStack,
 
     Count //Count체크용 enum, 삭제 금지
 }
@@ -36,12 +57,22 @@ public class SoundManager : SingletonObject<SoundManager>
 {
     public AudioMixer Mixer { get; private set; }
 
+    [Header("BGM Groups")]
+    [SerializeField] private BGM[] titleAndLobbyBGMs = { BGM.BGM1_Title1, BGM.BGM2_Title2 };
+    [SerializeField] private BGM[] inGameDefaultBGMs = { BGM.BGM3_InGameDefault };
+    [SerializeField] private BGM[] middleHurdleStageBGMs = { BGM.BGM4_HurdleStage };
+    [SerializeField] private BGM[] highHurdleStageBGMs = { BGM.BGM5_HurdleStage2 };
+    [SerializeField] private BGM[] habitatModeBGMs = { BGM.BGM6_StaveHomeMode, BGM.BGM7_StaveHomeMode2 };
+    [SerializeField] private BGM[] habitatModeSelectBGMs = { BGM.BGM8_StaveHomeSelect };
+
     [Header("BGM")]
     List<AudioClip> bgmClips = new List<AudioClip>();
     float bgmVolume = 0.5f;
     AudioSource bgmPlayer;
     AudioSource bgmBuffer;
     bool isBGMLooping = false;
+    Coroutine bgmRandomLoopCoroutine;
+    BGM[] currentBGMGroup;
 
     [Header("SFX")]
     List<AudioClip> sfxClips = new List<AudioClip>();
@@ -173,6 +204,87 @@ public class SoundManager : SingletonObject<SoundManager>
     // BGM을 실행
     public void PlayBgm(BGM bgm, bool isLoop)
     {
+        currentBGMGroup = null;
+        StopBGMRandomLoop();
+        PlayBgmInternal(bgm, isLoop);
+    }
+
+    public void PlayTitleAndLobbyBGM()
+    {
+        PlayBGMGroupLoop(titleAndLobbyBGMs);
+    }
+
+    public void PlayInGameDefaultBGM()
+    {
+        PlayBGMGroupLoop(inGameDefaultBGMs);
+    }
+
+    public void PlayMiddleHurdleStageBGM()
+    {
+        PlayBGMGroupLoop(middleHurdleStageBGMs);
+    }
+
+    public void PlayHighHurdleStageBGM()
+    {
+        PlayBGMGroupLoop(highHurdleStageBGMs);
+    }
+
+    public void PlayHabitatModeBGM()
+    {
+        PlayBGMGroupLoop(habitatModeBGMs);
+    }
+
+    public void PlayHabitatModeSelectBGM()
+    {
+        PlayBGMGroupLoop(habitatModeSelectBGMs);
+    }
+
+    private void PlayBGMGroupLoop(BGM[] bgmList)
+    {
+        if (bgmList == null || bgmList.Length == 0)
+        {
+            Debug.LogWarning("PlayBGMGroupLoop: BGM 리스트가 비어 있습니다.");
+            return;
+        }
+
+        if (IsSameBGMGroup(bgmList) && (bgmPlayer.isPlaying || isBGMLooping))
+        {
+            return;
+        }
+
+        if (bgmList.Length == 1)
+        {
+            StopBGMRandomLoop();
+            currentBGMGroup = bgmList;
+            PlayBgmInternal(bgmList[0], true);
+            return;
+        }
+
+        currentBGMGroup = bgmList;
+        StartBGMRandomLoop(bgmList);
+    }
+
+    private bool IsSameBGMGroup(BGM[] bgmList)
+    {
+        if (currentBGMGroup == null || bgmList == null ||
+            currentBGMGroup.Length != bgmList.Length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < bgmList.Length; i++)
+        {
+            if (currentBGMGroup[i] != bgmList[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void PlayBgmInternal(BGM bgm, bool isLoop)
+    {
         if (bgmPlayer.isPlaying)
         {
             bgmBuffer.clip = bgmClips[(int)bgm];
@@ -200,6 +312,9 @@ public class SoundManager : SingletonObject<SoundManager>
     // Rnd으로 플레이
     public void PlayRndBgm(BGM[] bgmList, bool isLoop)
     {
+        currentBGMGroup = null;
+        StopBGMRandomLoop();
+
         if (bgmList == null || bgmList.Length == 0)
         {
             Debug.LogWarning("RndPlayBgm: BGM 리스트가 비어 있습니다.");
@@ -214,21 +329,21 @@ public class SoundManager : SingletonObject<SoundManager>
     }
     public void StartBGMRandomLoop(BGM[] bgmList)
     {
-        if (isBGMLooping) return;
+        StopBGMRandomLoop();
 
-        StopCoroutine("BGMRandomLoopByList");
-        StartCoroutine(BGMRandomLoopByList(bgmList));
+        bgmRandomLoopCoroutine = StartCoroutine(BGMRandomLoopByList(bgmList, true));
         isBGMLooping = true;
     }
 
-    IEnumerator BGMRandomLoopByList(BGM[] bgmList)
+    IEnumerator BGMRandomLoopByList(BGM[] bgmList, bool playImmediately = false)
     {
         while (true)
         {
-            if (!bgmPlayer.isPlaying)
+            if (playImmediately || !bgmPlayer.isPlaying)
             {
                 BGM randomBgm = bgmList[UnityEngine.Random.Range(0, bgmList.Length)];
-                PlayBgm(randomBgm, false);
+                PlayBgmInternal(randomBgm, false);
+                playImmediately = false;
             }
 
             yield return new WaitForSeconds(1f);
@@ -238,7 +353,20 @@ public class SoundManager : SingletonObject<SoundManager>
     public void StopBgm()
     {
         StartCoroutine(SoundSmooth(bgmPlayer, true));
+        currentBGMGroup = null;
+        StopBGMRandomLoop();
+    }
+
+    private void StopBGMRandomLoop()
+    {
+        if (bgmRandomLoopCoroutine != null)
+        {
+            StopCoroutine(bgmRandomLoopCoroutine);
+            bgmRandomLoopCoroutine = null;
+        }
+
         StopCoroutine("BGMRandomLoop");
+        StopCoroutine("BGMRandomLoopByList");
         isBGMLooping = false;
     }
     public void SetBGMPicth(float val)
@@ -307,9 +435,10 @@ public class SoundManager : SingletonObject<SoundManager>
     // BGM을 실행하고 끝났을시 랜덤으로 다시 돌림
     public void StartBGMRandomLoop(int num)
     {
-        if (isBGMLooping) return;
-        StopCoroutine("BGMRandomLoop");
-        StartCoroutine("BGMRandomLoop", num);
+        currentBGMGroup = null;
+        StopBGMRandomLoop();
+
+        bgmRandomLoopCoroutine = StartCoroutine(BGMRandomLoop(num));
         isBGMLooping = true;
     }
 
@@ -379,7 +508,7 @@ public class SoundManager : SingletonObject<SoundManager>
         {
             if (!bgmPlayer.isPlaying)
             {
-                PlayBgm((BGM)temp[index], false);
+                PlayBgmInternal((BGM)temp[index], false);
                 index++;
 
                 if (index >= temp.Length)

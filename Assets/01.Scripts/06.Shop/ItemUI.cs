@@ -32,13 +32,14 @@ namespace _01.Scripts._06.Shop
                 {
                     if (GoldManager.Instance.TrySpendGold(info.price))
                     {
-                        SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                         _upgradePopup.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = info.price + "G";
                         _upgradePopup.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "구매하시겠습니까?";
                         _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.RemoveAllListeners();
                         _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
                         {
                             GoldManager.Instance.AdjustGold(-info.price);
+                            SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
 
                             GameManager.Instance.itemData.ItemAmounts[item.type]++;
                             GameManager.Instance.SaveItemData();
@@ -55,7 +56,7 @@ namespace _01.Scripts._06.Shop
             
             _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
-                SoundManager.Instance.PlaySFX(SFX.SFX1_ButtonClick);
+                SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
         }

@@ -108,6 +108,26 @@ public class StageManager : SingletonObject<StageManager>
         return CurrentStage < MaxStage;
     }
 
+    public bool IsMiddleHurdleStage()
+    {
+        return IsMiddleHurdleStage(CurrentStage);
+    }
+
+    public bool IsHighHurdleStage()
+    {
+        return IsHighHurdleStage(CurrentStage);
+    }
+
+    public static bool IsMiddleHurdleStage(int stage)
+    {
+        return stage % 10 == 4;
+    }
+
+    public static bool IsHighHurdleStage(int stage)
+    {
+        return stage % 10 == 9;
+    }
+
     public void GameClear()
     {
         FindAnyObjectByType<GameClearUI>(FindObjectsInactive.Include).gameObject.SetActive(true);
