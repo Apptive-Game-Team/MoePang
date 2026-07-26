@@ -17,6 +17,7 @@ public class Castle : MonoBehaviour, IDamageable
     [Header("피격 연출")]
     [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] private int maxHitEffectCount = 5;
+    [SerializeField] private Vector3 hitEffectLocalScale = new Vector3(0.55f, 0.55f, 1f);
     [SerializeField] private float shakeStrength = 0.05f;
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float flashAlpha = 0.4f;
@@ -102,6 +103,7 @@ public class Castle : MonoBehaviour, IDamageable
             hitEffectPrefab.transform.parent
         );
         activeHitEffects.Add(hitEffect);
+        hitEffect.transform.localScale = hitEffectLocalScale;
         hitEffect.SetActive(true);
 
         var particleRenderer = hitEffect.GetComponent<ParticleSystemRenderer>();
