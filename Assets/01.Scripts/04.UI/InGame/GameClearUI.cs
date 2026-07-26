@@ -19,6 +19,7 @@ namespace _01.Scripts._04.UI.InGame
         protected override void OnEnable()
         {
             DepthOfField.active = true;
+            SoundManager.Instance.PlaySFX(SFX.SFX14_StageClear);
             
             // Save
             GameManager gameManager = GameManager.Instance;

@@ -84,6 +84,7 @@ namespace _01.Scripts._04.UI.MainScene
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
                         {
                             GoldManager.Instance.AdjustDia(-comboLevels[type] * 100);
+                            SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
                             combo.UpgradeCombo();
                             GameManager.Instance.SaveGoldData();
                             GameManager.Instance.SaveComboData();

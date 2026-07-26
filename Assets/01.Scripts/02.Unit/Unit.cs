@@ -311,6 +311,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected virtual IEnumerator AttackCoroutine()
     {
         isAttacking = true;
+        SoundManager.Instance.PlaySFX(SFX.SFX5_Attack);
 
         float segment = 1f / attackSpeed / 3f;
 
@@ -714,6 +715,7 @@ public class Unit : MonoBehaviour, IDamageable
     {
         if (isDying || isDamaging) return;
 
+        SoundManager.Instance.PlaySFX(SFX.SFX8_Hit);
         StartCoroutine(PlayHitEffect());
 
         float nextHp = currentHp - damage;

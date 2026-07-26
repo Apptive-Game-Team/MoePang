@@ -134,6 +134,7 @@ public class ShopManager : MonoBehaviour
             {
                 SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 GoldManager.Instance.AdjustGold(-unitData.UnlockCost);
+                SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
                 HabitatManager.Instance.Unlock(unitData);
                 refreshAction.Invoke();
                 if (currentSelected != null)
@@ -212,6 +213,7 @@ public class ShopManager : MonoBehaviour
         }
 
         GoldManager.Instance.AdjustGold(-cost);
+        SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
 
         if (isUnlocked)
         {

@@ -8,6 +8,7 @@ namespace _01.Scripts._04.UI.InGame
         protected override void OnEnable()
         {
             DepthOfField.active = true;
+            SoundManager.Instance.PlaySFX(SFX.SFX15_StageFailed);
             
             StageManager.Instance.StopStage();
             Time.timeScale = 0;

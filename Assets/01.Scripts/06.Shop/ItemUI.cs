@@ -39,6 +39,7 @@ namespace _01.Scripts._06.Shop
                         _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
                         {
                             GoldManager.Instance.AdjustGold(-info.price);
+                            SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
 
                             GameManager.Instance.itemData.ItemAmounts[item.type]++;
                             GameManager.Instance.SaveItemData();

@@ -1363,6 +1363,7 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         spawnStackManager.AddStack(group.habitat, 1);
                         StageManager.Instance.SetUsedTile(1);
+                        SoundManager.Instance.PlaySFX(SFX.SFX16_TilePop);
                         Destroy(targetPuzzle.gameObject);
                     }));
                 }
@@ -1529,6 +1530,7 @@ namespace _01.Scripts._01.ThreeMatch
                 .OnComplete(() =>
                 {
                     StageManager.Instance.SetUsedTile(1);
+                    SoundManager.Instance.PlaySFX(SFX.SFX16_TilePop);
                     Destroy(self);
                 })
                 .WaitForCompletion();
@@ -1774,12 +1776,14 @@ namespace _01.Scripts._01.ThreeMatch
                     {
                         spawnStackManager.AddStack(no.habitat, 1);
                         StageManager.Instance.SetUsedTile(1);
+                        SoundManager.Instance.PlaySFX(SFX.SFX16_TilePop);
                         Destroy(targetPuzzle.gameObject);
                     });
             }
             else
             {
                 StageManager.Instance.SetUsedTile(1);
+                SoundManager.Instance.PlaySFX(SFX.SFX16_TilePop);
                 Destroy(targetPuzzle.gameObject);
             }
         }
@@ -2159,8 +2163,9 @@ namespace _01.Scripts._01.ThreeMatch
             seq.OnComplete(() =>
             {
                 GoldManager.Instance.AdjustGold(1);
+                SoundManager.Instance.PlaySFX(SFX.SFX7_ConsumGoldTile);
                 goldUI.AddGoldEffect();
-                 
+                  
                 Destroy(tr.gameObject);
             });
         }

@@ -59,6 +59,7 @@ namespace _01.Scripts._06.Shop
                     _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
                     {
                         GoldManager.Instance.AdjustGold(-cost);
+                        SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
                         
                         _castleLevel++;
                         GameManager.Instance.castleData.castleLevel = _castleLevel;

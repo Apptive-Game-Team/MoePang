@@ -76,6 +76,7 @@ namespace _01.Scripts._10.System.Constraint
         private IEnumerator StartRoulette()
         {
             rouletteObject.SetActive(true);
+            SoundManager.Instance.PlaySFX(SFX.SFX13_SlotMachine);
             Time.timeScale = 0f;
             yield return _constraintRouletteSystem.StartRoulette(ApplyMiddleConstraint);
             yield return new WaitForSecondsRealtime(1f);
