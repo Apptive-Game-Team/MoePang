@@ -311,7 +311,6 @@ public class Unit : MonoBehaviour, IDamageable
     protected virtual IEnumerator AttackCoroutine()
     {
         isAttacking = true;
-        SoundManager.Instance.PlaySFX(SFX.SFX5_Attack);
 
         float segment = 1f / attackSpeed / 3f;
 

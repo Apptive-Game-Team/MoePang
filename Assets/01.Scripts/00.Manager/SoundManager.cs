@@ -30,7 +30,7 @@ public enum SFX
     SFX2_ButtonClick,
     SFX3_CannotMove,
     SFX4_CircleTile,
-    SFX5_Attack,
+    SFX5_TilePop,
     SFX6_Combo,
     SFX7_ConsumGoldTile,
     SFX8_Hit,
