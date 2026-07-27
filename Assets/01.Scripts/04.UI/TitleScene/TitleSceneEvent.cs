@@ -17,7 +17,7 @@ public class TitleSceneEvent : MonoBehaviour
         float t = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
         textComponent.color = Color.Lerp(Color.black, Color.gray, t);
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonUp(0))
         {
             MoveToNextScene();
         }
