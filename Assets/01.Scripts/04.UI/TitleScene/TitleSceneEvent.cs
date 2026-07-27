@@ -12,6 +12,11 @@ public class TitleSceneEvent : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textComponent;
     [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
 
+    private void Awake()
+    {
+        Application.targetFrameRate = 65;
+    }
+
     private void Update()
     {
         float t = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
