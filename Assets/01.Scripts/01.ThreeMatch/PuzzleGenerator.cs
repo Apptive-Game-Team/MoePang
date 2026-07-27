@@ -232,7 +232,7 @@ namespace _01.Scripts._01.ThreeMatch
                     
                     if (isReset)
                     {
-                        po.transform.position = targetPos;
+                        po.transform.localPosition = targetPos;
                         po.puzzleState = PuzzleState.Idle;
                         po.Init(this, i, j);
                         continue;
@@ -646,7 +646,7 @@ namespace _01.Scripts._01.ThreeMatch
                     GameObject rect = Instantiate(resetRectanglePrefab, puzzleFrame);
 
                     rect.name = $"ResetRectangle({i + 1},{j + 1})";
-                    rect.transform.position = CalculatePos(i, j);
+                    rect.transform.localPosition = CalculatePos(i, j);
                     
                     resetRectangles.Add(rect);
                 }
@@ -663,7 +663,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 GameObject rect = resetRectangles[i];
 
-                startPositions[i] = rect.transform.position;
+                startPositions[i] = rect.transform.localPosition;
                 startScales[i] = rect.transform.localScale;
 
                 float targetScale = Random.Range(resetScaleRange.x, resetScaleRange.y);
@@ -701,7 +701,7 @@ namespace _01.Scripts._01.ThreeMatch
                         continue;
                     }
 
-                    rect.transform.position = Vector3.Lerp(startPositions[i], targetPositions[i], t);
+                    rect.transform.localPosition = Vector3.Lerp(startPositions[i], targetPositions[i], t);
                     rect.transform.localScale = Vector3.Lerp(startScales[i], targetScales[i], t);
                 }
 
@@ -743,12 +743,8 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < y; j++)
                 {
-                    GameObject effect = Instantiate(
-                        resetSpawnEffectPrefab,
-                        CalculatePos(i, j),
-                        Quaternion.identity,
-                        puzzleFrame
-                    );
+                    GameObject effect = Instantiate(resetSpawnEffectPrefab, puzzleFrame);
+                    effect.transform.localPosition = CalculatePos(i, j); 
 
                     ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>(true);
                     foreach (ParticleSystem particle in particles)
