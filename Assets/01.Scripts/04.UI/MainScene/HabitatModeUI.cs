@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._08.Utility;
 using _01.Scripts._11.HabitatMode;
 using System;
@@ -106,6 +107,7 @@ namespace _01.Scripts._04.UI.MainScene
         private void OnHabitatPlaySceneLoaded(Scene scene, LoadSceneMode mode)
         {
             StageManager.Instance.StartStage();
+            GameManager.Instance.PlayBattleBGM();
             SceneManager.sceneLoaded -= OnHabitatPlaySceneLoaded;
         }
 

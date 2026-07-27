@@ -39,6 +39,7 @@ namespace _01.Scripts._04.UI.InGame
                 }
             }
             StageManager.Instance.StartStage();
+            GameManager.Instance.PlayBattleBGM();
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }
 
@@ -46,6 +47,7 @@ namespace _01.Scripts._04.UI.InGame
         {
             SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
             StageManager.Instance.StartStage();
+            GameManager.Instance.PlayBattleBGM();
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }
     }
