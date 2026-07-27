@@ -10,11 +10,6 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            if (GameManager.Instance.playData.MaxStages[StageType.Forest] < 5)
-            {
-                return;
-            }
-            
             Debug.Log("Forest Combo Applied");
             
             int level = GameManager.Instance.comboData.ComboLevels[info.comboType];

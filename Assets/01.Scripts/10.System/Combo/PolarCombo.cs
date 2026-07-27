@@ -8,11 +8,6 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            if (GameManager.Instance.playData.MaxStages[StageType.Polar] < 5)
-            {
-                return;
-            }
-            
             Debug.Log("Polar Combo Applied");
             
             float multiplier = 0.9f - GameManager.Instance.comboData.ComboLevels[info.comboType] * 0.025f;

@@ -65,7 +65,7 @@ namespace _01.Scripts._04.UI.InGame
             
             if (show)
             {
-                _moveInTween = transform.DOMove(_originPos - new Vector3(1, 0, 0), 0.15f)
+                _moveInTween = transform.DOMove(_originPos - new Vector3(1.5f, 0, 0), 0.15f)
                     .SetEase(Ease.OutBack)
                     .OnComplete(() =>
                     {
@@ -74,7 +74,7 @@ namespace _01.Scripts._04.UI.InGame
             }
             else
             {
-                transform.DOMove(_originPos + new Vector3(1, 0, 0), 0.15f)
+                transform.DOMove(_originPos + new Vector3(1.5f, 0, 0), 0.15f)
                     .SetEase(Ease.OutBack);
             }
         }

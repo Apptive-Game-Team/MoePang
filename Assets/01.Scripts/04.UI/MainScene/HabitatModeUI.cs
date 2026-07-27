@@ -33,7 +33,41 @@ namespace _01.Scripts._04.UI.MainScene
 
         private void OnEnable()
         {
-            SelectMode(HabitatMode.MeadowMode);
+            HabitatMode mode = HabitatMode.MeadowMode;
+            selectedMode = mode;
+            HabitatModeManager.Instance.HabitatMode = mode;
+
+            if (modeTitleText != null)
+            {
+                modeTitleText.text = GetModeTitleText(mode);
+            }
+
+            if (modeDescriptionText != null)
+            {
+                modeDescriptionText.text = GetModeDescriptionText(mode);
+            }
+
+            if (clearRewardText != null)
+            {
+                clearRewardText.text = GetModeClearRewardText(mode);
+            }
+
+            if (currentBonusTitle != null)
+            {
+                currentBonusTitle.text = GetModeCurrentBonusTitle(mode);
+            }
+
+            if (currentBonusText != null)
+            {
+                currentBonusText.text = GetModeCurrentBonusText(mode);
+            }
+            
+            StageManager.Instance.SetHabitatStage(
+                selectedMode,
+                StageManager.Instance.GetHabitatStage(selectedMode)
+            );
+            
+            RefreshStageUI();
         }
 
         public void SelectMode(int modeIndex)

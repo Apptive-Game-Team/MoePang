@@ -9,11 +9,6 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            if (GameManager.Instance.playData.MaxStages[StageType.Desert] < 5)
-            {
-                return;
-            }
-            
             Debug.Log("Desert Combo Applied");
             
             for (int i = 0; i < 1 + ((GameManager.Instance.comboData.ComboLevels[info.comboType] - 1) / 2); i++)

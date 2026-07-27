@@ -10,11 +10,6 @@ namespace _01.Scripts._10.System.Combo
     {
         public override void TriggerComboEffect(ComboContext context)
         {
-            if (GameManager.Instance.playData.MaxStages[StageType.Meadow] < 5)
-            {
-                return;
-            }
-            
             Debug.Log("Meadow Combo Applied");
             
             var types = Enum.GetValues(typeof(Habitat));
