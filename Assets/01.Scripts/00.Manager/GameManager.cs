@@ -363,7 +363,7 @@ namespace _01.Scripts._00.Manager
             SoundManager.Instance.PlayTitleAndLobbyBGM();
         }
 
-        private void PlayBattleBGM()
+        public void PlayBattleBGM()
         {
             if (HabitatModeManager.Instance != null &&
                 HabitatModeManager.Instance.IsHabitatBattle)

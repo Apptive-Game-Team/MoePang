@@ -21,13 +21,14 @@ namespace _01.Scripts._04.UI.InGame
         private bool _isDragging;
         private Vector3 _lastMousePos;
         private float _targetZoom;
-        private float _groundYAnchor;
+        private float _cameraBottomY;
+        private bool _canDrag;
 
         private void Awake()
         {
             _battleCam = GetComponent<Camera>();
             _targetZoom = _battleCam.orthographicSize;
-            _groundYAnchor = battleBackgroundSr.bounds.min.y;
+            _cameraBottomY = _battleCam.transform.position.y - _battleCam.orthographicSize;
         }
 
         private void Update()
@@ -94,7 +95,7 @@ namespace _01.Scripts._04.UI.InGame
             transform.position += new Vector3(difference.x, difference.y, 0);
             
             Vector3 pos = transform.position;
-            pos.y = _groundYAnchor;
+            pos.y = _cameraBottomY + _battleCam.orthographicSize;
             transform.position = pos;
 
             ClampCameraInsideBackground();
@@ -118,30 +119,29 @@ namespace _01.Scripts._04.UI.InGame
             if (Input.GetMouseButtonDown(0))
             {
                 _isDragging = true;
+                _canDrag = IsPointerInsideBattleCamera(Input.mousePosition);
                 _lastMousePos = Input.mousePosition;
             }
 
             if (Input.GetMouseButtonUp(0))
             {
                 _isDragging = false;
+                _canDrag = false;
             }
             
-            if (!IsPointerInsideBattleCamera(Input.mousePosition))
+            if (!_isDragging || !_canDrag)
             {
                 return;
             }
+            
+            Vector3 currentMousePos = Input.mousePosition;
+            Vector3 delta = currentMousePos - _lastMousePos;
+            Vector3 moveDirection = new Vector3(-delta.x, 0, 0) * (dragSpeed * 0.01f * _battleCam.orthographicSize);
+            
+            transform.position += moveDirection;
+            _lastMousePos = currentMousePos;
 
-            if (_isDragging)
-            {
-                Vector3 currentMousePos = Input.mousePosition;
-                Vector3 delta = currentMousePos - _lastMousePos;
-                Vector3 moveDirection = new Vector3(-delta.x, 0, 0) * (dragSpeed * 0.01f * _battleCam.orthographicSize);
-                
-                transform.position += moveDirection;
-                _lastMousePos = currentMousePos;
-
-                ClampCameraInsideBackground();
-            }
+            ClampCameraInsideBackground();
         }
         
         private void ClampCameraInsideBackground()

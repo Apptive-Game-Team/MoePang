@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._08.Utility;
 using _01.Scripts._11.HabitatMode;
 using TMPro;
@@ -35,6 +36,7 @@ public class MainButtonManager : MonoBehaviour
     private void OnPlaySceneLoaded(Scene scene, LoadSceneMode mode)
     {
         StageManager.Instance.StartStage();
+        GameManager.Instance.PlayBattleBGM();
         
         SceneManager.sceneLoaded -= OnPlaySceneLoaded;
     }

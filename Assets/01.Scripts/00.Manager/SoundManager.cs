@@ -73,6 +73,7 @@ public class SoundManager : SingletonObject<SoundManager>
     bool isBGMLooping = false;
     Coroutine bgmRandomLoopCoroutine;
     BGM[] currentBGMGroup;
+    int bgmTransitionVersion;
 
     [Header("SFX")]
     List<AudioClip> sfxClips = new List<AudioClip>();
@@ -285,13 +286,15 @@ public class SoundManager : SingletonObject<SoundManager>
 
     private void PlayBgmInternal(BGM bgm, bool isLoop)
     {
+        int transitionVersion = ++bgmTransitionVersion;
+
         if (bgmPlayer.isPlaying)
         {
             bgmBuffer.clip = bgmClips[(int)bgm];
             bgmBuffer.Play();
             bgmBuffer.volume = bgmVolume;
-            StartCoroutine(SoundSmooth(bgmPlayer, true));
-            StartCoroutine(SoundSmooth(bgmBuffer, false));
+            StartCoroutine(SoundSmooth(bgmPlayer, true, transitionVersion));
+            StartCoroutine(SoundSmooth(bgmBuffer, false, transitionVersion));
 
             var temp = bgmBuffer;
             bgmBuffer = bgmPlayer;
@@ -305,7 +308,7 @@ public class SoundManager : SingletonObject<SoundManager>
             bgmPlayer.clip = bgmClips[(int)bgm];
             bgmPlayer.volume = bgmVolume;
             bgmPlayer.Play();
-            StartCoroutine(SoundSmooth(bgmPlayer, false));
+            StartCoroutine(SoundSmooth(bgmPlayer, false, transitionVersion));
             bgmPlayer.loop = isLoop;
         }
     }
@@ -352,7 +355,8 @@ public class SoundManager : SingletonObject<SoundManager>
     // BGM을 멈춤
     public void StopBgm()
     {
-        StartCoroutine(SoundSmooth(bgmPlayer, true));
+        int transitionVersion = ++bgmTransitionVersion;
+        StartCoroutine(SoundSmooth(bgmPlayer, true, transitionVersion));
         currentBGMGroup = null;
         StopBGMRandomLoop();
     }
@@ -456,7 +460,7 @@ public class SoundManager : SingletonObject<SoundManager>
     }
 
     // 사운드의 크기를 서서히 줄이거나 늘릴때 사용 
-    IEnumerator SoundSmooth(AudioSource audio, bool isDown)
+    IEnumerator SoundSmooth(AudioSource audio, bool isDown, int transitionVersion = -1)
     {
         float startvolume = audio.volume;
         float start = 0;
@@ -472,12 +476,27 @@ public class SoundManager : SingletonObject<SoundManager>
             num = audio.volume / 10;
         }
 
+        if (transitionVersion != -1 && transitionVersion != bgmTransitionVersion)
+        {
+            yield break;
+        }
+
         audio.volume = start;
 
         for (int i = 0; i < 10; i++)
         {
+            if (transitionVersion != -1 && transitionVersion != bgmTransitionVersion)
+            {
+                yield break;
+            }
+
             audio.volume += num;
             yield return new WaitForSeconds(0.095f);
+        }
+
+        if (transitionVersion != -1 && transitionVersion != bgmTransitionVersion)
+        {
+            yield break;
         }
 
         if (isDown)

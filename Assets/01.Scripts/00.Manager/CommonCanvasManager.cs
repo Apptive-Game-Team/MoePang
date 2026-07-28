@@ -107,7 +107,14 @@ namespace _01.Scripts._00.Manager
 
         private void UpdateButtons()
         {
-            _comboButton.interactable = GameManager.Instance.playData.MaxStages.Any(stage => stage.Value >= 5);
+            _comboButton.interactable = 
+                GameManager.Instance.playData.MaxStages.
+                    Any(stage => 
+                        stage.Key != StageType.Normal && stage.Value >= 5);
+            _habitatModeButton.interactable = 
+                GameManager.Instance.playData.MaxStages.
+                    Any(stage => 
+                        stage is { Key: StageType.Normal, Value: >= 50 });
         }
     }
 }

@@ -62,6 +62,11 @@ namespace _01.Scripts._10.System.Combo
                 return;
             }
 
+            if (GameManager.Instance.playData.MaxStages[(StageType)(GameManager.Instance.comboData.comboSequence[_continuousComboCount - 2] + 1)] < 5)
+            {
+                return;
+            }
+            
             SoundManager.Instance.PlaySFX(SFX.SFX6_Combo);
             combos.First(c => c.info.comboType == GameManager.Instance.comboData.comboSequence[_continuousComboCount - 2]).TriggerComboEffect(_context);
         }
