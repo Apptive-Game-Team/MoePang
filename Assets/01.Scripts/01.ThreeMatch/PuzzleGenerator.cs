@@ -4,6 +4,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -32,6 +33,7 @@ namespace _01.Scripts._01.ThreeMatch
         DeActivated,
         Fixed,
         ForcedRowColumn,
+        ChangingHabitat,
     }
     
     public class PuzzleGenerator : MonoBehaviour
@@ -472,7 +474,7 @@ namespace _01.Scripts._01.ThreeMatch
             // (obstacle or normal) <-> (obstacle or normal)
             int t1 = -1, t2 = -1;
             
-            if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn } op1)
+            if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn or ObstaclePuzzleType.ChangingHabitat} op1)
             {
                 t1 = (int)op1.habitat;
             }
@@ -481,7 +483,7 @@ namespace _01.Scripts._01.ThreeMatch
                 t1 = p1.GetPuzzleSubType();
             }
 
-            if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn} op2)
+            if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn or ObstaclePuzzleType.ChangingHabitat} op2)
             {
                 t2 = (int)op2.habitat;
             }
@@ -517,7 +519,7 @@ namespace _01.Scripts._01.ThreeMatch
                     return true;
                 }
             }
-            else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn } op)
+            else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn or ObstaclePuzzleType.ChangingHabitat} op)
             {
                 if (op.habitat == type)
                 {
@@ -927,8 +929,8 @@ namespace _01.Scripts._01.ThreeMatch
                 return;
             }
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn } 
-                || _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn }
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn and not ObstaclePuzzleType.ChangingHabitat } 
+                || _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn and not ObstaclePuzzleType.ChangingHabitat}
                 || (maxSwapCount != -1 && _swapCount >= maxSwapCount)
                 || (isContinuousHabitatBanned && _lastMovedHabitat != null &&
                     ((_puzzles[x1, y1] is NormalPuzzleObject np1 && np1.GetPuzzleSubType() == (int)_lastMovedHabitat)
@@ -1143,6 +1145,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 ObstaclePuzzleObject { obstaclePuzzleType : ObstaclePuzzleType.Fixed } o => o.habitat,
                 ForcedRowColumnPuzzleObject f => f.habitat,
+                ChangingHabitatPuzzleObject c => c.habitat,
                 _ => (Habitat)_puzzles[startX, startY].GetPuzzleSubType()
             };
             group.habitat = habitat;
@@ -1328,6 +1331,10 @@ namespace _01.Scripts._01.ThreeMatch
                     if (_puzzles[pos.x, pos.y] is ForcedRowColumnPuzzleObject frc)
                     {
                         seq1.Join(frc.HighlightEffect());
+                    }
+                    if (_puzzles[pos.x, pos.y] is ChangingHabitatPuzzleObject ch)
+                    {
+                        seq1.Join(ch.HighlightEffect());
                     }
                 }
                 yield return seq1.WaitForCompletion();
@@ -1771,6 +1778,11 @@ namespace _01.Scripts._01.ThreeMatch
                 yield return frc.HighlightEffect().WaitForCompletion();
             }
             
+            if (po is ChangingHabitatPuzzleObject ch)
+            {
+                yield return ch.HighlightEffect().WaitForCompletion();
+            }
+            
             if (po is NormalPuzzleObject no2 && TryGetGoldTile(no2, out GameObject gold))
             {
                 GoldMoveEffect(gold);
@@ -1975,6 +1987,9 @@ namespace _01.Scripts._01.ThreeMatch
                     GameObject fp = Instantiate(forcedRowColumnDirectionPrefabs[(int)frc.forcedDirection], po.transform);
                     fp.transform.localPosition = new Vector3(0.2f, -0.2f, 0);
                     break;
+                case ChangingHabitatPuzzleObject ch:
+                    ch.InitialSetting(this, normalPuzzlePrefabs);
+                    break;
             }
             
             Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
@@ -2003,6 +2018,78 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             return ObstaclePuzzleType.DeActivated;
+        }
+        
+        // 서식지 변경 방해타일 용 서식지 확인 함수
+        private bool CanChangeHabitat(int r, int c, Habitat habitat)
+        {
+            int count = 1;
+            
+            for (int i = r - 1; i >= 0; i--)
+            {
+                if (CheckNormalType(_puzzles[i, c], habitat))
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            for (int i = r + 1; i < x; i++)
+            {
+                if (CheckNormalType(_puzzles[i, c], habitat))
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (count >= 3)
+            {
+                return false;
+            }
+            
+            count = 1;
+            
+            for (int j = c - 1; j >= 0; j--)
+            {
+                if (CheckNormalType(_puzzles[r, j], habitat))
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            for (int j = c + 1; j < y; j++)
+            {
+                if (CheckNormalType(_puzzles[r, j], habitat))
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return count < 3;
+        }
+        
+        // 서식지 변경 방해타일 용 서식지 확인 함수
+        public Habitat GetRandomSafeHabitat(int r, int c, Habitat currentHabitat)
+        {
+            List<Habitat> candidates = Enum.GetValues(typeof(Habitat))
+                .Cast<Habitat>()
+                .Where(h => h != currentHabitat && CanChangeHabitat(r, c, h))
+                .ToList();
+
+            return candidates.Count == 0 ? currentHabitat : candidates[Random.Range(0, candidates.Count)];
         }
 
         private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
