@@ -6824,8 +6824,10 @@ MonoBehaviour:
       pos: {x: 5, y: 4}
   obstacleWeights:
   - type: 0
-    weight: 30
+    weight: 2
   - type: 1
+    weight: 2
+  - type: 2
     weight: 70
   obstacleSpawnDelay: 2
   obstacleSpawnInterval: 10
@@ -6847,6 +6849,7 @@ MonoBehaviour:
   obstaclePuzzlePrefabs:
   - {fileID: 2857731521102525544, guid: 644aa0087807ddd4d91aef22c9df1c2e, type: 3}
   - {fileID: 2857731521102525544, guid: 3078c7d34f980f744bd38f948248da48, type: 3}
+  - {fileID: 2857731521102525544, guid: 9b2a10560c861bd45827295082b35dfb, type: 3}
   normalPuzzleImages:
   - {fileID: 21300000, guid: 9fe9ca50d6604164aa3fa5fa42a67872, type: 3}
   - {fileID: 21300000, guid: decc2a57a9fe79e4ba0fbb68764b08a9, type: 3}
@@ -6861,6 +6864,9 @@ MonoBehaviour:
   obstacleWarningPrefab: {fileID: 2444415622454818781, guid: ce1e179ce44092440bb8c160c2f8210e, type: 3}
   goldPrefab: {fileID: 4336401594318408796, guid: f9a06fa307e97174cba5cc3bc6a14784, type: 3}
   swapPrefab: {fileID: 4336401594318408796, guid: 8d8da2be2507e754e90ff703ef6e6adf, type: 3}
+  forcedRowColumnDirectionPrefabs:
+  - {fileID: 7511933255784740646, guid: 83ced48ea11e4174aa70d4c3f9765b19, type: 3}
+  - {fileID: 7511933255784740646, guid: 76104887144c6674785ac934662b7da3, type: 3}
   spawnStackManager: {fileID: 1195533400}
   isDebug: 0
   resetRectanglePrefab: {fileID: 1359563286638045153, guid: d45e9fa7bbd42b6498c2dea1964f0f67, type: 3}

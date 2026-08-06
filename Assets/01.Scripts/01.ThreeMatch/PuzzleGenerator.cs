@@ -31,6 +31,7 @@ namespace _01.Scripts._01.ThreeMatch
     {
         DeActivated,
         Fixed,
+        ForcedRowColumn,
     }
     
     public class PuzzleGenerator : MonoBehaviour
@@ -65,6 +66,7 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private GameObject obstacleWarningPrefab;
         [SerializeField] private GameObject goldPrefab;
         [SerializeField] private GameObject swapPrefab;
+        [SerializeField] private GameObject[] forcedRowColumnDirectionPrefabs;
         
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
@@ -467,10 +469,10 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
 
-            // (fixed or normal) <-> (fixed or normal)
+            // (obstacle or normal) <-> (obstacle or normal)
             int t1 = -1, t2 = -1;
             
-            if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op1)
+            if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn } op1)
             {
                 t1 = (int)op1.habitat;
             }
@@ -479,7 +481,7 @@ namespace _01.Scripts._01.ThreeMatch
                 t1 = p1.GetPuzzleSubType();
             }
 
-            if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op2)
+            if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn} op2)
             {
                 t2 = (int)op2.habitat;
             }
@@ -515,7 +517,7 @@ namespace _01.Scripts._01.ThreeMatch
                     return true;
                 }
             }
-            else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op)
+            else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn } op)
             {
                 if (op.habitat == type)
                 {
@@ -925,7 +927,8 @@ namespace _01.Scripts._01.ThreeMatch
                 return;
             }
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject || _puzzles[x2, y2] is ObstaclePuzzleObject
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn } 
+                || _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn }
                 || (maxSwapCount != -1 && _swapCount >= maxSwapCount)
                 || (isContinuousHabitatBanned && _lastMovedHabitat != null &&
                     ((_puzzles[x1, y1] is NormalPuzzleObject np1 && np1.GetPuzzleSubType() == (int)_lastMovedHabitat)
@@ -1136,8 +1139,12 @@ namespace _01.Scripts._01.ThreeMatch
         private MatchGroup GetMatchGroupBfs(int startX, int startY, bool[,] visited)
         {
             MatchGroup group = new();
-            Habitat habitat = _puzzles[startX, startY] is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op ?
-                op.habitat : (Habitat)_puzzles[startX, startY].GetPuzzleSubType();
+            Habitat habitat = _puzzles[startX, startY] switch
+            {
+                ObstaclePuzzleObject { obstaclePuzzleType : ObstaclePuzzleType.Fixed } o => o.habitat,
+                ForcedRowColumnPuzzleObject f => f.habitat,
+                _ => (Habitat)_puzzles[startX, startY].GetPuzzleSubType()
+            };
             group.habitat = habitat;
 
             Queue<Vector2Int> queue = new();
@@ -1155,9 +1162,19 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     int nx = curr.x + dir.x;
                     int ny = curr.y + dir.y;
-
+                    
+                    if (!CheckForcedDirection(_puzzles[curr.x, curr.y], dir))
+                    {
+                        continue;
+                    }
+                    
                     if (nx >= 0 && nx < x && ny >= 0 && ny < y && !visited[nx, ny])
                     {
+                        if (!CheckForcedDirection(_puzzles[nx, ny], dir))
+                        {
+                            continue;
+                        }
+                        
                         if (_puzzles[nx, ny] != null && _puzzles[nx, ny].isMatched && 
                             CheckNormalType(_puzzles[nx, ny], habitat))
                         {
@@ -1172,6 +1189,25 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
             return group;
+        }
+        
+        private bool CheckForcedDirection(PuzzleObject puzzle, Vector2Int dir)
+        {
+            if (puzzle is not ForcedRowColumnPuzzleObject forced)
+            {
+                return true;
+            }
+
+            return forced.forcedDirection switch
+            {
+                ForcedDirection.ForcedRow =>
+                    dir == Vector2Int.left || dir == Vector2Int.right,
+
+                ForcedDirection.ForcedColumn =>
+                    dir == Vector2Int.up || dir == Vector2Int.down,
+
+                _ => true
+            };
         }
         
         private void DetermineSpecialType(MatchGroup group)
@@ -1287,6 +1323,11 @@ namespace _01.Scripts._01.ThreeMatch
                         }
                         
                         seq1.Join(no.HighlightEffect());
+                    }
+
+                    if (_puzzles[pos.x, pos.y] is ForcedRowColumnPuzzleObject frc)
+                    {
+                        seq1.Join(frc.HighlightEffect());
                     }
                 }
                 yield return seq1.WaitForCompletion();
@@ -1724,6 +1765,11 @@ namespace _01.Scripts._01.ThreeMatch
                 }
                 yield return no1.HighlightEffect().WaitForCompletion();
             }
+
+            if (po is ForcedRowColumnPuzzleObject frc)
+            {
+                yield return frc.HighlightEffect().WaitForCompletion();
+            }
             
             if (po is NormalPuzzleObject no2 && TryGetGoldTile(no2, out GameObject gold))
             {
@@ -1920,7 +1966,14 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                     op.habitat = type;
-                    newPuzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    po.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    break;
+                case ForcedRowColumnPuzzleObject frc:
+                    frc.habitat = type;
+                    frc.forcedDirection = Random.Range(0, 2) == 0 ? ForcedDirection.ForcedRow : ForcedDirection.ForcedColumn;
+                    po.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    GameObject fp = Instantiate(forcedRowColumnDirectionPrefabs[(int)frc.forcedDirection], po.transform);
+                    fp.transform.localPosition = new Vector3(0.2f, -0.2f, 0);
                     break;
             }
             
