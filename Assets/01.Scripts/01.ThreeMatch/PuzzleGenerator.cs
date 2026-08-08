@@ -1287,6 +1287,28 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator MatchPuzzle(Vector2Int? delayedBombPos = null)
         {
+            foreach (Vector2Int pos in _movedPositions)
+            {
+                PuzzleObject puzzle = _puzzles[pos.x, pos.y];
+
+                if (!puzzle)
+                {
+                    continue;
+                }
+
+                if (puzzle.puzzleState != PuzzleState.Swapping)
+                {
+                    continue;
+                }
+
+                bool isMatched = _currentMatchGroups.Any(group => group.positions.Contains(pos));
+
+                if (!isMatched)
+                {
+                    puzzle.puzzleState = PuzzleState.Idle;
+                }
+            }
+            
             foreach (var group in _currentMatchGroups)
             {
                 foreach (var pos in group.positions)
