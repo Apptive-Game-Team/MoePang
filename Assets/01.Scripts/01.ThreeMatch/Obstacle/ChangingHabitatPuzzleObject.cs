@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = System.Random;
 
-namespace _01.Scripts._01.ThreeMatch
+namespace _01.Scripts._01.ThreeMatch.Obstacle
 {
     public class ChangingHabitatPuzzleObject : ObstaclePuzzleObject
     {

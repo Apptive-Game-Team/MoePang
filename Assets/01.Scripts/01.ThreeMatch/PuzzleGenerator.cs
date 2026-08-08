@@ -1,3 +1,4 @@
+using _01.Scripts._01.ThreeMatch.Obstacle;
 using _01.Scripts._04.UI.InGame;
 using _01.Scripts._11.HabitatMode;
 using DG.Tweening;
@@ -34,6 +35,7 @@ namespace _01.Scripts._01.ThreeMatch
         Fixed,
         ForcedRowColumn,
         ChangingHabitat,
+        LockedTwice,
     }
     
     public class PuzzleGenerator : MonoBehaviour
@@ -1303,7 +1305,7 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     if (_puzzles[i, j] != null)
                     {
-                        if (_puzzles[i, j] is ObstaclePuzzleObject { isTriggered: true } op)
+                        if (_puzzles[i, j] is ObstaclePuzzleObject { isTriggered : true } op)
                         {
                             yield return ObstacleMatch(i, j, op.obstaclePuzzleType);
                         }
@@ -2094,16 +2096,27 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator ObstacleMatch(int curX, int curY, ObstaclePuzzleType type)
         {
+            if (_puzzles[curX, curY] is ObstaclePuzzleObject op)
+            {
+                op.isTriggered = false;
+            }
+            
             switch (type)
             {
                 case ObstaclePuzzleType.DeActivated:
                     yield return DeActivatedMatch(curX, curY);
                     break;
-                case ObstaclePuzzleType.Fixed:
+                case ObstaclePuzzleType.LockedTwice:
+                    LockedTwicePuzzleObject lt = _puzzles[curX, curY] as LockedTwicePuzzleObject;
+                    if (lt)
+                    {
+                        yield return lt.Unlock(this, curX, curY);
+                    }
                     break;
             }
         }
 
+        // 비활성화 방해타일 해제
         private IEnumerator DeActivatedMatch(int curX, int curY)
         {
             var obstacleObj = _puzzles[curX, curY].GetComponent<ObstaclePuzzleObject>();
@@ -2128,6 +2141,15 @@ namespace _01.Scripts._01.ThreeMatch
                 .SetEase(Ease.InSine);
 
             yield return null;
+        }
+
+        // 2회 이동 방해타일 해제용
+        public Tween Unlock(int curX, int curY, float duration)
+        {
+            GameObject target = _puzzles[curX, curY].gameObject;
+            _puzzles[curX, curY] = null;
+
+            return target.transform.DOScale(0, duration).SetEase(Ease.OutCubic);
         }
         #endregion
 

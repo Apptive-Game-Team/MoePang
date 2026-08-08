@@ -6830,6 +6830,8 @@ MonoBehaviour:
   - type: 2
     weight: 2
   - type: 3
+    weight: 2
+  - type: 4
     weight: 70
   obstacleSpawnDelay: 2
   obstacleSpawnInterval: 10
@@ -6853,6 +6855,7 @@ MonoBehaviour:
   - {fileID: 2857731521102525544, guid: 3078c7d34f980f744bd38f948248da48, type: 3}
   - {fileID: 2857731521102525544, guid: 9b2a10560c861bd45827295082b35dfb, type: 3}
   - {fileID: 2857731521102525544, guid: df56f61a4847de043bf38fa2ef198b0e, type: 3}
+  - {fileID: 2857731521102525544, guid: 009a5c30eb734024eb2a23e62e9b9dba, type: 3}
   normalPuzzleImages:
   - {fileID: 21300000, guid: 9fe9ca50d6604164aa3fa5fa42a67872, type: 3}
   - {fileID: 21300000, guid: decc2a57a9fe79e4ba0fbb68764b08a9, type: 3}

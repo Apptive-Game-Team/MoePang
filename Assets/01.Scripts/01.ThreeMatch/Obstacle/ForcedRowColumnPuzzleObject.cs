@@ -2,7 +2,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace _01.Scripts._01.ThreeMatch
+namespace _01.Scripts._01.ThreeMatch.Obstacle
 {
     public enum ForcedDirection
     {
