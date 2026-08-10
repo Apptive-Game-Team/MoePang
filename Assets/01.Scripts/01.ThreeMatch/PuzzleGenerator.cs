@@ -1920,7 +1920,7 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     yield break;
                 }
-                yield return SpawnObstacleWarning(pos.x, pos.y);
+                
                 StartCoroutine(SpawnRandomObstaclePuzzleCoroutine(pos.x, pos.y));
             }
         }
@@ -1966,10 +1966,21 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
         {
+            Vector2 pos = CalculatePos(curX, curY);
+            GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
+            warningOb.transform.localPosition = pos;
+            Tween warningTween = warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
+                .SetLoops(-1, LoopType.Yoyo);
+
+            yield return new WaitForSeconds(obstacleSpawnDelay);
+            
             yield return new WaitUntil(() =>
-                _puzzles[curX, curY] != null &&
+                _puzzles[curX, curY] &&
                 _puzzles[curX, curY].puzzleState == PuzzleState.Idle
             );
+            
+            warningTween.Kill();
+            Destroy(warningOb);
             
             PuzzleObject target = _puzzles[curX, curY];
             target.puzzleState = PuzzleState.Swapping;

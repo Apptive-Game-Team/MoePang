@@ -5,7 +5,7 @@ using UnityEditor;
 
 #if UNITY_EDITOR
 [InitializeOnLoad]
-public class GoogleSheetPullButton : Editor
+public class GoogleSheetPullButton : UnityEditor.Editor
 {
     static StringTableCollection googleSheetCollection;
 
