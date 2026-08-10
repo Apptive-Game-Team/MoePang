@@ -251,12 +251,12 @@ Shader "Custom/GlowEffect_ChangingHabitat"
                     if (input.uv.y > 0.5)
                     {
                         // 위쪽: 왼쪽 → 오른쪽
-                        rainbowPosition = input.uv.x;
+                        rainbowPosition = input.uv.x * 0.5;
                     }
                     else
                     {
                         // 아래쪽: 오른쪽 → 왼쪽
-                        rainbowPosition = 1.0 - input.uv.x;
+                        rainbowPosition = (1.0 - input.uv.x) * 0.5;
                     }
                 }
                 else
@@ -264,13 +264,13 @@ Shader "Custom/GlowEffect_ChangingHabitat"
                     if (input.uv.x > 0.5)
                     {
                         // 오른쪽: 위쪽 → 아래쪽
-                        rainbowPosition = 1.0 - input.uv.y;
+                        rainbowPosition = 0.5 + (1.0 - input.uv.y) * 0.5;
                     }
                     else
                     {
                         // 왼쪽: 아래쪽 → 위쪽
-                        rainbowPosition = input.uv.y;
-                    }
+                        rainbowPosition = 0.5 + input.uv.y * 0.5;
+                    } 
                 }
 
                 rainbowPosition = frac(rainbowPosition + _Time.y * speed);
