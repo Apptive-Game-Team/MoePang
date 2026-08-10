@@ -36,6 +36,7 @@ namespace _01.Scripts._01.ThreeMatch
         ForcedRowColumn,
         ChangingHabitat,
         LockedTwice,
+        Portal,
     }
     
     public class PuzzleGenerator : MonoBehaviour
@@ -110,6 +111,7 @@ namespace _01.Scripts._01.ThreeMatch
         private List<PuzzleObject> _bannedPuzzles = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
+        private List<PortalPuzzleObject> _portals = new();
         
         private List<GameObject> resetRectangles = new();
 
@@ -139,6 +141,24 @@ namespace _01.Scripts._01.ThreeMatch
         {
             public ObstaclePuzzleType type;
             [Range(0, 100)] public int weight;
+        }
+        
+        private enum DropSegmentType
+        {
+            Fall,
+            Teleport
+        }
+
+        private class DropSegment
+        {
+            public DropSegmentType type;
+            public Vector3 start;
+            public Vector3 end;
+        }
+
+        private class DropPath
+        {
+            public List<DropSegment> segments = new();
         }
         
         private void Start()
@@ -266,6 +286,12 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             yield return seq.WaitForCompletion();
+
+            for (int i = 0; i < _portals.Count; i += 2)
+            {
+                _portals[i].linkedPortal = _portals[i + 1];
+                _portals[i + 1].linkedPortal = _portals[i];
+            }
         }
 
         private GameObject SetStartRandomPuzzle(int col, int row)
@@ -295,9 +321,11 @@ namespace _01.Scripts._01.ThreeMatch
                             obstacleType = GetRandomObstacleType();
                             break;
                         case 4:
-                            obstacleType = Enum.GetValues(typeof(ObstaclePuzzleType)).Length >= 6
-                                ? (ObstaclePuzzleType)5
-                                : GetRandomObstacleType();
+                            obstacleType = (ObstaclePuzzleType)5;
+                                // todo : 포탈 방해타일 테스트용
+                                // Enum.GetValues(typeof(ObstaclePuzzleType)).Length >= 6
+                                // ? (ObstaclePuzzleType)5
+                                // : GetRandomObstacleType();
                             break;
                     }
                 }
@@ -309,6 +337,10 @@ namespace _01.Scripts._01.ThreeMatch
                 puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], puzzleFrame);
                 puzzle.transform.localPosition = CalculateDropPos(col, row);
                 PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                if (po is PortalPuzzleObject pp)
+                {
+                    _portals.Add(pp);
+                }
                 Habitat randomType = GetValidRandomType(col, row);
                 switch (po)
                 {
@@ -1478,21 +1510,30 @@ namespace _01.Scripts._01.ThreeMatch
         {
             _movedPositions.Clear();
             Sequence seq = DOTween.Sequence();
-
+        
             for (int i = 0; i < x; i++)
             {
                 int spawnOrder = 0;
-
+        
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j] == null)
+                    if (!_puzzles[i, j])
                     {
                         PuzzleObject targetPo = null;
                         bool foundUpperTile = false;
+                        PortalPuzzleObject portal = null;
+                        PortalPuzzleObject linkedPortal = null;
                         
                         for (int k = j + 1; k < y; k++)
                         {
-                            if (_puzzles[i, k] != null)
+                            if (_puzzles[i, k] is PortalPuzzleObject pp)
+                            {
+                                portal = pp;
+                                linkedPortal = pp.linkedPortal;
+                                break;
+                            }
+                            
+                            if (_puzzles[i, k])
                             {
                                 _puzzles[i, k].puzzleState = PuzzleState.Falling;
                                 _puzzles[i, j] = _puzzles[i, k];
@@ -1502,39 +1543,88 @@ namespace _01.Scripts._01.ThreeMatch
                                 break;
                             }
                         }
+
+                        if (portal)
+                        {
+                            int linkedX = linkedPortal.column;
+                            for (int k = linkedPortal.row + 1; k < y; k++)
+                            {
+                                if (_puzzles[linkedX, k])
+                                {
+                                    _puzzles[linkedX, k].puzzleState = PuzzleState.Falling;
+                                    _puzzles[i, j] = _puzzles[linkedX, k];
+                                    _puzzles[linkedX, k] = null;
+                                    targetPo = _puzzles[i, j];
+                                    foundUpperTile = true;
+                                    break;
+                                }
+                            }
+                        }
                         
                         if (!foundUpperTile)
                         {
-                            GameObject puzzle = SetRandomPuzzle(i, j, spawnOrder);
+                            GameObject puzzle = portal ? 
+                                SetRandomPuzzle(linkedPortal.column, j, spawnOrder) :
+                                SetRandomPuzzle(i, j, spawnOrder);
                             spawnOrder++;
                             targetPo = puzzle.GetComponent<PuzzleObject>();
                             targetPo.puzzleState = PuzzleState.Falling;
                             _puzzles[i, j] = targetPo;
                         }
-
-                        if (targetPo != null)
+        
+                        if (targetPo)
                         {
                             targetPo.gameObject.name = $"Puzzle({i + 1},{j + 1})";
                             targetPo.Init(this, i, j);
                             _movedPositions.Add(new Vector2Int(i, j));
-
+        
                             Vector3 targetPos = CalculatePos(i, j);
                             
                             float distance = Vector3.Distance(targetPo.transform.localPosition, targetPos);
                             float duration = distance / dropSpeed;
                             float startAt = columnDropDelay * i + rowDropDelay * j;
-                            
-                            Tween fallTween = targetPo.transform.DOLocalMove(targetPos, duration)
-                                .SetEase(Ease.InSine)
-                                .OnComplete(() => 
-                                {
-                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
-                                        .OnComplete(() =>
-                                        {
-                                            targetPo.puzzleState = PuzzleState.Idle;
-                                        });
-                                });
 
+                            Tween fallTween;
+                            
+                            if (portal)
+                            {
+                                distance = Vector3.Distance(targetPo.transform.localPosition, linkedPortal.transform.localPosition)
+                                           + Vector3.Distance(portal.transform.localPosition, targetPos);
+                                duration = distance / dropSpeed;
+                                
+                                Vector3 linkedPortalPos = CalculatePos(linkedPortal.column, linkedPortal.row);
+                                Vector3 portalPos = CalculatePos(portal.column, portal.row);
+                                fallTween = targetPo.transform.DOLocalMove(linkedPortalPos, duration / 2)
+                                    .SetEase(Ease.InSine)
+                                    .OnComplete(() =>
+                                    {
+                                        targetPo.transform.localPosition = portalPos;
+                                        targetPo.transform.DOLocalMove(targetPos, duration / 2)
+                                            .SetEase(Ease.InSine)
+                                            .OnComplete(() =>
+                                            {
+                                                targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                                                    .OnComplete(() =>
+                                                    {
+                                                        targetPo.puzzleState = PuzzleState.Idle;
+                                                    });
+                                            });
+                                    });
+                            }
+                            else
+                            {
+                                fallTween = targetPo.transform.DOLocalMove(targetPos, duration)
+                                    .SetEase(Ease.InSine)
+                                    .OnComplete(() =>
+                                    {
+                                        targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                                            .OnComplete(() =>
+                                            {
+                                                targetPo.puzzleState = PuzzleState.Idle;
+                                            });
+                                    });
+                            }
+        
                             seq.Insert(startAt, fallTween);
                         }
                     }
@@ -1543,7 +1633,7 @@ namespace _01.Scripts._01.ThreeMatch
             
             yield return seq.WaitForCompletion();
             yield return new WaitForSeconds(0.1f);
-
+        
             if (CheckAnyMatches())
             {
                 yield return MatchPuzzle();
@@ -1554,6 +1644,7 @@ namespace _01.Scripts._01.ThreeMatch
                 goldUI.ShowUI(false);
             }
         }
+        
         #endregion
         
         /// <summary>
