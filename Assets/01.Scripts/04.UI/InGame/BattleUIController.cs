@@ -16,6 +16,10 @@ namespace _01.Scripts._04.UI.InGame
         
         [Header("Drag")]
         [SerializeField] private float dragSpeed = 0.5f;
+        
+        [Header("Camera Lock")]
+        [SerializeField] private bool isCameraLocked;
+        [SerializeField] private float followSpeed = 8f;
 
         private Camera _battleCam;
         private bool _isDragging;
@@ -35,6 +39,12 @@ namespace _01.Scripts._04.UI.InGame
         {
             if (Time.timeScale == 0)
             {
+                return;
+            }
+            
+            if (isCameraLocked)
+            {
+                FollowFrontFriendlyTarget();
                 return;
             }
             
@@ -167,6 +177,58 @@ namespace _01.Scripts._04.UI.InGame
             camPos.y = minY > maxY ? bgBounds.center.y : Mathf.Clamp(camPos.y, minY, maxY);
 
             transform.position = new Vector3(camPos.x, camPos.y, transform.position.z);
+        }
+        
+        public void ToggleCameraLock()
+        {
+            SetCameraLock(!isCameraLocked);
+        }
+
+        public void SetCameraLock(bool isOn)
+        {
+            isCameraLocked = isOn;
+
+            if (isCameraLocked)
+            {
+                _targetZoom = minOrthographicSize;
+                _battleCam.orthographicSize = _targetZoom;
+
+                Vector3 pos = transform.position;
+                pos.y = _cameraBottomY + _battleCam.orthographicSize;
+                transform.position = pos;
+
+                ClampCameraInsideBackground();
+            }
+        }
+        
+        private void FollowFrontFriendlyTarget()
+        {
+            if (UnitTransformQueue.Instance == null)
+            {
+                return;
+            }
+
+            IDamageable target = UnitTransformQueue.Instance.PeekFrontUnit(TeamType.Friendly);
+
+            if (target == null)
+            {
+                target = UnitTransformQueue.Instance.PeekCastle(TeamType.Friendly);
+            }
+
+            if (target == null)
+            {
+                return;
+            }
+
+            Vector3 targetPos = target.GetTransform().position;
+            Vector3 camPos = transform.position;
+
+            camPos.x = Mathf.Lerp(camPos.x, targetPos.x, followSpeed * Time.deltaTime);
+            camPos.y = _cameraBottomY + _battleCam.orthographicSize;
+
+            transform.position = camPos;
+
+            ClampCameraInsideBackground();
         }
     }
 }

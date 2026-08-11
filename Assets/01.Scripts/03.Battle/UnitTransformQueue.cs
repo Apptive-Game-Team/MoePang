@@ -269,6 +269,22 @@ public class UnitTransformQueue : MonoBehaviour
             node = next;
         }
     }
+    
+    public Unit PeekFrontUnit(TeamType team)
+    {
+        RemoveInvalidUnits(team);
+
+        if (teamLists[team].Count <= 0)
+            return null;
+
+        return teamLists[team].First.Value.Unit;
+    }
+
+    public IDamageable PeekCastle(TeamType team)
+    {
+        teamCastles.TryGetValue(team, out IDamageable castle);
+        return castle;
+    }
 
     private void OnDrawGizmos()
     {
