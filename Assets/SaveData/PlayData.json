@@ -1,0 +1,87 @@
+{
+    "goldAmount": 153,
+    "diaAmount": 0,
+    "clearedStageKeys": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "clearedStageValues": [
+        5,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "stageTypeKeys": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "stageTypeValues": [
+        {
+            "stages": [
+                {
+                    "stageNum": 1,
+                    "minUsedTime": 51.51313400268555,
+                    "minUsedTile": 127,
+                    "maxUsedTile": 127
+                },
+                {
+                    "stageNum": 2,
+                    "minUsedTime": 41.899478912353519,
+                    "minUsedTile": 140,
+                    "maxUsedTile": 140
+                },
+                {
+                    "stageNum": 3,
+                    "minUsedTime": 44.71393585205078,
+                    "minUsedTile": 97,
+                    "maxUsedTile": 97
+                },
+                {
+                    "stageNum": 4,
+                    "minUsedTime": 49.764522552490237,
+                    "minUsedTile": 86,
+                    "maxUsedTile": 86
+                },
+                {
+                    "stageNum": 5,
+                    "minUsedTime": 50.3929443359375,
+                    "minUsedTile": 143,
+                    "maxUsedTile": 143
+                }
+            ]
+        },
+        {
+            "stages": []
+        },
+        {
+            "stages": []
+        },
+        {
+            "stages": []
+        },
+        {
+            "stages": []
+        },
+        {
+            "stages": []
+        }
+    ],
+    "selectedStage": [
+        5,
+        0,
+        0,
+        0,
+        0,
+        0
+    ]
+}
