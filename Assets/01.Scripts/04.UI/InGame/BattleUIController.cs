@@ -208,7 +208,7 @@ namespace _01.Scripts._04.UI.InGame
                 return;
             }
 
-            IDamageable target = UnitTransformQueue.Instance.PeekFrontUnit(TeamType.Friendly);
+            IDamageable target = UnitTransformQueue.Instance.PeekFrontUnitForCamera(TeamType.Friendly);
 
             if (target == null)
             {

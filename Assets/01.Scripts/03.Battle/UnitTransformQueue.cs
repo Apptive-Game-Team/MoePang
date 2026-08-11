@@ -285,6 +285,45 @@ public class UnitTransformQueue : MonoBehaviour
         teamCastles.TryGetValue(team, out IDamageable castle);
         return castle;
     }
+    
+    public Unit PeekFrontUnitForCamera(TeamType team)
+    {
+        RemoveInvalidUnits(team);
+
+        Unit frontUnit = null;
+
+        foreach (Unit unit in FindObjectsByType<Unit>(FindObjectsSortMode.None))
+        {
+            if (unit == null) continue;
+            if (!unit.gameObject.activeInHierarchy) continue;
+            if (unit.CurrentHp <= 0f) continue;
+            if (unit.GetTeam() != team) continue;
+
+            Insert(unit);
+
+            if (frontUnit == null)
+            {
+                frontUnit = unit;
+                continue;
+            }
+
+            float unitX = unit.transform.position.x;
+            float frontX = frontUnit.transform.position.x;
+
+            if (team == TeamType.Friendly)
+            {
+                if (unitX > frontX)
+                    frontUnit = unit;
+            }
+            else
+            {
+                if (unitX < frontX)
+                    frontUnit = unit;
+            }
+        }
+
+        return frontUnit;
+    }
 
     private void OnDrawGizmos()
     {
