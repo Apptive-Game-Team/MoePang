@@ -17,19 +17,25 @@ namespace _01.Scripts._04.UI.InGame
         
         private Material _material;
         private Tween _moveInTween;
-        private Vector3 _originPos;
         private Vector3 _goldScale;
         private Sequence _effectSeq;
+        
+        private RectTransform _rectTransform;
+        private Vector2 _originPos;
+        private Vector2 _hidePos;
         
 
         private void Awake()
         {
+            _rectTransform = GetComponent<RectTransform>();
             _goldImage = GetComponentsInChildren<Image>().FirstOrDefault(go => go.gameObject != gameObject);
             _text = GetComponentInChildren<TextMeshProUGUI>();
+            
+            _originPos = _rectTransform.anchoredPosition;
+            _hidePos = _originPos + new Vector2(400f, 0f);
 
             if (_goldImage != null)
             {
-                _originPos = _goldImage.transform.position;
                 _goldScale = _goldImage.transform.localScale;
                 
                 Image img = _goldImage.GetComponent<Image>();
@@ -43,6 +49,7 @@ namespace _01.Scripts._04.UI.InGame
 
         private void Start()
         {
+            _rectTransform.anchoredPosition = _hidePos;
             UpdateGold();
         }
 
@@ -62,10 +69,10 @@ namespace _01.Scripts._04.UI.InGame
             {
                 return;
             }
-            
+    
             if (show)
             {
-                _moveInTween = transform.DOMove(_originPos - new Vector3(1.5f, 0, 0), 0.15f)
+                _moveInTween = _rectTransform.DOAnchorPos(_originPos, 0.15f)
                     .SetEase(Ease.OutBack)
                     .OnComplete(() =>
                     {
@@ -74,7 +81,7 @@ namespace _01.Scripts._04.UI.InGame
             }
             else
             {
-                transform.DOMove(_originPos + new Vector3(1.5f, 0, 0), 0.15f)
+                _rectTransform.DOAnchorPos(_hidePos, 0.15f)
                     .SetEase(Ease.OutBack);
             }
         }

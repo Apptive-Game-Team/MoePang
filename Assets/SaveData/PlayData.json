@@ -1,5 +1,5 @@
 {
-    "goldAmount": 280,
+    "goldAmount": 416,
     "diaAmount": 0,
     "clearedStageKeys": [
         0,
@@ -10,7 +10,7 @@
         5
     ],
     "clearedStageValues": [
-        5,
+        6,
         0,
         0,
         0,
@@ -57,6 +57,12 @@
                     "minUsedTime": 50.3929443359375,
                     "minUsedTile": 143,
                     "maxUsedTile": 143
+                },
+                {
+                    "stageNum": 6,
+                    "minUsedTime": 106.91539001464844,
+                    "minUsedTile": 176,
+                    "maxUsedTile": 176
                 }
             ]
         },
@@ -77,7 +83,7 @@
         }
     ],
     "selectedStage": [
-        5,
+        6,
         0,
         0,
         0,
