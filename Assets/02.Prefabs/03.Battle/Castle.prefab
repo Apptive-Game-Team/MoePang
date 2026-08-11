@@ -106,6 +106,7 @@ MonoBehaviour:
   team: 0
   maxHp: 80
   currentHp: 0
+  hpText: {fileID: 195648580370435595}
   hitEffectPrefab: {fileID: 3181032540795233476}
   maxHitEffectCount: 5
   hitEffectLocalScale: {x: 0.55, y: 0.55, z: 1}
@@ -260,7 +261,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 9999
+  m_text: 9999/9999
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8e835c76d5ad37146abec1af9cc8a9c4, type: 2}
   m_sharedMaterial: {fileID: -7741939688891927508, guid: 8e835c76d5ad37146abec1af9cc8a9c4, type: 2}
@@ -287,8 +288,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 15
-  m_fontSizeBase: 15
+  m_fontSize: 9
+  m_fontSizeBase: 9
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
