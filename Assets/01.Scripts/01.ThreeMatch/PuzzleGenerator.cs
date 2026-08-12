@@ -37,6 +37,7 @@ namespace _01.Scripts._01.ThreeMatch
         ChangingHabitat,
         LockedTwice,
         Portal,
+        Infection,
     }
     
     public class PuzzleGenerator : MonoBehaviour
@@ -2131,6 +2132,9 @@ namespace _01.Scripts._01.ThreeMatch
                 case ChangingHabitatPuzzleObject ch:
                     ch.InitialSetting(this, normalPuzzlePrefabs);
                     break;
+                case InfectionPuzzleObject ip:
+                    ip.Init(this);
+                    break;
             }
             
             Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
@@ -2140,9 +2144,17 @@ namespace _01.Scripts._01.ThreeMatch
         
         private ObstaclePuzzleType GetWeightedRandomObstacle()
         {
+            bool canCreateInfection = InfectionPuzzleObject.CanCreate();
+            
             int totalWeight = 0;
             foreach (var obstacle in obstacleWeights)
             {
+                if (obstacle.type == ObstaclePuzzleType.Infection &&
+                    !canCreateInfection)
+                {
+                    continue;
+                }
+                
                 totalWeight += obstacle.weight;
             }
             
@@ -2151,6 +2163,12 @@ namespace _01.Scripts._01.ThreeMatch
             int currentSum = 0;
             foreach (var obstacle in obstacleWeights)
             {
+                if (obstacle.type == ObstaclePuzzleType.Infection &&
+                    !canCreateInfection)
+                {
+                    continue;
+                }
+                
                 currentSum += obstacle.weight;
                 if (randomValue < currentSum)
                 {
@@ -2252,6 +2270,17 @@ namespace _01.Scripts._01.ThreeMatch
                         yield return lt.Unlock(this, curX, curY);
                     }
                     break;
+                case ObstaclePuzzleType.Infection:
+                    GameObject go = _puzzles[curX, curY].gameObject;
+                    _puzzles[curX, curY] = null;
+                    go.transform.DOScale(0, 0.2f)
+                        .SetEase(Ease.OutSine)
+                        .OnComplete(() =>
+                        {
+                            Destroy(go);
+                        });
+                    yield return null;
+                    break;
             }
         }
 
@@ -2275,9 +2304,13 @@ namespace _01.Scripts._01.ThreeMatch
             _puzzles[curX, curY] = po;
             po.Init(this, curX, curY);
             po.isMatched = false;
-            
+
             newPuzzle.transform.DOScale(tileScale, 0.2f)
-                .SetEase(Ease.InSine);
+                .SetEase(Ease.InSine)
+                .OnComplete(() =>
+                {
+                    po.puzzleState = PuzzleState.Idle;
+                });
 
             yield return null;
         }
@@ -2289,6 +2322,84 @@ namespace _01.Scripts._01.ThreeMatch
             _puzzles[curX, curY] = null;
 
             return target.transform.DOScale(0, duration).SetEase(Ease.OutCubic);
+        }
+        
+        // 감염타일 감염 함수
+        public IEnumerator Infect(InfectionPuzzleObject ip)
+        {
+            int indexX = ip.column;
+            int indexY = ip.row;
+
+            Vector2Int[] directions =
+            {
+                Vector2Int.up,
+                Vector2Int.down,
+                Vector2Int.left,
+                Vector2Int.right
+            };
+
+            List<Vector2Int> candidates = new();
+
+            foreach (Vector2Int direction in directions)
+            {
+                int targetX = indexX + direction.x;
+                int targetY = indexY + direction.y;
+                
+                if (targetX < 0 || targetX >= x ||
+                    targetY < 0 || targetY >= y)
+                {
+                    continue;
+                }
+
+                PuzzleObject target = _puzzles[targetX, targetY];
+                
+                if (!target || target is ObstaclePuzzleObject)
+                {
+                    continue;
+                }
+
+                candidates.Add(new Vector2Int(targetX, targetY));
+            }
+            
+            if (candidates.Count == 0)
+            {
+                yield break;
+            }
+            
+            Vector2Int selected = candidates[Random.Range(0, candidates.Count)];
+            
+            yield return new WaitUntil(() =>
+                _puzzles[selected.x, selected.y] &&
+                _puzzles[selected.x, selected.y].puzzleState == PuzzleState.Idle
+            );
+
+            if (!InfectionPuzzleObject.CanCreate())
+            {
+                yield break;
+            }
+            
+            Vector3 currentPos = _puzzles[selected.x, selected.y].transform.position;
+            GameObject oldObject = _puzzles[selected.x, selected.y].gameObject;
+            _puzzles[selected.x, selected.y] = null;
+            Destroy(oldObject);
+            
+            InfectionPuzzleObject newPuzzle = Instantiate(obstaclePuzzlePrefabs[(int)ObstaclePuzzleType.Infection], puzzleFrame).GetComponent<InfectionPuzzleObject>();
+            newPuzzle.Init(this);
+            newPuzzle.transform.position = currentPos;
+            newPuzzle.name = $"Puzzle({selected.x + 1},{selected.y + 1})";
+            newPuzzle.transform.localScale = Vector3.zero;
+            
+            _puzzles[selected.x, selected.y] = newPuzzle;
+            newPuzzle.Init(this, selected.x, selected.y);
+            newPuzzle.isMatched = false;
+            
+            newPuzzle.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine)
+                .OnComplete(() =>
+                {
+                    newPuzzle.puzzleState = PuzzleState.Idle;
+                });
+
         }
         #endregion
 
