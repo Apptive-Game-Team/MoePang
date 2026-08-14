@@ -3,6 +3,7 @@ using UnityEngine;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 /// <summary>
 /// 각 팀의 성 관리 스크립트
@@ -14,7 +15,7 @@ public class Castle : MonoBehaviour, IDamageable
     [SerializeField] protected float maxHp;
     [SerializeField] protected float currentHp;
 
-    [Header("피격 연출")]
+    [Header("피격 연출")] [SerializeField] private TextMeshPro hpText;
     [SerializeField] private GameObject hitEffectPrefab;
     [SerializeField] private int maxHitEffectCount = 5;
     [SerializeField] private Vector3 hitEffectLocalScale = new Vector3(0.55f, 0.55f, 1f);
@@ -50,6 +51,7 @@ public class Castle : MonoBehaviour, IDamageable
         }
 
         currentHp = maxHp;
+        UpdateHpText();
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalPos = transform.localPosition;
 
@@ -64,6 +66,7 @@ public class Castle : MonoBehaviour, IDamageable
     {
         SoundManager.Instance.PlaySFX(SFX.SFX8_Hit);
         currentHp -= damage;
+        UpdateHpText();
         StartCoroutine(PlayHitEffect(hitSprite));
 
         if (damageTween != null && damageTween.IsActive() && damageTween.IsPlaying())
@@ -78,8 +81,15 @@ public class Castle : MonoBehaviour, IDamageable
 
         if (currentHp <= 0)
         {
+            currentHp = 0;
+            UpdateHpText();
             Die();
         }
+    }
+
+    private void UpdateHpText()
+    {
+        hpText.text = currentHp + "/" + maxHp;
     }
 
     private IEnumerator PlayHitEffect(Sprite hitSprite = null)
