@@ -44,6 +44,7 @@ namespace _01.Scripts._01.ThreeMatch
     {
         [Header("Puzzle Settings")]
         [SerializeField] private RectTransform puzzleFrame;
+        [SerializeField] private RectTransform upPuzzleFrame;
         [SerializeField] private GameObject downParticleFrame;
         [SerializeField] private GameObject particleFrame;
         [SerializeField] private GoldUI goldUI;
@@ -332,13 +333,18 @@ namespace _01.Scripts._01.ThreeMatch
             GameObject puzzle;
             if (isObstacle)
             {
-                puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], puzzleFrame);
+                RectTransform frame = obstacleType == ObstaclePuzzleType.Portal ? upPuzzleFrame : puzzleFrame;
+                puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], frame);
                 puzzle.transform.localPosition = CalculateDropPos(col, row);
                 PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
                 
                 if (po is PortalPuzzleObject pp)
                 {
                     _portals.Add(pp);
+                    if (_portals.Count % 2 == 0)
+                    {
+                        _portals[^1].transform.rotation = new Quaternion(0, 0, 180, 0);
+                    }
                 }
                 
                 Habitat randomType = GetValidRandomType(col, row);
