@@ -509,9 +509,39 @@ namespace _01.Scripts._01.ThreeMatch
         
         private bool CheckType(PuzzleObject p1, PuzzleObject p2)
         {
-            if (p1 == null || p2 == null)
+            if (!p1 || !p2)
             {
                 return false;
+            }
+            
+            bool isRow = p1.row == p2.row;
+            bool isColumn = p1.column == p2.column;
+
+            // Forced Column Row 방해타일 예외
+            if (p1 is ForcedRowColumnPuzzleObject f1)
+            {
+                if (isRow && f1.forcedDirection != ForcedDirection.ForcedRow)
+                {
+                    return false;
+                }
+
+                if (isColumn && f1.forcedDirection != ForcedDirection.ForcedColumn)
+                {
+                    return false;
+                }
+            }
+
+            if (p2 is ForcedRowColumnPuzzleObject f2)
+            {
+                if (isRow && f2.forcedDirection != ForcedDirection.ForcedRow)
+                {
+                    return false;
+                }
+
+                if (isColumn && f2.forcedDirection != ForcedDirection.ForcedColumn)
+                {
+                    return false;
+                }
             }
 
             if (p1 is JokerPuzzleObject || p2 is JokerPuzzleObject)
