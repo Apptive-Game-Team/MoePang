@@ -139,7 +139,7 @@ namespace _01.Scripts._01.ThreeMatch
         }
 
         [Serializable]
-        private struct ObstacleWeight
+        public struct ObstacleWeight
         {
             public ObstaclePuzzleType type;
             [Range(0, 100)] public int weight;
@@ -402,11 +402,6 @@ namespace _01.Scripts._01.ThreeMatch
         
         private ObstaclePuzzleType GetRandomObstacleType()
         {
-            if (Enum.GetValues(typeof(ObstaclePuzzleType)).Length <= 2)
-            {
-                return (ObstaclePuzzleType)Random.Range(0, Enum.GetValues(typeof(ObstaclePuzzleType)).Length);
-            }
-            
             int[] weights = BalanceFormula.InitialObstacleWeights;
 
             int totalWeight = 0;
@@ -2210,6 +2205,9 @@ namespace _01.Scripts._01.ThreeMatch
         private ObstaclePuzzleType GetWeightedRandomObstacle()
         {
             bool canCreateInfection = InfectionPuzzleObject.CanCreate();
+
+            // todo : 방해타일 생성 디버깅 용 추후 변경
+            // var obstacleWeights = BalanceFormula.ObstacleWeights;
             
             int totalWeight = 0;
             foreach (var obstacle in obstacleWeights)
