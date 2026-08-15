@@ -1,6 +1,4 @@
-using UnityEngine.Serialization;
-
-namespace _01.Scripts._01.ThreeMatch
+namespace _01.Scripts._01.ThreeMatch.Obstacle
 {
     public class ObstaclePuzzleObject : PuzzleObject
     {
