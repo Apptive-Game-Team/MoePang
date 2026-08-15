@@ -136,9 +136,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puzzleType: 2
+  puzzleState: 4
   column: 0
   row: 0
   isMatched: 0
   obstaclePuzzleType: 1
-  normalPuzzleType: 0
+  habitat: 0
   isTriggered: 0
+  isMatchable: 1
+  isSwappable: 0

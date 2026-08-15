@@ -112,6 +112,7 @@ namespace _01.Scripts._01.ThreeMatch
         private List<PuzzleObject> _bannedPuzzles = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
         private HashSet<Vector2Int> _movedPositions = new();
+        private HashSet<Vector2Int> _swappedPositions = new();
         private List<PortalPuzzleObject> _portals = new();
         
         private List<GameObject> resetRectangles = new();
@@ -322,11 +323,7 @@ namespace _01.Scripts._01.ThreeMatch
                             obstacleType = GetRandomObstacleType();
                             break;
                         case 4:
-                            obstacleType = (ObstaclePuzzleType)5;
-                                // todo : 포탈 방해타일 테스트용
-                                // Enum.GetValues(typeof(ObstaclePuzzleType)).Length >= 6
-                                // ? (ObstaclePuzzleType)5
-                                // : GetRandomObstacleType();
+                            obstacleType = ObstaclePuzzleType.Portal;
                             break;
                     }
                 }
@@ -338,11 +335,15 @@ namespace _01.Scripts._01.ThreeMatch
                 puzzle = Instantiate(obstaclePuzzlePrefabs[(int)obstacleType], puzzleFrame);
                 puzzle.transform.localPosition = CalculateDropPos(col, row);
                 PuzzleObject po = puzzle.GetComponent<PuzzleObject>();
+                
                 if (po is PortalPuzzleObject pp)
                 {
                     _portals.Add(pp);
                 }
+                
                 Habitat randomType = GetValidRandomType(col, row);
+                Material material = new(normalPuzzlePrefabs[(int)randomType].GetComponent<Image>().material);
+                
                 switch (po)
                 {
                     case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.DeActivated } op:
@@ -350,7 +351,28 @@ namespace _01.Scripts._01.ThreeMatch
                         break;
                     case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                         op.habitat = randomType;
-                        puzzle.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        op.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        op.SetMaterial(material);
+                        break;
+                    case ForcedRowColumnPuzzleObject frc:
+                        frc.habitat = randomType;
+                        frc.forcedDirection = Random.Range(0, 2) == 0 ? ForcedDirection.ForcedRow : ForcedDirection.ForcedColumn;
+                        frc.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        frc.SetMaterial(material);
+                    
+                        GameObject fp = Instantiate(forcedRowColumnDirectionPrefabs[(int)frc.forcedDirection], po.transform);
+                        fp.transform.localPosition = new Vector3(0.2f, -0.2f, 0);
+                        break;
+                    case ChangingHabitatPuzzleObject ch:
+                        ch.InitialSetting(this, normalPuzzlePrefabs);
+                        break;
+                    case LockedTwicePuzzleObject lt:
+                        lt.habitat = randomType;
+                        lt.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        lt.SetMaterial(material);
+                        break;
+                    case InfectionPuzzleObject ip:
+                        ip.Init(this);
                         break;
                 }
             }
@@ -509,7 +531,7 @@ namespace _01.Scripts._01.ThreeMatch
             // (obstacle or normal) <-> (obstacle or normal)
             int t1 = -1, t2 = -1;
             
-            if (p1 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn or ObstaclePuzzleType.ChangingHabitat} op1)
+            if (p1 is ObstaclePuzzleObject { isMatchable : true } op1)
             {
                 t1 = (int)op1.habitat;
             }
@@ -518,7 +540,7 @@ namespace _01.Scripts._01.ThreeMatch
                 t1 = p1.GetPuzzleSubType();
             }
 
-            if (p2 is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn or ObstaclePuzzleType.ChangingHabitat} op2)
+            if (p2 is ObstaclePuzzleObject { isMatchable : true } op2)
             {
                 t2 = (int)op2.habitat;
             }
@@ -554,7 +576,7 @@ namespace _01.Scripts._01.ThreeMatch
                     return true;
                 }
             }
-            else if (p is ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed or ObstaclePuzzleType.ForcedRowColumn or ObstaclePuzzleType.ChangingHabitat} op)
+            else if (p is ObstaclePuzzleObject { isMatchable : true } op)
             {
                 if (op.habitat == type)
                 {
@@ -964,8 +986,8 @@ namespace _01.Scripts._01.ThreeMatch
                 return;
             }
             
-            if (_puzzles[x1, y1] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn and not ObstaclePuzzleType.ChangingHabitat } 
-                || _puzzles[x2, y2] is ObstaclePuzzleObject { obstaclePuzzleType : not ObstaclePuzzleType.ForcedRowColumn and not ObstaclePuzzleType.ChangingHabitat}
+            if (_puzzles[x1, y1] is ObstaclePuzzleObject { isSwappable : false } 
+                || _puzzles[x2, y2] is ObstaclePuzzleObject { isSwappable : false }
                 || (maxSwapCount != -1 && _swapCount >= maxSwapCount)
                 || (isContinuousHabitatBanned && _lastMovedHabitat != null &&
                     ((_puzzles[x1, y1] is NormalPuzzleObject np1 && np1.GetPuzzleSubType() == (int)_lastMovedHabitat)
@@ -997,6 +1019,10 @@ namespace _01.Scripts._01.ThreeMatch
             _movedPositions.Clear();
             _movedPositions.Add(new Vector2Int(x1, y1));
             _movedPositions.Add(new Vector2Int(x2, y2));
+
+            _swappedPositions.Clear();
+            _swappedPositions.Add(new Vector2Int(x1, y1));
+            _swappedPositions.Add(new Vector2Int(x2, y2));
             
             var p1 = _puzzles[x1, y1];
             var p2 = _puzzles[x2, y2];
@@ -1156,6 +1182,11 @@ namespace _01.Scripts._01.ThreeMatch
         {
             int[] dx = { 0, 0, -1, 1 };
             int[] dy = { 1, -1, 0, 0 };
+            
+            if (_puzzles[i, j] is ObstaclePuzzleObject op1)
+            {
+                op1.isTriggered = true;
+            }
 
             for (int d = 0; d < 4; d++)
             {
@@ -1164,10 +1195,16 @@ namespace _01.Scripts._01.ThreeMatch
 
                 if (ni >= 0 && ni < x && nj >= 0 && nj < y)
                 {
-                    if (_puzzles[ni, nj] is ObstaclePuzzleObject op &&
-                        _puzzles[ni, nj] is not ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed })
+                    if (_puzzles[ni, nj] is LockedTwicePuzzleObject lt)
                     {
-                        op.isTriggered = true;
+                        if (_swappedPositions.Contains(new Vector2Int(ni, nj)))
+                        {
+                            lt.isTriggered = true;
+                        }
+                    }
+                    else if (_puzzles[ni, nj] is ObstaclePuzzleObject op2)
+                    {
+                        op2.isTriggered = true;
                     }
                 }
             }
@@ -1178,9 +1215,7 @@ namespace _01.Scripts._01.ThreeMatch
             MatchGroup group = new();
             Habitat habitat = _puzzles[startX, startY] switch
             {
-                ObstaclePuzzleObject { obstaclePuzzleType : ObstaclePuzzleType.Fixed } o => o.habitat,
-                ForcedRowColumnPuzzleObject f => f.habitat,
-                ChangingHabitatPuzzleObject c => c.habitat,
+                ObstaclePuzzleObject { isMatchable : true } o => o.habitat,
                 _ => (Habitat)_puzzles[startX, startY].GetPuzzleSubType()
             };
             group.habitat = habitat;
@@ -1213,7 +1248,7 @@ namespace _01.Scripts._01.ThreeMatch
                             continue;
                         }
                         
-                        if (_puzzles[nx, ny] != null && _puzzles[nx, ny].isMatched && 
+                        if (_puzzles[nx, ny] && _puzzles[nx, ny].isMatched && 
                             CheckNormalType(_puzzles[nx, ny], habitat))
                         {
                             if (_puzzles[nx, ny] is not JokerPuzzleObject)
@@ -1358,7 +1393,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int j = 0; j < y; j++)
                 {
-                    if (_puzzles[i, j] != null)
+                    if (_puzzles[i, j])
                     {
                         if (_puzzles[i, j] is ObstaclePuzzleObject { isTriggered : true } op)
                         {
@@ -1385,13 +1420,9 @@ namespace _01.Scripts._01.ThreeMatch
                         seq1.Join(no.HighlightEffect());
                     }
 
-                    if (_puzzles[pos.x, pos.y] is ForcedRowColumnPuzzleObject frc)
+                    if (_puzzles[pos.x, pos.y] is ObstaclePuzzleObject { isMatchable : true } op)
                     {
-                        seq1.Join(frc.HighlightEffect());
-                    }
-                    if (_puzzles[pos.x, pos.y] is ChangingHabitatPuzzleObject ch)
-                    {
-                        seq1.Join(ch.HighlightEffect());
+                        seq1.Join(op.HighlightEffect());
                     }
                 }
                 yield return seq1.WaitForCompletion();
@@ -1403,9 +1434,18 @@ namespace _01.Scripts._01.ThreeMatch
                 foreach (var pos in group.positions)
                 {
                     var targetPuzzle = _puzzles[pos.x, pos.y];
-                    targets.Add(targetPuzzle);
-                    if (targetPuzzle == null) continue;
                     
+                    if (!targetPuzzle)
+                    {
+                        continue;
+                    }
+
+                    if (targetPuzzle is LockedTwicePuzzleObject { isLocked : true } )
+                    {
+                        continue;
+                    }
+                    
+                    targets.Add(targetPuzzle);
                     _puzzles[pos.x, pos.y] = null;
 
                     if (group.resultType != null)
@@ -1432,7 +1472,7 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 foreach (PuzzleObject targetPuzzle in targets)
                 {
-                    if (targetPuzzle == null)
+                    if (!targetPuzzle)
                     {
                         continue;
                     }
@@ -1469,7 +1509,7 @@ namespace _01.Scripts._01.ThreeMatch
                     }));
                 }
 
-                if (group.resultType != null)
+                if (group.resultType != null && !_puzzles[group.spawnPos.x, group.spawnPos.y])
                 {
                     GameObject newPuzzle = Instantiate(specialPuzzlePrefabs[(int)group.resultType], puzzleFrame);
                     newPuzzle.transform.localPosition = destination;
@@ -2055,20 +2095,6 @@ namespace _01.Scripts._01.ThreeMatch
 
             return new Vector2Int(target.column, target.row);
         }
-
-        private IEnumerator SpawnObstacleWarning(int curX, int curY)
-        {
-            Vector2 pos = CalculatePos(curX, curY);
-            GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
-            warningOb.transform.localPosition = pos;
-            yield return warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
-                .SetLoops(4, LoopType.Yoyo)
-                .OnComplete(() =>
-                {
-                    Destroy(warningOb);
-                })
-                .WaitForCompletion();
-        }
         
         private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
         {
@@ -2099,6 +2125,7 @@ namespace _01.Scripts._01.ThreeMatch
 
             Vector3 currentPos = target.transform.position;
             Habitat type = (Habitat)_puzzles[curX, curY].GetPuzzleSubType();
+            Material material = new(normalPuzzlePrefabs[(int)type].GetComponent<Image>().material);
             _puzzles[curX, curY] = null;
             Destroy(target.gameObject);
             
@@ -2120,17 +2147,25 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                     op.habitat = type;
-                    po.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    op.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    op.SetMaterial(material);
                     break;
                 case ForcedRowColumnPuzzleObject frc:
                     frc.habitat = type;
                     frc.forcedDirection = Random.Range(0, 2) == 0 ? ForcedDirection.ForcedRow : ForcedDirection.ForcedColumn;
-                    po.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    frc.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    frc.SetMaterial(material);
+                    
                     GameObject fp = Instantiate(forcedRowColumnDirectionPrefabs[(int)frc.forcedDirection], po.transform);
                     fp.transform.localPosition = new Vector3(0.2f, -0.2f, 0);
                     break;
                 case ChangingHabitatPuzzleObject ch:
                     ch.InitialSetting(this, normalPuzzlePrefabs);
+                    break;
+                case LockedTwicePuzzleObject lt:
+                    lt.habitat = type;
+                    lt.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    lt.SetMaterial(material);
                     break;
                 case InfectionPuzzleObject ip:
                     ip.Init(this);
@@ -2313,15 +2348,6 @@ namespace _01.Scripts._01.ThreeMatch
                 });
 
             yield return null;
-        }
-
-        // 2회 이동 방해타일 해제용
-        public Tween Unlock(int curX, int curY, float duration)
-        {
-            GameObject target = _puzzles[curX, curY].gameObject;
-            _puzzles[curX, curY] = null;
-
-            return target.transform.DOScale(0, duration).SetEase(Ease.OutCubic);
         }
         
         // 감염타일 감염 함수
