@@ -351,7 +351,7 @@ namespace _01.Scripts._01.ThreeMatch
                         break;
                     case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                         op.habitat = randomType;
-                        op.GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
+                        op.transform.GetChild(2).GetComponent<Image>().sprite = normalPuzzleImages[(int)randomType];
                         op.SetMaterial(material);
                         break;
                     case ForcedRowColumnPuzzleObject frc:
@@ -2147,7 +2147,7 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
                 case ObstaclePuzzleObject { obstaclePuzzleType: ObstaclePuzzleType.Fixed } op:
                     op.habitat = type;
-                    op.GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
+                    op.transform.GetChild(2).GetComponent<Image>().sprite = normalPuzzleImages[(int)type];
                     op.SetMaterial(material);
                     break;
                 case ForcedRowColumnPuzzleObject frc:

@@ -59,7 +59,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 6610348951678344521, guid: 7a2010da24920844f86d4080ab4d83e5, type: 3}
+  m_Sprite: {fileID: -44391478049313630, guid: 1607f87f9312c4925b0bfbe976845328, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -143,5 +143,6 @@ MonoBehaviour:
   obstaclePuzzleType: 6
   habitat: 0
   isTriggered: 0
+  isMatchable: 0
+  isSwappable: 0
   infectionInterval: 5
-  maxCount: 8

@@ -18,7 +18,7 @@ namespace _01.Scripts._01.ThreeMatch.Obstacle
         
         public override int GetPuzzleSubType() => (int)obstaclePuzzleType;
 
-        public void SetMaterial(Material material)
+        public virtual void SetMaterial(Material material)
         {
             Image img = GetComponent<Image>();
             
