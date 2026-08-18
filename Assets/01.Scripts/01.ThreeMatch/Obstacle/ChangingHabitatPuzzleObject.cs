@@ -11,21 +11,19 @@ namespace _01.Scripts._01.ThreeMatch.Obstacle
     {
         [SerializeField] private float changingInterval;
         public GameObject[] normalPuzzlePrefabs;
-
-        private static readonly int HighlightAlphaId = Shader.PropertyToID("_Highlight");
+        
         private static readonly int EdgeHighlightAlphaId = Shader.PropertyToID("_EdgeHighlight");
         private PuzzleGenerator _puzzleGenerator;
         private Coroutine _changingCoroutine;
         private Image _image;
-        private Material _material;
         
         public void InitialSetting(PuzzleGenerator generator, GameObject[] puzzlePrefabs)
         {
             _puzzleGenerator = generator;
             normalPuzzlePrefabs = puzzlePrefabs;
             _image = GetComponent<Image>();
-            _material = new Material(_image.material);
-            _image.material = _material;
+            Material = new Material(_image.material);
+            _image.material = Material;
             habitat = ((Habitat[])Enum.GetValues(typeof(Habitat)))[UnityEngine.Random.Range(0, Enum.GetValues(typeof(Habitat)).Length)];
 
             _changingCoroutine = StartCoroutine(ChangingCoroutine());
@@ -54,12 +52,12 @@ namespace _01.Scripts._01.ThreeMatch.Obstacle
             habitat = type;
         }
         
-        public Tween HighlightEffect()
+        public override Tween HighlightEffect()
         {
-            DOTween.To(() => 0f, x => _material.SetFloat(EdgeHighlightAlphaId, x), 0f, 0.1f)
+            DOTween.To(() => 0f, x => Material.SetFloat(EdgeHighlightAlphaId, x), 0f, 0.1f)
                 .SetEase(Ease.OutCubic);
             
-            return DOTween.To(() => 0f, x => _material.SetFloat(HighlightAlphaId, x), 1f, 0.1f)
+            return DOTween.To(() => 0f, x => Material.SetFloat(HighlightAlphaId, x), 1f, 0.1f)
                 .SetLoops(2, LoopType.Yoyo)
                 .SetEase(Ease.OutCubic);
         }

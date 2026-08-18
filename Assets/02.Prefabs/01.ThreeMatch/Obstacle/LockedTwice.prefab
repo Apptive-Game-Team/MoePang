@@ -204,14 +204,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: c9e2f78593ab2614fa02b960e13989d8, type: 2}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.49019608}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4317225593958605249, guid: f4deabd780efe094ab5a5b021ccead15, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9fe9ca50d6604164aa3fa5fa42a67872, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -295,6 +295,9 @@ MonoBehaviour:
   obstaclePuzzleType: 4
   habitat: 0
   isTriggered: 0
+  isMatchable: 1
+  isSwappable: 1
   lockedImages:
   - {fileID: 123933005683181562}
   - {fileID: 2934059919490529406}
+  isLocked: 1

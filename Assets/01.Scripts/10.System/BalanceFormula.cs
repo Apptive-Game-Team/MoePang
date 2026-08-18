@@ -1,3 +1,4 @@
+using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._11.HabitatMode;
 using System;
 using System.Collections.Generic;
@@ -520,7 +521,7 @@ public static class BalanceFormula
     
     #endregion
 
-    #region 100스테이지 이후의 스테이지에 따른 초기 장애물 타일 소환 확률 가중치
+    #region 장애물 타일 소환 확률 가중치
 
     private static int currentStageNum = HabitatModeManager.Instance && HabitatModeManager.Instance.IsHabitatBattle
         ? StageManager.Instance.CurrentHabitatStage + 50 : StageManager.Instance.CurrentStage;
@@ -531,8 +532,48 @@ public static class BalanceFormula
             <= 109 => new[] { 0, 0, 10,  0,  0, 0, 0 },
             <= 119 => new[] { 0, 0, 15, 10,  0, 0, 0 },
             <= 129 => new[] { 0, 0, 15, 10, 10, 0, 0 },
-            <= 139 => new[] { 0, 0, 15, 10, 10, 4, 0 },
-            _      => new[] { 0, 0, 15, 15, 10, 4, 5 }
+            <= 139 => new[] { 0, 0, 15, 10, 10, 0, 0 },
+            _      => new[] { 0, 0, 15, 15, 10, 0, 5 }
+        };
+
+    public static List<PuzzleGenerator.ObstacleWeight> ObstacleWeights =>
+        currentStageNum switch
+        {
+            <= 99 => new List<PuzzleGenerator.ObstacleWeight>()
+            {
+                new() { type = ObstaclePuzzleType.Fixed, weight = 70 },
+                new() { type = ObstaclePuzzleType.DeActivated, weight = 30 },
+            },
+            <= 109 => new List<PuzzleGenerator.ObstacleWeight>()
+            {
+                new() { type = ObstaclePuzzleType.Fixed, weight = 60 },
+                new() { type = ObstaclePuzzleType.DeActivated, weight = 30 },
+                new() { type = ObstaclePuzzleType.ForcedRowColumn, weight = 10 },
+            },
+            <= 119 => new List<PuzzleGenerator.ObstacleWeight>()
+            {
+                new() { type = ObstaclePuzzleType.Fixed, weight = 45 },
+                new() { type = ObstaclePuzzleType.DeActivated, weight = 30 },
+                new() { type = ObstaclePuzzleType.ForcedRowColumn, weight = 15 },
+                new() { type = ObstaclePuzzleType.ChangingHabitat, weight = 10 },
+            },
+            <= 139 => new List<PuzzleGenerator.ObstacleWeight>()
+            {
+                new() { type = ObstaclePuzzleType.Fixed, weight = 40 },
+                new() { type = ObstaclePuzzleType.DeActivated, weight = 25 },
+                new() { type = ObstaclePuzzleType.ForcedRowColumn, weight = 15 },
+                new() { type = ObstaclePuzzleType.ChangingHabitat, weight = 10 },
+                new() { type = ObstaclePuzzleType.LockedTwice, weight = 10 },
+            },
+            _ => new List<PuzzleGenerator.ObstacleWeight>()
+            {
+                new() { type = ObstaclePuzzleType.Fixed, weight = 35 },
+                new() { type = ObstaclePuzzleType.DeActivated, weight = 20 },
+                new() { type = ObstaclePuzzleType.ForcedRowColumn, weight = 15 },
+                new() { type = ObstaclePuzzleType.ChangingHabitat, weight = 15 },
+                new() { type = ObstaclePuzzleType.LockedTwice, weight = 10 },
+                new() { type = ObstaclePuzzleType.Infection, weight = 5 },
+            }
         };
 
     #endregion

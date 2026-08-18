@@ -8,6 +8,7 @@ namespace _01.Scripts._01.ThreeMatch.Obstacle
     public class LockedTwicePuzzleObject : ObstaclePuzzleObject
     {
         [SerializeField] private Image[] lockedImages;
+        public bool isLocked = true;
         private int _lockedCount = 2;
 
         public IEnumerator Unlock(PuzzleGenerator generator, int curX, int curY)
@@ -24,9 +25,9 @@ namespace _01.Scripts._01.ThreeMatch.Obstacle
                 seq.Append(target.DOFade(0, 0.2f).SetEase(Ease.Linear));
             }
 
-            if (_lockedCount <= 0)
+            if (_lockedCount <= -1)
             {
-                seq.Append(generator.Unlock(curX, curY, 0.1f));
+                isLocked = false;
             }
 
             yield return null;
