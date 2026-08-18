@@ -7,6 +7,8 @@ using UnityEngine.UI;
 /// </summary>
 public class UnitInfoIcon : MonoBehaviour
 {
+    private static readonly int Highlight = Shader.PropertyToID("_UIHighlight");
+
     [Header("Unit Data")]
     [SerializeField] private FriendlyUnitData unitData;
 
@@ -21,6 +23,7 @@ public class UnitInfoIcon : MonoBehaviour
     private bool isSelected = false;
     private Vector3 unlockImageOriginScale;
     private Vector3 backgroundImageOriginScale;
+    private Material _highlightMaterial;
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
@@ -109,5 +112,19 @@ public class UnitInfoIcon : MonoBehaviour
         }
         
         shopManager.UnitClicked(this);
+    }
+    
+    // UI 하이라이트 용 함수
+    public void SetHighlight(Material material, bool highlight)
+    {
+        Image animalImage = GetComponentInChildren<Image>(true);
+
+        if (_highlightMaterial == null)
+        {
+            _highlightMaterial = new Material(material);
+            animalImage.material = _highlightMaterial;
+        }
+        
+        _highlightMaterial.SetFloat(Highlight, highlight ? 1f : 0f);
     }
 }
