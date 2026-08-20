@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,8 @@ namespace _01.Scripts._04.UI.InGame
         [Header("Components")]
         [SerializeField] private RawImage battleRawImage;
         [SerializeField] private SpriteRenderer battleBackgroundSr;
+        [SerializeField] private Transform friendlySpawnPosition;
+        [SerializeField] private Transform enemySpawnPosition;
         
         [Header("Zoom")]
         [SerializeField] private float zoomSpeed = 2f;
@@ -35,6 +38,12 @@ namespace _01.Scripts._04.UI.InGame
             _cameraBottomY = _battleCam.transform.position.y - _battleCam.orthographicSize;
         }
 
+        private void Start()
+        {
+            bool savedCameraLock = GameManager.Instance == null || GameManager.Instance.gameData.cameraLockEnabled;
+            SetCameraLock(savedCameraLock, false);
+        }
+
         private void Update()
         {
             if (Time.timeScale == 0)
@@ -47,9 +56,8 @@ namespace _01.Scripts._04.UI.InGame
                 FollowFrontFriendlyTarget();
                 return;
             }
-            
-            HandleZoom();
-            HandleDrag();
+
+            ApplyUnlockedCameraView();
         }
 
         private void HandleZoom()
@@ -186,6 +194,11 @@ namespace _01.Scripts._04.UI.InGame
 
         public void SetCameraLock(bool isOn)
         {
+            SetCameraLock(isOn, true);
+        }
+
+        private void SetCameraLock(bool isOn, bool saveGameData)
+        {
             isCameraLocked = isOn;
 
             if (isCameraLocked)
@@ -199,6 +212,39 @@ namespace _01.Scripts._04.UI.InGame
 
                 ClampCameraInsideBackground();
             }
+            else
+            {
+                ApplyUnlockedCameraView();
+            }
+
+            if (!saveGameData || GameManager.Instance == null)
+            {
+                return;
+            }
+
+            GameManager.Instance.gameData.cameraLockEnabled = isCameraLocked;
+            GameManager.Instance.SaveGameData();
+        }
+
+        private void ApplyUnlockedCameraView()
+        {
+            _targetZoom = maxOrthographicSize;
+            _battleCam.orthographicSize = _targetZoom;
+
+            Vector3 pos = transform.position;
+
+            if (friendlySpawnPosition != null && enemySpawnPosition != null)
+            {
+                pos = (friendlySpawnPosition.position + enemySpawnPosition.position) * 0.5f;
+                pos.z = transform.position.z;
+            }
+            else
+            {
+                pos.y = _cameraBottomY + _battleCam.orthographicSize;
+            }
+
+            transform.position = pos;
+            ClampCameraInsideBackground();
         }
         
         private void FollowFrontFriendlyTarget()

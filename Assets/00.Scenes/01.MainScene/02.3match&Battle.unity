@@ -6420,6 +6420,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   battleRawImage: {fileID: 683930344}
   battleBackgroundSr: {fileID: 777223921}
+  friendlySpawnPosition: {fileID: 1540985937}
+  enemySpawnPosition: {fileID: 894054809}
   zoomSpeed: 0.1
   minOrthographicSize: 0.5
   maxOrthographicSize: 1

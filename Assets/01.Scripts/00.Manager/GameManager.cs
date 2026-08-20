@@ -284,6 +284,7 @@ namespace _01.Scripts._00.Manager
     {
         public SoundData soundData;
         public LanguageData languageData;
+        public bool cameraLockEnabled = true;
     }
 
     [Serializable]
