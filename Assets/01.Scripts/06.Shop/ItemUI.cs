@@ -52,14 +52,16 @@ namespace _01.Scripts._06.Shop
             foreach (ItemObject item in items)
             {
                 ItemInfo info = itemData.items.Find(i => i.type == item.type);
+                Button itemButton = item.transform.GetComponentInChildren<Button>();
                 
                 item.Init(info);
                 item.UpdateAmount();
+                itemButton.interactable = IsItemUnlockedForPurchase(item.type);
                 
                 ItemObject currentItem = item;
                 ItemInfo currentInfo = info;
 
-                item.transform.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                itemButton.onClick.AddListener(() =>
                 {
                     OpenBuyPopup(currentItem, currentInfo);
                 });
@@ -68,6 +70,9 @@ namespace _01.Scripts._06.Shop
         
         private void OpenBuyPopup(ItemObject item, ItemInfo info)
             {
+                if (!IsItemUnlockedForPurchase(item.type))
+                    return;
+
                 int availableBuyCount = GetAvailableBuyCount(item.type, info.price);
                 
                 if (availableBuyCount <= 0)
@@ -148,6 +153,13 @@ namespace _01.Scripts._06.Shop
                 int affordableCount = GoldManager.Instance.Gold / Mathf.Max(1, price);
 
                 return Mathf.Max(0, Mathf.Min(remainingCapacity, affordableCount));
+            }
+
+            private bool IsItemUnlockedForPurchase(ItemType itemType)
+            {
+                return itemType != ItemType.RaiseSpawnProb ||
+                       HabitatManager.Instance != null &&
+                       HabitatManager.Instance.AreAllFinalHabitatUnitsUnlocked();
             }
 
             private void ClosePopup()
