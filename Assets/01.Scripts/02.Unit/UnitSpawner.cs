@@ -161,7 +161,7 @@ namespace _01.Scripts._02.Unit
 
                 SpawnEnemy();
 
-                if (enemySpawnCount % 5 == 0)
+                if (enemySpawnCount >= 3 && (enemySpawnCount - 3) % 6 == 0)
                 {
                     StartCoroutine(SpawnAdditionalEnemiesCoroutine(4, 0.2f));
                 }
