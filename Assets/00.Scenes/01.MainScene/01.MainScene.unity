@@ -682,6 +682,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previousButton: {fileID: 1906997923189694580}
   nextButton: {fileID: 8386085727605257562}
+  stageImage: {fileID: 8297500639672959944}
+  diorama:
+  - {fileID: 5738715646551038629, guid: 8a170c092c5214142a9286b8fbd5ae4f, type: 3}
+  - {fileID: 7805257845491766523, guid: 2416600eda77148a9a52f1cc0f8d6f0a, type: 3}
+  - {fileID: -1539376994465307607, guid: 0eb481e3584814aefb5b53789cdb7601, type: 3}
+  - {fileID: -5583321545735827055, guid: cb7e0c6becaac471ab342f765b472008, type: 3}
+  - {fileID: -3845254777260823607, guid: 5e978abf5eb884e57bedbcb3b889def6, type: 3}
+  - {fileID: 1446860171702913961, guid: a742b9847935b468a963fdc45158d98e, type: 3}
+  - {fileID: 4492679297899769435, guid: 7efe857dd2feb4abf9525635877c052f, type: 3}
+  - {fileID: -8844516669783243173, guid: e0427d6b37d3a4d3d92ddb6f96a3409a, type: 3}
+  - {fileID: 1104268955487446498, guid: 180c38c0527144ac0a1f3e4f0c392636, type: 3}
+  - {fileID: 3023947217505616116, guid: 9f4dce07238f646a88cc62eb4249897a, type: 3}
   stageText: {fileID: 1684028642370474151}
 --- !u!1 &1759585961
 GameObject:
