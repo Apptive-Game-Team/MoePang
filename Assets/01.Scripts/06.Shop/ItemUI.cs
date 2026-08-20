@@ -10,7 +10,7 @@ namespace _01.Scripts._06.Shop
     {
         [SerializeField] private ItemData itemData;
         private GameObject _upgradePopup;
-        private int maxBuyCount = 99;
+        private int maxBuyCount = 5;
         private int _buyCount = 1;
         private ItemInfo _selectedInfo;
         private ItemObject _selectedItem;
@@ -68,14 +68,16 @@ namespace _01.Scripts._06.Shop
         
         private void OpenBuyPopup(ItemObject item, ItemInfo info)
             {
-                if (!GoldManager.Instance.TrySpendGold(info.price))
+                int availableBuyCount = GetAvailableBuyCount(item.type, info.price);
+                
+                if (availableBuyCount <= 0)
                     return;
 
                 SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
 
                 _selectedItem = item;
                 _selectedInfo = info;
-                _buyCount = 1;
+                _buyCount = Mathf.Clamp(1, 1, availableBuyCount);
 
                 RefreshPopupText();
                 _upgradePopup.SetActive(true);
@@ -88,8 +90,13 @@ namespace _01.Scripts._06.Shop
 
                 SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
 
-                int affordableCount = GoldManager.Instance.Gold / _selectedInfo.price;
-                int limit = Mathf.Min(maxBuyCount, affordableCount);
+                int limit = GetAvailableBuyCount(_selectedItem.type, _selectedInfo.price);
+
+                if (limit <= 0)
+                {
+                    ClosePopup();
+                    return;
+                }
 
                 _buyCount = Mathf.Clamp(_buyCount + amount, 1, limit);
 
@@ -111,9 +118,16 @@ namespace _01.Scripts._06.Shop
                 if (_selectedInfo == null || _selectedItem == null)
                     return;
 
+                int availableBuyCount = GetAvailableBuyCount(_selectedItem.type, _selectedInfo.price);
+
+                if (availableBuyCount <= 0)
+                    return;
+
+                _buyCount = Mathf.Clamp(_buyCount, 1, availableBuyCount);
+
                 int totalPrice = _selectedInfo.price * _buyCount;
 
-                if (!GoldManager.Instance.TrySpendGold(totalPrice))
+                if (availableBuyCount <= 0 || !GoldManager.Instance.TrySpendGold(totalPrice))
                     return;
 
                 GoldManager.Instance.AdjustGold(-totalPrice);
@@ -125,6 +139,15 @@ namespace _01.Scripts._06.Shop
                 _selectedItem.UpdateAmount();
 
                 ClosePopup();
+            }
+
+            private int GetAvailableBuyCount(ItemType itemType, int price)
+            {
+                int ownedCount = GameManager.Instance.itemData.ItemAmounts[itemType];
+                int remainingCapacity = maxBuyCount - ownedCount;
+                int affordableCount = GoldManager.Instance.Gold / Mathf.Max(1, price);
+
+                return Mathf.Max(0, Mathf.Min(remainingCapacity, affordableCount));
             }
 
             private void ClosePopup()
