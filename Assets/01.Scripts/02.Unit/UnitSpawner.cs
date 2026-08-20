@@ -163,7 +163,7 @@ namespace _01.Scripts._02.Unit
 
                 if (enemySpawnCount % 5 == 0)
                 {
-                    StartCoroutine(SpawnAdditionalEnemiesCoroutine(2, 0.2f));
+                    StartCoroutine(SpawnAdditionalEnemiesCoroutine(4, 0.2f));
                 }
             }
         }
