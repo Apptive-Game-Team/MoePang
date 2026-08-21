@@ -26,7 +26,7 @@ namespace _01.Scripts._06.Shop
 
         private void Awake()
         {
-            _upgradePopup = transform.parent.transform.Find("UpgradePopup").gameObject;
+            _upgradePopup = transform.parent.transform.Find("ItemBuyPopup").gameObject;
             
             _titleText = _upgradePopup.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
             _unitPriceText = _upgradePopup.transform.GetChild(1).GetComponent<TextMeshProUGUI>();

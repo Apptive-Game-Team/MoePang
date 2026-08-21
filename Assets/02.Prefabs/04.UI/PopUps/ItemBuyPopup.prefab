@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 6001672760727323810}
   - component: {fileID: 6281247274713415092}
   m_Layer: 5
-  m_Name: ButtonText
+  m_Name: AcceptButtonText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -825,7 +825,7 @@ GameObject:
   - component: {fileID: 1436718930868743886}
   - component: {fileID: 7921817280833023211}
   m_Layer: 5
-  m_Name: ButtonText
+  m_Name: CloseButtonText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1081,12 +1081,12 @@ GameObject:
   - component: {fileID: 3846589211572422359}
   - component: {fileID: 4113640839524330474}
   m_Layer: 5
-  m_Name: UpgradePopup
+  m_Name: ItemBuyPopup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1555359975909320754
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1163,7 +1163,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8704650812585997060}
   m_Layer: 5
-  m_Name: Decription
+  m_Name: Description
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
