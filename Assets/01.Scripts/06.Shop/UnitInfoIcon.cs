@@ -24,6 +24,8 @@ public class UnitInfoIcon : MonoBehaviour
     private Vector3 unlockImageOriginScale;
     private Vector3 backgroundImageOriginScale;
     private Material _highlightMaterial;
+    private Image _targetAnimalImage;
+    private bool _isHighlighted;
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
@@ -40,6 +42,8 @@ public class UnitInfoIcon : MonoBehaviour
         {
             backgroundImageOriginScale = backgroundImage.transform.localScale;
         }
+        
+        _targetAnimalImage = GetComponentInChildren<Image>(true);
     }
 
     private void Start()
@@ -117,14 +121,19 @@ public class UnitInfoIcon : MonoBehaviour
     // UI 하이라이트 용 함수
     public void SetHighlight(Material material, bool highlight)
     {
-        Image animalImage = GetComponentInChildren<Image>(true);
-
-        if (_highlightMaterial == null)
+        if (_targetAnimalImage == null)
         {
-            _highlightMaterial = new Material(material);
-            animalImage.material = _highlightMaterial;
+            _targetAnimalImage = GetComponentInChildren<Image>(true);
         }
         
-        _highlightMaterial.SetFloat(Highlight, highlight ? 1f : 0f);
+        if (material != null && _targetAnimalImage.material != material)
+        {
+            _targetAnimalImage.material = material;
+        }
+        
+        if (_targetAnimalImage.materialForRendering != null)
+        {
+            _targetAnimalImage.materialForRendering.SetFloat(Highlight, highlight ? 1f : 0f);
+        }
     }
 }

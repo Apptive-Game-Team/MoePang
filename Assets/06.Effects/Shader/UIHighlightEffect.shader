@@ -7,6 +7,14 @@ Shader "Custom/UIHighlightEffect"
         _OutlineColor("OutlineColor", Color) = (1, 1, 1, 1)
         _OutlineThickness("OutlineThickness", Float) = 3
         _UIHighlight("UIHighlight", Float) = 0
+        
+        [HideInInspector] _StencilComp ("Stencil Comparison", Float) = 8
+        [HideInInspector] _Stencil ("Stencil ID", Float) = 0
+        [HideInInspector] _StencilOp ("Stencil Operation", Float) = 0
+        [HideInInspector] _StencilWriteMask ("Stencil Write Mask", Float) = 255
+        [HideInInspector] _StencilReadMask ("Stencil Read Mask", Float) = 255
+        [HideInInspector] _ColorMask ("Color Mask", Float) = 15
+        [HideInInspector] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
     }
 
     
@@ -23,11 +31,22 @@ Shader "Custom/UIHighlightEffect"
 
         Pass
         {
-            Name "Unlit"
+            Name "UIHighlightEffect"
             
             Blend SrcAlpha OneMinusSrcAlpha
             ZWrite Off
             Cull Off
+            
+            Stencil
+            {
+                Ref [_Stencil]
+                Comp [_StencilComp]
+                Pass [_StencilOp]
+                ReadMask [_StencilReadMask]
+                WriteMask [_StencilWriteMask]
+            }
+
+            ColorMask [_ColorMask]
             
             HLSLPROGRAM
 
@@ -159,9 +178,23 @@ Shader "Custom/UIHighlightEffect"
                             input.uv - diagonalOffset
                         ).a);
                 }
+                
                 float outline = surroundingAlpha * (1.0 - color.a);
+                
+                half4 outlineColor = _OutlineColor;
 
-                color += _OutlineColor * outline * _UIHighlight;
+                outlineColor.a *= outline * _UIHighlight;
+
+                color.rgb = lerp(
+                    color.rgb,
+                    outlineColor.rgb,
+                    outlineColor.a
+                );
+
+                color.a = max(
+                    color.a,
+                    outlineColor.a
+                );
                 
                 return color;
             }
