@@ -9235,9 +9235,9 @@ MonoBehaviour:
     - type: 2
       pos: {x: 6, y: 6}
     - type: 4
-      pos: {x: 2, y: 2}
+      pos: {x: 2, y: 4}
     - type: 4
-      pos: {x: 4, y: 2}
+      pos: {x: 4, y: 4}
   - obstacles:
     - type: 1
       pos: {x: 3, y: 1}
@@ -9317,7 +9317,6 @@ MonoBehaviour:
   - {fileID: 7511933255784740646, guid: 83ced48ea11e4174aa70d4c3f9765b19, type: 3}
   - {fileID: 7511933255784740646, guid: 76104887144c6674785ac934662b7da3, type: 3}
   spawnStackManager: {fileID: 1195533400}
-  isDebug: 0
   resetRectanglePrefab: {fileID: 1359563286638045153, guid: d45e9fa7bbd42b6498c2dea1964f0f67, type: 3}
   resetEffectDuration: 1
   resetScaleRange: {x: 0.9, y: 1.1}

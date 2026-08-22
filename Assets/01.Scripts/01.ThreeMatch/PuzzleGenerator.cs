@@ -206,13 +206,11 @@ namespace _01.Scripts._01.ThreeMatch
                 if (_isCheckRequired)
                 {
                     _isCheckRequired = false;
-                    print("퍼즐 리셋 판별");
 
                     yield return new WaitUntil(IsAllPuzzlesIdle);
-
+                    
                     if (!HasPossibleMove())
                     {
-                        print("퍼즐 판별 결과 리셋");
                         _taskQueue.Enqueue(ResetBoard);
                 
                         Func<IEnumerator> resetTask = _taskQueue.Dequeue();
@@ -659,7 +657,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int r = 0; r < y; r++)
                 {
-                    if (_puzzles[c, r] != null && _puzzles[c, r].puzzleState != PuzzleState.Idle)
+                    if (_puzzles[c, r] && _puzzles[c, r].puzzleState != PuzzleState.Idle)
                     {
                         return false;
                     }
@@ -1798,7 +1796,6 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator DropBlocks()
         {
-            _movedPositions.Clear();
             Sequence seq = DOTween.Sequence();
 
             bool hasEmptySlot = true;
@@ -1892,8 +1889,8 @@ namespace _01.Scripts._01.ThreeMatch
                                     float duration1 = distance1 / dropSpeed;
                                     float duration2 = distance2 / dropSpeed;
 
-                                    Vector3 linkedPortalPos = CalculatePos(linkedPortal.column, linkedPortal.row);
-                                    Vector3 portalPos = CalculatePos(portal.column, portal.row);
+                                    Vector3 linkedPortalPos = linkedPortal.transform.localPosition;
+                                    Vector3 portalPos = portal.transform.localPosition;
                                     fallTween = targetPo.transform.DOLocalMove(linkedPortalPos, duration1)
                                         .SetEase(Ease.InSine)
                                         .OnComplete(() =>
@@ -2550,6 +2547,7 @@ namespace _01.Scripts._01.ThreeMatch
             if (_puzzles[curX, curY] is ObstaclePuzzleObject op)
             {
                 op.isTriggered = false;
+                op.puzzleState = PuzzleState.Idle;
             }
             
             switch (type)
