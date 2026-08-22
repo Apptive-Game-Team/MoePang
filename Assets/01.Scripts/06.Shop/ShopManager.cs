@@ -15,6 +15,7 @@ public class ShopManager : MonoBehaviour
     [Header("패널")]
     [SerializeField] private List<GameObject> panels;
     [SerializeField] private Image unlockPanel;
+    [SerializeField] private Material uiHighlightMaterial;
     
     private UnitDescription unitDescription;
     private UnitInfoIcon currentSelected;
@@ -110,11 +111,13 @@ public class ShopManager : MonoBehaviour
 
         if (currentSelected != null)
         {
+            currentSelected.SetHighlight(uiHighlightMaterial, false);
             currentSelected.Deselect();
         }
-
+        
         currentSelected = clickedUI;
         currentSelected.Select();
+        currentSelected.SetHighlight(new Material(uiHighlightMaterial), true);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
     }
 

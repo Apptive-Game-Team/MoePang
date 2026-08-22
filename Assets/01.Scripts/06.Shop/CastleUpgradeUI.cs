@@ -21,7 +21,7 @@ namespace _01.Scripts._06.Shop
         private void Awake()
         {
             _castleLevel = GameManager.Instance.castleData.castleLevel;
-            _upgradePopup = transform.parent.transform.Find("UpgradePopup").gameObject;
+            _upgradePopup = transform.parent.transform.Find("CastleUpgradePopup").gameObject;
             
             UpdateText();
             RegisterUpgradeButton();
@@ -53,10 +53,10 @@ namespace _01.Scripts._06.Shop
             {
                 if (GoldManager.Instance.TrySpendGold(cost))
                 {
-                    _upgradePopup.transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = cost + "G";
-                    _upgradePopup.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "강화하시겠습니까?";
-                    _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.RemoveAllListeners();
-                    _upgradePopup.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+                    _upgradePopup.transform.Find("CostText").GetComponent<TextMeshProUGUI>().text = cost.ToString();
+                    _upgradePopup.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text = "강화하시겠습니까?";
+                    _upgradePopup.transform.Find("AcceptButton").GetComponent<Button>().onClick.RemoveAllListeners();
+                    _upgradePopup.transform.Find("AcceptButton").GetComponent<Button>().onClick.AddListener(() =>
                     {
                         GoldManager.Instance.AdjustGold(-cost);
                         SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
@@ -81,7 +81,7 @@ namespace _01.Scripts._06.Shop
                 }
             });
 
-            _upgradePopup.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
+            _upgradePopup.transform.Find("CloseButton").GetComponent<Button>().onClick.AddListener(() =>
             {
                 SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 _upgradePopup.SetActive(false);

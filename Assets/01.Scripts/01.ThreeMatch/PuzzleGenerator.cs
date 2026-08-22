@@ -853,6 +853,159 @@ namespace _01.Scripts._01.ThreeMatch
                 }
             }
         }
+        
+        // 퍼즐 매치 가능 판별 함수들
+        private bool HasPossibleMove()
+        {
+            for (int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if (_puzzles[i, j] is SpecialPuzzleObject)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            for (int c = 0; c < x; c++)
+            {
+                for (int r = 0; r < y; r++)
+                {
+                    if (r + 1 < y)
+                    {
+                        if (CanCreateMatchBySwap(c, r, c, r + 1))
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (c + 1 < x)
+                    {
+                        if (CanCreateMatchBySwap(c, r, c + 1, r))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        
+        private bool CanCreateMatchBySwap(int c1, int r1, int c2, int r2)
+        {
+            PuzzleObject first = _puzzles[c1, r1];
+            PuzzleObject second = _puzzles[c2, r2];
+
+            if (first == null || second == null)
+            {
+                return false;
+            }
+
+            if (first is not (NormalPuzzleObject or ObstaclePuzzleObject { isSwappable: true}) &&
+                second is not (NormalPuzzleObject or ObstaclePuzzleObject { isSwappable: true}))
+            {
+                return false;
+            }
+
+            _puzzles[c1, r1] = second;
+            _puzzles[c2, r2] = first;
+
+            bool canMatch =
+                HasMatchAt(c1, r1) ||
+                HasMatchAt(c2, r2);
+
+            _puzzles[c1, r1] = first;
+            _puzzles[c2, r2] = second;
+
+            return canMatch;
+        }
+        
+        private bool HasMatchAt(int column, int row)
+        {
+            PuzzleObject target = _puzzles[column, row];
+
+            if (target == null)
+            {
+                return false;
+            }
+
+            Habitat habitat = target switch
+            {
+                NormalPuzzleObject np => np.habitat,
+                ObstaclePuzzleObject op => op.habitat,
+                _ => Habitat.Desert
+            };
+
+            int horizontalCount = 1 + CountSame(column, row, 0, -1, habitat) +
+                                  CountSame(column, row, 0, 1, habitat);
+
+            if (horizontalCount >= 3)
+            {
+                return true;
+            }
+
+            int verticalCount = 1 + CountSame(column, row, -1, 0, habitat) + 
+                                CountSame(column, row, 1, 0, habitat);
+
+            return verticalCount >= 3;
+        }
+        
+        private int CountSame(
+            int column,
+            int row,
+            int columnDirection,
+            int rowDirection,
+            Habitat habitat)
+        {
+            int count = 0;
+
+            int nextRow = row + rowDirection;
+            int nextColumn = column + columnDirection;
+
+            while (nextRow >= 0 &&
+                   nextRow < y &&
+                   nextColumn >= 0 &&
+                   nextColumn < x)
+            {
+                PuzzleObject puzzleObject = _puzzles[nextColumn, nextRow];
+
+                if (puzzleObject == null)
+                {
+                    break;
+                }
+
+                if (puzzleObject is not (NormalPuzzleObject or ObstaclePuzzleObject { isMatchable: true }))
+                {
+                    break;
+                }
+
+                if (puzzleObject is NormalPuzzleObject np)
+                {
+                    if (np.habitat != habitat)
+                    {
+                        break;
+                    }
+                }
+
+                if (puzzleObject is ObstaclePuzzleObject { isMatchable: true } op)
+                {
+                    if (op.habitat != habitat)
+                    {
+                        break;
+                    }
+                }
+
+                count++;
+
+                nextRow += rowDirection;
+                nextColumn += columnDirection;
+            }
+
+            return count;
+        }
+        
         #endregion
         
         /// <summary>
@@ -1725,6 +1878,11 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 OnComboInitialized?.Invoke();
                 goldUI.ShowUI(false);
+
+                if (!HasPossibleMove())
+                {
+                    yield return ResetBoard();
+                }
             }
         }
         
