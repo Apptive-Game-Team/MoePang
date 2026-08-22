@@ -79,7 +79,6 @@ namespace _01.Scripts._01.ThreeMatch
         [SerializeField] private SpawnStackManager spawnStackManager;
 
         [Header("Puzzle Reset Setting")] 
-        [SerializeField] private bool isDebug = false;
         [SerializeField] private GameObject resetRectanglePrefab;
         [SerializeField] private float resetEffectDuration = 0.8f;
         [SerializeField] private Vector2 resetScaleRange = new Vector2(1f, 1.3f);
@@ -108,10 +107,14 @@ namespace _01.Scripts._01.ThreeMatch
         public Action OnComboInitialized;
         public Action OnComboDetected;
         public Action<int> OnSwapCountChanged;
+
+        private Coroutine _obstacleSpawnCoroutine;
+        private List<GameObject> _obstacleSpawnIndicator = new();
         
         private List<MatchGroup> _currentMatchGroups = new();
         private List<PuzzleObject> _bannedPuzzles = new();
         private Queue<Func<IEnumerator>> _taskQueue = new();
+        private bool _isCheckRequired;
         private HashSet<Vector2Int> _movedPositions = new();
         private HashSet<Vector2Int> _swappedPositions = new();
         private List<PortalPuzzleObject> _portals = new();
@@ -167,7 +170,7 @@ namespace _01.Scripts._01.ThreeMatch
         private void Start()
         {
             AddTask(GenerateBoard);
-            StartCoroutine(SpawnObstaclePuzzle());
+            _obstacleSpawnCoroutine = StartCoroutine(SpawnObstaclePuzzle());
         }
         
         /// <summary>
@@ -198,6 +201,23 @@ namespace _01.Scripts._01.ThreeMatch
                     
                     Func<IEnumerator> task = _taskQueue.Dequeue();
                     yield return StartCoroutine(task());
+                }
+
+                if (_isCheckRequired)
+                {
+                    _isCheckRequired = false;
+                    print("퍼즐 리셋 판별");
+
+                    yield return new WaitUntil(IsAllPuzzlesIdle);
+
+                    if (!HasPossibleMove())
+                    {
+                        print("퍼즐 판별 결과 리셋");
+                        _taskQueue.Enqueue(ResetBoard);
+                
+                        Func<IEnumerator> resetTask = _taskQueue.Dequeue();
+                        yield return StartCoroutine(resetTask());
+                    }
                 }
             }
             finally
@@ -238,6 +258,22 @@ namespace _01.Scripts._01.ThreeMatch
                         Destroy(_puzzles[i, j].gameObject);
                     }
                 }
+            }
+            
+            if (_obstacleSpawnCoroutine != null)
+            {
+                StopCoroutine(_obstacleSpawnCoroutine);
+                
+                foreach (GameObject indicator in _obstacleSpawnIndicator)
+                {
+                    if (indicator)
+                    {
+                        DOTween.Kill(indicator);
+                        Destroy(indicator);
+                    }
+                }
+
+                _obstacleSpawnIndicator.Clear();
             }
 
             yield return SpawnResetRectangles();
@@ -616,6 +652,21 @@ namespace _01.Scripts._01.ThreeMatch
             }
             return false;
         }
+        
+        private bool IsAllPuzzlesIdle()
+        {
+            for (int c = 0; c < x; c++)
+            {
+                for (int r = 0; r < y; r++)
+                {
+                    if (_puzzles[c, r] != null && _puzzles[c, r].puzzleState != PuzzleState.Idle)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
         #endregion
         
         /// <summary>
@@ -655,7 +706,6 @@ namespace _01.Scripts._01.ThreeMatch
         {
             if (Input.GetKeyDown(KeyCode.P))
             {
-                isDebug = true;
                 StartCoroutine(ResetBoard());
             }
         }
@@ -817,11 +867,9 @@ namespace _01.Scripts._01.ThreeMatch
 
             resetRectangles.Clear();
 
-            if (isDebug)
-            {
-                isDebug = false;
-                StartCoroutine(GenerateBoard());
-            }
+            StartCoroutine(GenerateBoard());
+
+            _obstacleSpawnCoroutine = StartCoroutine(SpawnObstaclePuzzle());
         }
         
         private void PlayResetSpawnEffects()
@@ -872,20 +920,14 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 for (int r = 0; r < y; r++)
                 {
-                    if (r + 1 < y)
+                    if (r + 1 < y && CanCreateMatchBySwap(c, r, c, r + 1))
                     {
-                        if (CanCreateMatchBySwap(c, r, c, r + 1))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
-
-                    if (c + 1 < x)
+                    
+                    if (c + 1 < x && CanCreateMatchBySwap(c, r, c + 1, r))
                     {
-                        if (CanCreateMatchBySwap(c, r, c + 1, r))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -898,13 +940,15 @@ namespace _01.Scripts._01.ThreeMatch
             PuzzleObject first = _puzzles[c1, r1];
             PuzzleObject second = _puzzles[c2, r2];
 
-            if (first == null || second == null)
+            if (!first || !second)
             {
                 return false;
             }
 
-            if (first is not (NormalPuzzleObject or ObstaclePuzzleObject { isSwappable: true}) &&
-                second is not (NormalPuzzleObject or ObstaclePuzzleObject { isSwappable: true}))
+            bool isFirstSwappable = first is NormalPuzzleObject or ObstaclePuzzleObject { isSwappable: true };
+            bool isSecondSwappable = second is NormalPuzzleObject or ObstaclePuzzleObject { isSwappable: true };
+
+            if (!isFirstSwappable || !isSecondSwappable)
             {
                 return false;
             }
@@ -926,30 +970,49 @@ namespace _01.Scripts._01.ThreeMatch
         {
             PuzzleObject target = _puzzles[column, row];
 
-            if (target == null)
+            if (!target)
             {
                 return false;
             }
 
-            Habitat habitat = target switch
+            Habitat habitat;
+            switch (target)
             {
-                NormalPuzzleObject np => np.habitat,
-                ObstaclePuzzleObject op => op.habitat,
-                _ => Habitat.Desert
-            };
-
-            int horizontalCount = 1 + CountSame(column, row, 0, -1, habitat) +
-                                  CountSame(column, row, 0, 1, habitat);
-
-            if (horizontalCount >= 3)
+                case NormalPuzzleObject np:
+                    habitat = np.habitat;
+                    break;
+                case ObstaclePuzzleObject { isMatchable: true } op:
+                    habitat = op.habitat;
+                    break;
+                default:
+                    return false;
+            }
+            
+            ForcedRowColumnPuzzleObject forcedTarget = target as ForcedRowColumnPuzzleObject;
+            
+            if (!forcedTarget || forcedTarget.forcedDirection == ForcedDirection.ForcedRow)
             {
-                return true;
+                int horizontalCount = 1 + CountSame(column, row, -1, 0, habitat) +
+                                      CountSame(column, row, 1, 0, habitat);
+
+                if (horizontalCount >= 3)
+                {
+                    return true;
+                }
+            }
+            
+            if (!forcedTarget || forcedTarget.forcedDirection == ForcedDirection.ForcedColumn)
+            {
+                int verticalCount = 1 + CountSame(column, row, 0, -1, habitat) + 
+                                    CountSame(column, row, 0, 1, habitat);
+
+                if (verticalCount >= 3)
+                {
+                    return true;
+                }
             }
 
-            int verticalCount = 1 + CountSame(column, row, -1, 0, habitat) + 
-                                CountSame(column, row, 1, 0, habitat);
-
-            return verticalCount >= 3;
+            return false;
         }
         
         private int CountSame(
@@ -971,33 +1034,35 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 PuzzleObject puzzleObject = _puzzles[nextColumn, nextRow];
 
-                if (puzzleObject == null)
+                if (!puzzleObject)
                 {
                     break;
                 }
-
-                if (puzzleObject is not (NormalPuzzleObject or ObstaclePuzzleObject { isMatchable: true }))
+                
+                if (puzzleObject is NormalPuzzleObject normal && normal.habitat == habitat)
+                {
+                    count++;
+                }
+                else if (puzzleObject is ObstaclePuzzleObject { isMatchable: true } obstacle && obstacle.habitat == habitat)
+                {
+                    if (obstacle is ForcedRowColumnPuzzleObject forcedTile)
+                    {
+                        if (columnDirection != 0 && forcedTile.forcedDirection != ForcedDirection.ForcedRow)
+                        {
+                            break;
+                        }
+                        if (rowDirection != 0 && forcedTile.forcedDirection != ForcedDirection.ForcedColumn)
+                        {
+                            break;
+                        }
+                    }
+                    
+                    count++;
+                }
+                else
                 {
                     break;
                 }
-
-                if (puzzleObject is NormalPuzzleObject np)
-                {
-                    if (np.habitat != habitat)
-                    {
-                        break;
-                    }
-                }
-
-                if (puzzleObject is ObstaclePuzzleObject { isMatchable: true } op)
-                {
-                    if (op.habitat != habitat)
-                    {
-                        break;
-                    }
-                }
-
-                count++;
 
                 nextRow += rowDirection;
                 nextColumn += columnDirection;
@@ -1661,7 +1726,7 @@ namespace _01.Scripts._01.ThreeMatch
                         continue;
                     }
                     
-                    targetPuzzle.transform.SetParent(puzzleFrame.parent);
+                    targetPuzzle.transform.SetParent(puzzleFrame.parent.parent);
                     
                     Vector3 startPos = targetPuzzle.transform.position;
                     Vector3 endPos = spawnStackManager.SetStack(group.habitat).transform.position;
@@ -1879,10 +1944,7 @@ namespace _01.Scripts._01.ThreeMatch
                 OnComboInitialized?.Invoke();
                 goldUI.ShowUI(false);
 
-                if (!HasPossibleMove())
-                {
-                    yield return ResetBoard();
-                }
+                _isCheckRequired = true;
             }
         }
         
@@ -2162,7 +2224,7 @@ namespace _01.Scripts._01.ThreeMatch
         {
             if (targetPuzzle is NormalPuzzleObject no)
             {
-                targetPuzzle.transform.SetParent(puzzleFrame.parent);
+                targetPuzzle.transform.SetParent(puzzleFrame.parent.parent);
                     
                 Vector3 startPos = targetPuzzle.transform.position;
                 Vector3 endPos = spawnStackManager.SetStack(no.habitat).transform.position;
@@ -2289,8 +2351,9 @@ namespace _01.Scripts._01.ThreeMatch
         {
             Vector2 pos = CalculatePos(curX, curY);
             GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
+            _obstacleSpawnIndicator.Add(warningOb);
             warningOb.transform.localPosition = pos;
-            Tween warningTween = warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
+            warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
                 .SetLoops(-1, LoopType.Yoyo);
 
             yield return new WaitForSeconds(obstacleSpawnDelay);
@@ -2299,9 +2362,13 @@ namespace _01.Scripts._01.ThreeMatch
                 _puzzles[curX, curY] &&
                 _puzzles[curX, curY].puzzleState == PuzzleState.Idle
             );
-            
-            warningTween.Kill();
-            Destroy(warningOb);
+
+            if (warningOb)
+            {
+                _obstacleSpawnIndicator.Remove(warningOb);
+                DOTween.Kill(warningOb);
+                Destroy(warningOb);
+            }
             
             PuzzleObject target = _puzzles[curX, curY];
 
@@ -2616,8 +2683,31 @@ namespace _01.Scripts._01.ThreeMatch
                 .OnComplete(() =>
                 {
                     newPuzzle.puzzleState = PuzzleState.Idle;
+                    OnTileInfected();
                 });
 
+        }
+        
+        private void OnTileInfected()
+        {
+            _isCheckRequired = true;
+            
+            if (!_isProcessing)
+            {
+                AddTask(CheckBoardPossibleMovesRoutine);
+            }
+        }
+        
+        private IEnumerator CheckBoardPossibleMovesRoutine()
+        {
+            yield return new WaitUntil(IsAllPuzzlesIdle);
+
+            _isCheckRequired = false;
+            
+            if (!HasPossibleMove())
+            {
+                yield return StartCoroutine(ResetBoard());
+            }
         }
         #endregion
 
@@ -2774,7 +2864,7 @@ namespace _01.Scripts._01.ThreeMatch
             Vector3 scale = tr.localScale;
             Sequence seq = DOTween.Sequence();
 
-            tr.SetParent(puzzleFrame.parent);
+            tr.SetParent(puzzleFrame.parent.parent);
             Tween t1 = tr.DOMove(goldUI.GoldImagePos, 0.4f)
                 .SetEase(Ease.OutSine);
             Tween t2 = tr.DOScale(scale * 1.2f, 0.2f)
