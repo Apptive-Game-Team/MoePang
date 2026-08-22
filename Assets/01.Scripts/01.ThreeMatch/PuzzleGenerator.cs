@@ -1800,15 +1800,15 @@ namespace _01.Scripts._01.ThreeMatch
 
             bool hasEmptySlot = true;
             
+            int[] spawnOrders = new int[x];
+            
             while(hasEmptySlot)
             {
                 hasEmptySlot = false;
                 
-                for (int i = 0; i < x; i++)
+                for (int j = 0; j < y; j++)
                 {
-                    int spawnOrder = 0;
-
-                    for (int j = 0; j < y; j++)
+                    for (int i = 0; i < x; i++)
                     {
                         if (!_puzzles[i, j])
                         {
@@ -1859,9 +1859,11 @@ namespace _01.Scripts._01.ThreeMatch
                             if (!foundUpperTile)
                             {
                                 GameObject puzzle = portal
-                                    ? SetRandomPuzzle(linkedPortal.column, j, spawnOrder)
-                                    : SetRandomPuzzle(i, j, spawnOrder);
-                                spawnOrder++;
+                                    ? SetRandomPuzzle(linkedPortal.column, j, spawnOrders[linkedPortal.column])
+                                    : SetRandomPuzzle(i, j, spawnOrders[i]);
+
+                                spawnOrders[portal ? linkedPortal.column : i]++;
+                                
                                 targetPo = puzzle.GetComponent<PuzzleObject>();
                                 targetPo.puzzleState = PuzzleState.Falling;
                                 _puzzles[i, j] = targetPo;
