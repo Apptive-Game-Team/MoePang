@@ -2561,7 +2561,7 @@ namespace _01.Scripts._01.ThreeMatch
                     LockedTwicePuzzleObject lt = _puzzles[curX, curY] as LockedTwicePuzzleObject;
                     if (lt)
                     {
-                        yield return lt.Unlock(this, curX, curY);
+                        yield return lt.Unlock();
                     }
                     break;
                 case ObstaclePuzzleType.Infection:
