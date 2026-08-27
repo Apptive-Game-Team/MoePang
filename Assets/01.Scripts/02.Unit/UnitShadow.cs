@@ -17,6 +17,13 @@ public class UnitShadow : MonoBehaviour
     
     [SerializeField] private bool lockWorldY = true;
     private float fixedWorldY;
+    private Color originalColor;
+    private bool hasOriginalColor;
+
+    private void Awake()
+    {
+        CacheOriginalColor();
+    }
 
     private void Start()
     {
@@ -30,12 +37,31 @@ public class UnitShadow : MonoBehaviour
     
     public void Refresh()
     {
+        CacheOriginalColor();
+
         if (shadowRenderer != null)
         {
             fixedWorldY = shadowRenderer.transform.position.y;
         }
 
         ApplyShadowSize();
+    }
+
+    public void SetAlpha(float alpha)
+    {
+        CacheOriginalColor();
+
+        if (shadowRenderer == null)
+            return;
+
+        Color color = originalColor;
+        color.a = originalColor.a * Mathf.Clamp01(alpha);
+        shadowRenderer.color = color;
+    }
+
+    public void ResetAlpha()
+    {
+        SetAlpha(1f);
     }
 
     private void LateUpdate()
@@ -81,5 +107,14 @@ public class UnitShadow : MonoBehaviour
 
         shadowRenderer.sortingLayerID = targetRenderer.sortingLayerID;
         shadowRenderer.sortingOrder = targetRenderer.sortingOrder - 1;
+    }
+
+    private void CacheOriginalColor()
+    {
+        if (hasOriginalColor || shadowRenderer == null)
+            return;
+
+        originalColor = shadowRenderer.color;
+        hasOriginalColor = true;
     }
 }
