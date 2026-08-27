@@ -5,7 +5,6 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections;
 
 namespace _01.Scripts._04.UI.MainScene
 {
@@ -21,8 +20,6 @@ namespace _01.Scripts._04.UI.MainScene
         [Header("Info Card Setting")]
         [SerializeField] private GameObject guidePanel;
         [SerializeField] private CanvasGroup canvasGroup;
-        [SerializeField] private float showTime = 3f;
-        [SerializeField] private float fadeTime = 2f;
         
         [Header("Stage Card Setting")]
         [SerializeField] private GameObject previousStageButton;
@@ -30,7 +27,6 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private TextMeshProUGUI stageText;
 
         private HabitatMode selectedMode = HabitatMode.MeadowMode;
-        private Coroutine guideCoroutine;
 
         private void OnEnable()
         {
@@ -276,45 +272,31 @@ namespace _01.Scripts._04.UI.MainScene
 
         public void ShowGuide()
         {
-            if (guideCoroutine != null)
-            {
-                Debug.Log("ShowGuide Coroutine Stop");
-                StopCoroutine(guideCoroutine);
-            }
-
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
             SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-            guideCoroutine = StartCoroutine(ShowGuideRoutine());
-        }
-
-        private IEnumerator ShowGuideRoutine()
-        {
-            float previousTimeScale = Time.timeScale;
-            Time.timeScale = 1f;
-
-            Debug.Log("Start ShowGuide Coroutine");
-            guidePanel.SetActive(true);
-            canvasGroup.alpha = 1f;
-
-            yield return new WaitForSeconds(showTime);
-
-            float elapsed = 0f;
-
-            while (elapsed < fadeTime)
+            if (guidePanel != null)
             {
-                elapsed += Time.deltaTime;
-
-                canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeTime);
-
-                yield return null;
+                guidePanel.SetActive(true);
             }
 
-            canvasGroup.alpha = 0f;
-            guidePanel.SetActive(false);
-
-            Time.timeScale = previousTimeScale;
-
-            guideCoroutine = null;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 1f;
+            }
         }
+
+        public void HideGuide()
+        {
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+            }
+
+            if (guidePanel != null)
+            {
+                guidePanel.SetActive(false);
+            }
+        }
+
     } 
 }

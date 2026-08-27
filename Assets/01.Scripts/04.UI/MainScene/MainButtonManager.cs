@@ -4,6 +4,8 @@ using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 /// <summary>
 /// 메인화면 버튼, 텍스트 관리 스크립트
@@ -13,6 +15,10 @@ public class MainButtonManager : MonoBehaviour
     [Header("버튼")] 
     [SerializeField] private GameObject previousButton;
     [SerializeField] private GameObject nextButton;
+
+    [Header("화면 이미지")] 
+    [SerializeField] private Image stageImage;
+    [SerializeField] private List<Sprite> diorama = new List<Sprite>();
     
     [Header("텍스트")]
     [SerializeField] private TextMeshProUGUI stageText;
@@ -22,6 +28,8 @@ public class MainButtonManager : MonoBehaviour
         if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
         if (previousButton != null) previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
         if (nextButton != null) nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
+
+        SetDioramaImage();
     }
 
     public void OnClickPlay()
@@ -62,6 +70,8 @@ public class MainButtonManager : MonoBehaviour
         nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
 
         stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
+
+        SetDioramaImage();
     }
 
     /// <summary>
@@ -79,5 +89,12 @@ public class MainButtonManager : MonoBehaviour
         nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
 
         stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
+
+        SetDioramaImage();
+    }
+
+    private void SetDioramaImage()
+    {
+        stageImage.sprite = diorama[StageManager.Instance.CurrentStage % 10];
     }
 }

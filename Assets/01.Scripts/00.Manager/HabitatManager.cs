@@ -1,4 +1,5 @@
 using _01.Scripts._00.Manager;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -75,6 +76,26 @@ public class HabitatManager : SingletonObject<HabitatManager>
         if (index == 0) return true;
 
         return IsUnlocked(list[index - 1]);
+    }
+
+    public bool AreAllFinalHabitatUnitsUnlocked()
+    {
+        foreach (Habitat habitat in Enum.GetValues(typeof(Habitat)))
+        {
+            List<FriendlyUnitData> units = unitList.GetUnits(habitat);
+
+            if (units == null || units.Count == 0)
+            {
+                return false;
+            }
+
+            if (!IsUnlocked(units[^1]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
     
     public void SetSelectedUnit(FriendlyUnitData unitData)
