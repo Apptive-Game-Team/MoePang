@@ -13,10 +13,13 @@ namespace _01.Scripts._06.Shop
         [Header("Description Setting")]
         [SerializeField] private Image habitatImage;
         [SerializeField] private List<Sprite> habitatSprites = new List<Sprite>();
+        [SerializeField] private TextMeshProUGUI habitatText;
         [SerializeField] private TextMeshProUGUI unitNameText;
+        [SerializeField] private TextMeshProUGUI unitLevelText;
+        [SerializeField] private TextMeshProUGUI unitAttackTypeText;
+        [SerializeField] private TextMeshProUGUI unitStatText;
         [SerializeField] private TextMeshProUGUI descriptionText;
         [SerializeField] private Animator unitAnimator;
-        [SerializeField] private TextMeshProUGUI unitStatText;
         [SerializeField] private TextMeshProUGUI unitUpgradeCostText;
 
         private void Start()
@@ -34,19 +37,15 @@ namespace _01.Scripts._06.Shop
             }
             ApplyHabitatImage(data.Habitat);
 
+            habitatText.text = data.Habitat.ToString();
             unitNameText.text = data.UnitName.ToString();
+            unitLevelText.text = $"Lv {data.UnitLevel}";
+            unitAttackTypeText.text = data.AttackType.ToString();
+            unitStatText.text = $"{data.AttackDamage}\n{data.MaxHp}";
             descriptionText.text = data.UnitDescriptionText;
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
             unitAnimator.Play("Walk", 0, 0f);
-
-            unitStatText.text =
-                $"Level : {data.UnitLevel}\n" +
-                $"Current Grade : {data.UnitGrade}\n" +
-                $"Attack Type : {data.AttackType}\n" +
-                $"HP : {data.MaxHp}\n" +
-                $"Damage : {data.AttackDamage}\n" +
-                $"Attack Speed : {data.AttackSpeed}\n" +
-                $"Move Speed : {data.BaseMoveSpeed}";
+            
             bool unlocked = HabitatManager.Instance.IsUnlocked(data);
             int cost = unlocked ? data.UnitCost : data.UnlockCost;
             unitUpgradeCostText.text = unlocked ? $"Level Up : {cost}" : $"Unlock : {cost}";
