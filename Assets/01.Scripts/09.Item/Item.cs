@@ -16,11 +16,14 @@ namespace _01.Scripts._09.Item
 {
     public class Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
+        private const int MaxUsableAmountPerGame = 5;
+
         public ItemType itemType;
 
         private PuzzleGenerator _generator;
         private UnitSpawner _spawner;
         private int _itemAmount;
+        private int _usableAmount;
         private TextMeshProUGUI _itemAmountText;
         private GameObject _draggedIcon;
         private Image _originalImage;
@@ -47,7 +50,18 @@ namespace _01.Scripts._09.Item
         private void SetItemAmountText()
         {
             _itemAmount = GameManager.Instance.itemData.ItemAmounts[itemType];
-            _itemAmountText.text = _itemAmount.ToString();
+            _usableAmount = Mathf.Min(MaxUsableAmountPerGame, _itemAmount);
+            UpdateItemAmountText();
+        }
+
+        private void UpdateItemAmountText()
+        {
+            _itemAmountText.text = $"{_usableAmount}/{_itemAmount}";
+        }
+
+        private bool CanUseItem()
+        {
+            return _usableAmount > 0 && _itemAmount > 0;
         }
 
         private void SetRaiseSpawnProbItem()
@@ -57,7 +71,7 @@ namespace _01.Scripts._09.Item
                 Button button = GetComponent<Button>();
                 button.onClick.AddListener(() =>
                 {
-                    if (_itemAmount == 0 || _isItemApplying)
+                    if (!CanUseItem() || _isItemApplying)
                     {
                         return;
                     }
@@ -68,7 +82,7 @@ namespace _01.Scripts._09.Item
         
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (_itemAmount == 0)
+            if (!CanUseItem())
             {
                 return;
             }
@@ -102,7 +116,7 @@ namespace _01.Scripts._09.Item
                 return;
             }
             
-            if (_itemAmount == 0)
+            if (!CanUseItem())
             {
                 return;
             }
@@ -214,6 +228,11 @@ namespace _01.Scripts._09.Item
 
         private void ApplyItemEffect(PuzzleObject tile = null)
         {
+            if (!CanUseItem())
+            {
+                return;
+            }
+
             switch (itemType)
             {
                 case ItemType.Joker:
@@ -231,7 +250,8 @@ namespace _01.Scripts._09.Item
             }
 
             _itemAmount--;
-            _itemAmountText.text = _itemAmount.ToString();
+            _usableAmount--;
+            UpdateItemAmountText();
             GameManager.Instance.itemData.ItemAmounts[itemType] = _itemAmount;
             GameManager.Instance.SaveItemData();
         }
