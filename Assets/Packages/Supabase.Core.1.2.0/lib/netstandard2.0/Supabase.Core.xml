@@ -1,0 +1,210 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Supabase.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Supabase.Core.Attributes.MapToAttribute">
+            <summary>
+            Used internally to add a string value to a C# field.
+            </summary>
+        </member>
+        <member name="P:Supabase.Core.Attributes.MapToAttribute.Mapping">
+            <summary>
+            The externally specified target value.
+            </summary>
+        </member>
+        <member name="P:Supabase.Core.Attributes.MapToAttribute.Formatter">
+            <summary>
+            A formatter to be passed into the <see cref="M:System.String.ToString" /> method.
+            </summary>
+        </member>
+        <member name="M:Supabase.Core.Attributes.MapToAttribute.#ctor(System.String,System.String)">
+             <summary>
+             Creates a Mapping to be used internally.
+            
+             For example, specifying an Enum that has a different string value elsewhere.
+             </summary>
+             <param name="mapping"></param>
+             <param name="formatter"></param>
+        </member>
+        <member name="T:Supabase.Core.Diagnostics.ActivityExtensions">
+             <summary>
+             Null-safe helpers for tagging activities with OpenTelemetry HTTP semantic conventions.
+            
+             All members accept a null <see cref="T:System.Diagnostics.Activity"/> (the result of
+             <see cref="M:System.Diagnostics.ActivitySource.StartActivity(System.String,System.Diagnostics.ActivityKind)"/> when nothing is listening)
+             and no-op, so call sites need no listener checks. URLs are recorded through
+             <see cref="T:Supabase.Core.Diagnostics.UrlSanitizer"/> only — never record a raw URL, query string, token, or other
+             credential as a tag value.
+             </summary>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.ActivityExtensions.SetHttpRequestTags(System.Diagnostics.Activity,System.String,System.Uri)">
+            <summary>
+            Tags an outgoing HTTP request following OpenTelemetry HTTP client conventions.
+            The URL is sanitized to scheme/host/port/path; the query string is never recorded.
+            </summary>
+            <param name="activity">The activity to tag, or null when nothing is listening.</param>
+            <param name="method">The HTTP method, e.g. <c>POST</c>.</param>
+            <param name="uri">The request URI, sanitized before tagging.</param>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.ActivityExtensions.SetHttpResponseTags(System.Diagnostics.Activity,System.Int32)">
+            <summary>
+            Tags the response status code, marking the activity as failed for 4xx/5xx responses.
+            </summary>
+            <param name="activity">The activity to tag, or null when nothing is listening.</param>
+            <param name="statusCode">The HTTP response status code.</param>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.ActivityExtensions.SetFailure(System.Diagnostics.Activity,System.Exception)">
+            <summary>
+            Marks the activity as failed with the exception type as <c>error.type</c>.
+            </summary>
+            <param name="activity">The activity to tag, or null when nothing is listening.</param>
+            <param name="exception">The exception whose type and message describe the failure.</param>
+        </member>
+        <member name="T:Supabase.Core.Diagnostics.Instrumentation">
+             <summary>
+             Factory methods for the <see cref="T:System.Diagnostics.ActivitySource"/> and <see cref="T:System.Diagnostics.Metrics.Meter"/> instances used
+             by the Supabase client libraries.
+            
+             Emission is zero-cost unless a consumer subscribes a listener (e.g. via the OpenTelemetry
+             SDK with <c>AddSource("Supabase.*")</c> / <c>AddMeter("Supabase.*")</c>), so instrumentation
+             built on these sources is always on and requires no configuration to stay silent.
+             </summary>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.Instrumentation.CreateActivitySource(System.Reflection.Assembly,System.String)">
+            <summary>
+            Creates the <see cref="T:System.Diagnostics.ActivitySource"/> for a Supabase client library, versioned from
+            the library's assembly rather than a hardcoded literal.
+            </summary>
+            <param name="assembly">The assembly whose version identifies the emitting library.</param>
+            <param name="name">The source name, e.g. <c>Supabase.Gotrue</c>.</param>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.Instrumentation.CreateMeter(System.Reflection.Assembly,System.String)">
+            <summary>
+            Creates the <see cref="T:System.Diagnostics.Metrics.Meter"/> for a Supabase client library, versioned from the
+            library's assembly rather than a hardcoded literal.
+            </summary>
+            <param name="assembly">The assembly whose version identifies the emitting library.</param>
+            <param name="name">The meter name, e.g. <c>Supabase.Gotrue</c>.</param>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.Instrumentation.GetVersion(System.Reflection.Assembly)">
+            <summary>
+            Resolves the version of an assembly, preferring the informational (package) version
+            with any build metadata (<c>+sha</c>) stripped.
+            </summary>
+            <param name="assembly">The assembly whose version identifies the emitting library.</param>
+        </member>
+        <member name="T:Supabase.Core.Diagnostics.UrlSanitizer">
+             <summary>
+             Reduces URLs to a form that is safe to record in telemetry and logs.
+            
+             Supabase URLs routinely carry secrets outside the path — access tokens in fragments,
+             API keys, PKCE verifiers and grant parameters in query strings — so telemetry must only
+             ever record scheme, host, port and path. There is no overload that keeps the query
+             string; that is deliberate.
+             </summary>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.UrlSanitizer.Sanitize(System.Uri)">
+            <summary>
+            Returns <c>scheme://host[:port]/path</c> for the given URI, dropping user info, the
+            query string, and the fragment. Default ports are omitted.
+            </summary>
+            <param name="uri">The URI to reduce to scheme, host, port and path.</param>
+        </member>
+        <member name="M:Supabase.Core.Diagnostics.UrlSanitizer.Sanitize(System.String)">
+            <summary>
+            Sanitizes a URL provided as a string; returns the input truncated at the first
+            query/fragment delimiter when it cannot be parsed as a URI.
+            </summary>
+            <param name="url">The URL to sanitize; parsed as an absolute URI when possible.</param>
+        </member>
+        <member name="T:Supabase.Core.Extensions.DictionaryExtensions">
+            <summary>
+            Extensions for the `Dictionary` Classes
+            </summary>
+        </member>
+        <member name="M:Supabase.Core.Extensions.DictionaryExtensions.MergeLeft``3(``0,System.Collections.Generic.IDictionary{``1,``2}[])">
+            <summary>
+            Merges two dictionaries, allowing overwrite priorities leftward.
+            
+            Works in C#3/VS2008:
+            Returns a new dictionary of this ... others merged leftward.
+            Keeps the type of 'this', which must be default-instantiable.
+            Example: 
+              result = map.MergeLeft(other1, other2, ...)
+            From: https://stackoverflow.com/a/2679857/3629438
+            </summary>
+            <param name="me"></param>
+            <param name="others"></param>
+            <typeparam name="T"></typeparam>
+            <typeparam name="K"></typeparam>
+            <typeparam name="V"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="T:Supabase.Core.Helpers">
+            <summary>
+            Shortcut Methods, mostly focused on getting attributes from class properties and enums.
+            </summary>
+        </member>
+        <member name="M:Supabase.Core.Helpers.GetPropertyValue``1(System.Object,System.String)">
+            <summary>
+            Returns the current value from a given class property
+            </summary>
+            <param name="obj"></param>
+            <param name="propName"></param>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Supabase.Core.Helpers.GetCustomAttribute``1(System.Object)">
+            <summary>
+            Returns a cast Custom Attribute from a given object.
+            </summary>
+            <param name="obj"></param>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Supabase.Core.Helpers.GetCustomAttribute``1(System.Type)">
+            <summary>
+            Returns a cast Custom Attribute from a given type.
+            </summary>
+            <param name="type"></param>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Supabase.Core.Helpers.GetMappedToAttr(System.Enum)">
+            <summary>
+            Shortcut method for accessing a `MapTo` attribute, combined with an Enum.
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Supabase.Core.Interfaces.IGettableHeaders">
+            <summary>
+            Used for classes that need to retrieve `Headers` externally.
+            </summary>
+        </member>
+        <member name="P:Supabase.Core.Interfaces.IGettableHeaders.GetHeaders">
+            <summary>
+            An executable `Func` that returns a dictionary of headers to be appended onto a request.
+            </summary>
+        </member>
+        <member name="T:Supabase.Core.Util">
+            <summary>
+            Shared utilities for Supabase client libraries.
+            </summary>
+        </member>
+        <member name="M:Supabase.Core.Util.GetAssemblyVersion(System.Type)">
+            <summary>
+            Builds the <c>X-Client-Info</c> header value for the given client type.
+            </summary>
+            <remarks>
+            Format: <c>name-csharp/version[; key=value ...]</c><br/>
+            Appended metadata includes platform, platform version, runtime, runtime version,
+            and framework (when detectable).
+            </remarks>
+            <param name="clientType">A type belonging to the client assembly, used to resolve the assembly name and version.</param>
+            <returns>A structured header value identifying the client library and its host environment.</returns>
+        </member>
+    </members>
+</doc>
