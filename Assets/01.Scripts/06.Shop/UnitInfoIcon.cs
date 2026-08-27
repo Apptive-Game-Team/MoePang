@@ -93,7 +93,7 @@ public class UnitInfoIcon : MonoBehaviour
 
         unlockImage.gameObject.SetActive(!unlocked);
         levelImage.gameObject.SetActive(unlocked);
-        backgroundImage.gameObject.SetActive(unlocked);
+        backgroundImage.gameObject.SetActive(true);
         
         levelImage.text = $"Lv.{unitData.UnitLevel}";
     }
