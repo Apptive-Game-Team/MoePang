@@ -10,7 +10,6 @@ namespace _01.Scripts._06.Shop
     {
         [SerializeField] private ItemData itemData;
         private GameObject _upgradePopup;
-        private int maxBuyCount = 5;
         private int _buyCount = 1;
         private ItemInfo _selectedInfo;
         private ItemObject _selectedItem;
@@ -148,11 +147,9 @@ namespace _01.Scripts._06.Shop
 
             private int GetAvailableBuyCount(ItemType itemType, int price)
             {
-                int ownedCount = GameManager.Instance.itemData.ItemAmounts[itemType];
-                int remainingCapacity = maxBuyCount - ownedCount;
                 int affordableCount = GoldManager.Instance.Gold / Mathf.Max(1, price);
 
-                return Mathf.Max(0, Mathf.Min(remainingCapacity, affordableCount));
+                return Mathf.Max(0, affordableCount);
             }
 
             private bool IsItemUnlockedForPurchase(ItemType itemType)

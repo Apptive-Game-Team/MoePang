@@ -16,8 +16,6 @@ namespace _01.Scripts._09.Item
 {
     public class Item : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        private const int MaxUsableAmountPerGame = 5;
-
         public ItemType itemType;
 
         private PuzzleGenerator _generator;
@@ -50,8 +48,18 @@ namespace _01.Scripts._09.Item
         private void SetItemAmountText()
         {
             _itemAmount = GameManager.Instance.itemData.ItemAmounts[itemType];
-            _usableAmount = Mathf.Min(MaxUsableAmountPerGame, _itemAmount);
+            _usableAmount = Mathf.Min(GetMaxUsableAmountPerGame(), _itemAmount);
             UpdateItemAmountText();
+        }
+
+        private int GetMaxUsableAmountPerGame()
+        {
+            return itemType switch
+            {
+                ItemType.CreateLineBomb => 5,
+                ItemType.RaiseSpawnProb => 1,
+                _ => 3
+            };
         }
 
         private void UpdateItemAmountText()
