@@ -1,33 +1,39 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using TMPro;
 using UnityEngine.UI;
 
 namespace _01.Scripts._01.ThreeMatch.Obstacle
 {
     public class LockedTwicePuzzleObject : ObstaclePuzzleObject
     {
-        [SerializeField] private Image[] lockedImages;
+        [SerializeField] private Image lockedImage;
+        private TextMeshProUGUI _lockedCountText;
         public bool isLocked = true;
         private int _lockedCount = 2;
 
-        public IEnumerator Unlock(PuzzleGenerator generator, int curX, int curY)
+        private void Awake()
+        {
+            _lockedCountText = lockedImage.GetComponentInChildren<TextMeshProUGUI>();
+            _lockedCountText.text = _lockedCount.ToString();
+        }
+
+        public IEnumerator Unlock()
         {
             _lockedCount--;
 
-            int index = _lockedCount;
-            Sequence seq = DOTween.Sequence();
-
-            if (index >= 0 && index < lockedImages.Length)
+            switch (_lockedCount)
             {
-                Image target = lockedImages[index];
-                
-                seq.Append(target.DOFade(0, 0.2f).SetEase(Ease.Linear));
-            }
-
-            if (_lockedCount <= -1)
-            {
-                isLocked = false;
+                case > 0:
+                    _lockedCountText.text = _lockedCount.ToString();
+                    break;
+                case 0:
+                    Destroy(lockedImage.gameObject);
+                    break;
+                case <= -1:
+                    isLocked = false;
+                    break;
             }
 
             yield return null;
