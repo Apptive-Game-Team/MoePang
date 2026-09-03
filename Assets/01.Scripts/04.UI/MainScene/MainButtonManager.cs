@@ -70,7 +70,7 @@ public class MainButtonManager : MonoBehaviour
         previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
         nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
 
-        stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
+        stageText.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Stage")} : {StageManager.Instance.CurrentStage + 1}";
 
         SetDioramaImage();
     }
@@ -89,7 +89,7 @@ public class MainButtonManager : MonoBehaviour
         previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
         nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
 
-        stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
+        stageText.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Stage")} : {StageManager.Instance.CurrentStage + 1}";
 
         SetDioramaImage();
     }
