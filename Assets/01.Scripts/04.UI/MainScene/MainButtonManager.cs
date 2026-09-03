@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.Localization.Settings;
 
 /// <summary>
 /// 메인화면 버튼, 텍스트 관리 스크립트
@@ -25,7 +26,7 @@ public class MainButtonManager : MonoBehaviour
 
     private void Start()
     {
-        if (stageText != null) stageText.text = $"Stage : {StageManager.Instance.CurrentStage + 1}";
+        if (stageText != null) stageText.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Stage")} : {StageManager.Instance.CurrentStage + 1}";
         if (previousButton != null) previousButton.SetActive(StageManager.Instance.CurrentStage > 0);
         if (nextButton != null) nextButton.SetActive(StageManager.Instance.CurrentStage < StageManager.Instance.MaxStage);
 
