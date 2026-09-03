@@ -1,6 +1,7 @@
 using _01.Scripts._00.Manager;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using _01.Scripts._11.HabitatMode;
 using UnityEngine.UI;
 
@@ -48,17 +49,20 @@ namespace _01.Scripts._04.UI.InGame
             
             Time.timeScale = 0f;
             DepthOfField.active = true;
+            string protectedText = LocalizationSettings.StringDatabase.GetLocalizedString("Localization", "GameClearUI_Protected");
+            string habitatText = LocalizationSettings.StringDatabase.GetLocalizedString("Localization", "GameClearUI_Habitat");
+
             if (isHabitatBattle)
             {
                 HabitatMode mode = habitatModeManager.HabitatMode;
                 string habitatName = GetHabitatName(mode);
                 int habitatStage = stageManager.GetHabitatStage(mode) + 1;
 
-                stageText.text = $"지켜낸 {habitatName} 서식지 {habitatStage}";
+                stageText.text = $"{protectedText} {habitatName} {habitatText} {habitatStage}";
             }
             else
             {
-                stageText.text = $"지켜낸 서식지 {stageManager.CurrentStage + 1}";
+                stageText.text = $"{protectedText} {habitatText} {stageManager.CurrentStage + 1}";
             }
             timeText.text = $"{minutes}:{seconds:00}";
             coinText.text = $"{goldManager.Gold}";
