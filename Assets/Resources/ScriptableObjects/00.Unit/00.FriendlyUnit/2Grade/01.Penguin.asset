@@ -22,6 +22,10 @@ MonoBehaviour:
   attackDamage: 6
   attackSpeed: 1.5
   unitSize: 0.4
-  unitDescriptionText: "\uD3AD\uADC4 \uC785\uB2C8\uB2E4."
+  rangeAttackPrefab: {fileID: 0}
+  unitDescriptionText: "\uB4A4\uB6B1\uB4A4\uB6B1 \uAC77\uC9C0\uB9CC \uC5BC\uC74C
+    \uC704\uC5D0\uC11C\uB294 \uC529\uC529\uD558\uAC8C \uB098\uC544\uAC11\uB2C8\uB2E4.
+    \uB118\uC5B4\uC838\uB3C4 \uAE08\uBC29 \uC77C\uC5B4\uB098\uB294 \uADC0\uC5EC\uC6B4
+    \uC6A9\uC0AC\uC785\uB2C8\uB2E4."
   habitat: 4
   unitLevel: 1
