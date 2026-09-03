@@ -77,6 +77,7 @@ public class Unit : MonoBehaviour, IDamageable
     protected UnitData data;
     protected SpriteRenderer spriteRenderer;
     protected Animator animator;
+    protected UnitShadow unitShadow;
     
     //북극 여우 공격
     private float articFoxJumpHeight = 0.4f;
@@ -161,10 +162,11 @@ public class Unit : MonoBehaviour, IDamageable
 
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
         
-        UnitShadow shadow = GetComponentInChildren<UnitShadow>(true);
-        if (shadow != null)
+        unitShadow = GetComponentInChildren<UnitShadow>(true);
+        if (unitShadow != null)
         {
-            shadow.Refresh();
+            unitShadow.Refresh();
+            unitShadow.ResetAlpha();
         }
     }
 
@@ -959,6 +961,7 @@ public class Unit : MonoBehaviour, IDamageable
         damageTween?.Kill();
         transform.localScale = originalScale;
         spriteRenderer.color = Color.white;
+        unitShadow?.ResetAlpha();
 
         direction *= -1f;
         spriteRenderer.flipX = true;
@@ -977,11 +980,13 @@ public class Unit : MonoBehaviour, IDamageable
 
             float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
             spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            unitShadow?.SetAlpha(alpha);
 
             yield return null;
         }
 
         spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 1f);
+        unitShadow?.ResetAlpha();
         transform.localScale = originalScale;
         spriteRenderer.flipX = false;
         isDying = false;
