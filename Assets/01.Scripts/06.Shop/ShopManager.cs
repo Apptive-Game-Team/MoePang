@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ItemData = _01.Scripts._06.Shop.ItemData;
+using UnityEngine.Localization.Settings;
 
 public class ShopManager : MonoBehaviour
 {
@@ -126,7 +127,8 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
     {
-        unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"{unitData.UnlockCost}G\n해금하시겠습니까?";
+        unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text =
+            $"{unitData.UnlockCost}G\n{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UnlockPanelText")}";
         
         Button yesButton = unlockPanel.transform.GetChild(2).GetComponent<Button>();
 

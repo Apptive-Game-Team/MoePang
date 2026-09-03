@@ -49,8 +49,8 @@ namespace _01.Scripts._04.UI.InGame
             
             Time.timeScale = 0f;
             DepthOfField.active = true;
-            string protectedText = LocalizationSettings.StringDatabase.GetLocalizedString("Localization", "GameClearUI_Protected");
-            string habitatText = LocalizationSettings.StringDatabase.GetLocalizedString("Localization", "GameClearUI_Habitat");
+            string protectedText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "GameClearUI_Protected");
+            string habitatText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "GameClearUI_Habitat");
 
             if (isHabitatBattle)
             {
