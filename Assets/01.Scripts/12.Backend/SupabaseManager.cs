@@ -10,11 +10,10 @@ namespace _01.Scripts._12.Backend
 
         public Supabase.Client Client { get; private set; }
 
-        [SerializeField]
-        private string _supabaseUrl;
+        public Task InitializationTask { get; private set; }
 
-        [SerializeField]
-        private string _supabasePublishableKey;
+        [SerializeField] private string _supabaseUrl;
+        [SerializeField] private string _supabasePublishableKey;
 
         private async void Awake()
         {
@@ -28,7 +27,9 @@ namespace _01.Scripts._12.Backend
 
             DontDestroyOnLoad(gameObject);
 
-            await Initialize();
+            InitializationTask = Initialize();
+
+            await InitializationTask;
         }
 
         private async Task Initialize()
@@ -49,6 +50,8 @@ namespace _01.Scripts._12.Backend
             catch (Exception e)
             {
                 Debug.LogError($"Supabase Initialize Failed\n{e}");
+
+                throw;
             }
         }
     }

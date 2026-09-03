@@ -5,6 +5,8 @@ using UnityEngine;
 using _01.Scripts._11.HabitatMode;
 using _01.Scripts._08.Utility;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
+using _01.Scripts._12.Backend;
 
 namespace _01.Scripts._00.Manager
 {
@@ -310,10 +312,19 @@ namespace _01.Scripts._00.Manager
         public ItemData itemData;
         public ComboData comboData;
         public GameData gameData;
+        
+        private AuthRepository _authRepository;
+        private SupabaseDataRepository _supabaseDataRepository;
+
+        private bool _useSupabase;
+        private bool _dataLoaded;
 
         protected override void Awake()
         {
             base.Awake();
+            
+            _authRepository = new AuthRepository();
+            _supabaseDataRepository = new SupabaseDataRepository();
             
             playData = new PlayData();
             castleData = new CastleData();
@@ -325,13 +336,6 @@ namespace _01.Scripts._00.Manager
 
         private void Start()
         {
-            SaveLoadManager.Instance.LoadData(playData, "PlayData");
-            SaveLoadManager.Instance.LoadData(castleData, "CastleData");
-            SaveLoadManager.Instance.LoadData(unitData, "UnitData");
-            SaveLoadManager.Instance.LoadData(itemData, "ItemData");
-            SaveLoadManager.Instance.LoadData(comboData, "ComboData");
-            SaveLoadManager.Instance.LoadData(gameData, "GameData");
-
             SceneManager.sceneLoaded += OnSceneLoaded;
             PlayBGMForScene(SceneManager.GetActiveScene().name);
         }
@@ -344,6 +348,84 @@ namespace _01.Scripts._00.Manager
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             PlayBGMForScene(scene.name);
+        }
+        
+        public async Task LoadData()
+        {
+            bool isLoggedIn = _authRepository.IsLoggedIn();
+
+            if (isLoggedIn)
+            {
+                try
+                {
+                    _useSupabase = true;
+
+                    await _supabaseDataRepository.LoadAllData(
+                        playData,
+                        castleData,
+                        unitData,
+                        itemData,
+                        comboData,
+                        unitList
+                    );
+
+                    Debug.Log("Game data loaded from Supabase.");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(
+                        $"Supabase data load failed.\n{e}\n" +
+                        "Fallback to local save."
+                    );
+
+                    _useSupabase = false;
+
+                    LoadLocalData();
+                }
+            }
+            else
+            {
+                _useSupabase = false;
+
+                LoadLocalData();
+            }
+
+            _dataLoaded = true;
+        }
+        
+        private void LoadLocalData()
+        {
+            SaveLoadManager.Instance.LoadData(
+                playData,
+                "PlayData"
+            );
+
+            SaveLoadManager.Instance.LoadData(
+                castleData,
+                "CastleData"
+            );
+
+            SaveLoadManager.Instance.LoadData(
+                unitData,
+                "UnitData"
+            );
+
+            SaveLoadManager.Instance.LoadData(
+                itemData,
+                "ItemData"
+            );
+
+            SaveLoadManager.Instance.LoadData(
+                comboData,
+                "ComboData"
+            );
+
+            SaveLoadManager.Instance.LoadData(
+                gameData,
+                "GameData"
+            );
+
+            Debug.Log("Game data loaded from local JSON.");
         }
 
         private void PlayBGMForScene(string sceneName)
@@ -413,7 +495,7 @@ namespace _01.Scripts._00.Manager
             return dict;
         }
 
-        public void SavePlayData()
+        public async void SavePlayData()
         {
             StageManager stageManager = StageManager.Instance;
             GoldManager goldManager = GoldManager.Instance;
@@ -462,8 +544,34 @@ namespace _01.Scripts._00.Manager
             
             playData.StageData[stageType][currentStage] = stageData;
             
-            playData.BeforeSave();
-            SaveLoadManager.Instance.SaveData(playData, "PlayData");
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SavePlayData(
+                        playData
+                    );
+
+                    Debug.Log("PlayData saved to Supabase.");
+                }
+                else
+                {
+                    playData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        playData,
+                        "PlayData"
+                    );
+
+                    Debug.Log("PlayData saved locally.");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SavePlayData failed.\n{e}"
+                );
+            }
             
             if (StageManager.Instance != null)
             {
@@ -471,27 +579,119 @@ namespace _01.Scripts._00.Manager
             }
         }
         
-        public void SaveCastleData()
+        public async void SaveCastleData()
         {
-            SaveGoldData();
-            
-            SaveLoadManager.Instance.SaveData(castleData, "CastleData");
+            playData.goldAmount = GoldManager.Instance.Gold;
+            playData.diaAmount = GoldManager.Instance.Dia;
+
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SaveCastleData(
+                        castleData,
+                        playData
+                    );
+                }
+                else
+                {
+                    playData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        playData,
+                        "PlayData"
+                    );
+
+                    SaveLoadManager.Instance.SaveData(
+                        castleData,
+                        "CastleData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveCastleData failed.\n{e}"
+                );
+            }
         }
 
-        public void SaveUnitData()
+        public async void SaveUnitData()
         {
-            SaveGoldData();
-            
-            unitData.BeforeSave();
-            SaveLoadManager.Instance.SaveData(unitData, "UnitData");
+            playData.goldAmount = GoldManager.Instance.Gold;
+            playData.diaAmount = GoldManager.Instance.Dia;
+
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SaveUnitData(
+                        unitData,
+                        playData
+                    );
+                }
+                else
+                {
+                    playData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        playData,
+                        "PlayData"
+                    );
+
+                    unitData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        unitData,
+                        "UnitData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveUnitData failed.\n{e}"
+                );
+            }
         }
         
-        public void SaveItemData()
+        public async void SaveItemData()
         {
-            SaveGoldData();
-            
-            itemData.BeforeSave();
-            SaveLoadManager.Instance.SaveData(itemData, "ItemData");
+            playData.goldAmount = GoldManager.Instance.Gold;
+            playData.diaAmount = GoldManager.Instance.Dia;
+
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SaveItemData(
+                        itemData,
+                        playData
+                    );
+                }
+                else
+                {
+                    playData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        playData,
+                        "PlayData"
+                    );
+
+                    itemData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        itemData,
+                        "ItemData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveItemData failed.\n{e}"
+                );
+            }
         }
 
         public void SaveGameData()
@@ -499,18 +699,63 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.SaveData(gameData, "GameData");
         }
 
-        public void SaveComboData()
+        public async void SaveComboData()
         {
-            SaveLoadManager.Instance.SaveData(comboData, "ComboData");
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SaveComboData(
+                        comboData
+                    );
+                }
+                else
+                {
+                    comboData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        comboData,
+                        "ComboData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveComboData failed.\n{e}"
+                );
+            }
         }
 
-        public void SaveGoldData()
+        public async void SaveGoldData()
         {
             playData.goldAmount = GoldManager.Instance.Gold;
             playData.diaAmount = GoldManager.Instance.Dia;
-            
-            playData.BeforeSave();
-            SaveLoadManager.Instance.SaveData(playData, "PlayData");
+
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SavePlayData(
+                        playData
+                    );
+                }
+                else
+                {
+                    playData.BeforeSave();
+
+                    SaveLoadManager.Instance.SaveData(
+                        playData,
+                        "PlayData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveGoldData failed.\n{e}"
+                );
+            }
         }
 
         public StageType GetStageTypeWithHabitat(HabitatMode mode)
