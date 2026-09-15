@@ -36,7 +36,7 @@ namespace _01.Scripts._00.Manager
 
             FindTextObjects();
             SetButtons();
-            UpdateButtons();
+            //UpdateButtons();
         }
 
         private void Start()

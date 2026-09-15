@@ -7,7 +7,7 @@ namespace _01.Scripts._01.ThreeMatch.Obstacle
     {
         public override void SetMaterial(Material material)
         {
-            Image img = transform.GetChild(2).GetComponent<Image>();
+            Image img = transform.GetChild(0).GetComponent<Image>();
             
             Material = new Material(material);
             img.material = Material;
