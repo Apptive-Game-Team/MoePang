@@ -40,11 +40,12 @@ namespace _01.Scripts._04.UI.MainScene
                 Combo combo = combos.Find(c => c.info.comboType == type);
 
                 StageType stageType = GetStageTypeWithHabitat(combo.info.comboType);
-                if (GameManager.Instance.playData.MaxStages[stageType] < 5)
-                {
-                    correctionValue++;
-                    continue;
-                }
+                
+                // if (GameManager.Instance.playData.MaxStages[stageType] < 5)
+                // {
+                //     correctionValue++;
+                //     continue;
+                // }
                 
                 GameObject comboUI = Instantiate(comboUIPrefab, content.transform);
                 ComboUIObject obj = comboUI.GetComponent<ComboUIObject>();
