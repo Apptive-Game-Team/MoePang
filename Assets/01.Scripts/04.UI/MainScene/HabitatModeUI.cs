@@ -209,26 +209,11 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode =>
-                    "Summoning units requires more stacks\n" +
-                    "<size=30>Stack Cost : 3 -> 6</size>",
-
-                HabitatMode.OceanMode =>
-                    "Enemies gain increased Stats\n" +
-                    "<size=30>All stats × 1.5</size>",
-
-                HabitatMode.DesertMode =>
-                    "A sandstorm periodically obscures the puzzle board\n" +
-                    "<size=30>Every 15s, tiles are hidden for 3s.</size>",
-
-                HabitatMode.ForestMode =>
-                    "Friendly units have reduced Movement Speed and Attack Speed\n" +
-                    "<size=30>Speed & Attack Stats × 0.75</size>",
-
-                HabitatMode.PolarMode =>
-                    "Enemies periodically recover HP\n" +
-                    "<size=30>All enemies restore HP every 15s</size>",
-
+                HabitatMode.MeadowMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06MeadowDescription"),
+                HabitatMode.OceanMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06OceanDescription"),
+                HabitatMode.DesertMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06DesertDescription"),
+                HabitatMode.ForestMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06ForestDescription"),
+                HabitatMode.PolarMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06PolarDescription"),
                 _ => mode.ToString()
             };
         }

@@ -143,6 +143,40 @@ MonoBehaviour:
     m_Localized: Polar
     m_Metadata:
       m_Items: []
+  - m_Id: 75354666536607744
+    m_Localized: 'Summoning units requires more stacks
+
+      <size=30>Stack Cost
+      : 3 -> 6</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75354666536607745
+    m_Localized: 'Enemies gain increased Stats
+
+      <size=30>All stats x 1.5</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75354666536607746
+    m_Localized: 'A sandstorm periodically obscures the puzzle board
+
+      <size=30>Every
+      15s, tiles are hidden for 3s.</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75354666536607747
+    m_Localized: 'Friendly units have reduced Movement Speed and Attack Speed
+
+      <size=30>Speed
+      & Attack Stats x 0.75</size>'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75354666536607748
+    m_Localized: 'Enemies periodically recover HP
+
+      <size=30>All enemies restore
+      HP every 15s</size>'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
