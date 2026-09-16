@@ -15,56 +15,28 @@ MonoBehaviour:
   m_TableCollectionName: LocalizationDataTable
   m_TableCollectionNameGuidString: c9327970db2aa964cb40f2e20d632d3b
   m_Entries:
-  - m_Id: 13887321296896
-    m_Key: Button
-    m_Metadata:
-      m_Items: []
-  - m_Id: 15096920821760
-    m_Key: Exit
-    m_Metadata:
-      m_Items: []
-  - m_Id: 34518293172224
-    m_Key: Open
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2549171321720832
-    m_Key: Next
-    m_Metadata:
-      m_Items: []
   - m_Id: 70663905987600384
     m_Key: 01Play
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70670913977524225
+    m_Key: 02Clear Failed
     m_Metadata:
       m_Items: []
   - m_Id: 70668612172849152
     m_Key: 03Check piece information ->
     m_Metadata:
       m_Items: []
+  - m_Id: 70675315547250691
+    m_Key: 03No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70675315547250690
+    m_Key: 03Yes
+    m_Metadata:
+      m_Items: []
   - m_Id: 70668612172849153
     m_Key: 05ComboSort
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70668612172849154
-    m_Key: 06Protect Home!
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70668612172849155
-    m_Key: 06MON
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70668612172849156
-    m_Key: 06TUS
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70668612172849157
-    m_Key: 06WED
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70668612172849158
-    m_Key: 06THUS
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70668612172849159
-    m_Key: 06FRI
     m_Metadata:
       m_Items: []
   - m_Id: 70668612172849160
@@ -75,12 +47,52 @@ MonoBehaviour:
     m_Key: 06Current Bonus
     m_Metadata:
       m_Items: []
-  - m_Id: 70669951523168256
-    m_Key: Option_Master Volume
+  - m_Id: 70668612172849159
+    m_Key: 06FRI
     m_Metadata:
       m_Items: []
-  - m_Id: 70670913977524224
-    m_Key: Option_SFX
+  - m_Id: 70668612172849155
+    m_Key: 06MON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70668612172849154
+    m_Key: 06Protect Home!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70668612172849158
+    m_Key: 06THUS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70668612172849156
+    m_Key: 06TUS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70668612172849157
+    m_Key: 06WED
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13887321296896
+    m_Key: Button
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15096920821760
+    m_Key: Exit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70675315547250689
+    m_Key: GameClearUI_Habitat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70675315547250688
+    m_Key: GameClearUI_Protected
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2549171321720832
+    m_Key: Next
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34518293172224
+    m_Key: Open
     m_Metadata:
       m_Items: []
   - m_Id: 70669951523168258
@@ -91,32 +103,40 @@ MonoBehaviour:
     m_Key: Option_Exit
     m_Metadata:
       m_Items: []
-  - m_Id: 70670913977524225
-    m_Key: 02Clear Failed
+  - m_Id: 70669951523168256
+    m_Key: Option_Master Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 70670913977524224
+    m_Key: Option_SFX
     m_Metadata:
       m_Items: []
   - m_Id: 70672258109349888
     m_Key: Stage
     m_Metadata:
       m_Items: []
-  - m_Id: 70675315547250688
-    m_Key: GameClearUI_Protected
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70675315547250689
-    m_Key: GameClearUI_Habitat
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70675315547250690
-    m_Key: 03Yes
-    m_Metadata:
-      m_Items: []
-  - m_Id: 70675315547250691
-    m_Key: 03No
-    m_Metadata:
-      m_Items: []
   - m_Id: 70676331671920640
     m_Key: UnlockPanelText
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75350266464247808
+    m_Key: Habitat_Meadow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75350266489413632
+    m_Key: Habitat_Ocean
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75350266489413633
+    m_Key: Habitat_Desert
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75350266489413634
+    m_Key: Habitat_Forest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75350266489413635
+    m_Key: Habitat_Polar
     m_Metadata:
       m_Items: []
   m_Metadata:

@@ -177,7 +177,8 @@ namespace _01.Scripts._04.UI.MainScene
 
             if (stageText != null)
             {
-                stageText.text = $"Stage : {currentStage + 1}";
+                string stageLabel = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Stage");
+                stageText.text = $"{stageLabel} : {currentStage + 1}";
             }
 
             if (previousStageButton != null)
@@ -195,11 +196,11 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow",
-                HabitatMode.OceanMode => "Ocean",
-                HabitatMode.DesertMode => "Desert",
-                HabitatMode.ForestMode => "Forest",
-                HabitatMode.PolarMode => "Polar",
+                HabitatMode.MeadowMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Meadow"),
+                HabitatMode.OceanMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Ocean"),
+                HabitatMode.DesertMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Desert"),
+                HabitatMode.ForestMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Forest"),
+                HabitatMode.PolarMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Polar"),
                 _ => mode.ToString()
             };
         }
