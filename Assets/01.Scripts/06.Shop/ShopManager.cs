@@ -1,6 +1,7 @@
 ﻿using _01.Scripts._00.Manager;
 using _01.Scripts._06.Shop;
 using _01.Scripts._08.Utility;
+using Supabase.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,17 +19,29 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private Image unlockPanel;
     [SerializeField] private Material uiHighlightMaterial;
     
+    [Header("서식지 강화 텍스트")]
+    [SerializeField] private TextMeshProUGUI meadowText;
+    [SerializeField] private TextMeshProUGUI oceanText;
+    [SerializeField] private TextMeshProUGUI desertText;
+    [SerializeField] private TextMeshProUGUI ForestText;
+    [SerializeField] private TextMeshProUGUI PolarText;
+    
     private UnitDescription unitDescription;
     private UnitInfoIcon currentSelected;
     private ItemObject currentItemSelected;
     private bool isBuyPopupActive;
 
-    #region 초기 세팅
     private void Awake()
     {
         InitializeShopPanels();
     }
-    
+
+    private void Start()
+    {
+        UpdateHabitatBonusText();
+    }
+
+    #region 초기 세팅
     private void InitializeShopPanels()
     {
         if (panels == null)
@@ -50,6 +63,42 @@ public class ShopManager : MonoBehaviour
             }
         }
     }
+    #endregion
+
+    #region 서식지 모드 강화 표시
+
+    private void UpdateHabitatBonusText()
+    {
+        SetHabitatBonusText(meadowText, Habitat.Meadow);
+        SetHabitatBonusText(oceanText, Habitat.Ocean);
+        SetHabitatBonusText(desertText, Habitat.Desert);
+        SetHabitatBonusText(ForestText, Habitat.Forest);
+        SetHabitatBonusText(PolarText, Habitat.Polar);
+    }
+
+    private void SetHabitatBonusText(TextMeshProUGUI text, Habitat habitat)
+    {
+        if (text == null)
+        {
+            return;
+        }
+
+        text.text = $"+{GetClearedHabitatStage(habitat)}";
+    }
+    
+    private int GetClearedHabitatStage(Habitat type)
+    {
+        return type switch
+        {
+            Habitat.Meadow => GameManager.Instance.playData.MaxStages[StageType.Meadow],
+            Habitat.Ocean => GameManager.Instance.playData.MaxStages[StageType.Ocean],
+            Habitat.Desert => GameManager.Instance.playData.MaxStages[StageType.Desert],
+            Habitat.Forest => GameManager.Instance.playData.MaxStages[StageType.Forest],
+            Habitat.Polar => GameManager.Instance.playData.MaxStages[StageType.Polar],
+            _ => 0
+        };
+    }
+
     #endregion
 
     #region 버튼 연결 함수
