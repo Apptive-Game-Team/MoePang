@@ -15,6 +15,9 @@ namespace _01.Scripts._11.HabitatMode
     public class HabitatModeManager : SingletonObject<HabitatModeManager>
     {
         public HabitatMode habitatMode = HabitatMode.MeadowMode;
+
+        [Header("Debug")]
+        public bool DebugHabitat = false;
         
         [Header("Ocean Debuff")]
         [SerializeField] private float oceanEnemyStatMultiplier = 1.5f;

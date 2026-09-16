@@ -3,6 +3,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using _01.Scripts._11.HabitatMode;
 
 namespace _01.Scripts._00.Manager
 {
@@ -42,6 +43,7 @@ namespace _01.Scripts._00.Manager
         private void Start()
         {
             UpdateUI();
+            UpdateButtons();
         }
 
         private void OnEnable()
@@ -112,6 +114,7 @@ namespace _01.Scripts._00.Manager
                     Any(stage => 
                         stage.Key != StageType.Normal && stage.Value >= 5);
             _habitatModeButton.interactable = 
+                HabitatModeManager.Instance.DebugHabitat ||
                 GameManager.Instance.playData.MaxStages.
                     Any(stage => 
                         stage is { Key: StageType.Normal, Value: >= 50 });

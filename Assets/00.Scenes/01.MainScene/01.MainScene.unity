@@ -603,6 +603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   habitatMode: 0
+  DebugHabitat: 1
   oceanEnemyStatMultiplier: 1.5
   oceanEventEnemyStatMultiplier: 1.25
   oceanEnemyBuffDuration: 9999
@@ -1275,6 +1276,10 @@ PrefabInstance:
     - target: {fileID: 1786010920946836221, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
       propertyPath: m_Name
       value: CommonCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7935958177445638585, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
