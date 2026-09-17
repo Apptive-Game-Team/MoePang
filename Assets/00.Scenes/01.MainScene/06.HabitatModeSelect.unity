@@ -2818,6 +2818,7 @@ GameObject:
   - component: {fileID: 2103761823}
   - component: {fileID: 2103761825}
   - component: {fileID: 2103761824}
+  - component: {fileID: 2103761826}
   m_Layer: 5
   m_Name: RewardInfoText
   m_TagString: Untagged
@@ -2947,6 +2948,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2103761822}
   m_CullTransparentMesh: 1
+--- !u!114 &2103761826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2103761822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_StringReference:
+    m_TableReference:
+      m_TableCollectionName: GUID:c9327970db2aa964cb40f2e20d632d3b
+    m_TableEntryReference:
+      m_KeyId: 75754692697989120
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  m_FormatArguments: []
+  m_UpdateString:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2103761824}
+        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
+        m_MethodName: set_text
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &288463247848731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4588,6 +4629,7 @@ MonoBehaviour:
   currentBonusText: {fileID: 1338546263}
   guidePanel: {fileID: 1511187554}
   canvasGroup: {fileID: 1511187558}
+  rewardText: {fileID: 2103761824}
   previousStageButton: {fileID: 1906997923189694580}
   nextStageButton: {fileID: 8386085727605257562}
   stageText: {fileID: 1684028642370474151}

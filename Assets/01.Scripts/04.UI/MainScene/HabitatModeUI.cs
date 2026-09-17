@@ -21,6 +21,9 @@ namespace _01.Scripts._04.UI.MainScene
         [Header("Info Card Setting")]
         [SerializeField] private GameObject guidePanel;
         [SerializeField] private CanvasGroup canvasGroup;
+
+        [Header("Reward Card Setting")]
+        [SerializeField] private TextMeshProUGUI rewardText;
         
         [Header("Stage Card Setting")]
         [SerializeField] private GameObject previousStageButton;
@@ -181,6 +184,11 @@ namespace _01.Scripts._04.UI.MainScene
                 stageText.text = $"{stageLabel} : {currentStage + 1}";
             }
 
+            if (rewardText != null)
+            {
+                rewardText.text = GetStageRewardText(selectedMode);
+            }
+
             if (previousStageButton != null)
             {
                 previousStageButton.SetActive(currentStage > 0);
@@ -216,6 +224,47 @@ namespace _01.Scripts._04.UI.MainScene
                 HabitatMode.PolarMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06PolarDescription"),
                 _ => mode.ToString()
             };
+        }
+
+        private string GetStageRewardText(HabitatMode mode)
+        {
+            string stageBonusText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06Stage_Bonus");
+            int goldReward = GetGoldReward(mode);
+            int diaReward = GetDiaReward(mode);
+
+            return $"{stageBonusText} :\nGold + {goldReward}\nDia + {diaReward}";
+        }
+
+        private int GetGoldReward(HabitatMode mode)
+        {
+            int currentStage = StageManager.Instance.GetHabitatStage(mode);
+            int stage = currentStage + 1 + 50;
+            bool alreadyCleared = currentStage < StageManager.Instance.GetMaxHabitatStage(mode);
+
+            float amount = alreadyCleared
+                ? 20f + 4f * Mathf.Sqrt(stage - 1)
+                : 100f + 20f * (Mathf.Sqrt(stage) - 1f);
+
+            return Mathf.CeilToInt(amount);
+        }
+
+        private int GetDiaReward(HabitatMode mode)
+        {
+            int currentStage = StageManager.Instance.GetHabitatStage(mode);
+            int stage = currentStage + 1;
+            bool alreadyCleared = currentStage < StageManager.Instance.GetMaxHabitatStage(mode);
+
+            float amount = alreadyCleared
+                ? 5f + stage
+                : 10f + 3f * stage;
+
+            if (HabitatModeManager.Instance != null &&
+                HabitatModeManager.Instance.IsHabitatModeEventDay(mode))
+            {
+                amount *= 1.5f;
+            }
+
+            return Mathf.RoundToInt(amount);
         }
 
         private string GetModeClearRewardText(HabitatMode mode)
