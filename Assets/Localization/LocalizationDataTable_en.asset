@@ -249,6 +249,23 @@ MonoBehaviour:
     m_Localized: Holdings
     m_Metadata:
       m_Items: []
+  - m_Id: 75769393515405312
+    m_Localized: Changes one habitat tile into a joker tile that can match with any
+      habitat.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75769393515405313
+    m_Localized: Select one obstacle tile and removes it immediately.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75769393515405314
+    m_Localized: Creates a wind support tile at the selected position.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 75769393515405315
+    m_Localized: Increases the chance for higher-tier allies to appear.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
