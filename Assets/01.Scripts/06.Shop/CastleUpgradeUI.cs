@@ -1,6 +1,7 @@
 using _01.Scripts._00.Manager;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
@@ -32,9 +33,12 @@ namespace _01.Scripts._06.Shop
         /// </summary>
         private void UpdateText()
         {
+            string currentHpText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07CastleText1");
+            string upgradedHpText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07CastleText2");
+
             castleLevel.text = $"LV{_castleLevel}";
-            castleDescription.text = $"현재 서식지의 체력 : {_castleLevel * BalanceFormula.CastleHpIncreasePerLevel}\n" +
-                                     $"강화 시 : {(_castleLevel + 1) * BalanceFormula.CastleHpIncreasePerLevel}";
+            castleDescription.text = $"{currentHpText} : {_castleLevel * BalanceFormula.CastleHpIncreasePerLevel}\n" +
+                                     $"{upgradedHpText} : {(_castleLevel + 1) * BalanceFormula.CastleHpIncreasePerLevel}";
         }
 
         private void RegisterUpgradeButton()

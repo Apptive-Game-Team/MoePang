@@ -2,6 +2,7 @@ using _01.Scripts._00.Manager;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
@@ -110,11 +111,27 @@ namespace _01.Scripts._06.Shop
             private void RefreshPopupText()
             {
                 int totalPrice = _selectedInfo.price * _buyCount;
+                string itemName = GetItemName(_selectedInfo.type);
+                string buyFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07ItemBuyConfirm");
 
-                _titleText.text = _selectedInfo.type + "을 구매합니다.";
+                _titleText.text = string.Format(buyFormat, itemName);
                 _unitPriceText.text = _selectedInfo.price + "G";
                 _countText.text = _buyCount.ToString();
                 _totalPriceText.text = totalPrice + "G";
+            }
+
+            private string GetItemName(ItemType itemType)
+            {
+                string key = itemType switch
+                {
+                    ItemType.Joker => "07Joker",
+                    ItemType.DestroyObstacle => "07Pure",
+                    ItemType.CreateLineBomb => "07Support",
+                    ItemType.RaiseSpawnProb => "07Potion",
+                    _ => itemType.ToString()
+                };
+
+                return LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", key);
             }
 
             private void BuySelectedItem()
