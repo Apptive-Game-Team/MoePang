@@ -1,6 +1,7 @@
 using _01.Scripts._00.Manager;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
@@ -21,7 +22,8 @@ namespace _01.Scripts._06.Shop
 
         public void UpdateAmount()
         {
-            itemAmount.text = "보유량 " + GameManager.Instance.itemData.ItemAmounts[type];
+            string holdingsText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07Holdings");
+            itemAmount.text = $"{holdingsText} : {GameManager.Instance.itemData.ItemAmounts[type]}";
         }
     }
 }
