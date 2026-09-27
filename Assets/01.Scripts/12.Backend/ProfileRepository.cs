@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -13,13 +12,19 @@ namespace _01.Scripts._12.Backend
         {
             try
             {
-                await Client.Rpc("create_user_profile", new { p_nickname = nickname });
+                await Client.Rpc(
+                    "create_user_profile",
+                    new { p_nickname = nickname }
+                );
+
                 Debug.Log("Profile Create Success via RPC!");
+
                 return true;
             }
             catch (Exception e)
             {
                 Debug.LogError($"Profile Create Failed\n{e}");
+
                 return false;
             }
         }
@@ -32,7 +37,9 @@ namespace _01.Scripts._12.Backend
 
                 if (user == null)
                 {
-                    Debug.LogError("GetProfile Failed - User is not logged in.");
+                    Debug.LogError(
+                        "GetProfile Failed - User is not logged in."
+                    );
 
                     return null;
                 }
@@ -63,6 +70,30 @@ namespace _01.Scripts._12.Backend
             }
         }
 
+        public async Task<bool> Exists()
+        {
+            try
+            {
+                Supabase.Gotrue.User user = Client.Auth.CurrentUser;
+
+                if (user == null)
+                {
+                    return false;
+                }
+
+                Profile profile = await Client
+                    .From<Profile>()
+                    .Where(x => x.Id == user.Id)
+                    .Single();
+
+                return profile != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> UpdateNickname(string nickname)
         {
             try
@@ -71,7 +102,9 @@ namespace _01.Scripts._12.Backend
 
                 if (user == null)
                 {
-                    Debug.LogError("UpdateNickname Failed - User is not logged in.");
+                    Debug.LogError(
+                        "UpdateNickname Failed - User is not logged in."
+                    );
 
                     return false;
                 }

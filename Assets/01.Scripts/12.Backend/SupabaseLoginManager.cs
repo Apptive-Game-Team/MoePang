@@ -28,7 +28,7 @@ namespace _01.Scripts._12.Backend
 
         private async void Start()
         {
-            await StartGame();
+            //await StartGame();
         }
 
         private async Task StartGame()
@@ -127,6 +127,87 @@ namespace _01.Scripts._12.Backend
             await GameManager.Instance.LoadData();
 
             Debug.Log("Game data loaded successfully.");
+        }
+        
+        public async Task LoginWithGoogle(string idToken, string nickname)
+        {
+            try
+            {
+                await SupabaseManager.Instance.InitializationTask;
+
+                Debug.Log("Google Supabase login started.");
+
+                await _authRepository.LoginWithGoogle(idToken);
+
+                if (!_authRepository.IsLoggedIn())
+                {
+                    IsAuthenticated = false;
+
+                    throw new Exception(
+                        "Google authentication failed."
+                    );
+                }
+
+                IsAuthenticated = true;
+
+                string userId = _authRepository.GetCurrentUserId();
+
+                Debug.Log(
+                    $"Google authentication success. UserId: {userId}"
+                );
+
+                bool profileExists = await _profileRepository.Exists();
+
+                if (!profileExists)
+                {
+                    Debug.Log("Profile does not exist. Creating profile...");
+
+                    bool profileCreated =
+                        await _profileRepository.CreateProfile(nickname);
+
+                    if (!profileCreated)
+                    {
+                        throw new Exception(
+                            "Failed to create Google user profile."
+                        );
+                    }
+
+                    Debug.Log("Google user profile created.");
+                }
+                else
+                {
+                    Debug.Log("Profile already exists. Skip profile creation.");
+                }
+
+                await _dataRepository.CreateInitialGameData();
+
+                //await LoadGameData();
+
+                Debug.Log(
+                    "Google authentication and data loading completed."
+                );
+            }
+            catch (Exception e)
+            {
+                IsAuthenticated = false;
+
+                Debug.LogError(
+                    $"Google login failed.\n{e}"
+                );
+
+                throw;
+            }
+        }
+        
+        public string GetCurrentUserId()
+        {
+            return _authRepository.GetCurrentUserId();
+        }
+
+        public async Task Logout()
+        {
+            await _authRepository.Logout();
+            IsAuthenticated = false;
         }
     }
 }

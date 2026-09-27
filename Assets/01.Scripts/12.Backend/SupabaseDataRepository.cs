@@ -35,6 +35,24 @@ namespace _01.Scripts._12.Backend
             return Client.Auth.CurrentUser != null &&
                    Client.Auth.CurrentSession != null;
         }
+        
+        
+        public async Task<bool> HasInitialGameData()
+        {
+            if (!IsLoggedIn())
+            {
+                return false;
+            }
+
+            Supabase.Postgrest.Responses.ModeledResponse<PlayerDataModel> response =
+                await Client
+                    .From<PlayerDataModel>()
+                    .Select("*")
+                    .Filter("user_id", Constants.Operator.Equals, UserId)
+                    .Get();
+
+            return response.Models.Count > 0;
+        }
 
 
         public async Task CreateInitialGameData()
@@ -47,6 +65,12 @@ namespace _01.Scripts._12.Backend
 
             try
             {
+                if (await HasInitialGameData())
+                {
+                    Debug.Log("Initial game data already exists. Skip creation.");
+                    return;
+                }
+
                 await Client.Rpc(
                     "create_user_game_data",
                     new Dictionary<string, object>()
