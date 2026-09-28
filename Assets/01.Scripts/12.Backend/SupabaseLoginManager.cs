@@ -28,7 +28,9 @@ namespace _01.Scripts._12.Backend
 
         private async void Start()
         {
-            //await StartGame();
+            #if UNITY_EDITOR
+                await StartGame();
+            #endif
         }
 
         private async Task StartGame()
