@@ -105,7 +105,7 @@ namespace _01.Scripts._12.Backend
                 
                 await Task.Delay(3000);
 
-                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Title));
+                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
             }
             catch (System.Exception e)
             {
