@@ -335,12 +335,10 @@ namespace _01.Scripts._00.Manager
             gameData = new GameData();
         }
 
-        private async void Start()
+        private void Start()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
             PlayBGMForScene(SceneManager.GetActiveScene().name);
-
-            await LoadData();
         }
 
         private void OnDestroy()
