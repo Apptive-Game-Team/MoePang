@@ -82,6 +82,14 @@ namespace _01.Scripts._12.Backend
 
                 IsAuthenticated = true;
                 
+                Profile profile = await _profileRepository.GetProfile();
+
+                if (profile != null && profile.Nickname != nickName)
+                {
+                    await _profileRepository.UpdateNickname(nickName);
+                    Debug.Log($"Nickname updated: {profile.Nickname} -> {nickName}");
+                }
+                
                 await LoadGameData();
             }
             catch (Exception loginException)
