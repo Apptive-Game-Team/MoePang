@@ -43,7 +43,7 @@ namespace _01.Scripts._06.Shop
             unitLevelText.text = $"Lv {data.UnitLevel}";
             unitAttackTypeText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.AttackType.ToString());
             unitStatText.text = $"{data.AttackDamage}\n{data.MaxHp}";
-            descriptionText.text = data.UnitDescriptionText;
+            descriptionText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitDescriptionText);
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
             unitAnimator.Play("Walk", 0, 0f);
             
