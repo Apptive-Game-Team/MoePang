@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
@@ -37,8 +38,8 @@ namespace _01.Scripts._06.Shop
             }
             ApplyHabitatImage(data.Habitat);
 
-            habitatText.text = data.Habitat.ToString();
-            unitNameText.text = data.UnitName.ToString();
+            habitatText.text = GetHabitatText(data.Habitat);
+            unitNameText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitName.ToString());
             unitLevelText.text = $"Lv {data.UnitLevel}";
             unitAttackTypeText.text = data.AttackType.ToString();
             unitStatText.text = $"{data.AttackDamage}\n{data.MaxHp}";
@@ -75,6 +76,21 @@ namespace _01.Scripts._06.Shop
             {
                 habitatImage.gameObject.SetActive(false);
             }
+        }
+
+        private string GetHabitatText(Habitat habitat)
+        {
+            string key = habitat switch
+            {
+                Habitat.Meadow => "Habitat_Meadow",
+                Habitat.Ocean => "Habitat_Ocean",
+                Habitat.Desert => "Habitat_Desert",
+                Habitat.Forest => "Habitat_Forest",
+                Habitat.Polar => "Habitat_Polar",
+                _ => habitat.ToString()
+            };
+
+            return LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", key);
         }
     }
 }

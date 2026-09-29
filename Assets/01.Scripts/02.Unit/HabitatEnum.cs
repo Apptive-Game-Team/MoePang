@@ -17,9 +17,9 @@ public enum UnitName
     Tiger,
 
     //Ocean
-    JellyFish,
-    SeaTurtle,
-    FurSeal,
+    Jellyfish,
+    Seaturtle,
+    Seal,
     Hippo,
     Whale,
 
@@ -38,11 +38,11 @@ public enum UnitName
     Elephant,
 
     //Polar
-    ArticHare,
+    Artichare,
     Penguin,
-    ArticFox,
+    Articfox,
     Reindeer,
-    PolarBear,
+    Polarbear,
 
     //Enemy
     Farmer,

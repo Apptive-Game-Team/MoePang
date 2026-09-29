@@ -316,7 +316,7 @@ public class Unit : MonoBehaviour, IDamageable
 
         float segment = 1f / attackSpeed / 3f;
 
-        if (data.UnitName == UnitName.ArticFox)
+        if (data.UnitName == UnitName.Articfox)
         {
             yield return StartCoroutine(ArticFoxAttackCoroutine(segment));
         }
