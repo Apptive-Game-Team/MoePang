@@ -88,7 +88,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 70669951523168259
-    m_Localized: Exit
+    m_Localized: Exit Game
     m_Metadata:
       m_Items: []
   - m_Id: 70670913977524224
@@ -144,37 +144,27 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 75354666536607744
-    m_Localized: 'Summoning units requires more stacks
-
-      <size=30>Stack Cost
-      : 3 -> 6</size>'
+    m_Localized: 'Summoning units requires more stacks <size=30>Stack Cost : 3 ->
+      6</size>'
     m_Metadata:
       m_Items: []
   - m_Id: 75354666536607745
-    m_Localized: 'Enemies gain increased Stats
-
-      <size=30>All stats x 1.5</size>'
+    m_Localized: Enemies gain increased Stats <size=30>All stats x 1.5</size>
     m_Metadata:
       m_Items: []
   - m_Id: 75354666536607746
-    m_Localized: 'A sandstorm periodically obscures the puzzle board
-
-      <size=30>Every
-      15s, tiles are hidden for 3s.</size>'
+    m_Localized: A sandstorm periodically obscures the puzzle board <size=30>Every
+      15s, tiles are hidden for 3s.</size>
     m_Metadata:
       m_Items: []
   - m_Id: 75354666536607747
-    m_Localized: 'Friendly units have reduced Movement Speed and Attack Speed
-
-      <size=30>Speed
-      & Attack Stats x 0.75</size>'
+    m_Localized: Friendly units have reduced Movement Speed and Attack Speed <size=30>Speed
+      & Attack Stats x 0.75</size>
     m_Metadata:
       m_Items: []
   - m_Id: 75354666536607748
-    m_Localized: 'Enemies periodically recover HP
-
-      <size=30>All enemies restore
-      HP every 15s</size>'
+    m_Localized: Enemies periodically recover HP <size=30>All enemies restore HP
+      every 15s</size>
     m_Metadata:
       m_Items: []
   - m_Id: 75754692697989120
@@ -413,6 +403,132 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 80018093347512323
     m_Localized: LongMeleeAttack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512341
+    m_Localized: A unique animal with a long snout and sharp claws. It quietly approaches
+      and strikes at the enemy's opening.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512335
+    m_Localized: A defensive animal that protects itself with a hard shell. When
+      danger comes, it curls up and calmly holds its ground.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512346
+    m_Localized: A clever animal that hides in snowy fields with its white fur. It
+      moves quietly and waits for the enemy to drop its guard.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512344
+    m_Localized: A small friend that quickly hops through the white snow. It may
+      look quiet, but it moves more nimbly than anyone.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512336
+    m_Localized: A friend that keeps walking steadily even through scorching sandstorms.
+      With endurance for long journeys, it protects the desert path.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512340
+    m_Localized: A relaxed and gentle animal that makes everyone feel at ease. But
+      when its friends are in danger, it quietly stands guard.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512325
+    m_Localized: With long legs and sharp senses, it notices distant danger before
+      anyone else. Quiet, but never hesitates to protect the meadow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512343
+    m_Localized: A reliable guardian of the forest with a huge body and great strength.
+      Calm and relaxed, but each step carries a heavy presence.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512339
+    m_Localized: A forest friend that hops around with a small body. Its quick movements
+      confuse enemies.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512327
+    m_Localized: A meadow watcher that surveys far away with its long neck. It may
+      look relaxed, but it warns friends before danger arrives.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512332
+    m_Localized: A dependable friend that blocks the way with a large body and great
+      strength. Usually relaxed, but hard to stop when angered.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512337
+    m_Localized: It never misses an opening with sharp senses and quick judgment.
+      It may look like it is smiling, but on the battlefield it is a clever hunter.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512342
+    m_Localized: An agile hunter that silently crosses the forest. It uses swift
+      movement to strike when the enemy lets its guard down.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512329
+    m_Localized: A mysterious friend that drifts gently with the waves. It looks
+      soft, but gives a stinging strike to enemies that get close.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512338
+    m_Localized: A guardian of the desert with great strength and dignity. When it
+      roars, every nearby enemy becomes tense.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512345
+    m_Localized: It waddles when walking, but bravely moves forward on the ice. A
+      cute warrior that quickly gets back up even after falling.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512348
+    m_Localized: A strong guardian of the land of snow and ice. Its huge body blocks
+      the enemy's path like a reliable shield.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512324
+    m_Localized: A scout that quickly moves through the grass with a small body.
+      It may look timid, but it moves before anyone else for its friends.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512347
+    m_Localized: A reliable friend that never loses its way even in a snowstorm.
+      With large antlers, it opens the path and leads its allies.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512334
+    m_Localized: It hides in the sand and appears at the decisive moment. Small,
+      but its sharp tail keeps enemies on edge.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512331
+    m_Localized: Fast in the water and cutely wobbly on land. Its playful nature
+      gives strength to its ocean friends.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512330
+    m_Localized: An animal that protects itself with a hard shell and slowly moves
+      forward. It may look slow, but it is a dependable ocean friend that never gives
+      up.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512328
+    m_Localized: A guardian of the meadow with great strength and sharp movement.
+      It waits quietly and unleashes its power at the decisive moment.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512333
+    m_Localized: A huge guardian that carries the vast ocean within it. Even its
+      heavy movement puts great pressure on enemies.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80018093347512326
+    m_Localized: A clever hunter that moves with its pack and targets enemy openings.
+      It may look a little scary, but it is a reliable guardian for its friends.
     m_Metadata:
       m_Items: []
   references:
