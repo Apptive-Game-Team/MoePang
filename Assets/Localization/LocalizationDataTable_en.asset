@@ -278,6 +278,27 @@ MonoBehaviour:
     m_Localized: Sort Success
     m_Metadata:
       m_Items: []
+  - m_Id: 80008172656730112
+    m_Localized: Summons {0}{1} highest-tier allied unit(s).
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80008172656730113
+    m_Localized: Increases allied units' attack damage, attack speed, and move speed
+      by {0}{1}x.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80008172656730114
+    m_Localized: Creates {0}{1} special puzzle tile(s).
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80008172656730115
+    m_Localized: Restores all allied units' HP by {0}{1} of their max HP.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80008172656730116
+    m_Localized: Reduces enemy units' attack speed and move speed to {0}{1}x.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
