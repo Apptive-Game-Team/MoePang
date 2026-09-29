@@ -28,9 +28,9 @@ namespace _01.Scripts._10.System.Combo
             
             if (level == info.ComboMaxLevel)
             {
-                return string.Format(info.comboDescription, level, "");   
+                return LocalizedDescription(level, "");   
             }
-            return string.Format(info.comboDescription, level, $"/<color=grey>{nextLevel}</color>");
+            return LocalizedDescription(level, $"/<color=grey>{nextLevel}</color>");
         }
     }
 }

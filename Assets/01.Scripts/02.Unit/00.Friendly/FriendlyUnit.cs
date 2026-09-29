@@ -45,16 +45,14 @@ public class FriendlyUnit : Unit
         }
 
         int clearedStage = GetClearedHabitatStage(habitat);
-        int comboLevel = GetComboLevel(habitat);
-
         if (clearedStage <= 0)
         {
             FinalStatApply(maxHp, attackDamage);
             return;
         }
 
-        float bonusMaxHp = BalanceFormula.GetHabitatBonusHp(clearedStage, comboLevel);
-        float bonusAttackDamage = BalanceFormula.GetHabitatBonusAttackDamage(clearedStage, comboLevel);
+        float bonusMaxHp = BalanceFormula.GetHabitatBonusHp(clearedStage);
+        float bonusAttackDamage = BalanceFormula.GetHabitatBonusAttackDamage(clearedStage);
 
         FinalStatApply(
             maxHp + bonusMaxHp,
@@ -73,16 +71,5 @@ public class FriendlyUnit : Unit
             Habitat.Polar => GameManager.Instance.playData.MaxStages[StageType.Polar],
             _ => 0
         };
-    }
-
-    private int GetComboLevel(Habitat type)
-    {
-        if (GameManager.Instance.comboData == null ||
-            !GameManager.Instance.comboData.ComboLevels.TryGetValue(type, out int level))
-        {
-            return 1;
-        }
-
-        return level;
     }
 }

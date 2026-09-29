@@ -24,6 +24,9 @@ namespace _01.Scripts._00.Manager
         private Button _comboButton;
         private Button _habitatModeButton;
         private Button _shopButton;
+
+        [Header("Debug")]
+        [SerializeField] private bool debugComboButton = false;
         
 
         private void Awake()
@@ -44,6 +47,14 @@ namespace _01.Scripts._00.Manager
         {
             UpdateUI();
             UpdateButtons();
+        }
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying && _comboButton != null && GameManager.Instance != null)
+            {
+                UpdateButtons();
+            }
         }
 
         private void OnEnable()
@@ -110,11 +121,12 @@ namespace _01.Scripts._00.Manager
         private void UpdateButtons()
         {
             _comboButton.interactable = 
+                debugComboButton ||
                 GameManager.Instance.playData.MaxStages.
                     Any(stage => 
                         stage.Key != StageType.Normal && stage.Value >= 5);
             _habitatModeButton.interactable = 
-                HabitatModeManager.Instance.DebugHabitat ||
+                HabitatModeManager.Instance != null && HabitatModeManager.Instance.DebugHabitat ||
                 GameManager.Instance.playData.MaxStages.
                     Any(stage => 
                         stage is { Key: StageType.Normal, Value: >= 50 });

@@ -1,6 +1,7 @@
 using _01.Scripts._00.Manager;
 using System;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 
 namespace _01.Scripts._10.System.Combo
 {
@@ -20,6 +21,15 @@ namespace _01.Scripts._10.System.Combo
         public void UpgradeCombo()
         {
             GameManager.Instance.comboData.ComboLevels[info.comboType]++;
+        }
+
+        protected string LocalizedDescription(params object[] args)
+        {
+            string descriptionFormat = LocalizationSettings.StringDatabase.GetLocalizedString(
+                "LocalizationDataTable",
+                info.comboDescription);
+
+            return string.Format(descriptionFormat, args);
         }
         
         public abstract void TriggerComboEffect(ComboContext context);
