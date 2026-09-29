@@ -128,7 +128,10 @@ namespace _01.Scripts._04.UI.MainScene
                 _isComboOrdering = !_isComboOrdering;
                 
                 SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-                comboOrderButton.GetComponentInChildren<TextMeshProUGUI>().text = _isComboOrdering ? "콤보 정렬 완료" : "콤보 정렬";
+                comboOrderButton.GetComponentInChildren<TextMeshProUGUI>().text =
+                    LocalizationSettings.StringDatabase.GetLocalizedString(
+                        "LocalizationDataTable",
+                        _isComboOrdering ? "05ComboSortComplete" : "05ComboSort");
                 foreach (ComboUIObject ui in content.transform.GetComponentsInChildren<ComboUIObject>())
                 {
                     ui.transform.GetChild(5).GetComponent<Button>().interactable = !_isComboOrdering;

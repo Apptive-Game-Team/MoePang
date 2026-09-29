@@ -35,10 +35,6 @@ MonoBehaviour:
     m_Key: 03Yes
     m_Metadata:
       m_Items: []
-  - m_Id: 70668612172849153
-    m_Key: 05ComboSort
-    m_Metadata:
-      m_Items: []
   - m_Id: 70668612172849160
     m_Key: 06Clear Reward
     m_Metadata:
@@ -247,12 +243,20 @@ MonoBehaviour:
     m_Key: 07PotionDescription
     m_Metadata:
       m_Items: []
+  - m_Id: 70668612172849153
+    m_Key: 05ComboSort
+    m_Metadata:
+      m_Items: []
   - m_Id: 80006151862034432
     m_Key: 05Dia
     m_Metadata:
       m_Items: []
   - m_Id: 80006151891394560
     m_Key: 05Upgrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 80007012629684224
+    m_Key: 05ComboSortComplete
     m_Metadata:
       m_Items: []
   m_Metadata:
