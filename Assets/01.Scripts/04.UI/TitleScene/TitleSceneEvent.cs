@@ -2,6 +2,7 @@ using _01.Scripts._08.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// 타이틀 씬 이벤트 담당 스크립트
@@ -11,6 +12,7 @@ public class TitleSceneEvent : MonoBehaviour
     [Header("타이틀 텍스트")]
     [SerializeField] private TextMeshProUGUI textComponent;
     [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
+    [SerializeField] private Image loginImage;
 
     private void Awake()
     {
@@ -30,6 +32,6 @@ public class TitleSceneEvent : MonoBehaviour
 
     private void MoveToNextScene()
     {
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+        loginImage.gameObject.SetActive(true);
     }
 }

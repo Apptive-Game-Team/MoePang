@@ -51,6 +51,23 @@ namespace _01.Scripts._12.Backend
                 $"SignUp success. UserId: {Client.Auth.CurrentUser?.Id}"
             );
         }
+        
+        public async Task LoginWithGoogle(string idToken)
+        {
+            if (string.IsNullOrWhiteSpace(idToken))
+            {
+                throw new ArgumentException("Google IdToken is empty.");
+            }
+
+            await Client.Auth.SignInWithIdToken(
+                Supabase.Gotrue.Constants.Provider.Google,
+                idToken
+            );
+
+            Debug.Log(
+                $"Google Login success. UserId: {Client.Auth.CurrentUser?.Id}"
+            );
+        }
 
         public string GetCurrentUserId()
         {
