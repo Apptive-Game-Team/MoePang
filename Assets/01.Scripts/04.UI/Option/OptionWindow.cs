@@ -1,16 +1,24 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class OptionWindow : MonoBehaviour
 {
+    private const string LanguageCodeKey = "LanguageCode";
+
     [Header("Sliders")]
     [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider bgmSlider;
     [SerializeField] private Slider SFXSlider;
+    
+    [Header("Language")]
+    [SerializeField] private TMP_Dropdown languageDropdown;
     [SerializeField] public Button optionButton;//이 창을 생성하는 버튼을 생성 시 연결해줘야함
     /// <summary>
     /// 옵션 창 생성 시 초기화
@@ -34,6 +42,72 @@ public class OptionWindow : MonoBehaviour
         SFXSlider.minValue = 0.0001f;
         SFXSlider.value = SoundManager.Instance.SFXSoundVolume;
         SFXSlider.onValueChanged.AddListener((float value) => { SoundManager.Instance.SFXSoundVolume = value; PlayerPrefs.SetFloat("SFXVolume", value); PlayerPrefs.Save(); });
+
+        StartCoroutine(InitLanguageDropdown());
+    }
+
+    private IEnumerator InitLanguageDropdown()
+    {
+        yield return LocalizationSettings.InitializationOperation;
+
+        TMP_Dropdown dropdown = GetLanguageDropdown();
+        if (dropdown == null)
+        {
+            yield break;
+        }
+
+        IList<Locale> locales = LocalizationSettings.AvailableLocales.Locales;
+        List<string> options = new();
+
+        foreach (Locale locale in locales)
+        {
+            options.Add(locale.LocaleName);
+        }
+
+        dropdown.ClearOptions();
+        dropdown.AddOptions(options);
+
+        string savedLanguageCode = PlayerPrefs.GetString(LanguageCodeKey, string.Empty);
+        if (!string.IsNullOrEmpty(savedLanguageCode))
+        {
+            foreach (Locale locale in locales)
+            {
+                if (locale.Identifier.Code == savedLanguageCode)
+                {
+                    LocalizationSettings.SelectedLocale = locale;
+                    break;
+                }
+            }
+        }
+
+        int selectedIndex = Mathf.Max(0, locales.IndexOf(LocalizationSettings.SelectedLocale));
+        dropdown.SetValueWithoutNotify(selectedIndex);
+        dropdown.onValueChanged.RemoveListener(OnLanguageChanged);
+        dropdown.onValueChanged.AddListener(OnLanguageChanged);
+    }
+
+    private void OnLanguageChanged(int index)
+    {
+        IList<Locale> locales = LocalizationSettings.AvailableLocales.Locales;
+        if (index < 0 || index >= locales.Count)
+        {
+            return;
+        }
+
+        Locale selectedLocale = locales[index];
+        LocalizationSettings.SelectedLocale = selectedLocale;
+        PlayerPrefs.SetString(LanguageCodeKey, selectedLocale.Identifier.Code);
+        PlayerPrefs.Save();
+    }
+
+    private TMP_Dropdown GetLanguageDropdown()
+    {
+        if (languageDropdown == null)
+        {
+            languageDropdown = GetComponentInChildren<TMP_Dropdown>(true);
+        }
+
+        return languageDropdown;
     }
 
     public void OnEndButton()
