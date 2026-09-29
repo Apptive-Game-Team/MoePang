@@ -93,6 +93,39 @@ namespace _01.Scripts._12.Backend
                 return false;
             }
         }
+        
+        public async Task<bool> UpdateAvatar(int avatarId)
+        {
+            try
+            {
+                Supabase.Gotrue.User user = Client.Auth.CurrentUser;
+
+                if (user == null)
+                {
+                    Debug.LogError(
+                        "AvatarId Failed - User is not logged in."
+                    );
+
+                    return false;
+                }
+
+                await Client
+                    .From<Profile>()
+                    .Set(x => x.AvatarId, avatarId)
+                    .Where(x => x.Id == user.Id)
+                    .Update();
+
+                Debug.Log($"AvatarId Update Success - {avatarId}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"AvatarId Update Failed\n{e}");
+
+                return false;
+            }
+        }
 
         public async Task<bool> UpdateNickname(string nickname)
         {

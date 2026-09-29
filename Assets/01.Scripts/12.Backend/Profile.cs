@@ -11,5 +11,8 @@ namespace _01.Scripts._12.Backend
 
         [Column("nickname")]
         public string Nickname { get; set; }
+        
+        [Column("avatar_id")]
+        public int AvatarId { get; set; }
     }
 }
