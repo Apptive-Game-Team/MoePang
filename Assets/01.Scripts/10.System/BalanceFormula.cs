@@ -240,14 +240,14 @@ public static class BalanceFormula
     private const float habitatBonusHp = 10f;
     private const float habitatBonusAttackDamage = 1f;
     
-    public static float GetHabitatBonusHp(int clearedStage, int comboLevel)
+    public static float GetHabitatBonusHp(int clearedStage)
     {
-        return Mathf.Max(0, clearedStage) * Mathf.Max(1, comboLevel) * habitatBonusHp;
+        return Mathf.Max(0, clearedStage) * habitatBonusHp;
     }
 
-    public static float GetHabitatBonusAttackDamage(int clearedStage, int comboLevel)
+    public static float GetHabitatBonusAttackDamage(int clearedStage)
     {
-        return Mathf.Max(0, clearedStage) * Mathf.Max(1, comboLevel) * habitatBonusAttackDamage;
+        return Mathf.Max(0, clearedStage) * habitatBonusAttackDamage;
     }
     
     #endregion
