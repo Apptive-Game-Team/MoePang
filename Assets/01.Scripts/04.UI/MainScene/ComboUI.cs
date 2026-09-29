@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
@@ -80,7 +81,7 @@ namespace _01.Scripts._04.UI.MainScene
                         }
                         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                         upgradeUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
-                            $"{comboLevels[type] * 100}D\nLevel {type.ToString()} 콤보를 업그레이드 하시겠습니까?";
+                            GetComboUpgradeConfirmText(type, comboLevels[type] * 100);
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
                         upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
                         {
@@ -185,6 +186,28 @@ namespace _01.Scripts._04.UI.MainScene
                 Habitat.Desert => StageType.Desert,
                 Habitat.Forest => StageType.Forest,
                 Habitat.Polar => StageType.Polar,
+                _ => throw new ArgumentOutOfRangeException(nameof(habitat), habitat, null)
+            };
+        }
+
+        private string GetComboUpgradeConfirmText(Habitat habitat, int price)
+        {
+            string diaText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "05Dia");
+            string habitatText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", GetHabitatLocalizationKey(habitat));
+            string upgradeFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "05Upgrade");
+
+            return $"{price}{diaText}\n{string.Format(upgradeFormat, habitatText)}";
+        }
+
+        private string GetHabitatLocalizationKey(Habitat habitat)
+        {
+            return habitat switch
+            {
+                Habitat.Meadow => "Habitat_Meadow",
+                Habitat.Ocean => "Habitat_Ocean",
+                Habitat.Desert => "Habitat_Desert",
+                Habitat.Forest => "Habitat_Forest",
+                Habitat.Polar => "Habitat_Polar",
                 _ => throw new ArgumentOutOfRangeException(nameof(habitat), habitat, null)
             };
         }

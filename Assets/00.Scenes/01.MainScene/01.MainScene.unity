@@ -1278,6 +1278,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CommonCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5909756121434844566, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
+      propertyPath: debugComboButton
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7935958177445638585, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
       propertyPath: m_IsActive
       value: 1
