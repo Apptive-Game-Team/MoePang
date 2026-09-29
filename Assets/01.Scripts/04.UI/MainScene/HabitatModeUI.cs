@@ -295,15 +295,11 @@ namespace _01.Scripts._04.UI.MainScene
 
         private string GetModeCurrentBonusText(HabitatMode mode)
         {
-            return mode switch
-            {
-                HabitatMode.MeadowMode => "In Developing...",
-                HabitatMode.OceanMode => "In Developing...",
-                HabitatMode.DesertMode => "In Developing...",
-                HabitatMode.ForestMode => "In Developing...",
-                HabitatMode.PolarMode => "In Developing...",
-                _ => mode.ToString()
-            };
+            int clearedStage = StageManager.Instance.GetMaxHabitatStage(mode);
+            float bonusHp = BalanceFormula.GetHabitatBonusHp(clearedStage);
+            float bonusAttackDamage = BalanceFormula.GetHabitatBonusAttackDamage(clearedStage);
+
+            return $"Hp + {bonusHp:0} / Damage + {bonusAttackDamage:0}";
         }
 
         public void ShowGuide()
