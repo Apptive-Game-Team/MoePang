@@ -41,7 +41,7 @@ namespace _01.Scripts._06.Shop
             habitatText.text = GetHabitatText(data.Habitat);
             unitNameText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitName.ToString());
             unitLevelText.text = $"Lv {data.UnitLevel}";
-            unitAttackTypeText.text = data.AttackType.ToString();
+            unitAttackTypeText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.AttackType.ToString());
             unitStatText.text = $"{data.AttackDamage}\n{data.MaxHp}";
             descriptionText.text = data.UnitDescriptionText;
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
