@@ -12,8 +12,10 @@ namespace _01.Scripts._12.Backend
         [SerializeField] private string nickName;
 
         private AuthRepository _authRepository;
-        private ProfileRepository _profileRepository;
+        public ProfileRepository ProfileRepository;
         private SupabaseDataRepository _dataRepository;
+
+        public Profile profile;
 
         public bool IsAuthenticated { get; private set; }
 
@@ -22,15 +24,8 @@ namespace _01.Scripts._12.Backend
             base.Awake();
 
             _authRepository = new AuthRepository();
-            _profileRepository = new ProfileRepository();
+            ProfileRepository = new ProfileRepository();
             _dataRepository = new SupabaseDataRepository();
-        }
-
-        private async void Start()
-        {
-            // #if UNITY_EDITOR
-            //     await StartGame();
-            // #endif
         }
 
         public async Task StartGame()
@@ -82,11 +77,11 @@ namespace _01.Scripts._12.Backend
 
                 IsAuthenticated = true;
                 
-                Profile profile = await _profileRepository.GetProfile();
+                profile = await ProfileRepository.GetProfile();
 
                 if (profile != null && profile.Nickname != nickName)
                 {
-                    await _profileRepository.UpdateNickname(nickName);
+                    await ProfileRepository.UpdateNickname(nickName);
                     Debug.Log($"Nickname updated: {profile.Nickname} -> {nickName}");
                 }
                 
@@ -109,7 +104,7 @@ namespace _01.Scripts._12.Backend
 
                     IsAuthenticated = true;
                     
-                    await _profileRepository.CreateProfile(nickName);
+                    await ProfileRepository.CreateProfile(nickName);
                     await _dataRepository.CreateInitialGameData();
                     
                     await LoadGameData();
@@ -166,14 +161,14 @@ namespace _01.Scripts._12.Backend
                     $"Google authentication success. UserId: {userId}"
                 );
 
-                bool profileExists = await _profileRepository.Exists();
+                bool profileExists = await ProfileRepository.Exists();
 
                 if (!profileExists)
                 {
                     Debug.Log("Profile does not exist. Creating profile...");
 
                     bool profileCreated =
-                        await _profileRepository.CreateProfile(nickname);
+                        await ProfileRepository.CreateProfile(nickname);
 
                     if (!profileCreated)
                     {
@@ -190,8 +185,6 @@ namespace _01.Scripts._12.Backend
                 }
 
                 await _dataRepository.CreateInitialGameData();
-
-                //await LoadGameData();
 
                 Debug.Log(
                     "Google authentication and data loading completed."
