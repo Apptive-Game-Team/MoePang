@@ -515,7 +515,7 @@ namespace _01.Scripts._00.Manager
                 HabitatMode mode = HabitatModeManager.Instance.HabitatMode;
                 stageType = GetStageTypeWithHabitat(mode);
                 playData.selectedStage[(int)stageType] = playData.MaxStages[stageType] == stageManager.CurrentHabitatStage ?
-                    playData.MaxStages[stageType] + 1 : stageManager.CurrentStage;
+                    playData.MaxStages[stageType] + 1 : stageManager.CurrentHabitatStage;
                 playData.MaxStages[stageType] = Mathf.Max(playData.MaxStages[stageType], stageManager.CurrentHabitatStage + 1);
                 currentStage = stageManager.CurrentHabitatStage;
                 stageManager.SetMaxHabitatStage(mode, Mathf.Max(stageManager.GetMaxHabitatStage(mode), stageManager.CurrentHabitatStage + 1));

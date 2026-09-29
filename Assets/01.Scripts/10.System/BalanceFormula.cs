@@ -235,6 +235,23 @@ public static class BalanceFormula
     }
     #endregion
     
+    #region 서식지 모드 콤보 강화 Fomula
+
+    private const float habitatBonusHp = 10f;
+    private const float habitatBonusAttackDamage = 1f;
+    
+    public static float GetHabitatBonusHp(int clearedStage, int comboLevel)
+    {
+        return Mathf.Max(0, clearedStage) * Mathf.Max(1, comboLevel) * habitatBonusHp;
+    }
+
+    public static float GetHabitatBonusAttackDamage(int clearedStage, int comboLevel)
+    {
+        return Mathf.Max(0, clearedStage) * Mathf.Max(1, comboLevel) * habitatBonusAttackDamage;
+    }
+    
+    #endregion
+    
     #region 유닛 소환 가중치 Formula
     
     private const int EnemySpawnWeightDynamicStartStage = 101;

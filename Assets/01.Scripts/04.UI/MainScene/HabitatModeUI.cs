@@ -5,6 +5,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Localization.Settings;
 
 namespace _01.Scripts._04.UI.MainScene
 {
@@ -20,6 +21,9 @@ namespace _01.Scripts._04.UI.MainScene
         [Header("Info Card Setting")]
         [SerializeField] private GameObject guidePanel;
         [SerializeField] private CanvasGroup canvasGroup;
+
+        [Header("Reward Card Setting")]
+        [SerializeField] private TextMeshProUGUI rewardText;
         
         [Header("Stage Card Setting")]
         [SerializeField] private GameObject previousStageButton;
@@ -176,7 +180,13 @@ namespace _01.Scripts._04.UI.MainScene
 
             if (stageText != null)
             {
-                stageText.text = $"Stage : {currentStage + 1}";
+                string stageLabel = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Stage");
+                stageText.text = $"{stageLabel} : {currentStage + 1}";
+            }
+
+            if (rewardText != null)
+            {
+                rewardText.text = GetStageRewardText(selectedMode);
             }
 
             if (previousStageButton != null)
@@ -194,11 +204,11 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode => "Meadow",
-                HabitatMode.OceanMode => "Ocean",
-                HabitatMode.DesertMode => "Desert",
-                HabitatMode.ForestMode => "Forest",
-                HabitatMode.PolarMode => "Polar",
+                HabitatMode.MeadowMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Meadow"),
+                HabitatMode.OceanMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Ocean"),
+                HabitatMode.DesertMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Desert"),
+                HabitatMode.ForestMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Forest"),
+                HabitatMode.PolarMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Habitat_Polar"),
                 _ => mode.ToString()
             };
         }
@@ -207,28 +217,54 @@ namespace _01.Scripts._04.UI.MainScene
         {
             return mode switch
             {
-                HabitatMode.MeadowMode =>
-                    "Summoning units requires more stacks\n" +
-                    "<size=30>Stack Cost : 3 -> 6</size>",
-
-                HabitatMode.OceanMode =>
-                    "Enemies gain increased Stats\n" +
-                    "<size=30>All stats × 1.5</size>",
-
-                HabitatMode.DesertMode =>
-                    "A sandstorm periodically obscures the puzzle board\n" +
-                    "<size=30>Every 15s, tiles are hidden for 3s.</size>",
-
-                HabitatMode.ForestMode =>
-                    "Friendly units have reduced Movement Speed and Attack Speed\n" +
-                    "<size=30>Speed & Attack Stats × 0.75</size>",
-
-                HabitatMode.PolarMode =>
-                    "Enemies periodically recover HP\n" +
-                    "<size=30>All enemies restore HP every 15s</size>",
-
+                HabitatMode.MeadowMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06MeadowDescription"),
+                HabitatMode.OceanMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06OceanDescription"),
+                HabitatMode.DesertMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06DesertDescription"),
+                HabitatMode.ForestMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06ForestDescription"),
+                HabitatMode.PolarMode => LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06PolarDescription"),
                 _ => mode.ToString()
             };
+        }
+
+        private string GetStageRewardText(HabitatMode mode)
+        {
+            string stageBonusText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "06Stage_Bonus");
+            int goldReward = GetGoldReward(mode);
+            int diaReward = GetDiaReward(mode);
+
+            return $"{stageBonusText} :\nGold + {goldReward}\nDia + {diaReward}";
+        }
+
+        private int GetGoldReward(HabitatMode mode)
+        {
+            int currentStage = StageManager.Instance.GetHabitatStage(mode);
+            int stage = currentStage + 1 + 50;
+            bool alreadyCleared = currentStage < StageManager.Instance.GetMaxHabitatStage(mode);
+
+            float amount = alreadyCleared
+                ? 20f + 4f * Mathf.Sqrt(stage - 1)
+                : 100f + 20f * (Mathf.Sqrt(stage) - 1f);
+
+            return Mathf.CeilToInt(amount);
+        }
+
+        private int GetDiaReward(HabitatMode mode)
+        {
+            int currentStage = StageManager.Instance.GetHabitatStage(mode);
+            int stage = currentStage + 1;
+            bool alreadyCleared = currentStage < StageManager.Instance.GetMaxHabitatStage(mode);
+
+            float amount = alreadyCleared
+                ? 5f + stage
+                : 10f + 3f * stage;
+
+            if (HabitatModeManager.Instance != null &&
+                HabitatModeManager.Instance.IsHabitatModeEventDay(mode))
+            {
+                amount *= 1.5f;
+            }
+
+            return Mathf.RoundToInt(amount);
         }
 
         private string GetModeClearRewardText(HabitatMode mode)
