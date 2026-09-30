@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._12.Backend;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -14,10 +15,14 @@ namespace _01.Scripts._04.UI.MainScene
 
         public int selectedAvatarId;
 
-        private async void Awake()
+        private void Awake()
         {
             _profileUI = GetComponentInParent<ProfileUI>();
-            _profile = SupabaseLoginManager.Instance.profile;
+
+            if (GameManager.Instance.IsLoggedIn)
+            {
+                _profile = SupabaseLoginManager.Instance.profile;
+            }
         }
 
         private void OnEnable()
@@ -41,7 +46,9 @@ namespace _01.Scripts._04.UI.MainScene
                 item.Initialize(
                     avatarId,
                     avatarDatabase.GetAvatar(avatarId),
-                    _profile.AvatarId,
+                    GameManager.Instance.IsLoggedIn ? 
+                        _profile.AvatarId : 
+                        GameManager.Instance.localProfileData.avatarId,
                     SelectAvatar
                 );
             }

@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._12.Backend;
 using TMPro;
 using UnityEngine;
@@ -14,21 +15,24 @@ namespace _01.Scripts._04.UI.MainScene
         private void Awake()
         {
             _profileUI = GetComponentInParent<ProfileUI>();
-            _profile = SupabaseLoginManager.Instance.profile;
 
-            if (_profile != null)
+            if (GameManager.Instance.IsLoggedIn)
             {
-                nicknameInput.text = _profile.Nickname;
+                _profile = SupabaseLoginManager.Instance.profile;
+                
+                if (_profile != null)
+                {
+                    nicknameInput.text = _profile.Nickname;
+                }
+            }
+            else
+            {
+                nicknameInput.text = GameManager.Instance.localProfileData.nickname;
             }
         }
 
         public void Open()
         {
-            if (_profile != null)
-            {
-                nicknameInput.text = _profile.Nickname;
-            }
-
             nicknameInput.Select();
             nicknameInput.ActivateInputField();
         }
@@ -43,13 +47,11 @@ namespace _01.Scripts._04.UI.MainScene
                 return;
             }
 
-            if (_profile == null)
+            if (GameManager.Instance.IsLoggedIn && _profile == null)
             {
                 Debug.LogWarning("Profile is null.");
                 return;
             }
-
-            _profile.Nickname = nickname;
 
             _profileUI.SetNickname(nickname);
             _profileUI.CloseNicknameChangeUI();
