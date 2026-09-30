@@ -26,7 +26,7 @@ namespace _01.Scripts._04.UI.TitleScene
         {
             await SupabaseLoginManager.Instance.StartGame();
             
-            await Task.Delay(3000);
+            await Task.Delay(1000);
 
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
         }
@@ -35,7 +35,7 @@ namespace _01.Scripts._04.UI.TitleScene
         {
             await GameManager.Instance.LoadData();
             
-            await Task.Delay(3000);
+            await Task.Delay(1000);
 
             SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
         }
