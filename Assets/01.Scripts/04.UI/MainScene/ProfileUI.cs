@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._12.Backend;
 using TMPro;
 using UnityEngine;
@@ -15,17 +16,20 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
 
-        private async void Awake()
+        private void Awake()
         {
-            Profile profile = SupabaseLoginManager.Instance.profile;
-            
-            SetProfile(profile);
-        }
-        
-        public void SetProfile(Profile profile)
-        {
-            nicknameText.text = profile.Nickname;
-            profileImage.sprite = avatarDatabase.GetAvatar(profile.AvatarId);
+            if (GameManager.Instance.IsLoggedIn)
+            {
+                Profile profile = SupabaseLoginManager.Instance.profile;
+                SetImage(avatarDatabase.GetAvatar(profile.AvatarId));
+                SetNickname(profile.Nickname);
+            }
+            else
+            {
+                LocalProfileData data = GameManager.Instance.localProfileData;
+                SetImage(avatarDatabase.GetAvatar(data.avatarId));
+                SetNickname(data.nickname);
+            }
         }
 
         public void SetImage(Sprite sprite)
@@ -74,12 +78,30 @@ namespace _01.Scripts._04.UI.MainScene
         
         private async void UpdateAvatarId(int id)
         {
-            await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatar(id);
+            if (GameManager.Instance.IsLoggedIn)
+            {
+                SupabaseLoginManager.Instance.profile.AvatarId = id;
+                await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatar(id);   
+            }
+            else
+            {
+                GameManager.Instance.localProfileData.avatarId = id;
+                GameManager.Instance.SaveLocalProfileData();
+            }
         }
 
         private async void UpdateNickname()
         {
-            await SupabaseLoginManager.Instance.ProfileRepository.UpdateNickname(nicknameText.text);
+            if (GameManager.Instance.IsLoggedIn)
+            {
+                SupabaseLoginManager.Instance.profile.Nickname = nicknameText.text;
+                await SupabaseLoginManager.Instance.ProfileRepository.UpdateNickname(nicknameText.text);    
+            }
+            else
+            {
+                GameManager.Instance.localProfileData.nickname = nicknameText.text;
+                GameManager.Instance.SaveLocalProfileData();
+            }
         }
     }
 }

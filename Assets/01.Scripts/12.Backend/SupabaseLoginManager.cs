@@ -183,6 +183,19 @@ namespace _01.Scripts._12.Backend
                 {
                     Debug.Log("Profile already exists. Skip profile creation.");
                 }
+                
+                profile = await ProfileRepository.GetProfile();
+
+                if (profile == null)
+                {
+                    throw new Exception(
+                        "Failed to load Google user profile."
+                    );
+                }
+
+                Debug.Log(
+                    $"Profile loaded. Nickname: {profile.Nickname}, AvatarId: {profile.AvatarId}"
+                );
 
                 await _dataRepository.CreateInitialGameData();
 

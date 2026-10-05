@@ -103,7 +103,7 @@ namespace _01.Scripts._12.Backend
 
                 await GameManager.Instance.LoadData();
                 
-                await Task.Delay(3000);
+                await Task.Delay(1000);
 
                 SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
             }

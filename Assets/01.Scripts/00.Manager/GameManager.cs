@@ -302,6 +302,13 @@ namespace _01.Scripts._00.Manager
     {
         public int languageIndex;
     }
+
+    [Serializable]
+    public class LocalProfileData
+    {
+        public int avatarId;
+        public string nickname = "localPlayer";
+    }
     
     public class GameManager : SingletonObject<GameManager>
     {
@@ -313,8 +320,10 @@ namespace _01.Scripts._00.Manager
         public ItemData itemData;
         public ComboData comboData;
         public GameData gameData;
+        public LocalProfileData localProfileData;
         
         private AuthRepository _authRepository;
+        public bool IsLoggedIn => _authRepository.IsLoggedIn();
         private SupabaseDataRepository _supabaseDataRepository;
 
         private bool _useSupabase;
@@ -333,6 +342,7 @@ namespace _01.Scripts._00.Manager
             itemData = new ItemData();
             comboData = new ComboData();
             gameData = new GameData();
+            localProfileData = new LocalProfileData();
         }
 
         private void Start()
@@ -353,9 +363,7 @@ namespace _01.Scripts._00.Manager
         
         public async Task LoadData()
         {
-            bool isLoggedIn = _authRepository.IsLoggedIn();
-
-            if (isLoggedIn)
+            if (IsLoggedIn)
             {
                 try
                 {
@@ -425,6 +433,10 @@ namespace _01.Scripts._00.Manager
                 gameData,
                 "GameData"
             );
+            
+            SaveLoadManager.Instance.LoadData(
+                localProfileData,
+                "LocalProfileData");
 
             Debug.Log("Game data loaded from local JSON.");
         }
@@ -698,6 +710,11 @@ namespace _01.Scripts._00.Manager
         public void SaveGameData()
         {
             SaveLoadManager.Instance.SaveData(gameData, "GameData");
+        }
+
+        public void SaveLocalProfileData()
+        {
+            SaveLoadManager.Instance.SaveData(localProfileData, "LocalProfileData");
         }
 
         public async void SaveComboData()
