@@ -95,7 +95,8 @@ namespace _01.Scripts._12.Backend
 
                 await SupabaseLoginManager.Instance.LoginWithGoogle(
                     googleUser.IdToken,
-                    nickname
+                    nickname,
+                    googleUser.ImageUrl?.ToString()
                 );
 
                 string userId = SupabaseLoginManager.Instance
