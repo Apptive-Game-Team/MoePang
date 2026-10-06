@@ -232,7 +232,10 @@ namespace _01.Scripts._04.UI.MainScene
             int goldReward = GetGoldReward(mode);
             int diaReward = GetDiaReward(mode);
 
-            return $"{stageBonusText} :\nGold + {goldReward}\nDia + {diaReward}";
+            string goldText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Gold");
+            string diaText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "05Dia");
+
+            return $"{stageBonusText} :\n{goldText} + {goldReward}\n{diaText} + {diaReward}";
         }
 
         private int GetGoldReward(HabitatMode mode)
@@ -299,7 +302,8 @@ namespace _01.Scripts._04.UI.MainScene
             float bonusHp = BalanceFormula.GetHabitatBonusHp(clearedStage);
             float bonusAttackDamage = BalanceFormula.GetHabitatBonusAttackDamage(clearedStage);
 
-            return $"Hp + {bonusHp:0} / Damage + {bonusAttackDamage:0}";
+            return $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Hp")} " +
+                   $"+ {bonusHp:0} / {LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Damage")} + {bonusAttackDamage:0}";
         }
 
         public void ShowGuide()
