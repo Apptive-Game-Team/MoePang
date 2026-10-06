@@ -40,7 +40,7 @@ namespace _01.Scripts._06.Shop
 
             habitatText.text = GetHabitatText(data.Habitat);
             unitNameText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitName.ToString());
-            unitLevelText.text = $"Lv {data.UnitLevel}";
+            unitLevelText.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv")} {data.UnitLevel}";
             unitAttackTypeText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.AttackType.ToString());
             unitStatText.text = $"{data.AttackDamage}\n{data.MaxHp}";
             descriptionText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitDescriptionText);
