@@ -36,7 +36,7 @@ namespace _01.Scripts._06.Shop
             string currentHpText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07CastleText1");
             string upgradedHpText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07CastleText2");
 
-            castleLevel.text = $"LV{_castleLevel}";
+            castleLevel.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv")}{_castleLevel}";
             castleDescription.text = $"{currentHpText} : {_castleLevel * BalanceFormula.CastleHpIncreasePerLevel}\n" +
                                      $"{upgradedHpText} : {(_castleLevel + 1) * BalanceFormula.CastleHpIncreasePerLevel}";
         }
