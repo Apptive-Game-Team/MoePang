@@ -64,7 +64,7 @@ namespace _01.Scripts._04.UI.MainScene
                 
                 comboOrder.text = (idx + 1 - correctionValue).ToString();
                 comboImage.sprite = combo.info.comboImage;
-                comboLevel.text = $"LV{comboLevels[type]}";
+                comboLevel.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv")}{comboLevels[type]}";
                 comboDescription.text = combo.DynamicDescription();
                 if (comboLevels[type] == combo.info.ComboMaxLevel)
                 {
@@ -92,7 +92,7 @@ namespace _01.Scripts._04.UI.MainScene
                             GameManager.Instance.SaveComboData();
                             upgradeUI.SetActive(false);
                             
-                            comboLevel.text = $"LV{comboLevels[type]}";
+                            comboLevel.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv")}{comboLevels[type]}";
                             comboDescription.text = combo.DynamicDescription();
                         
                             if (comboLevels[type] == combo.info.ComboMaxLevel)
