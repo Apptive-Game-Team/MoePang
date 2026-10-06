@@ -23,6 +23,14 @@ MonoBehaviour:
     m_Key: 02Clear Failed
     m_Metadata:
       m_Items: []
+  - m_Id: 82518317773168640
+    m_Key: 02StageClear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82517695267151872
+    m_Key: 02StageFailed
+    m_Metadata:
+      m_Items: []
   - m_Id: 70668612172849152
     m_Key: 03Check piece information ->
     m_Metadata:
@@ -69,6 +77,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 70668612172849159
     m_Key: 06FRI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82524546595627011
+    m_Key: 06Info
     m_Metadata:
       m_Items: []
   - m_Id: 75354666536607744
@@ -121,6 +133,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 75758595158122496
     m_Key: 07Enhancement
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82526918243852288
+    m_Key: 07G
     m_Metadata:
       m_Items: []
   - m_Id: 75763988210982912
@@ -263,6 +279,10 @@ MonoBehaviour:
     m_Key: Combo_Polar_Description
     m_Metadata:
       m_Items: []
+  - m_Id: 82524546595627009
+    m_Key: Damage
+    m_Metadata:
+      m_Items: []
   - m_Id: 80016016152010753
     m_Key: Dear
     m_Metadata:
@@ -307,6 +327,10 @@ MonoBehaviour:
     m_Key: Giraffe_Description
     m_Metadata:
       m_Items: []
+  - m_Id: 82524546595627010
+    m_Key: Gold
+    m_Metadata:
+      m_Items: []
   - m_Id: 75350266489413633
     m_Key: Habitat_Desert
     m_Metadata:
@@ -333,6 +357,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 80018093347512332
     m_Key: Hippo_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82524546595627008
+    m_Key: Hp
     m_Metadata:
       m_Items: []
   - m_Id: 80016016152010765
@@ -369,6 +397,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 80018093347512323
     m_Key: LongMeleeAttack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82519722231668736
+    m_Key: Lv
     m_Metadata:
       m_Items: []
   - m_Id: 80018093347512320
@@ -493,34 +525,6 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 80018093347512326
     m_Key: Wolf_Description
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82517695267151872
-    m_Key: 02StageFailed
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82519722231668736
-    m_Key: Lv
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82518317773168640
-    m_Key: 02StageClear
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82524546595627008
-    m_Key: Hp
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82524546595627009
-    m_Key: Damage
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82524546595627010
-    m_Key: Gold
-    m_Metadata:
-      m_Items: []
-  - m_Id: 82524546595627011
-    m_Key: 06Info
     m_Metadata:
       m_Items: []
   m_Metadata:
