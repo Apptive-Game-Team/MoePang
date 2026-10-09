@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace _01.Scripts._04.UI.MainScene
+namespace _01.Scripts._04.UI.MainScene.Profile
 {
     [CreateAssetMenu(fileName = "AvatarDatabase", menuName = "Game/Avatar Database")]
     public class AvatarDatabase : ScriptableObject

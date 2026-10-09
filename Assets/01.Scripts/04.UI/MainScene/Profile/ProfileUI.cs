@@ -4,10 +4,9 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-namespace _01.Scripts._04.UI.MainScene
+namespace _01.Scripts._04.UI.MainScene.Profile
 {
     public class ProfileUI : MonoBehaviour
     {
@@ -18,7 +17,7 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
 
-        private Profile _profile;
+        private _12.Backend.Profile _profile;
 
         private void Awake()
         {
@@ -27,7 +26,7 @@ namespace _01.Scripts._04.UI.MainScene
             SetInitialSetting(_profile);
         }
 
-        private void SetInitialSetting(Profile profile)
+        private void SetInitialSetting(_12.Backend.Profile profile)
         {
             if (GameManager.Instance.IsLoggedIn)
             {
