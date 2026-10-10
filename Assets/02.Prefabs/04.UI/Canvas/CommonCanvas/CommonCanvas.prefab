@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1962947005121f5498d42c9a942cd95c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugComboButton: 0
 --- !u!1 &6184169638351520801
 GameObject:
   m_ObjectHideFlags: 0
@@ -114,7 +115,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2389278446680308781, guid: fe74fffb18c6d974a8e7ab7b1240ae7f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ae01ec5f556e51842875232f3d6bfa4a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -608,6 +609,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 5541361265983550404, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 44f4938f44f78bb47b07301d544de1ec, type: 3}
+    - target: {fileID: 6029627143278691193, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -5471571834216394860, guid: c0629a27fff84504b81d66802edcafe9, type: 3}
     - target: {fileID: 6183269435266998201, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
       propertyPath: m_Pivot.x
       value: 1
@@ -640,6 +649,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -100
       objectReference: {fileID: 0}
+    - target: {fileID: 6837836478791302377, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -4194890188815931030, guid: ab3c65dbf8b572c4f824a231bdc01cc6, type: 3}
     - target: {fileID: 7059200783618548554, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
       propertyPath: m_Pivot.y
       value: 0
@@ -668,6 +681,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 7474987506688611921, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -7072263951682545746, guid: c0629a27fff84504b81d66802edcafe9, type: 3}
+    - target: {fileID: 7806674589609647533, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -7964612278333177358, guid: c0629a27fff84504b81d66802edcafe9, type: 3}
     - target: {fileID: 8696673353264385343, guid: 2ffb624d60ab83a4c9226f43cf976339, type: 3}
       propertyPath: m_Pivot.y
       value: 0
