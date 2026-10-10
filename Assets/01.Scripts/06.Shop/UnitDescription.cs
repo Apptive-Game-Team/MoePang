@@ -22,7 +22,6 @@ namespace _01.Scripts._06.Shop
         [SerializeField] private TextMeshProUGUI unitStatText;
         [SerializeField] private TextMeshProUGUI descriptionText;
         [SerializeField] private Animator unitAnimator;
-        [SerializeField] private TextMeshProUGUI unitUpgradeCostText;
 
         private void Start()
         {
@@ -50,7 +49,6 @@ namespace _01.Scripts._06.Shop
             
             bool unlocked = HabitatManager.Instance.IsUnlocked(data);
             int cost = unlocked ? data.UnitCost : data.UnlockCost;
-            unitUpgradeCostText.text = unlocked ? $"Level Up : {cost}" : $"Unlock : {cost}";
         }
 
         private string GetUnitStatText(FriendlyUnitData data)
