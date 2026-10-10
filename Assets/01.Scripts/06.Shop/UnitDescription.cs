@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -21,7 +22,6 @@ namespace _01.Scripts._06.Shop
         [SerializeField] private TextMeshProUGUI unitStatText;
         [SerializeField] private TextMeshProUGUI descriptionText;
         [SerializeField] private Animator unitAnimator;
-        [SerializeField] private TextMeshProUGUI unitUpgradeCostText;
 
         private void Start()
         {
@@ -42,14 +42,41 @@ namespace _01.Scripts._06.Shop
             unitNameText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitName.ToString());
             unitLevelText.text = $"{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv")} {data.UnitLevel}";
             unitAttackTypeText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.AttackType.ToString());
-            unitStatText.text = $"{data.AttackDamage}\n{data.MaxHp}";
+            unitStatText.text = GetUnitStatText(data);
             descriptionText.text = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", data.UnitDescriptionText);
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
             unitAnimator.Play("Walk", 0, 0f);
             
             bool unlocked = HabitatManager.Instance.IsUnlocked(data);
             int cost = unlocked ? data.UnitCost : data.UnlockCost;
-            unitUpgradeCostText.text = unlocked ? $"Level Up : {cost}" : $"Unlock : {cost}";
+        }
+
+        private string GetUnitStatText(FriendlyUnitData data)
+        {
+            int stage = GetStatPreviewStage();
+            float attackDamage = BalanceFormula.GetUnitAttackDamage(data.AttackDamage, data.UnitLevel, data.UnitGrade, stage);
+            float maxHp = BalanceFormula.GetUnitMaxHp(data.MaxHp, data.UnitLevel, data.UnitGrade, stage);
+
+            return $"{attackDamage}\n{maxHp}";
+        }
+
+        private int GetStatPreviewStage()
+        {
+            StageManager stageManager = FindObjectOfType<StageManager>();
+            if (stageManager != null)
+            {
+                return Mathf.Max(1, stageManager.MaxStage);
+            }
+
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager != null &&
+                gameManager.playData != null &&
+                gameManager.playData.MaxStages.TryGetValue(StageType.Normal, out int maxStage))
+            {
+                return Mathf.Max(1, maxStage);
+            }
+
+            return 1;
         }
     
         /// <summary>

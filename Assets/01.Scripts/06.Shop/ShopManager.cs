@@ -18,6 +18,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private List<GameObject> panels;
     [SerializeField] private Image unlockPanel;
     [SerializeField] private Material uiHighlightMaterial;
+    [SerializeField] private GameObject unitUpgradePanel;
     
     [Header("서식지 강화 텍스트")]
     [SerializeField] private TextMeshProUGUI meadowText;
@@ -145,7 +146,13 @@ public class ShopManager : MonoBehaviour
         
         int cost = GetUnitPurchaseCost(unit);
         Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
-        BuyUnitImmediately(unit);
+        
+        if (!CanBuyUnit(unit, cost))
+        {
+            return;
+        }
+        
+        OpenUnitUpgradePanel(unit);
     }
     #endregion
     
@@ -238,6 +245,54 @@ public class ShopManager : MonoBehaviour
         }
 
         return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
+    }
+
+    private bool CanBuyUnit(FriendlyUnitData unit, int cost)
+    {
+        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+
+        if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
+        {
+            Debug.LogWarning($"Buy failed: {unit.UnitName} cannot be unlocked yet.");
+            return false;
+        }
+
+        if (!GoldManager.Instance.TrySpendGold(cost))
+        {
+            Debug.LogWarning($"Buy failed: not enough gold. Current: {GoldManager.Instance.Gold}, Cost: {cost}");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void OpenUnitUpgradePanel(FriendlyUnitData unit)
+    {
+        if (unitUpgradePanel == null)
+        {
+            Debug.LogWarning("Unit upgrade panel is null.");
+            return;
+        }
+
+        Button confirmButton = unitUpgradePanel.transform.GetChild(0).GetComponent<Button>();
+        Button cancelButton = unitUpgradePanel.transform.GetChild(1).GetComponent<Button>();
+
+        confirmButton.onClick.RemoveAllListeners();
+        confirmButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+            BuyUnitImmediately(unit);
+            unitUpgradePanel.SetActive(false);
+        });
+
+        cancelButton.onClick.RemoveAllListeners();
+        cancelButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+            unitUpgradePanel.SetActive(false);
+        });
+
+        unitUpgradePanel.SetActive(true);
     }
 
     /// <summary>

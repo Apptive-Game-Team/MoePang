@@ -28,10 +28,23 @@ public class FriendlyUnit : Unit
     /// </summary>
     private void ApplyStageStatMultiplier()
     {
-        int currentStage = StageManager.Instance.DifficultyStage + 1;
+        int clearedStage = GetClearedDifficultyStage();
 
-        maxHp = BalanceFormula.GetUnitMaxHp(maxHp, friendlyData.UnitLevel, unitGrade, currentStage);
-        attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, friendlyData.UnitLevel, unitGrade, currentStage);
+        maxHp = BalanceFormula.GetUnitMaxHp(maxHp, friendlyData.UnitLevel, unitGrade, clearedStage);
+        attackDamage = BalanceFormula.GetUnitAttackDamage(attackDamage, friendlyData.UnitLevel, unitGrade, clearedStage);
+    }
+
+    private int GetClearedDifficultyStage()
+    {
+        StageManager stageManager = StageManager.Instance;
+        HabitatModeManager habitatModeManager = FindObjectOfType<HabitatModeManager>();
+        if (habitatModeManager != null &&
+            habitatModeManager.IsHabitatBattle)
+        {
+            return Mathf.Max(1, stageManager.GetMaxHabitatStage(habitatModeManager.HabitatMode) + 50);
+        }
+
+        return Mathf.Max(1, stageManager.MaxStage);
     }
 
     /// <summary>
