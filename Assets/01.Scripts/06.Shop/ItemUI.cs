@@ -113,11 +113,11 @@ namespace _01.Scripts._06.Shop
                 int totalPrice = _selectedInfo.price * _buyCount;
                 string itemName = GetItemName(_selectedInfo.type);
                 string buyFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07ItemBuyConfirm");
-
+                string goldUnitText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07G");
                 _titleText.text = string.Format(buyFormat, itemName);
-                _unitPriceText.text = _selectedInfo.price + "G";
+                _unitPriceText.text = _selectedInfo.price + goldUnitText;
                 _countText.text = _buyCount.ToString();
-                _totalPriceText.text = totalPrice + "G";
+                _totalPriceText.text = totalPrice + goldUnitText;
             }
 
             private string GetItemName(ItemType itemType)
