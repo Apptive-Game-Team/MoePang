@@ -2016,9 +2016,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71284487bb52e3546b3bb4a88f2695e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textComponent: {fileID: 7583510352471268236}
-  blinkSpeed: 2
+  tiger: {fileID: 1423301690}
+  title: {fileID: 656168747}
+  touchToScreen: {fileID: 7583510352471268236}
   loginImage: {fileID: 1708187254}
+  introDelay: 1
+  hiddenOffsetY: 900
+  tigerMoveDuration: 1
+  stepDelay: 1
+  titleDropDuration: 0.45
+  titleBounceHeight: 120
+  touchBlinkDuration: 0.6
 --- !u!1 &5177785434050262139
 GameObject:
   m_ObjectHideFlags: 0
