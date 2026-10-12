@@ -6,16 +6,13 @@ using UnityEngine.UI;
 
 namespace _01.Scripts._06.Shop
 {
-    /// <summary>
-    /// 성 업그레이드 스크립트
-    /// </summary>
     public class CastleUpgradeUI : MonoBehaviour
     {
         [Header("Castle Upgrade Settings")]
         [SerializeField] private TextMeshProUGUI castleLevel;
         [SerializeField] private TextMeshProUGUI castleDescription;
         [SerializeField] private Button castleUpgradeButton;
-        
+
         private GameObject _upgradePopup;
         private int _castleLevel;
 
@@ -23,14 +20,11 @@ namespace _01.Scripts._06.Shop
         {
             _castleLevel = GameManager.Instance.castleData.castleLevel;
             _upgradePopup = transform.parent.transform.Find("CastleUpgradePopup").gameObject;
-            
+
             UpdateText();
             RegisterUpgradeButton();
         }
 
-        /// <summary>
-        /// 성 UI 텍스트 최신화
-        /// </summary>
         private void UpdateText()
         {
             string currentHpText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07CastleText1");
@@ -48,38 +42,37 @@ namespace _01.Scripts._06.Shop
                 castleUpgradeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Max Level";
                 castleUpgradeButton.interactable = false;
             }
-            
-            int cost = _castleLevel <= 5
-                ? _castleLevel * BalanceFormula.CastleHpBaseCost
-                : 600 + BalanceFormula.CastleHpBaseCost * (_castleLevel - 6);
-            
+
             castleUpgradeButton.onClick.AddListener(() =>
             {
+                int cost = GetUpgradeCost();
+
                 if (GoldManager.Instance.TrySpendGold(cost))
                 {
-                    _upgradePopup.transform.Find("CostText").GetComponent<TextMeshProUGUI>().text = cost.ToString();
-                    _upgradePopup.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text = "강화하시겠습니까?";
+                    _upgradePopup.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text =
+                        LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07CastleUpgrade");
+                    _upgradePopup.transform.Find("CostText").GetComponent<TextMeshProUGUI>().text = GetCostText(cost);
                     _upgradePopup.transform.Find("AcceptButton").GetComponent<Button>().onClick.RemoveAllListeners();
                     _upgradePopup.transform.Find("AcceptButton").GetComponent<Button>().onClick.AddListener(() =>
                     {
                         GoldManager.Instance.AdjustGold(-cost);
                         SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
-                        
+
                         _castleLevel++;
                         GameManager.Instance.castleData.castleLevel = _castleLevel;
                         GameManager.Instance.SaveCastleData();
 
                         UpdateText();
-                        
+
                         if (_castleLevel >= 21)
                         {
                             castleUpgradeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Max Level";
                             castleUpgradeButton.interactable = false;
                         }
-                        
-                        _upgradePopup.SetActive(false);    
+
+                        _upgradePopup.SetActive(false);
                     });
-                    
+
                     SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                     _upgradePopup.SetActive(true);
                 }
@@ -90,6 +83,23 @@ namespace _01.Scripts._06.Shop
                 SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
                 _upgradePopup.SetActive(false);
             });
+        }
+
+        private int GetUpgradeCost()
+        {
+            return _castleLevel <= 5
+                ? _castleLevel * BalanceFormula.CastleHpBaseCost
+                : 600 + BalanceFormula.CastleHpBaseCost * (_castleLevel - 6);
+        }
+
+        private string GetCostText(int cost)
+        {
+            string levelText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv");
+            string usedGoldText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UsedGold");
+            string goldUnitText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07G");
+
+            return $"{levelText}{_castleLevel} => {levelText}{_castleLevel + 1}\n" +
+                   $"{usedGoldText} {cost}{goldUnitText}";
         }
     }
 }
