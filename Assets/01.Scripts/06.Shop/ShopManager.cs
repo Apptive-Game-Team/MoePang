@@ -276,6 +276,9 @@ public class ShopManager : MonoBehaviour
 
         Button confirmButton = unitUpgradePanel.transform.GetChild(0).GetComponent<Button>();
         Button cancelButton = unitUpgradePanel.transform.GetChild(1).GetComponent<Button>();
+        int cost = GetUnitPurchaseCost(unit);
+
+        SetUnitUpgradePanelText(unit, cost);
 
         confirmButton.onClick.RemoveAllListeners();
         confirmButton.onClick.AddListener(() =>
@@ -293,6 +296,28 @@ public class ShopManager : MonoBehaviour
         });
 
         unitUpgradePanel.SetActive(true);
+    }
+
+    private void SetUnitUpgradePanelText(FriendlyUnitData unit, int cost)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+
+        TextMeshProUGUI titleText = unitUpgradePanel.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI costText = unitUpgradePanel.transform.Find("CostText").GetComponent<TextMeshProUGUI>();
+
+        string unitNameText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", unit.UnitName.ToString());
+        string titleFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UpgradeTargetTitle");
+        string levelText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv");
+        string usedGoldText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UsedGold");
+        string goldUnitText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07G");
+        int currentLevel = Mathf.RoundToInt(unit.UnitLevel);
+
+        titleText.text = string.Format(titleFormat, unitNameText);
+        costText.text = $"{levelText}{currentLevel} => {levelText}{currentLevel + 1}\n" +
+                        $"{usedGoldText} {cost}{goldUnitText}";
     }
 
     /// <summary>
