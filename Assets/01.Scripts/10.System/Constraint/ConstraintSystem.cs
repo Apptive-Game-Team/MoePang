@@ -91,7 +91,7 @@ namespace _01.Scripts._10.System.Constraint
         {
             Constraint constraint = constraints.First(c => c.type == type);
             constraint.ApplyConstraint(_constraintContext);
-            constraintText.text = constraint.constraintDescription;
+            constraintText.text = constraint.LocalizedDescription;
             constraintText.transform.parent.gameObject.SetActive(true);
 
             switch (constraint)
