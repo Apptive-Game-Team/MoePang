@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace _01.Scripts._04.UI.MainScene
+namespace _01.Scripts._04.UI.MainScene.Profile
 {
     public class AvatarItem : MonoBehaviour
     {

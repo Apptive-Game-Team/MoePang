@@ -1,9 +1,8 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._12.Backend;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace _01.Scripts._04.UI.MainScene
+namespace _01.Scripts._04.UI.MainScene.Profile
 {
     public class AvatarChangeUI : MonoBehaviour
     {
@@ -11,7 +10,7 @@ namespace _01.Scripts._04.UI.MainScene
         [SerializeField] private Transform content;
         [SerializeField] private AvatarDatabase avatarDatabase;
         private ProfileUI _profileUI;
-        private Profile _profile;
+        private _12.Backend.Profile _profile;
 
         public int selectedAvatarId;
 

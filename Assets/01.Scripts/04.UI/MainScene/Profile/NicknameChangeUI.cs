@@ -3,14 +3,14 @@ using _01.Scripts._12.Backend;
 using TMPro;
 using UnityEngine;
 
-namespace _01.Scripts._04.UI.MainScene
+namespace _01.Scripts._04.UI.MainScene.Profile
 {
     public class NicknameChangeUI : MonoBehaviour
     {
         [SerializeField] private TMP_InputField nicknameInput;
 
         private ProfileUI _profileUI;
-        private Profile _profile;
+        private _12.Backend.Profile _profile;
 
         private void Awake()
         {

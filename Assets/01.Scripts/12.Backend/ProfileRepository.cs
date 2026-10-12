@@ -28,6 +28,31 @@ namespace _01.Scripts._12.Backend
                 return false;
             }
         }
+        
+        public async Task<bool> CreateProfile(string nickname, string googleAvatarUrl)
+        {
+            try
+            {
+                await Client.Rpc(
+                    "create_user_profile_mobile",
+                    new
+                    {
+                        p_nickname = nickname,
+                        p_google_avatar_url = googleAvatarUrl
+                    }
+                );
+
+                Debug.Log("Profile Create Success via RPC!");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Profile Create Failed\n{e}");
+                
+                return false;
+            }
+        }
 
         public async Task<Profile> GetProfile()
         {
@@ -90,6 +115,39 @@ namespace _01.Scripts._12.Backend
             }
             catch
             {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateAvatarMode(bool flag)
+        {
+            try
+            {
+                Supabase.Gotrue.User user = Client.Auth.CurrentUser;
+
+                if (user == null)
+                {
+                    Debug.LogError(
+                        "AvatarMode Failed - User is not logged in."
+                    );
+
+                    return false;
+                }
+
+                await Client
+                    .From<Profile>()
+                    .Set(x => x.IsGoogleAvatar, flag)
+                    .Where(x => x.Id == user.Id)
+                    .Update();
+
+                Debug.Log($"AvatarMode Update Success - {flag}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"AvatarMode Update Failed\n{e}");
+
                 return false;
             }
         }
