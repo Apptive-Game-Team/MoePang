@@ -183,13 +183,13 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
     {
-        unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text =
-            $"{unitData.UnlockCost}G\n{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UnlockPanelText")}";
+        SetUnitUnlockPanelText(unitData);
         
         Button yesButton = unlockPanel.transform.GetChild(2).GetComponent<Button>();
 
         if (GoldManager.Instance.TrySpendGold(unitData.UnlockCost))
         {
+            yesButton.interactable = true;
             yesButton.onClick.RemoveAllListeners();
             yesButton.onClick.AddListener(() =>
             {
@@ -219,6 +219,44 @@ public class ShopManager : MonoBehaviour
         });
         
         unlockPanel.gameObject.SetActive(true);
+    }
+
+    private void SetUnitUnlockPanelText(FriendlyUnitData unitData)
+    {
+        TextMeshProUGUI unlockText = GetUnlockPanelText("UnlockText") ??
+                                     GetUnlockPanelText("NameText") ??
+                                     unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI costText = GetUnlockPanelText("CostText");
+        string unitNameText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", unitData.UnitName.ToString());
+        string unlockFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UnlockTargetTitle");
+        string usedGoldText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UsedGold");
+        string goldUnitText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07G");
+        string title = string.Format(unlockFormat, unitNameText);
+        string cost = $"{usedGoldText} {unitData.UnlockCost}{goldUnitText}";
+
+        unlockText.text = title;
+
+        if (costText != null)
+        {
+            costText.text = cost;
+        }
+        else
+        {
+            unlockText.text = $"{title}\n{cost}";
+        }
+    }
+
+    private TextMeshProUGUI GetUnlockPanelText(string objectName)
+    {
+        foreach (TextMeshProUGUI text in unlockPanel.GetComponentsInChildren<TextMeshProUGUI>(true))
+        {
+            if (text.name == objectName)
+            {
+                return text;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
