@@ -16,6 +16,8 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         [SerializeField] private TMP_Text nicknameText;
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
+        [SerializeField] private GameObject googleConnectButton;
+        [SerializeField] private Image googleConnectPanel;
 
         private _12.Backend.Profile _profile;
 
@@ -43,6 +45,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             }
             else
             {
+                googleConnectButton.gameObject.SetActive(true);
                 LocalProfileData data = GameManager.Instance.localProfileData;
                 SetImage(avatarDatabase.GetAvatar(data.avatarId));
                 SetNickname(data.nickname);
@@ -210,6 +213,16 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             );
 
             target.sprite = sprite;
+        }
+
+        public void OpenGoogleConnectPanel()
+        {
+            googleConnectPanel.gameObject.SetActive(true);
+        }
+
+        public void CloseGoogleConnectPanel()
+        {
+            googleConnectPanel.gameObject.SetActive(false);
         }
     }
 }
