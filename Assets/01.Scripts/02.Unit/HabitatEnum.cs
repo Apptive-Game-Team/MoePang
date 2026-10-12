@@ -31,7 +31,7 @@ public enum UnitName
     Lion,
 
     //Forest
-    Flog,
+    Frog,
     Capybara,
     Anteater,
     Jaguar,
