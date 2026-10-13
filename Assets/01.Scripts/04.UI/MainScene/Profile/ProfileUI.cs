@@ -17,6 +17,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
         [SerializeField] private GameObject googleConnectButton;
+        [SerializeField] private Button googleLoginButton;
         [SerializeField] private Image googleConnectPanel;
 
         private _12.Backend.Profile _profile;
@@ -30,7 +31,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
 
         private void SetInitialSetting(_12.Backend.Profile profile)
         {
-            if (GameManager.Instance.IsLoggedIn)
+            if (GameManager.Instance.isLoggedIn)
             {
                 if (profile.IsGoogleAvatar && !string.IsNullOrEmpty(profile.GoogleAvatarUrl))
                 {
@@ -46,6 +47,10 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             else
             {
                 googleConnectButton.gameObject.SetActive(true);
+                googleLoginButton.onClick.AddListener(() =>
+                {
+                    GoogleSignInTest.Instance.SignInAndMigrateLocalSave();
+                });
                 LocalProfileData data = GameManager.Instance.localProfileData;
                 SetImage(avatarDatabase.GetAvatar(data.avatarId));
                 SetNickname(data.nickname);
@@ -103,7 +108,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
 
         public void ChangeAvatarMode(Button button)
         {
-            if (!GameManager.Instance.IsLoggedIn)
+            if (!GameManager.Instance.isLoggedIn)
             {
                 return;
             }
@@ -141,7 +146,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         
         private async void UpdateAvatarId(int id)
         {
-            if (GameManager.Instance.IsLoggedIn)
+            if (GameManager.Instance.isLoggedIn)
             {
                 SupabaseLoginManager.Instance.profile.AvatarId = id;
                 await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatar(id);   
@@ -155,7 +160,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
 
         private async void UpdateNickname()
         {
-            if (GameManager.Instance.IsLoggedIn)
+            if (GameManager.Instance.isLoggedIn)
             {
                 SupabaseLoginManager.Instance.profile.Nickname = nicknameText.text;
                 await SupabaseLoginManager.Instance.ProfileRepository.UpdateNickname(nicknameText.text);    

@@ -16,7 +16,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         {
             _profileUI = GetComponentInParent<ProfileUI>();
 
-            if (GameManager.Instance.IsLoggedIn)
+            if (GameManager.Instance.isLoggedIn)
             {
                 _profile = SupabaseLoginManager.Instance.profile;
                 
@@ -47,7 +47,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
                 return;
             }
 
-            if (GameManager.Instance.IsLoggedIn && _profile == null)
+            if (GameManager.Instance.isLoggedIn && _profile == null)
             {
                 Debug.LogWarning("Profile is null.");
                 return;

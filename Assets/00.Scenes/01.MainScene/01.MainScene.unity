@@ -1276,19 +1276,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 353993841}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2108927256}
-        m_TargetAssemblyTypeName: _01.Scripts._04.UI.TitleScene.LoginUI, Assembly-CSharp
-        m_MethodName: GoogleLogin
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &353993841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5259,6 +5247,7 @@ MonoBehaviour:
   nicknameChangeUI: {fileID: 1112968600}
   avatarDatabase: {fileID: 11400000, guid: 0555d774802f55949bd024ffa1195ef4, type: 2}
   googleConnectButton: {fileID: 1493581410}
+  googleLoginButton: {fileID: 353993840}
   googleConnectPanel: {fileID: 2108927257}
 --- !u!1 &2108927254
 GameObject:
@@ -5271,9 +5260,8 @@ GameObject:
   - component: {fileID: 2108927255}
   - component: {fileID: 2108927258}
   - component: {fileID: 2108927257}
-  - component: {fileID: 2108927256}
   m_Layer: 5
-  m_Name: LoginUI
+  m_Name: ConnectUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5300,18 +5288,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 700, y: 900}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2108927256
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2108927254}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 700d79d9267cffd46988862e0c0ca32c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2108927257
 MonoBehaviour:
   m_ObjectHideFlags: 0

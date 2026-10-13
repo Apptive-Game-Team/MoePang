@@ -33,6 +33,8 @@ namespace _01.Scripts._04.UI.TitleScene
 
         public async void LocalLogin()
         {
+            GameManager.Instance.isLoggedIn = false;
+            
             await GameManager.Instance.LoadData();
             
             await Task.Delay(1000);

@@ -1,26 +1,27 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._08.Utility;
+using System;
 using System.Threading.Tasks;
 using Google;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace _01.Scripts._12.Backend
 {
-    public class GoogleSignInTest : MonoBehaviour
+    public class GoogleSignInTest : SingletonObject<GoogleSignInTest>
     {
         [SerializeField] private string webClientId;
 
         private GoogleSignInConfiguration _configuration;
-        private Task<GoogleSignInUser> _googleSignInTask;
+        private bool _isSigningIn;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+            
 #if UNITY_EDITOR
             return;
 #endif
-            
             _configuration = new GoogleSignInConfiguration
             {
                 WebClientId = webClientId,
@@ -32,91 +33,101 @@ namespace _01.Scripts._12.Backend
             GoogleSignIn.Configuration = _configuration;
             GoogleSignIn.DefaultInstance.EnableDebugLogging(true);
         }
-
-        private void Update()
+        
+        public async void SignIn()
+        {
+            await ExecuteGoogleFlow(false);
+        }
+        
+        public async void SignInAndMigrateLocalSave()
+        {
+            await ExecuteGoogleFlow(true);
+        }
+        
+        private async Task ExecuteGoogleFlow(bool migrateLocalSave)
         {
 #if UNITY_EDITOR
             return;
 #endif
-            
-            if (_googleSignInTask is not { IsCompleted: true })
+
+            if (_isSigningIn)
             {
                 return;
             }
 
-            Task<GoogleSignInUser> task = _googleSignInTask;
-            _googleSignInTask = null;
+            _isSigningIn = true;
 
-            if (task.IsCanceled)
-            {
-                return;
-            }
-
-            if (task.IsFaulted)
-            {
-                return;
-            }
-
-            _ = LoginToSupabase(task.Result);
-        }
-
-        public void SignIn()
-        {
-#if UNITY_EDITOR
-            return;
-#endif
-            
-            if (_googleSignInTask is { IsCompleted: false })
-            {
-                return;
-            }
-
-            _googleSignInTask = GoogleSignIn.DefaultInstance.SignIn();
-        }
-
-        private async Task LoginToSupabase(GoogleSignInUser googleUser)
-        {
             try
             {
-                if (googleUser == null)
+                GoogleSignInUser googleUser = await GoogleSignIn.DefaultInstance.SignIn();
+
+                if (googleUser == null || string.IsNullOrEmpty(googleUser.IdToken))
                 {
+                    Debug.LogError("Google Sign-In failed: IdToken is empty.");
                     return;
                 }
-
-                if (string.IsNullOrEmpty(googleUser.IdToken))
-                {
-                    return;
-                }
-
 
                 string nickname = string.IsNullOrEmpty(googleUser.DisplayName)
                     ? googleUser.Email
                     : googleUser.DisplayName;
 
-                await SupabaseLoginManager.Instance.LoginWithGoogle(
-                    googleUser.IdToken,
-                    nickname,
-                    googleUser.ImageUrl?.ToString()
-                );
+                string imageUrl = googleUser.ImageUrl?.ToString();
+                
+                if (migrateLocalSave)
+                {
+                    await SupabaseLoginManager.Instance
+                        .LinkGoogleForLocalMigration(
+                            googleUser.IdToken,
+                            nickname,
+                            imageUrl
+                        );
 
-                string userId = SupabaseLoginManager.Instance
-                    .GetCurrentUserId();
+                    bool migrated = await GameManager.Instance
+                        .MigrateLocalDataToSupabase();
+
+                    if (!migrated)
+                    {
+                        Debug.LogError(
+                            "Local save migration failed. " +
+                            "Local save remains available."
+                        );
+                        return;
+                    }
+
+                    Debug.Log("Local save migration succeeded.");
+                    
+                    GameManager.Instance.isLoggedIn = true;
+                }
+                else
+                {
+                    await SupabaseLoginManager.Instance.LoginWithGoogle(
+                        googleUser.IdToken,
+                        nickname,
+                        imageUrl
+                    );
+
+                    Debug.Log("Google Sign-In and Supabase login succeeded.");
+                }
 
                 await GameManager.Instance.LoadData();
-                
                 await Task.Delay(1000);
-
                 SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
-                Debug.LogError($"Google Login Failed : {e}");
+                Debug.LogError($"Google Sign-In Failed: {e}");
+            }
+            finally
+            {
+                _isSigningIn = false;
             }
         }
 
         public void SignOut()
         {
+#if !UNITY_EDITOR
             GoogleSignIn.DefaultInstance.SignOut();
+#endif
             _ = SignOutFromSupabase();
         }
 
@@ -126,9 +137,9 @@ namespace _01.Scripts._12.Backend
             {
                 await SupabaseLoginManager.Instance.Logout();
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
-                Debug.LogError($"Google Logout Failed : {e}");
+                Debug.LogError($"Google Logout Failed: {e}");
             }
         }
     }

@@ -7,6 +7,7 @@ using _01.Scripts._08.Utility;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
 using _01.Scripts._12.Backend;
+using UnityEngine.Serialization;
 
 namespace _01.Scripts._00.Manager
 {
@@ -323,7 +324,7 @@ namespace _01.Scripts._00.Manager
         public LocalProfileData localProfileData;
         
         private AuthRepository _authRepository;
-        public bool IsLoggedIn => _authRepository.IsLoggedIn();
+        public bool isLoggedIn = true;
         private SupabaseDataRepository _supabaseDataRepository;
 
         private bool _useSupabase;
@@ -332,7 +333,7 @@ namespace _01.Scripts._00.Manager
         protected override void Awake()
         {
             base.Awake();
-            
+
             _authRepository = new AuthRepository();
             _supabaseDataRepository = new SupabaseDataRepository();
             
@@ -363,7 +364,7 @@ namespace _01.Scripts._00.Manager
         
         public async Task LoadData()
         {
-            if (IsLoggedIn)
+            if (isLoggedIn)
             {
                 try
                 {
@@ -439,6 +440,74 @@ namespace _01.Scripts._00.Manager
                 "LocalProfileData");
 
             Debug.Log("Game data loaded from local JSON.");
+        }
+        
+        public async Task<bool> MigrateLocalDataToSupabase()
+        {
+            if (!_dataLoaded)
+            {
+                Debug.LogError("Game data has not been loaded.");
+                return false;
+            }
+
+            if (!_authRepository.IsLoggedIn())
+            {
+                Debug.LogError("Supabase user is not logged in.");
+                return false;
+            }
+
+            if (_useSupabase)
+            {
+                Debug.LogWarning("Supabase mode is already enabled.");
+                return false;
+            }
+
+            try
+            {
+                bool hasCloudData = await _supabaseDataRepository.HasInitialGameData();
+
+                if (hasCloudData)
+                {
+                    Debug.LogWarning("Cloud game data already exists. Migration cancelled.");
+
+                    return false;
+                }
+                
+                await _supabaseDataRepository.SavePlayData(playData);
+
+                await _supabaseDataRepository.SaveCastleData(
+                    castleData,
+                    playData
+                );
+
+                await _supabaseDataRepository.SaveUnitData(
+                    unitData,
+                    playData
+                );
+
+                await _supabaseDataRepository.SaveItemData(
+                    itemData,
+                    playData
+                );
+
+                await _supabaseDataRepository.SaveComboData(comboData);
+                
+                _useSupabase = true;
+
+                Debug.Log("Local game data migration completed.");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _useSupabase = false;
+
+                Debug.LogError(
+                    $"Local game data migration failed.\n{e}"
+                );
+
+                return false;
+            }
         }
 
         private void PlayBGMForScene(string sceneName)

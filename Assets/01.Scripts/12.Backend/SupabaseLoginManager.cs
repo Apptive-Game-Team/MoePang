@@ -226,6 +226,41 @@ namespace _01.Scripts._12.Backend
             }
         }
         
+        public async Task LinkGoogleForLocalMigration(string idToken, string nickname, string imageUrl)
+        {
+            await SupabaseManager.Instance.InitializationTask;
+            
+            await _authRepository.LoginWithGoogle(idToken);
+
+            if (!_authRepository.IsLoggedIn())
+            {
+                throw new Exception("Google authentication failed.");
+            }
+
+            IsAuthenticated = true;
+            
+            bool profileExists = await ProfileRepository.Exists();
+
+            if (!profileExists)
+            {
+                bool created = await ProfileRepository.CreateProfile(nickname, imageUrl);
+
+                if (!created)
+                {
+                    throw new Exception("Failed to create Google profile.");
+                }
+            }
+            
+            profile = await ProfileRepository.GetProfile();
+
+            if (profile == null)
+            {
+                throw new Exception("Failed to load Google profile.");
+            }
+
+            Debug.Log($"Google authentication completed. UserId: {_authRepository.GetCurrentUserId()}");
+        }
+        
         public string GetCurrentUserId()
         {
             return _authRepository.GetCurrentUserId();
