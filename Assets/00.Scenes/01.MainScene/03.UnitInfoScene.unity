@@ -2549,6 +2549,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3354769560653196785, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
+      propertyPath: m_Name
+      value: UnlockText
+      objectReference: {fileID: 0}
     - target: {fileID: 4379940642145891419, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
       propertyPath: m_Name
       value: UpgradePopup
@@ -11164,6 +11168,7 @@ MonoBehaviour:
   - {fileID: 6224633744199782439}
   unlockPanel: {fileID: 825611352}
   uiHighlightMaterial: {fileID: 2100000, guid: a6e0952424bac9447a8fe1de7644bf4b, type: 2}
+  unitUpgradePanel: {fileID: 0}
   meadowText: {fileID: 137993182}
   oceanText: {fileID: 1689010475}
   desertText: {fileID: 1116215471}

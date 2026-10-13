@@ -80,10 +80,9 @@ namespace _01.Scripts._04.UI.MainScene
                             return;
                         }
                         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-                        upgradeUI.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text =
-                            GetComboUpgradeConfirmText(type, comboLevels[type] * 100);
-                        upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
-                        upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
+                        SetComboUpgradePopupText(type, comboLevels[type], comboLevels[type] * 100);
+                        upgradeUI.transform.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
+                        upgradeUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() =>
                         {
                             GoldManager.Instance.AdjustDia(-comboLevels[type] * 100);
                             SoundManager.Instance.PlaySFX(SFX.SFX12_PurChase);
@@ -114,7 +113,7 @@ namespace _01.Scripts._04.UI.MainScene
                 });
             }
             
-            upgradeUI.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+            upgradeUI.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
             {
                 upgradeUI.SetActive(false);
                 scrollRectCG.interactable = true;
@@ -193,24 +192,49 @@ namespace _01.Scripts._04.UI.MainScene
             };
         }
 
-        private string GetComboUpgradeConfirmText(Habitat habitat, int price)
+        private void SetComboUpgradePopupText(Habitat habitat, int currentLevel, int price)
         {
-            string diaText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "05Dia");
-            string habitatText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", GetHabitatLocalizationKey(habitat));
-            string upgradeFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "05Upgrade");
+            TextMeshProUGUI nameText = GetPopupText("NameText", 0);
+            TextMeshProUGUI costText = GetPopupText("CostText", 0);
 
-            return $"{price}{diaText}\n{string.Format(upgradeFormat, habitatText)}";
+            nameText.text = LocalizationSettings.StringDatabase.GetLocalizedString(
+                "LocalizationDataTable",
+                GetComboUpgradeTitleKey(habitat));
+
+            costText.text = GetComboUpgradeCostText(currentLevel, price);
         }
 
-        private string GetHabitatLocalizationKey(Habitat habitat)
+        private TextMeshProUGUI GetPopupText(string childName, int fallbackChildIndex)
+        {
+            Transform child = upgradeUI.transform.Find(childName);
+
+            if (child != null && child.TryGetComponent(out TextMeshProUGUI text))
+            {
+                return text;
+            }
+
+            return upgradeUI.transform.GetChild(fallbackChildIndex).GetComponent<TextMeshProUGUI>();
+        }
+
+        private string GetComboUpgradeCostText(int currentLevel, int price)
+        {
+            string levelText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv");
+            string usedDiaText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UsedDia");
+            string diaText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "05Dia");
+
+            return $"{levelText}{currentLevel} => {levelText}{currentLevel + 1}\n" +
+                   $"{usedDiaText} {price}{diaText}";
+        }
+
+        private string GetComboUpgradeTitleKey(Habitat habitat)
         {
             return habitat switch
             {
-                Habitat.Meadow => "Habitat_Meadow",
-                Habitat.Ocean => "Habitat_Ocean",
-                Habitat.Desert => "Habitat_Desert",
-                Habitat.Forest => "Habitat_Forest",
-                Habitat.Polar => "Habitat_Polar",
+                Habitat.Meadow => "MeadowComboUpgrade",
+                Habitat.Ocean => "OceanComboUpgrade",
+                Habitat.Desert => "DesertComboUpgrade",
+                Habitat.Forest => "ForestComboUpgrade",
+                Habitat.Polar => "PolarComboUpgrade",
                 _ => throw new ArgumentOutOfRangeException(nameof(habitat), habitat, null)
             };
         }

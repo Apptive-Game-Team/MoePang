@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace _01.Scripts._10.System.Constraint
@@ -38,6 +39,8 @@ namespace _01.Scripts._10.System.Constraint
     
     public class ConstraintSystem : MonoBehaviour
     {
+        private const string LocalizationTableName = "LocalizationDataTable";
+
         [Header("References")]
         [SerializeField] private List<Constraint> constraints;
         [SerializeField] private PuzzleGenerator puzzle;
@@ -88,7 +91,7 @@ namespace _01.Scripts._10.System.Constraint
         {
             Constraint constraint = constraints.First(c => c.type == type);
             constraint.ApplyConstraint(_constraintContext);
-            constraintText.text = constraint.constraintDescription;
+            constraintText.text = constraint.LocalizedDescription;
             constraintText.transform.parent.gameObject.SetActive(true);
 
             switch (constraint)
@@ -140,24 +143,19 @@ namespace _01.Scripts._10.System.Constraint
 
         private void SetHighConstraintText(HabitatMode mode)
         {
-            switch (mode)
+            string key = mode switch
             {
-                case HabitatMode.MeadowMode:
-                    highConstraintText.text = "기물을 소환하는데 더 많은 스택을 필요로 합니다.";
-                    break;
-                case HabitatMode.OceanMode:
-                    highConstraintText.text = "적의 공격속도, 공격력, 이동속도가 증가합니다.";
-                    break;
-                case HabitatMode.DesertMode:
-                    highConstraintText.text = "일정 시간마다 모래바람이 불어 퍼즐 테이블이 잠시 가려집니다.";
-                    break;
-                case HabitatMode.ForestMode:
-                    highConstraintText.text = "적의 체력이 일정 시간마다 회복됩니다.";
-                    break;
-                case HabitatMode.PolarMode:
-                    highConstraintText.text = "아군의 이동속도와 공격속도가 느려집니다.";
-                    break;
-            }
+                HabitatMode.MeadowMode => "MeadowHighConstraint",
+                HabitatMode.OceanMode => "OceanHighConstraint",
+                HabitatMode.DesertMode => "DesertHighConstraint",
+                HabitatMode.ForestMode => "ForestHighConstraint",
+                HabitatMode.PolarMode => "PolarHighConstraint",
+                _ => string.Empty
+            };
+
+            highConstraintText.text = string.IsNullOrEmpty(key)
+                ? string.Empty
+                : LocalizationSettings.StringDatabase.GetLocalizedString(LocalizationTableName, key);
         }
     }
 }
