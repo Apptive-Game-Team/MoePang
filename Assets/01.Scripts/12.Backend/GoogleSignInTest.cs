@@ -14,6 +14,7 @@ namespace _01.Scripts._12.Backend
 
         private GoogleSignInConfiguration _configuration;
         private bool _isSigningIn;
+        public bool googleLoggedIn;
 
         protected override void Awake()
         {
@@ -36,35 +37,36 @@ namespace _01.Scripts._12.Backend
         
         public async void SignIn()
         {
-            await ExecuteGoogleFlow(false);
+            await ExecuteGoogleLoginFlow(false);
         }
         
         public async void SignInAndMigrateLocalSave()
         {
-            await ExecuteGoogleFlow(true);
+            await ExecuteGoogleLoginFlow(true);
         }
         
-        private async Task ExecuteGoogleFlow(bool migrateLocalSave)
+        public async Task<bool> ExecuteGoogleLoginFlow(bool migrateLocalSave = false)
         {
-#if UNITY_EDITOR
-            return;
-#endif
+        #if UNITY_EDITOR
+            return false;
+        #endif
 
             if (_isSigningIn)
             {
-                return;
+                return false;
             }
 
             _isSigningIn = true;
 
             try
             {
-                GoogleSignInUser googleUser = await GoogleSignIn.DefaultInstance.SignIn();
+                GoogleSignInUser googleUser =
+                    await GoogleSignIn.DefaultInstance.SignIn();
 
                 if (googleUser == null || string.IsNullOrEmpty(googleUser.IdToken))
                 {
-                    Debug.LogError("Google Sign-In failed: IdToken is empty.");
-                    return;
+                    Debug.LogWarning("Google Sign-In cancelled or IdToken is empty.");
+                    return false;
                 }
 
                 string nickname = string.IsNullOrEmpty(googleUser.DisplayName)
@@ -72,7 +74,7 @@ namespace _01.Scripts._12.Backend
                     : googleUser.DisplayName;
 
                 string imageUrl = googleUser.ImageUrl?.ToString();
-                
+
                 if (migrateLocalSave)
                 {
                     await SupabaseLoginManager.Instance
@@ -91,12 +93,20 @@ namespace _01.Scripts._12.Backend
                             "Local save migration failed. " +
                             "Local save remains available."
                         );
-                        return;
+
+                        return false;
                     }
 
                     Debug.Log("Local save migration succeeded.");
-                    
+
                     GameManager.Instance.isLoggedIn = true;
+                    googleLoggedIn = true;
+
+                    await GameManager.Instance.LoadData();
+
+                    SceneManager.LoadScene(
+                        SceneInfo.GetSceneName(SceneType.Main)
+                    );
                 }
                 else
                 {
@@ -107,21 +117,26 @@ namespace _01.Scripts._12.Backend
                     );
 
                     Debug.Log("Google Sign-In and Supabase login succeeded.");
+
+                    GameManager.Instance.isLoggedIn = true;
+                    googleLoggedIn = true;
+
+                    await GameManager.Instance.LoadData();
                 }
 
-                await GameManager.Instance.LoadData();
-                await Task.Delay(1000);
-                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+                return true;
             }
             catch (Exception e)
             {
                 Debug.LogError($"Google Sign-In Failed: {e}");
+                return false;
             }
             finally
             {
                 _isSigningIn = false;
             }
         }
+
 
         public void SignOut()
         {
@@ -136,6 +151,7 @@ namespace _01.Scripts._12.Backend
             try
             {
                 await SupabaseLoginManager.Instance.Logout();
+                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Title));
             }
             catch (Exception e)
             {

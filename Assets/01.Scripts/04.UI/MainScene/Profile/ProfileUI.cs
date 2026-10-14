@@ -1,6 +1,7 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._12.Backend;
 using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -10,15 +11,20 @@ namespace _01.Scripts._04.UI.MainScene.Profile
 {
     public class ProfileUI : MonoBehaviour
     {
+        [Header("Profile UI")]
         [SerializeField] private Image profileUI;
         [SerializeField] private Image profileImage;
         [SerializeField] private AvatarChangeUI avatarChangeUI;
         [SerializeField] private TMP_Text nicknameText;
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
-        [SerializeField] private GameObject googleConnectButton;
-        [SerializeField] private Button googleLoginButton;
-        [SerializeField] private Image googleConnectPanel;
+        [SerializeField] private Button avatarModeButton;
+
+
+        [Header("Simple Profile UI")] 
+        [SerializeField] private Image simpleProfileImage;
+        [SerializeField] private TMP_Text simpleNicknameText;
+        [SerializeField] private TMP_Text simpleMaxStageText;
 
         private _12.Backend.Profile _profile;
 
@@ -29,13 +35,15 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             SetInitialSetting(_profile);
         }
 
-        private void SetInitialSetting(_12.Backend.Profile profile)
+        private async void SetInitialSetting(_12.Backend.Profile profile)
         {
             if (GameManager.Instance.isLoggedIn)
             {
                 if (profile.IsGoogleAvatar && !string.IsNullOrEmpty(profile.GoogleAvatarUrl))
                 {
                     LoadGoogleAvatar(profile.GoogleAvatarUrl, profileImage);
+                    LoadGoogleAvatar(profile.GoogleAvatarUrl, simpleProfileImage);
+                    ChangeAvatarModeButtonColor(avatarModeButton, _profile.IsGoogleAvatar);
                 }
                 else
                 {
@@ -43,33 +51,41 @@ namespace _01.Scripts._04.UI.MainScene.Profile
                 }
                 
                 SetNickname(profile.Nickname);
+                SetMaxStage(await SupabaseLoginManager.Instance.ProfileRepository.GetMyMaxStage());
             }
             else
             {
-                googleConnectButton.gameObject.SetActive(true);
-                googleLoginButton.onClick.AddListener(() =>
-                {
-                    GoogleSignInTest.Instance.SignInAndMigrateLocalSave();
-                });
                 LocalProfileData data = GameManager.Instance.localProfileData;
+                
                 SetImage(avatarDatabase.GetAvatar(data.avatarId));
                 SetNickname(data.nickname);
+                SetMaxStage(GameManager.Instance.playData.MaxStages.Values.Max());
             }
         }
 
         public void SetImage(Sprite sprite)
         {
             profileImage.sprite = sprite;
+            simpleProfileImage.sprite = sprite;
         }
 
         public void SetNickname(string nickname)
         {
             nicknameText.text = nickname;
+            simpleNicknameText.text = nickname;
+        }
+
+        public void SetMaxStage(int stage)
+        {
+            simpleMaxStageText.text = "Stage " + stage;
         }
 
         public void OpenProfile()
         {
-            profileUI.gameObject.SetActive(true);
+            if (GameManager.Instance.isLoggedIn)
+            {
+                profileUI.gameObject.SetActive(true);
+            }
         }
 
         public void CloseProfile()
@@ -108,19 +124,14 @@ namespace _01.Scripts._04.UI.MainScene.Profile
 
         public void ChangeAvatarMode(Button button)
         {
-            if (!GameManager.Instance.isLoggedIn)
+            if (!GoogleSignInTest.Instance.googleLoggedIn)
             {
                 return;
             }
             
             _profile.IsGoogleAvatar = !_profile.IsGoogleAvatar;
-            
-            ColorBlock colors = button.colors;
-            colors.normalColor = _profile.IsGoogleAvatar ? Color.gray : Color.white;
-            colors.highlightedColor = _profile.IsGoogleAvatar ? Color.gray : Color.white;
-            colors.pressedColor = _profile.IsGoogleAvatar ? Color.gray : Color.white;
-            colors.selectedColor = _profile.IsGoogleAvatar ? Color.gray : Color.white;
-            button.colors = colors;
+
+            ChangeAvatarModeButtonColor(button, _profile.IsGoogleAvatar);
             
             if (_profile.IsGoogleAvatar && !string.IsNullOrEmpty(_profile.GoogleAvatarUrl))
             {
@@ -132,6 +143,16 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             }
 
             UpdateAvatarMode(_profile.IsGoogleAvatar);
+        }
+
+        private void ChangeAvatarModeButtonColor(Button button, bool flag)
+        {
+            ColorBlock colors = button.colors;
+            colors.normalColor = flag ? Color.gray : Color.white;
+            colors.highlightedColor = flag ? Color.gray : Color.white;
+            colors.pressedColor = flag ? Color.gray : Color.white;
+            colors.selectedColor = flag ? Color.gray : Color.white;
+            button.colors = colors;
         }
 
         private void UpdateAvatarMode(bool flag)
@@ -218,16 +239,6 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             );
 
             target.sprite = sprite;
-        }
-
-        public void OpenGoogleConnectPanel()
-        {
-            googleConnectPanel.gameObject.SetActive(true);
-        }
-
-        public void CloseGoogleConnectPanel()
-        {
-            googleConnectPanel.gameObject.SetActive(false);
         }
     }
 }
