@@ -18,7 +18,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         {
             _profileUI = GetComponentInParent<ProfileUI>();
 
-            if (GameManager.Instance.IsLoggedIn)
+            if (GameManager.Instance.isLoggedIn)
             {
                 _profile = SupabaseLoginManager.Instance.profile;
             }
@@ -45,7 +45,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
                 item.Initialize(
                     avatarId,
                     avatarDatabase.GetAvatar(avatarId),
-                    GameManager.Instance.IsLoggedIn ? 
+                    GameManager.Instance.isLoggedIn ? 
                         _profile.AvatarId : 
                         GameManager.Instance.localProfileData.avatarId,
                     SelectAvatar

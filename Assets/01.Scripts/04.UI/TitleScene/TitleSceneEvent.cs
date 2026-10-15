@@ -1,6 +1,12 @@
+using _01.Scripts._00.Manager;
+using _01.Scripts._08.Utility;
+using _01.Scripts._12.Backend;
 using DG.Tweening;
+using System;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -11,7 +17,6 @@ public class TitleSceneEvent : MonoBehaviour
     [SerializeField] private RectTransform title;
     [FormerlySerializedAs("textComponent")]
     [SerializeField] private TextMeshProUGUI touchToScreen;
-    [SerializeField] private Image loginImage;
 
     [Header("Intro Animation")]
     [SerializeField] private float introDelay = 1f;
@@ -22,6 +27,15 @@ public class TitleSceneEvent : MonoBehaviour
     [SerializeField] private float titleBounceHeight = 120f;
     [SerializeField] private float touchBlinkDuration = 0.6f;
 
+    [Header("Login UI")] 
+    [SerializeField] private GameObject loginPanel;
+    [SerializeField] private Button googleLoginButton;
+    [SerializeField] private Button localPlayButton;
+    [SerializeField] private Button editorPlayButton;
+    [SerializeField] private Image localPlayUI;
+    [SerializeField] private Button localPlayYesButton;
+    [SerializeField] private Button localPlayNoButton;
+
     private Vector2 tigerTargetPosition;
     private Vector2 titleTargetPosition;
     private CanvasGroup tigerCanvasGroup;
@@ -29,10 +43,14 @@ public class TitleSceneEvent : MonoBehaviour
     private Sequence introSequence;
     private Tween touchBlinkTween;
     private bool canStartGame;
+    private int _loginType;
+    private bool _isLoggingIn;
 
     private void Awake()
     {
         Application.targetFrameRate = 65;
+        
+        _loginType = PlayerPrefs.GetInt("LoginType", 0);
     }
 
     private void Start()
@@ -58,11 +76,6 @@ public class TitleSceneEvent : MonoBehaviour
     private void InitializeIntroObjects()
     {
         canStartGame = false;
-
-        if (loginImage != null)
-        {
-            loginImage.gameObject.SetActive(false);
-        }
 
         if (tiger != null)
         {
@@ -113,11 +126,110 @@ public class TitleSceneEvent : MonoBehaviour
         }
 
         introSequence.AppendInterval(stepDelay);
-        introSequence.AppendCallback(EnableTouchToScreen);
+        introSequence.AppendCallback(ExecuteLoginFlow);
+    }
+
+    private async void ExecuteLoginFlow()
+    {
+        if (_loginType == 0)
+        {
+            AddButtonListeners();
+            loginPanel.gameObject.SetActive(true);
+        }
+        else
+        {
+            try
+            {
+                if (await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow())
+                {
+                    EnableTouchToScreen();
+                }
+            }
+            catch (Exception)
+            {
+                AddButtonListeners();
+                loginPanel.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    private void AddButtonListeners()
+    {
+#if UNITY_EDITOR
+        editorPlayButton.onClick.AddListener(async () =>
+        {
+            if (_isLoggingIn)
+            {
+                return;
+            }
+            _isLoggingIn = true;
+                
+            await SupabaseLoginManager.Instance.StartGame();
+            EnableTouchToScreen();
+        });
+        editorPlayButton.gameObject.SetActive(true);
+#endif
+        
+        googleLoginButton.onClick.AddListener(async () =>
+        {
+            if (_isLoggingIn)
+            {
+                return;
+            }
+            _isLoggingIn = true;
+
+            try
+            {
+                bool success = await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow();
+
+                if (!success)
+                {
+                    return;
+                }
+
+                PlayerPrefs.SetInt("LoginType", 1);
+                PlayerPrefs.Save();
+
+                EnableTouchToScreen();
+            }
+            finally
+            {
+                _isLoggingIn = false;
+            }
+        });
+        
+        localPlayButton.onClick.AddListener(async () =>
+        {
+            if (_isLoggingIn)
+            {
+                return;
+            }
+            _isLoggingIn = true;
+            
+            localPlayUI.gameObject.SetActive(true);
+        });
+        
+        localPlayYesButton.onClick.AddListener(async () =>
+        {
+            GameManager.Instance.isLoggedIn = false;
+            await GameManager.Instance.LoadData();
+            await Task.Yield();
+            EnableTouchToScreen();
+        });
+        localPlayNoButton.onClick.AddListener(() =>
+        {
+            _isLoggingIn = false;
+            localPlayUI.gameObject.SetActive(false);
+        });
     }
 
     private void EnableTouchToScreen()
     {
+        if (loginPanel.activeInHierarchy)
+        {
+            loginPanel.gameObject.SetActive(false);
+        }
+        
         if (touchToScreen != null)
         {
             touchToScreen.gameObject.SetActive(true);
@@ -144,9 +256,6 @@ public class TitleSceneEvent : MonoBehaviour
 
     private void MoveToNextScene()
     {
-        if (loginImage != null)
-        {
-            loginImage.gameObject.SetActive(true);
-        }
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 }

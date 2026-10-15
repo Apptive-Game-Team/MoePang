@@ -1,3 +1,4 @@
+using _01.Scripts._10.System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -25,8 +26,10 @@ namespace _01.Scripts._00.Manager
             }
             
             string json = JsonUtility.ToJson(data, true);
+            
+            string encrypted = SaveDataEncryption.Encrypt(json);
 
-            File.WriteAllText(path, json);
+            File.WriteAllText(path, encrypted);
             
             #if UNITY_EDITOR
                 UnityEditor.AssetDatabase.Refresh();
@@ -40,7 +43,10 @@ namespace _01.Scripts._00.Manager
             if (File.Exists(path))
             {
                 string json = File.ReadAllText(path);
-                JsonUtility.FromJsonOverwrite(json, data);
+                
+                string decrypted = SaveDataEncryption.Decrypt(json);
+                
+                JsonUtility.FromJsonOverwrite(decrypted, data);
                 
                 if (data is IConvertable convert)
                 {

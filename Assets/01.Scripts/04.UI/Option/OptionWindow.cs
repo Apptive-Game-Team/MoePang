@@ -1,3 +1,5 @@
+using _01.Scripts._00.Manager;
+using _01.Scripts._12.Backend;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +22,15 @@ public class OptionWindow : MonoBehaviour
     [Header("Language")]
     [SerializeField] private TMP_Dropdown languageDropdown;
     [SerializeField] public Button optionButton;//이 창을 생성하는 버튼을 생성 시 연결해줘야함
+
+    [Header("Login & Logout")] 
+    [SerializeField] private Button logoutButton;
+    [SerializeField] private Image googleLoginUI;
+    [SerializeField] private Button googleLoginButton;
+    [SerializeField] private Button googleConnectButton;
+    [SerializeField] private Button googleLoginCancelButton;
+    
+    
     /// <summary>
     /// 옵션 창 생성 시 초기화
     /// </summary>
@@ -44,6 +55,8 @@ public class OptionWindow : MonoBehaviour
         SFXSlider.onValueChanged.AddListener((float value) => { SoundManager.Instance.SFXSoundVolume = value; PlayerPrefs.SetFloat("SFXVolume", value); PlayerPrefs.Save(); });
 
         StartCoroutine(InitLanguageDropdown());
+
+        SetLogButtons();
     }
 
     private IEnumerator InitLanguageDropdown()
@@ -108,6 +121,36 @@ public class OptionWindow : MonoBehaviour
         }
 
         return languageDropdown;
+    }
+
+    private void SetLogButtons()
+    {
+        if (GameManager.Instance.isLoggedIn)
+        {
+            logoutButton.gameObject.SetActive(true);
+            logoutButton.onClick.AddListener(() =>
+            {
+                PlayerPrefs.SetInt("LoginType", 0);
+                PlayerPrefs.Save();
+                GoogleSignInTest.Instance.SignOut();
+            });
+        }
+        else
+        {
+            googleLoginButton.gameObject.SetActive(true);
+            googleLoginButton.onClick.AddListener(() =>
+            {
+                googleLoginUI.gameObject.SetActive(true);
+            });
+            googleConnectButton.onClick.AddListener(async () =>
+            {
+                await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow(true);
+            });
+            googleLoginCancelButton.onClick.AddListener(() =>
+            {
+                googleLoginUI.gameObject.SetActive(false);
+            });
+        }
     }
 
     public void OnEndButton()
