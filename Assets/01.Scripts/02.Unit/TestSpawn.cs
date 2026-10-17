@@ -14,7 +14,13 @@ public class TestSpawn : MonoBehaviour
     [SerializeField] private FriendlyUnitList friendlyUnitList;
     [SerializeField] private Transform friendlySpawnPosition;
 
+    [Header("Enemy spawn settings")]
+    [SerializeField] private EnemyUnit enemyPrefab;
+    [SerializeField] private EnemyUnitList enemyUnitList;
+    [SerializeField] private Transform enemySpawnPosition;
+
     private const int UnitsPerHabitat = 5;
+    private const int EnemyButtonCount = 9;
     private static readonly Habitat[] Habitats =
     {
         Habitat.Meadow, Habitat.Ocean, Habitat.Desert, Habitat.Forest, Habitat.Polar
@@ -35,11 +41,12 @@ public class TestSpawn : MonoBehaviour
         }
 
         buttons = buttonGrid.GetComponentsInChildren<Button>(true);
-        int count = Mathf.Min(buttons.Length, Habitats.Length * UnitsPerHabitat);
+        int expectedCount = Habitats.Length * UnitsPerHabitat + EnemyButtonCount;
+        int count = Mathf.Min(buttons.Length, expectedCount);
         spawnActions = new UnityAction[count];
 
-        if (buttons.Length != Habitats.Length * UnitsPerHabitat)
-            Debug.LogWarning($"TestSpawn: Expected 25 buttons, found {buttons.Length}.", this);
+        if (buttons.Length != expectedCount)
+            Debug.LogWarning($"TestSpawn: Expected {expectedCount} buttons, found {buttons.Length}.", this);
 
         for (int i = 0; i < count; i++)
         {
@@ -59,6 +66,13 @@ public class TestSpawn : MonoBehaviour
 
     private void SpawnUnit(int buttonIndex)
     {
+        int friendlyButtonCount = Habitats.Length * UnitsPerHabitat;
+        if (buttonIndex >= friendlyButtonCount)
+        {
+            SpawnEnemy(buttonIndex - friendlyButtonCount);
+            return;
+        }
+
         if (friendlyPrefab == null || friendlyUnitList == null ||
             friendlySpawnPosition == null || UnitPool.Instance == null)
         {
@@ -77,6 +91,25 @@ public class TestSpawn : MonoBehaviour
         }
 
         UnitPool.Instance.Get(friendlyPrefab, units[unitIndex], friendlySpawnPosition);
+    }
+
+    private void SpawnEnemy(int unitIndex)
+    {
+        if (enemyPrefab == null || enemyUnitList == null ||
+            enemySpawnPosition == null || UnitPool.Instance == null)
+        {
+            Debug.LogError("TestSpawn: Check enemy prefab, unit list, spawn position, and UnitPool.", this);
+            return;
+        }
+
+        var units = enemyUnitList.GetUnits();
+        if (units == null || unitIndex >= units.Count || units[unitIndex] == null)
+        {
+            Debug.LogWarning($"TestSpawn: Missing enemy unit at index {unitIndex}.", this);
+            return;
+        }
+
+        UnitPool.Instance.Get(enemyPrefab, units[unitIndex], enemySpawnPosition);
     }
 
     private void OnDestroy()
