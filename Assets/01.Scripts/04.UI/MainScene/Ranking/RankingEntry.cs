@@ -16,6 +16,9 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
         [JsonProperty("max_stage")]
         public int MaxStage { get; set; }
 
+        [JsonProperty("min_used_time")]
+        public float MinUsedTime { get; set; }
+
         [JsonProperty("avatar_id")]
         public int AvatarId { get; set; }
 

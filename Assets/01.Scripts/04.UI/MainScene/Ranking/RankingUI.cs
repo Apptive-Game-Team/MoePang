@@ -4,9 +4,12 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 namespace _01.Scripts._04.UI.MainScene.Ranking
 {
@@ -15,9 +18,13 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
         [Header("Ranking UI")]
         [SerializeField] private GameObject rankingPanel;
         [SerializeField] private GameObject rankingUserPrefab;
+        [SerializeField] private List<GameObject> topRankingUsers;
+        [SerializeField] private RankingUserData myRanking;
 
         [Header("Avatar")]
         [SerializeField] private AvatarDatabase avatarDatabase;
+
+        private const int RankingCount = 100;
 
         private async void OnEnable()
         {
@@ -25,6 +32,7 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
             {
                 await SupabaseManager.Instance.InitializationTask;
                 await GetStageRanking();
+                await GetUserStageRanking();
             }
             catch (Exception e)
             {
@@ -40,7 +48,7 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                 "get_stage_ranking",
                 new
                 {
-                    p_limit = 100
+                    p_limit = RankingCount
                 }
             );
 
@@ -56,20 +64,44 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
 
                 Debug.Log($"Ranking Loaded: {rankingList.Count}");
 
+                foreach (GameObject ranker in topRankingUsers)
+                {
+                    ranker.SetActive(false);
+                }
                 foreach (Transform child in rankingPanel.transform)
                 {
                     Destroy(child.gameObject);
                 }
 
-                foreach (RankingEntry entry in rankingList)
+                for (int i = 0; i < Math.Min(3, rankingList.Count); i++)
                 {
+                    RankingEntry entry = rankingList[i];
+
+                    GameObject ranker = topRankingUsers[i];
+                    
+                    Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
+                    ranker.GetComponent<Image>().sprite = avatar;
+                    ranker.GetComponentInChildren<TextMeshProUGUI>().text = entry.Nickname;
+
+                    if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
+                    {
+                        StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl,ranker.GetComponent<Image>()));
+                    }
+                    
+                    ranker.SetActive(true);
+                }
+
+                for (int i = 3; i < rankingList.Count; i++)
+                {
+                    RankingEntry entry = rankingList[i];
+                    
                     GameObject obj = Instantiate(rankingUserPrefab, rankingPanel.transform);
 
                     RankingUserData userData = obj.GetComponent<RankingUserData>();
                     
                     Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
 
-                    userData.ProfileSetting((int)entry.Ranking, avatar, entry.Nickname, entry.MaxStage);
+                    userData.ProfileSetting((int)entry.Ranking, avatar, entry.Nickname, entry.MaxStage, entry.MinUsedTime);
                     
                     if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
                     {
@@ -77,6 +109,70 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                     }
                 }
             }
+        }
+
+        private async Task GetUserStageRanking()
+        {
+            var client = SupabaseManager.Instance.Client;
+
+            var response = await client.Rpc(
+                "get_user_stage_ranking",
+                new
+                {
+                    p_user_id = client.Auth.CurrentUser.Id
+                });
+
+            if (response.Content != null)
+            {
+                List<RankingEntry> rankingEntry = JsonConvert.DeserializeObject<List<RankingEntry>>(response.Content);
+                
+                if (rankingEntry == null)
+                {
+                    Debug.LogError("Ranking JSON Parse Failed");
+                    return;
+                }
+
+                RankingEntry entry = rankingEntry[0];
+                
+                Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
+
+                myRanking.ProfileSetting((int)entry.Ranking, avatar, entry.Nickname, entry.MaxStage, entry.MinUsedTime);
+                    
+                if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
+                {
+                    StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl, myRanking));
+                }
+            }
+        }
+
+        private IEnumerator LoadGoogleAvatar(string imageUrl, Image image)
+        {
+            using UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
+            request.timeout = 10;
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"Google Avatar Load Failed: {request.error}");
+                
+                yield break;
+            }
+
+            Texture2D texture = DownloadHandlerTexture.GetContent(request);
+
+            if (!texture)
+            {
+                yield break;
+            }
+
+            Sprite sprite = Sprite.Create(
+                texture,
+                new Rect(0, 0, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f)
+            );
+            
+            image.sprite = sprite;
         }
 
         private IEnumerator LoadGoogleAvatar(string imageUrl, RankingUserData userData)
