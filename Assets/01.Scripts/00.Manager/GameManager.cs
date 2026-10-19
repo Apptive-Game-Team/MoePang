@@ -441,8 +441,13 @@ namespace _01.Scripts._00.Manager
 
             Debug.Log("Game data loaded from local JSON.");
         }
+
+        public async Task<bool> HasInitialGameData()
+        {
+            return await _supabaseDataRepository.HasInitialGameData();
+        }
         
-        public async Task<bool> MigrateLocalDataToSupabase()
+        public async Task<bool> MigrateLocalDataToSupabase(bool forceMigrate = false)
         {
             if (!_dataLoaded)
             {
@@ -464,13 +469,16 @@ namespace _01.Scripts._00.Manager
 
             try
             {
-                bool hasCloudData = await _supabaseDataRepository.HasInitialGameData();
-
-                if (hasCloudData)
+                if (!forceMigrate)
                 {
-                    Debug.LogWarning("Cloud game data already exists. Migration cancelled.");
+                    bool hasCloudData = await HasInitialGameData();
 
-                    return false;
+                    if (hasCloudData)
+                    {
+                        Debug.LogWarning("Cloud game data already exists. Migration cancelled.");
+
+                        return false;
+                    }
                 }
                 
                 await _supabaseDataRepository.SavePlayData(playData);
