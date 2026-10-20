@@ -19,6 +19,7 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
         [SerializeField] private GameObject rankingPanel;
         [SerializeField] private GameObject rankingUserPrefab;
         [SerializeField] private List<GameObject> topRankingUsers;
+        [SerializeField] private RankingUserData rankerUserData;
         [SerializeField] private RankingUserData myRanking;
 
         [Header("Avatar")]
@@ -37,6 +38,19 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
             catch (Exception e)
             {
                 Debug.LogError($"Ranking Load Failed: {e}");
+            }
+        }
+
+        private void OnDisable()
+        {
+            foreach (GameObject ranker in topRankingUsers)
+            {
+                ranker.SetActive(false);
+            }
+            
+            foreach (Transform child in rankingPanel.transform)
+            {
+                Destroy(child.gameObject);
             }
         }
 
@@ -64,28 +78,31 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
 
                 Debug.Log($"Ranking Loaded: {rankingList.Count}");
 
-                foreach (GameObject ranker in topRankingUsers)
-                {
-                    ranker.SetActive(false);
-                }
-                foreach (Transform child in rankingPanel.transform)
-                {
-                    Destroy(child.gameObject);
-                }
-
                 for (int i = 0; i < Math.Min(3, rankingList.Count); i++)
                 {
                     RankingEntry entry = rankingList[i];
 
                     GameObject ranker = topRankingUsers[i];
+                    Button button = ranker.GetComponent<Button>();
                     
                     Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
                     ranker.GetComponent<Image>().sprite = avatar;
                     ranker.GetComponentInChildren<TextMeshProUGUI>().text = entry.Nickname;
 
+                    button.onClick.AddListener(() =>
+                    {
+                        rankerUserData.ProfileSetting((int)entry.Ranking, avatar, entry.Nickname, entry.MaxStage, entry.MinUsedTime);
+                        rankerUserData.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                        {
+                            rankerUserData.gameObject.SetActive(false);
+                        });
+                        rankerUserData.gameObject.SetActive(true);
+                    });
+                    
                     if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
                     {
                         StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl,ranker.GetComponent<Image>()));
+                        StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl, rankerUserData));
                     }
                     
                     ranker.SetActive(true);
