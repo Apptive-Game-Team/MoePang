@@ -19,6 +19,9 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
         [SerializeField] private Button avatarModeButton;
+        [SerializeField] private TextMeshProUGUI maxStage;
+        [SerializeField] private TextMeshProUGUI clearedTime;
+        [SerializeField] private TextMeshProUGUI[] habitatBonuses;
 
 
         [Header("Simple Profile UI")] 
@@ -33,6 +36,11 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             _profile = SupabaseLoginManager.Instance.profile;
             
             SetInitialSetting(_profile);
+        }
+
+        private void OnEnable()
+        {
+            SetStageAndHabitatInfo();
         }
 
         private async void SetInitialSetting(_12.Backend.Profile profile)
@@ -61,6 +69,11 @@ namespace _01.Scripts._04.UI.MainScene.Profile
                 SetNickname(data.nickname);
                 SetMaxStage(GameManager.Instance.playData.MaxStages.Values.Max());
             }
+        }
+
+        private void SetStageAndHabitatInfo()
+        {
+            
         }
 
         public void SetImage(Sprite sprite)
