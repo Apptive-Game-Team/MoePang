@@ -123,6 +123,9 @@ namespace _01.Scripts._12.Backend
 
                     await GameManager.Instance.LoadData();
                 }
+                
+                PlayerPrefs.SetInt("LoginType", 1);
+                PlayerPrefs.Save();
 
                 return true;
             }
