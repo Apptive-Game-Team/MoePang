@@ -39,30 +39,30 @@ namespace _01.Scripts._00.Manager
             switch (unit)
             {
                 case FriendlyUnit fu:
-                    if (_allies.Add(fu))
+                    _allies.Add(fu);
+                    foreach (Buff buff in _activeAllyBuffs)
                     {
-                        foreach (Buff buff in _activeAllyBuffs)
-                        {
-                            fu.AddBuff(buff);
-                        }
+                        // 풀에서 다시 소환되면 기본 스탯이 초기화되므로 재적용한다.
+                        fu.RemoveBuff(buff);
+                        fu.AddBuff(buff);
                     }
                     break;
                 case EnemyUnit eu:
-                    if (_enemies.Add(eu))
+                    _enemies.Add(eu);
+                    foreach (Buff buff in _activeEnemyBuffs)
                     {
-                        foreach (Buff buff in _activeEnemyBuffs)
-                        {
-                            eu.AddBuff(buff);
-                        }
+                        eu.RemoveBuff(buff);
+                        eu.AddBuff(buff);
                     }
                     break;
             }
         }
         
-        public void ApplyAllyBuff(StatType type, float multiplier, float duration)
+        public Buff ApplyAllyBuff(StatType type, float multiplier, float duration)
         {
             Buff newBuff = new(type, multiplier);
             newBuff.Coroutine = StartCoroutine(AllyBuffRoutine(newBuff, duration));
+            return newBuff;
         }
 
         private IEnumerator AllyBuffRoutine(Buff buff, float duration)
@@ -84,10 +84,29 @@ namespace _01.Scripts._00.Manager
             }
         }
         
-        public void ApplyEnemyBuff(StatType type, float multiplier, float duration)
+        public Buff ApplyEnemyBuff(StatType type, float multiplier, float duration)
         {
             Buff newBuff = new(type, multiplier);
             newBuff.Coroutine = StartCoroutine(EnemyBuffRoutine(newBuff, duration));
+            return newBuff;
+        }
+
+        public void RemoveBuff(Buff buff)
+        {
+            if (buff == null) return;
+            if (buff.Coroutine != null) StopCoroutine(buff.Coroutine);
+
+            if (_activeAllyBuffs.Remove(buff))
+            {
+                foreach (FriendlyUnit unit in _allies.Where(unit => unit))
+                    unit.RemoveBuff(buff);
+            }
+
+            if (_activeEnemyBuffs.Remove(buff))
+            {
+                foreach (EnemyUnit unit in _enemies.Where(unit => unit))
+                    unit.RemoveBuff(buff);
+            }
         }
 
         private IEnumerator EnemyBuffRoutine(Buff buff, float duration)

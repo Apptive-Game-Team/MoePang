@@ -394,5 +394,7 @@ namespace _01.Scripts._01.ThreeMatch
             LayoutStackSlots();
             FillStack(_stackCount);
         }
+
+        public int MaxStackCount => StackMaxCount;
     }
 }
