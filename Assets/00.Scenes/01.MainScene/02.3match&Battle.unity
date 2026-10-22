@@ -3692,6 +3692,7 @@ GameObject:
   - component: {fileID: 683930343}
   - component: {fileID: 683930345}
   - component: {fileID: 683930344}
+  - component: {fileID: 683930346}
   m_Layer: 5
   m_Name: RawImage
   m_TagString: Untagged
@@ -3754,6 +3755,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 683930342}
   m_CullTransparentMesh: 1
+--- !u!114 &683930346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683930342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &697419835
 GameObject:
   m_ObjectHideFlags: 0
