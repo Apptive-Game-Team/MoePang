@@ -188,6 +188,7 @@ namespace _01.Scripts._12.Backend
                 return false;
             }
         }
+        
 
         public async Task<bool> UpdateNickname(string nickname)
         {

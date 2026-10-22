@@ -1,10 +1,12 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._12.Backend;
+using System;
 using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace _01.Scripts._04.UI.MainScene.Profile
@@ -18,7 +20,9 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         [SerializeField] private TMP_Text nicknameText;
         [SerializeField] private NicknameChangeUI nicknameChangeUI;
         [SerializeField] private AvatarDatabase avatarDatabase;
-        [SerializeField] private Button avatarModeButton;
+        [SerializeField] private TextMeshProUGUI maxStageText;
+        [SerializeField] private TextMeshProUGUI clearedTimeText;
+        [SerializeField] private TextMeshProUGUI[] habitatBonuses;
 
 
         [Header("Simple Profile UI")] 
@@ -26,13 +30,20 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         [SerializeField] private TMP_Text simpleNicknameText;
         [SerializeField] private TMP_Text simpleMaxStageText;
 
-        private _12.Backend.Profile _profile;
+        private _12.Backend.Profile _profile; 
+        public Sprite googleAvatarSprite;
 
         private void Awake()
         {
             _profile = SupabaseLoginManager.Instance.profile;
+            googleAvatarSprite = GameManager.Instance.googleAvatarSprite;
             
             SetInitialSetting(_profile);
+        }
+
+        private void OnEnable()
+        {
+            SetStageAndHabitatInfo();
         }
 
         private async void SetInitialSetting(_12.Backend.Profile profile)
@@ -41,9 +52,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             {
                 if (profile.IsGoogleAvatar && !string.IsNullOrEmpty(profile.GoogleAvatarUrl))
                 {
-                    LoadGoogleAvatar(profile.GoogleAvatarUrl, profileImage);
-                    LoadGoogleAvatar(profile.GoogleAvatarUrl, simpleProfileImage);
-                    ChangeAvatarModeButtonColor(avatarModeButton, _profile.IsGoogleAvatar);
+                    SetImage(googleAvatarSprite);
                 }
                 else
                 {
@@ -60,6 +69,25 @@ namespace _01.Scripts._04.UI.MainScene.Profile
                 SetImage(avatarDatabase.GetAvatar(data.avatarId));
                 SetNickname(data.nickname);
                 SetMaxStage(GameManager.Instance.playData.MaxStages.Values.Max());
+            }
+        }
+
+        private void SetStageAndHabitatInfo()
+        {
+            PlayData playData = GameManager.Instance.playData;
+            
+            int maxStage = playData.MaxStages.Values.Max();
+            StageType maxStageType = playData.MaxStages
+                .FirstOrDefault(x => x.Value == maxStage)
+                .Key;
+            float minUsedTime = maxStage == 0 ? 0.0f : playData.StageData[maxStageType][maxStage - 1].minUsedTime;
+            
+            maxStageText.text = "stage " + maxStage;
+            clearedTimeText.text = $"{minUsedTime:F}".Replace(".", " : ");
+
+            for (int i = 0; i < habitatBonuses.Length; i++)
+            {
+                habitatBonuses[i].text = "+" + GameManager.Instance.playData.MaxStages[(StageType)(i + 1)];
             }
         }
 
@@ -95,19 +123,25 @@ namespace _01.Scripts._04.UI.MainScene.Profile
 
         public void OpenAvatarChangeUI()
         {
-            if (_profile.IsGoogleAvatar)
-            {
-                return;
-            }
-            
             avatarChangeUI.gameObject.SetActive(true);
         }
 
-        public void CloseAvatarChangeUI()
+        public void SaveCloseAvatarChangeUI()
         {
             int id = avatarChangeUI.selectedAvatarId;
             avatarChangeUI.gameObject.SetActive(false);
             UpdateAvatarId(id);
+        }
+
+        public void SaveCloseAvatarChangeUIGoogle()
+        {
+            avatarChangeUI.gameObject.SetActive(false);
+            UpdateGoogleAvatar();
+        }
+
+        public void CloseAvatarChangeUI()
+        {
+            avatarChangeUI.gameObject.SetActive(false);
         }
 
         public void OpenNicknameChangeUI()
@@ -116,53 +150,15 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             nicknameChangeUI.Open();
         }
 
-        public void CloseNicknameChangeUI()
+        public void SaveCloseNicknameChangeUI()
         {
             nicknameChangeUI.gameObject.SetActive(false);
             UpdateNickname();
         }
 
-        public void ChangeAvatarMode(Button button)
+        public void CloseNicknameChangeUI()
         {
-            if (!GoogleSignInTest.Instance.googleLoggedIn)
-            {
-                return;
-            }
-            
-            _profile.IsGoogleAvatar = !_profile.IsGoogleAvatar;
-
-            ChangeAvatarModeButtonColor(button, _profile.IsGoogleAvatar);
-            
-            if (_profile.IsGoogleAvatar && !string.IsNullOrEmpty(_profile.GoogleAvatarUrl))
-            {
-                LoadGoogleAvatar(_profile.GoogleAvatarUrl, profileImage);
-            }
-            else
-            {
-                SetImage(avatarDatabase.GetAvatar(_profile.AvatarId));
-            }
-
-            UpdateAvatarMode(_profile.IsGoogleAvatar);
-        }
-
-        private void ChangeAvatarModeButtonColor(Button button, bool flag)
-        {
-            ColorBlock colors = button.colors;
-            colors.normalColor = flag ? Color.gray : Color.white;
-            colors.highlightedColor = flag ? Color.gray : Color.white;
-            colors.pressedColor = flag ? Color.gray : Color.white;
-            colors.selectedColor = flag ? Color.gray : Color.white;
-            button.colors = colors;
-        }
-
-        private void UpdateAvatarMode(bool flag)
-        {
-            UpdateAvatarModeTask(flag);
-        }
-
-        private async void UpdateAvatarModeTask(bool flag)
-        {
-            await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatarMode(flag);
+            nicknameChangeUI.gameObject.SetActive(false);
         }
         
         private async void UpdateAvatarId(int id)
@@ -170,13 +166,21 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             if (GameManager.Instance.isLoggedIn)
             {
                 SupabaseLoginManager.Instance.profile.AvatarId = id;
-                await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatar(id);   
+                SupabaseLoginManager.Instance.profile.IsGoogleAvatar = false;
+                await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatar(id);
+                await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatarMode(false);
             }
             else
             {
                 GameManager.Instance.localProfileData.avatarId = id;
                 GameManager.Instance.SaveLocalProfileData();
             }
+        }
+
+        private async void UpdateGoogleAvatar()
+        {
+            SupabaseLoginManager.Instance.profile.IsGoogleAvatar = true;
+            await SupabaseLoginManager.Instance.ProfileRepository.UpdateAvatarMode(true);
         }
 
         private async void UpdateNickname()
@@ -191,54 +195,6 @@ namespace _01.Scripts._04.UI.MainScene.Profile
                 GameManager.Instance.localProfileData.nickname = nicknameText.text;
                 GameManager.Instance.SaveLocalProfileData();
             }
-        }
-
-        private void LoadGoogleAvatar(string imageUrl, Image target)
-        {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-            {
-                Debug.LogWarning("Google avatar URL is empty.");
-                return;
-            }
-
-            StartCoroutine(LoadGoogleAvatarImage(imageUrl, target));
-        }
-        
-        private IEnumerator LoadGoogleAvatarImage(string imageUrl, Image target)
-        {
-            using UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
-
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError(
-                    $"Google avatar load failed.\n{request.error}"
-                );
-
-                yield break;
-            }
-
-            Texture2D texture = DownloadHandlerTexture.GetContent(request);
-
-            if (texture == null)
-            {
-                Debug.LogError("Google avatar texture is null.");
-                yield break;
-            }
-
-            Sprite sprite = Sprite.Create(
-                texture,
-                new Rect(
-                    0,
-                    0,
-                    texture.width,
-                    texture.height
-                ),
-                new Vector2(0.5f, 0.5f)
-            );
-
-            target.sprite = sprite;
         }
     }
 }

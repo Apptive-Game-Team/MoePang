@@ -1,4 +1,5 @@
 using _01.Scripts._00.Manager;
+using _01.Scripts._08.Utility;
 using _01.Scripts._12.Backend;
 using System;
 using System.Collections;
@@ -8,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class OptionWindow : MonoBehaviour
@@ -29,6 +31,10 @@ public class OptionWindow : MonoBehaviour
     [SerializeField] private Button googleLoginButton;
     [SerializeField] private Button googleConnectButton;
     [SerializeField] private Button googleLoginCancelButton;
+    [SerializeField] private Image googleConnectMigrationUI;
+    [SerializeField] private Button googleConnectMigrationConfirmButton;
+    [SerializeField] private Button googleConnectMigrationRejectButton;
+    [SerializeField] private Button googleConnectMigrationCancelButton;
     
     
     /// <summary>
@@ -144,7 +150,27 @@ public class OptionWindow : MonoBehaviour
             });
             googleConnectButton.onClick.AddListener(async () =>
             {
-                await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow(true);
+                if (await GameManager.Instance.HasInitialGameData())
+                {
+                    googleConnectMigrationConfirmButton.onClick.AddListener(async () =>
+                    {
+                        await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow(true, true);
+                    });
+                    googleConnectMigrationRejectButton.onClick.AddListener(async () =>
+                    {
+                        await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow();
+                        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+                    });
+                    googleConnectMigrationCancelButton.onClick.AddListener(() =>
+                    {
+                        googleConnectMigrationUI.gameObject.SetActive(false);
+                    });
+                    googleConnectMigrationUI.gameObject.SetActive(true);
+                }
+                else
+                {
+                    await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow(true);
+                }
             });
             googleLoginCancelButton.onClick.AddListener(() =>
             {

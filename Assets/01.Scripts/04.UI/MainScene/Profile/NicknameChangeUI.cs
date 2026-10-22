@@ -54,7 +54,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
             }
 
             _profileUI.SetNickname(nickname);
-            _profileUI.CloseNicknameChangeUI();
+            _profileUI.SaveCloseNicknameChangeUI();
         }
 
         public void Cancel()
