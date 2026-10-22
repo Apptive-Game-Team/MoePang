@@ -28,6 +28,7 @@ namespace _01.Scripts._10.System.Combo
         [SerializeField] private SpawnStack[] stacks;
         [SerializeField] private UnitSpawner unitSpawner;
         [SerializeField] private List<Combo> combos;
+        [SerializeField] private ComboAnimation comboAnimation;
         
         public bool isTypeNull;
         
