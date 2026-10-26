@@ -45,7 +45,7 @@ namespace _01.Scripts._12.Backend
             await ExecuteGoogleLoginFlow(true);
         }
         
-        public async Task<bool> ExecuteGoogleLoginFlow(bool migrateLocalSave = false)
+        public async Task<bool> ExecuteGoogleLoginFlow(bool migrateLocalSave = false, bool forceMigrate = false)
         {
         #if UNITY_EDITOR
             return false;
@@ -85,7 +85,7 @@ namespace _01.Scripts._12.Backend
                         );
 
                     bool migrated = await GameManager.Instance
-                        .MigrateLocalDataToSupabase();
+                        .MigrateLocalDataToSupabase(forceMigrate);
 
                     if (!migrated)
                     {
@@ -123,6 +123,9 @@ namespace _01.Scripts._12.Backend
 
                     await GameManager.Instance.LoadData();
                 }
+                
+                PlayerPrefs.SetInt("LoginType", 1);
+                PlayerPrefs.Save();
 
                 return true;
             }
