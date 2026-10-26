@@ -1,4 +1,5 @@
 using UnityEngine;
+using NotImplementedException = System.NotImplementedException;
 
 namespace _01.Scripts._10.System.Constraint
 {
@@ -9,6 +10,11 @@ namespace _01.Scripts._10.System.Constraint
         {
             Debug.Log("BanContinuousHabitat");
             context.Puzzle.isContinuousHabitatBanned = true;
+        }
+
+        public override void CancelConstraint(ConstraintContext context)
+        {
+            context.Puzzle.isContinuousHabitatBanned = false;
         }
     }
 }

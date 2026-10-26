@@ -15,5 +15,7 @@ namespace _01.Scripts._10.System.Constraint
             constraintDescription);
 
         public abstract void ApplyConstraint(ConstraintContext context);
+        
+        public abstract void CancelConstraint(ConstraintContext context);
     }
 }

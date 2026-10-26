@@ -332,6 +332,7 @@ namespace _01.Scripts._00.Manager
         private bool _useSupabase;
         private bool _dataLoaded;
 
+        public bool isTestMode;
         public Sprite googleAvatarSprite;
 
         protected override void Awake()

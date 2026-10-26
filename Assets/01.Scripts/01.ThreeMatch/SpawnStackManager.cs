@@ -42,5 +42,19 @@ namespace _01.Scripts._01.ThreeMatch
                 stack.SetStackMaxCount(count);
             }
         }
+
+        public System.Action CaptureStackMaxCounts()
+        {
+            int[] counts = stacks.Select(stack => stack.MaxStackCount).ToArray();
+            SpawnStack[] capturedStacks = stacks.ToArray();
+            return () =>
+            {
+                for (int i = 0; i < capturedStacks.Length; i++)
+                {
+                    if (capturedStacks[i] != null)
+                        capturedStacks[i].SetStackMaxCount(counts[i]);
+                }
+            };
+        }
     }
 }
