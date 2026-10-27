@@ -36,7 +36,7 @@ namespace _01.Scripts._04.UI.MainScene.Profile
         private void Awake()
         {
             _profile = SupabaseLoginManager.Instance.profile;
-            googleAvatarSprite = GameManager.Instance.googleAvatarSprite;
+            googleAvatarSprite = GameManager.Instance.googleAvatarSprite ?? avatarDatabase.GetAvatar(_profile.AvatarId);
             
             SetInitialSetting(_profile);
         }

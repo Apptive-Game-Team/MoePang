@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._04.UI.MainScene.Profile;
 using _01.Scripts._12.Backend;
 using Newtonsoft.Json;
@@ -18,21 +19,29 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
         [SerializeField] private GameObject rankingPanel;
         [SerializeField] private GameObject rankingUserPrefab;
         [SerializeField] private List<GameObject> topRankingUsers;
-        [SerializeField] private RankingUserData rankerUserData;
+        [SerializeField] private RankerProfileUI rankerUI;
         [SerializeField] private RankingUserData myRanking;
 
         [Header("Avatar")]
         [SerializeField] private AvatarDatabase avatarDatabase;
 
-        private const int RankingCount = 100;
+        private Sprite _googleAvatarSprite;
+        private _12.Backend.Profile _profile; 
+        private const int RankingCount = 1000;
+
+        private void Awake()
+        {
+            _profile = SupabaseLoginManager.Instance.profile;
+            _googleAvatarSprite = GameManager.Instance.googleAvatarSprite ?? avatarDatabase.GetAvatar(_profile.AvatarId);
+        }
 
         private async void OnEnable()
         {
             try
             {
                 await SupabaseManager.Instance.InitializationTask;
-                await GetStageRanking();
                 await GetUserStageRanking();
+                await GetStageRanking();
             }
             catch (Exception e)
             {
@@ -76,32 +85,39 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                 }
 
                 Debug.Log($"Ranking Loaded: {rankingList.Count}");
+                
+                List<Task> avatarTasks = new();
 
                 for (int i = 0; i < Math.Min(3, rankingList.Count); i++)
                 {
                     RankingEntry entry = rankingList[i];
-
                     GameObject ranker = topRankingUsers[i];
                     Button button = ranker.GetComponent<Button>();
                     
                     Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
                     ranker.GetComponent<Image>().sprite = avatar;
                     ranker.GetComponentInChildren<TextMeshProUGUI>().text = entry.Nickname;
-
+                    
                     button.onClick.AddListener(() =>
                     {
-                        rankerUserData.ProfileSetting((int)entry.Ranking, avatar, entry.Nickname, entry.MaxStage, entry.MinUsedTime);
-                        rankerUserData.GetComponentInChildren<Button>().onClick.AddListener(() =>
-                        {
-                            rankerUserData.gameObject.SetActive(false);
-                        });
-                        rankerUserData.gameObject.SetActive(true);
+                        rankerUI.InitialSetting(entry, avatar);
+                        rankerUI.gameObject.SetActive(true);
                     });
                     
                     if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
                     {
-                        StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl,ranker.GetComponent<Image>()));
-                        StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl, rankerUserData));
+                        avatarTasks.Add(ApplyGoogleAvatarAsync(entry.GoogleAvatarUrl, sprite =>
+                        {
+                            avatar = sprite;
+                            ranker.GetComponent<Image>().sprite = avatar;
+                            
+                            button.onClick.RemoveAllListeners();
+                            button.onClick.AddListener(() =>
+                            {
+                                rankerUI.InitialSetting(entry, avatar);
+                                rankerUI.gameObject.SetActive(true);
+                            });
+                        } ));
                     }
                     
                     ranker.SetActive(true);
@@ -121,8 +137,20 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                     
                     if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
                     {
-                        StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl, userData));
+                        avatarTasks.Add(ApplyGoogleAvatarAsync(entry.GoogleAvatarUrl, userData.SetProfileImage));
                     }
+                }
+                
+                await Task.WhenAll(avatarTasks);
+                
+                for (int i = 0; i < Math.Min(3, rankingList.Count); i++)
+                {
+                    topRankingUsers[i].SetActive(true);
+                }
+                
+                foreach (Transform child in rankingPanel.transform)
+                {
+                    child.gameObject.SetActive(true);
                 }
             }
         }
@@ -142,9 +170,9 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
             {
                 List<RankingEntry> rankingEntry = JsonConvert.DeserializeObject<List<RankingEntry>>(response.Content);
                 
-                if (rankingEntry == null)
+                if (rankingEntry == null || rankingEntry.Count == 0)
                 {
-                    Debug.LogError("Ranking JSON Parse Failed");
+                    Debug.LogError("No Ranking Data");
                     return;
                 }
 
@@ -156,77 +184,60 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                     
                 if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
                 {
-                    StartCoroutine(LoadGoogleAvatar(entry.GoogleAvatarUrl, myRanking));
+                    myRanking.SetProfileImage(_googleAvatarSprite);
+                }
+                
+                myRanking.gameObject.SetActive(true);
+            }
+        }
+        
+        private async Task ApplyGoogleAvatarAsync(string imageUrl, Action<Sprite> applySprite)
+        {
+            try
+            {
+                Sprite sprite = await LoadGoogleAvatarAsync(imageUrl);
+
+                if (sprite != null)
+                {
+                    applySprite?.Invoke(sprite);
                 }
             }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Google Avatar Load Failed: {e.Message}");
+            }
         }
 
-        private IEnumerator LoadGoogleAvatar(string imageUrl, Image image)
+        private async Task<Sprite> LoadGoogleAvatarAsync(string imageUrl)
         {
             using UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
             request.timeout = 10;
 
-            yield return request.SendWebRequest();
+            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
 
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogWarning($"Google Avatar Load Failed: {request.error}");
-                
-                yield break;
+                return null;
             }
 
             Texture2D texture = DownloadHandlerTexture.GetContent(request);
 
             if (!texture)
             {
-                yield break;
+                return null;
             }
 
-            Sprite sprite = Sprite.Create(
+            return Sprite.Create(
                 texture,
                 new Rect(0, 0, texture.width, texture.height),
                 new Vector2(0.5f, 0.5f)
             );
-            
-            image.sprite = sprite;
-        }
-
-        private IEnumerator LoadGoogleAvatar(string imageUrl, RankingUserData userData)
-        {
-            using UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
-            request.timeout = 10;
-
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogWarning($"Google Avatar Load Failed: {request.error}");
-                
-                yield break;
-            }
-
-            Texture2D texture = DownloadHandlerTexture.GetContent(request);
-
-            if (!texture)
-            {
-                yield break;
-            }
-
-            Sprite sprite = Sprite.Create(
-                texture,
-                new Rect(0, 0, texture.width, texture.height),
-                new Vector2(0.5f, 0.5f)
-            );
-
-            if (userData)
-            {
-                userData.SetProfileImage(sprite);
-            }
-            else
-            {
-                Destroy(sprite);
-                Destroy(texture);
-            }
         }
     }
 }
