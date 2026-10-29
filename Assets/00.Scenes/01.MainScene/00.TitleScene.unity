@@ -957,6 +957,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   webClientId: 700579836124-6a5s1iafh4jsth49ehodrn72icru6e76.apps.googleusercontent.com
+  googleLoggedIn: 0
 --- !u!4 &765072337
 Transform:
   m_ObjectHideFlags: 0
@@ -1415,6 +1416,9 @@ MonoBehaviour:
     avatarId: 0
     nickname: localPlayer
   isLoggedIn: 1
+  isTestMode: 0
+  googleAvatarSprite: {fileID: 0}
+  isTutorial: 1
 --- !u!4 &1168916410
 Transform:
   m_ObjectHideFlags: 0

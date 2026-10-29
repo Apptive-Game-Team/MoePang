@@ -6181,6 +6181,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d38bf924babfcfe44bb77873ace9670c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeInfo: {fileID: 1219555817}
+  lockButton: {fileID: 2066411931}
+  tutorialPanel: {fileID: 1066944211}
 --- !u!4 &707969074
 Transform:
   m_ObjectHideFlags: 0
@@ -7733,7 +7736,7 @@ GameObject:
   - component: {fileID: 870558471}
   - component: {fileID: 870558470}
   m_Layer: 5
-  m_Name: Image
+  m_Name: TutorialCharacterImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9317,8 +9320,9 @@ GameObject:
   - component: {fileID: 1066944208}
   - component: {fileID: 1066944210}
   - component: {fileID: 1066944209}
+  - component: {fileID: 1066944211}
   m_Layer: 5
-  m_Name: Image
+  m_Name: TutorialPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9382,6 +9386,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1066944207}
   m_CullTransparentMesh: 1
+--- !u!225 &1066944211
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066944207}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1069151706
 GameObject:
   m_ObjectHideFlags: 0
@@ -11048,6 +11064,7 @@ GameObject:
   - component: {fileID: 1219555815}
   - component: {fileID: 1219555814}
   - component: {fileID: 1219555816}
+  - component: {fileID: 1219555817}
   m_Layer: 8
   m_Name: TimeInfo
   m_TagString: Untagged
@@ -11127,6 +11144,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeText: {fileID: 297517527}
+--- !u!225 &1219555817
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219555812}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &1237293982
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19214,6 +19243,7 @@ GameObject:
   - component: {fileID: 2066411930}
   - component: {fileID: 2066411929}
   - component: {fileID: 2066411928}
+  - component: {fileID: 2066411931}
   m_Layer: 8
   m_Name: CameraLockButton
   m_TagString: Untagged
@@ -19335,6 +19365,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2066411926}
   m_CullTransparentMesh: 1
+--- !u!225 &2066411931
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066411926}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2067579650
 GameObject:
   m_ObjectHideFlags: 0
