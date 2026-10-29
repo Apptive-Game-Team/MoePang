@@ -187,9 +187,6 @@ public class TitleSceneEvent : MonoBehaviour
                     return;
                 }
 
-                PlayerPrefs.SetInt("LoginType", 1);
-                PlayerPrefs.Save();
-
                 EnableTouchToScreen();
             }
             finally

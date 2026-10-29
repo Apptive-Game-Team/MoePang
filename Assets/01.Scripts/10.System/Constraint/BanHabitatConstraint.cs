@@ -17,5 +17,10 @@ namespace _01.Scripts._10.System.Constraint
             
             Debug.Log($"BanHabitatConstraint {banHabitat}");
         }
+
+        public override void CancelConstraint(ConstraintContext context)
+        {
+            context.SpawnStacks.First(s => s.type == banHabitat).UnbanStack();
+        }
     }
 }

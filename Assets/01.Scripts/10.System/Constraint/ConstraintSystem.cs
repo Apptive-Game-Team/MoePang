@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._02.Unit;
 using _01.Scripts._11.HabitatMode;
@@ -57,13 +58,17 @@ namespace _01.Scripts._10.System.Constraint
         private ConstraintContext _constraintContext;
         private ConstraintRouletteSystem _constraintRouletteSystem;
 
+        private int _testConstraintIndex;
+        private Constraint _currentTestConstraint;
+
         private void Awake()
         {
             _constraintContext = new ConstraintContext(puzzle, unitSpawner, spawnStacks);
             _constraintRouletteSystem = GetComponent<ConstraintRouletteSystem>();
             _constraintRouletteSystem.InitializeItems();
 
-            bool setMiddleConstraint = StageManager.Instance.IsMiddleHurdleStage();
+            // todo : 디버깅 용 테스트 코드 추가됨
+            bool setMiddleConstraint = GameManager.Instance.isTestMode ? false : StageManager.Instance.IsMiddleHurdleStage();
             if (setMiddleConstraint)
             {
                 StartCoroutine(StartRoulette());
@@ -74,6 +79,39 @@ namespace _01.Scripts._10.System.Constraint
             {
                 StartCoroutine(ApplyHighConstraint());
             }
+        }
+
+        private void Update()
+        {
+            if (!GameManager.Instance.isTestMode)
+            {
+                return;
+            }
+
+            if (!Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                return;
+            }
+
+            if (constraints == null || constraints.Count == 0)
+            {
+                return;
+            }
+            
+            if (_currentTestConstraint)
+            {
+                _currentTestConstraint.CancelConstraint(_constraintContext);
+            }
+            
+            _testConstraintIndex %= constraints.Count;
+
+            _currentTestConstraint = constraints[_testConstraintIndex];
+
+            Debug.Log($"[Constraint Test] Apply: {_currentTestConstraint.type}");
+
+            ApplyMiddleConstraint(_currentTestConstraint.type);
+
+            _testConstraintIndex++;
         }
 
         private IEnumerator StartRoulette()
@@ -106,6 +144,11 @@ namespace _01.Scripts._10.System.Constraint
                     constraintImage.gameObject.SetActive(true);
                     constraintCount.text = sc.maxSwapCount.ToString();
                     puzzle.OnSwapCountChanged += RegisterSwapCountConstraint;
+                    break;
+                default:
+                    constraintImage.gameObject.SetActive(false);
+                    puzzle.OnSwapCountChanged -= RegisterSwapCountConstraint;
+                    constraintCount.text = "";
                     break;
             }
         }

@@ -7,6 +7,8 @@ using _01.Scripts._08.Utility;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
 using _01.Scripts._12.Backend;
+using System.Collections;
+using UnityEngine.Networking;
 using UnityEngine.Serialization;
 
 namespace _01.Scripts._00.Manager
@@ -330,6 +332,9 @@ namespace _01.Scripts._00.Manager
         private bool _useSupabase;
         private bool _dataLoaded;
 
+        public bool isTestMode;
+        public Sprite googleAvatarSprite;
+
         protected override void Awake()
         {
             base.Awake();
@@ -378,6 +383,8 @@ namespace _01.Scripts._00.Manager
                         comboData,
                         unitList
                     );
+
+                    LoadGoogleAvatarSprite();
 
                     Debug.Log("Game data loaded from Supabase.");
                 }
@@ -441,8 +448,13 @@ namespace _01.Scripts._00.Manager
 
             Debug.Log("Game data loaded from local JSON.");
         }
+
+        public async Task<bool> HasInitialGameData()
+        {
+            return await _supabaseDataRepository.HasInitialGameData();
+        }
         
-        public async Task<bool> MigrateLocalDataToSupabase()
+        public async Task<bool> MigrateLocalDataToSupabase(bool forceMigrate = false)
         {
             if (!_dataLoaded)
             {
@@ -464,13 +476,16 @@ namespace _01.Scripts._00.Manager
 
             try
             {
-                bool hasCloudData = await _supabaseDataRepository.HasInitialGameData();
-
-                if (hasCloudData)
+                if (!forceMigrate)
                 {
-                    Debug.LogWarning("Cloud game data already exists. Migration cancelled.");
+                    bool hasCloudData = await HasInitialGameData();
 
-                    return false;
+                    if (hasCloudData)
+                    {
+                        Debug.LogWarning("Cloud game data already exists. Migration cancelled.");
+
+                        return false;
+                    }
                 }
                 
                 await _supabaseDataRepository.SavePlayData(playData);
@@ -869,6 +884,53 @@ namespace _01.Scripts._00.Manager
                 HabitatMode.PolarMode => playData.MaxStages[StageType.Polar],
                 _ => playData.MaxStages[StageType.Meadow]
             };
+        }
+
+        public void LoadGoogleAvatarSprite()
+        {
+            StartCoroutine(LoadGoogleAvatarSprite(SupabaseLoginManager.Instance.profile.GoogleAvatarUrl));
+        }
+
+        private IEnumerator LoadGoogleAvatarSprite(string imageUrl)
+        {
+            if (imageUrl == null)
+            {
+                yield break;
+            }
+            
+            using UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(
+                    $"Google avatar load failed.\n{request.error}"
+                );
+
+                yield break;
+            }
+
+            Texture2D texture = DownloadHandlerTexture.GetContent(request);
+
+            if (texture == null)
+            {
+                Debug.LogError("Google avatar texture is null.");
+                yield break;
+            }
+
+            Sprite sprite = Sprite.Create(
+                texture,
+                new Rect(
+                    0,
+                    0,
+                    texture.width,
+                    texture.height
+                ),
+                new Vector2(0.5f, 0.5f)
+            );
+
+            googleAvatarSprite = sprite;
         }
     }
 }

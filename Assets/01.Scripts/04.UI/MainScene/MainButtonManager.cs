@@ -25,14 +25,35 @@ public class MainButtonManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI chapterText;
     [SerializeField] private TextMeshProUGUI stageText;
 
+    [Header("Test")] 
+    [SerializeField] private Button testPlayButton;
+
     private void Start()
     {
         RefreshStageUI();
+        
+        // todo : 디버깅 용 코드 추가
+        GameManager.Instance.isTestMode = false;
+        #if UNITY_EDITOR
+        {
+            testPlayButton.onClick.AddListener(OnClickTestPlay);
+            testPlayButton.gameObject.SetActive(true);
+        }
+        #endif
     }
 
     public void OnClickPlay()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+        HabitatModeManager.Instance.IsHabitatBattle = false;
+        SceneManager.sceneLoaded += OnPlaySceneLoaded;
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+    }
+
+    private void OnClickTestPlay()
+    {
+        SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+        GameManager.Instance.isTestMode = true;
         HabitatModeManager.Instance.IsHabitatBattle = false;
         SceneManager.sceneLoaded += OnPlaySceneLoaded;
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));

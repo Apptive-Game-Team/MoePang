@@ -81,6 +81,20 @@ namespace _01.Scripts._01.ThreeMatch
             isBanned = true;
             GetComponent<Image>().color = Color.gray;
         }
+
+        public void UnbanStack()
+        {
+            isBanned = false;
+            
+            Image image = GetComponent<Image>();
+
+            Color color = image.color;
+            color.r = 1f;
+            color.g = 1f;
+            color.b = 1f;
+
+            image.color = color;
+        }
         
         public void AddStack(int num)
         {
@@ -380,5 +394,7 @@ namespace _01.Scripts._01.ThreeMatch
             LayoutStackSlots();
             FillStack(_stackCount);
         }
+
+        public int MaxStackCount => StackMaxCount;
     }
 }

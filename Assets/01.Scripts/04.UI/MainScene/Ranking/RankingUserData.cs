@@ -11,11 +11,11 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
         [SerializeField] private TextMeshProUGUI profileNickname;
         [SerializeField] private TextMeshProUGUI maxStage;
 
-        public void ProfileSetting(int rank, Sprite image, string nickname, int stage)
+        public void ProfileSetting(int rank, Sprite image, string nickname, int stage, float minTime)
         {
             rankingText.text = rank.ToString();
             profileNickname.text = nickname;
-            maxStage.text = stage.ToString();
+            maxStage.text = "Stage : " + stage + "\n" + minTime.ToString("F");
 
             if (image != null)
             {

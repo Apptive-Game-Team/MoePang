@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace _01.Scripts._04.UI.MainScene.Ranking
 {
@@ -15,6 +16,12 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
 
         [JsonProperty("max_stage")]
         public int MaxStage { get; set; }
+        
+        [JsonProperty("stage_progress")]
+        public Dictionary<int, int> StageProgress { get; set; }
+
+        [JsonProperty("min_used_time")]
+        public float MinUsedTime { get; set; }
 
         [JsonProperty("avatar_id")]
         public int AvatarId { get; set; }
