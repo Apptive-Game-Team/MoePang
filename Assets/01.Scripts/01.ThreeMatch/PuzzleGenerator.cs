@@ -78,6 +78,10 @@ namespace _01.Scripts._01.ThreeMatch
         
         [Header("Spawn Settings")] 
         [SerializeField] private SpawnStackManager spawnStackManager;
+        
+        [Header("Tutorial")]
+        [SerializeField] private TutorialPuzzleLayout tutorialPuzzleLayout;
+        private readonly int[] tutorialRefillIndices = new int[TutorialPuzzleLayout.Width];
 
         [Header("Puzzle Reset Setting")] 
         [SerializeField] private GameObject resetRectanglePrefab;
@@ -232,10 +236,26 @@ namespace _01.Scripts._01.ThreeMatch
         #region Start Puzzle
         public IEnumerator GenerateBoard()
         {
+            if (GameManager.Instance.Istutorial)
+            {
+                if (tutorialPuzzleLayout == null)
+                {
+                    Debug.LogError(
+                        "PuzzleGenerator: TutorialPuzzleLayout을 연결해 주세요.", this);
+                    yield break;
+                }
+
+                x = TutorialPuzzleLayout.Width;
+                y = TutorialPuzzleLayout.BoardHeight;
+
+                Array.Clear(
+                    tutorialRefillIndices, 0, tutorialRefillIndices.Length);
+            }
+
             _puzzles = new PuzzleObject[x, y];
-            
+
             yield return SetStartPuzzle();
-            
+
             if (isReset)
             {
                 PlayResetSpawnEffects();
@@ -334,6 +354,22 @@ namespace _01.Scripts._01.ThreeMatch
 
         private GameObject SetStartRandomPuzzle(int col, int row)
         {
+            //튜토리얼이면 지정한 layout 생성
+            if (GameManager.Instance.Istutorial)
+            {
+                Habitat tutorialType =
+                    tutorialPuzzleLayout.GetInitialTile(col, row);
+
+                GameObject tutorialPuzzle = Instantiate(
+                    normalPuzzlePrefabs[(int)tutorialType],
+                    puzzleFrame);
+
+                tutorialPuzzle.transform.localPosition =
+                    CalculateDropPos(col, row);
+
+                return tutorialPuzzle;
+            }
+            
             bool isObstacle = false;
             ObstaclePuzzleType obstacleType = ObstaclePuzzleType.DeActivated;
 
@@ -489,6 +525,22 @@ namespace _01.Scripts._01.ThreeMatch
 
         private GameObject SetRandomPuzzle(int col, int row, int spawnOrder)
         {
+            if (GameManager.Instance.Istutorial)
+            {
+                Habitat tutorialType = GetTutorialRefillType(col);
+
+                GameObject tutorialPuzzle = Instantiate(
+                    normalPuzzlePrefabs[(int)tutorialType],
+                    puzzleFrame);
+
+                tutorialPuzzle.transform.localPosition =
+                    CalculateDropPos(col, spawnOrder);
+
+                tutorialPuzzle.name = $"Puzzle({col + 1},{row + 1})";
+
+                return tutorialPuzzle;
+            }
+            
             var types = Enum.GetValues(typeof(Habitat));
             var randomType = (Habitat)types.GetValue(Random.Range(0, types.Length));
             
@@ -525,6 +577,21 @@ namespace _01.Scripts._01.ThreeMatch
             }
 
             return randomType;
+        }
+        
+        private Habitat GetTutorialRefillType(int column)
+        {
+            int refillIndex = tutorialRefillIndices[column]++;
+
+            if (refillIndex < TutorialPuzzleLayout.RefillCountPerColumn)
+            {
+                return tutorialPuzzleLayout.GetRefillTile(
+                    column, refillIndex);
+            }
+
+            var types = (Habitat[])Enum.GetValues(typeof(Habitat));
+
+            return types[Random.Range(0, types.Length)];
         }
 
         private bool IsStartingMatch(int curX, int curY, Habitat type)
