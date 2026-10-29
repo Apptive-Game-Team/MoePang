@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._11.HabitatMode;
 using System;
 using System.Collections;
@@ -35,6 +36,7 @@ namespace _01.Scripts._02.Unit
             enemySpawnCount = 0;
             BuildUnlockedUnitDictionary();
 
+            if (GameManager.Instance.isTestMode || GameManager.Instance.Istutorial) return;
             StartCoroutine(SpawnEnemyCoroutine());
         }
 
