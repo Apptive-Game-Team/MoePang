@@ -45,6 +45,13 @@ public class MainButtonManager : MonoBehaviour
     public void OnClickPlay()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+
+        if (GameManager.Instance.staminaData.stamina <= 0)
+        {
+            return;
+        }
+
+        StaminaManager.Instance.ConsumeStamina();
         HabitatModeManager.Instance.IsHabitatBattle = false;
         SceneManager.sceneLoaded += OnPlaySceneLoaded;
         SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));

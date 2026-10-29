@@ -95,6 +95,7 @@ namespace _01.Scripts._12.Backend
             _00.Manager.UnitData unitData,
             ItemData itemData,
             ComboData comboData,
+            StaminaData staminaData,
             FriendlyUnitList unitList)
         {
             if (!IsLoggedIn())
@@ -111,6 +112,7 @@ namespace _01.Scripts._12.Backend
                 await LoadUnitData(unitData, unitList);
                 await LoadItemData(itemData);
                 await LoadComboData(comboData);
+                await LoadStaminaData(staminaData);
 
                 Debug.Log("Load all Supabase data success.");
             }
@@ -358,6 +360,21 @@ namespace _01.Scripts._12.Backend
             }
         }
 
+        private async Task LoadStaminaData(StaminaData staminaData)
+        {
+            Supabase.Postgrest.Responses.ModeledResponse<PlayerStaminaModel> response =
+                await Client
+                    .From<PlayerStaminaModel>()
+                    .Select("*")
+                    .Filter("user_id", Constants.Operator.Equals,UserId)
+                    .Get();
+
+            PlayerStaminaModel data = response.Models[0];
+
+            staminaData.stamina = data.Stamina;
+            staminaData.lastSavedDateTime = data.LastSavedDateTime;
+        }
+
 
         public async Task SavePlayData(PlayData playData)
         {
@@ -411,8 +428,7 @@ namespace _01.Scripts._12.Backend
         {
             await SavePlayerData(playData.goldAmount, playData.diaAmount, null);
 
-            List<PlayerItemModel> rows =
-                new();
+            List<PlayerItemModel> rows = new();
 
             foreach (KeyValuePair<ItemType, int> pair in itemData.ItemAmounts)
             {
@@ -437,8 +453,7 @@ namespace _01.Scripts._12.Backend
 
         public async Task SaveComboData(ComboData comboData)
         {
-            List<PlayerComboModel> rows =
-                new();
+            List<PlayerComboModel> rows = new();
 
             foreach (KeyValuePair<Habitat, int> pair in comboData.ComboLevels)
             {
@@ -557,6 +572,20 @@ namespace _01.Scripts._12.Backend
                     .From<PlayerStageModel>()
                     .Upsert(rows);
             }
+        }
+
+        public async Task SaveStaminaData(StaminaData staminaData)
+        {
+            PlayerStaminaModel data = new()
+            {
+                UserId = UserId,
+                Stamina = staminaData.stamina, 
+                LastSavedDateTime = staminaData.lastSavedDateTime,
+            };
+            
+            await Client
+                .From<PlayerStaminaModel>()
+                .Upsert(data);
         }
     }
 }

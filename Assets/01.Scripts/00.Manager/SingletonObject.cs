@@ -8,15 +8,20 @@ public class SingletonObject<T> : MonoBehaviour where T : MonoBehaviour
     {
         get
         {
-            if (_instance == null)
+            if (!_instance)
             {
-                _instance = FindObjectOfType<T>();
-                DontDestroyOnLoad(_instance.gameObject);
+                _instance = FindFirstObjectByType<T>();
+
+                if (_instance)
+                    DontDestroyOnLoad(_instance.gameObject);
             }
 
             return _instance;
         }
     }
+
+    protected bool IsDuplicate { get; private set; }
+
     protected virtual void Awake()
     {
         if (_instance == null)
@@ -26,6 +31,7 @@ public class SingletonObject<T> : MonoBehaviour where T : MonoBehaviour
         }
         else if (_instance != this)
         {
+            IsDuplicate = true;
             Destroy(gameObject);
         }
     }
