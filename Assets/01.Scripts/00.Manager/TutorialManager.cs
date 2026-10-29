@@ -9,6 +9,8 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private CanvasGroup lockButton;
     [SerializeField] private CanvasGroup tutorialPanel;
     
+    [SerializeField] private TutorialText tutorialText;
+    
     private void Start()
     {
         if (!GameManager.Instance.Istutorial)
