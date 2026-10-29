@@ -1,6 +1,7 @@
 using _01.Scripts._01.ThreeMatch.Obstacle;
 using _01.Scripts._04.UI.InGame;
 using _01.Scripts._11.HabitatMode;
+using _01.Scripts._00.Manager;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -336,30 +337,37 @@ namespace _01.Scripts._01.ThreeMatch
             bool isObstacle = false;
             ObstaclePuzzleType obstacleType = ObstaclePuzzleType.DeActivated;
 
-            int currentStage = HabitatModeManager.Instance && HabitatModeManager.Instance.IsHabitatBattle
-                ? StageManager.Instance.CurrentHabitatStage + 50 : StageManager.Instance.CurrentStage;
-
-            var obstacleSpawnGroups = currentStage >= 100 ? startObstacles[1] : startObstacles[0];
-            
-            foreach (var data in obstacleSpawnGroups.obstacles)
+            if (!GameManager.Instance.Istutorial)
             {
-                if (data.pos.x == col && data.pos.y == row)
+                int currentStage =
+                    HabitatModeManager.Instance && HabitatModeManager.Instance.IsHabitatBattle
+                        ? StageManager.Instance.CurrentHabitatStage + 50
+                        : StageManager.Instance.CurrentStage;
+
+                var obstacleSpawnGroups =
+                    currentStage >= 100 ? startObstacles[1] : startObstacles[0];
+
+                foreach (var data in obstacleSpawnGroups.obstacles)
                 {
-                    isObstacle = true;
-                    switch (data.type)
+                    if (data.pos.x == col && data.pos.y == row)
                     {
-                        case 1:
-                            obstacleType = ObstaclePuzzleType.Fixed;
-                            break;
-                        case 2:
-                            obstacleType = ObstaclePuzzleType.DeActivated;
-                            break;
-                        case 3:
-                            obstacleType = GetRandomObstacleType();
-                            break;
-                        case 4:
-                            obstacleType = ObstaclePuzzleType.Portal;
-                            break;
+                        isObstacle = true;
+
+                        switch (data.type)
+                        {
+                            case 1:
+                                obstacleType = ObstaclePuzzleType.Fixed;
+                                break;
+                            case 2:
+                                obstacleType = ObstaclePuzzleType.DeActivated;
+                                break;
+                            case 3:
+                                obstacleType = GetRandomObstacleType();
+                                break;
+                            case 4:
+                                obstacleType = ObstaclePuzzleType.Portal;
+                                break;
+                        }
                     }
                 }
             }
@@ -2310,6 +2318,9 @@ namespace _01.Scripts._01.ThreeMatch
         {
             while (true)
             {
+                if (GameManager.Instance.Istutorial)
+                    yield break;
+                
                 yield return new WaitForSeconds(obstacleSpawnInterval);
                 Vector2Int pos = SetObstacleSpawnPos();
                 if (pos == new Vector2Int(-1, -1))
