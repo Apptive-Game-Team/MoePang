@@ -33,6 +33,12 @@ namespace _01.Scripts._02.Unit
 
         private void Start()
         {
+            var testSpawn = FindFirstObjectByType<TestSpawn>(
+                FindObjectsInactive.Include);
+
+            if (testSpawn != null)
+                testSpawn.gameObject.SetActive(GameManager.Instance.isTestMode);
+            
             enemySpawnCount = 0;
             BuildUnlockedUnitDictionary();
 
