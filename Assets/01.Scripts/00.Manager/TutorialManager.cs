@@ -7,6 +7,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private CanvasGroup timeInfo;
     [SerializeField] private CanvasGroup lockButton;
     [SerializeField] private CanvasGroup tutorialPanel;
+    [SerializeField] private CanvasGroup underTutorialPanel;
     
     [SerializeField] private TutorialText tutorialTextList;
     [SerializeField] private TextMeshProUGUI tutorialText;
