@@ -7,6 +7,8 @@ using _01.Scripts._08.Utility;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
 using _01.Scripts._12.Backend;
+using Newtonsoft.Json;
+using Supabase.Postgrest.Responses;
 using System.Collections;
 using UnityEngine.Networking;
 using UnityEngine.Serialization;
@@ -312,6 +314,13 @@ namespace _01.Scripts._00.Manager
         public int avatarId;
         public string nickname = "localPlayer";
     }
+
+    [Serializable]
+    public class StaminaData
+    {
+        public int stamina = 10;
+        public DateTime lastSavedDateTime;
+    }
     
     public class GameManager : SingletonObject<GameManager>
     {
@@ -323,6 +332,7 @@ namespace _01.Scripts._00.Manager
         public ItemData itemData;
         public ComboData comboData;
         public GameData gameData;
+        public StaminaData staminaData;
         public LocalProfileData localProfileData;
         
         private AuthRepository _authRepository;
@@ -348,6 +358,7 @@ namespace _01.Scripts._00.Manager
             itemData = new ItemData();
             comboData = new ComboData();
             gameData = new GameData();
+            staminaData = new StaminaData();
             localProfileData = new LocalProfileData();
         }
 
@@ -381,6 +392,7 @@ namespace _01.Scripts._00.Manager
                         unitData,
                         itemData,
                         comboData,
+                        staminaData,
                         unitList
                     );
 
@@ -410,7 +422,7 @@ namespace _01.Scripts._00.Manager
             _dataLoaded = true;
         }
         
-        private void LoadLocalData()
+        private async void LoadLocalData()
         {
             SaveLoadManager.Instance.LoadData(
                 playData,
@@ -441,6 +453,24 @@ namespace _01.Scripts._00.Manager
                 gameData,
                 "GameData"
             );
+            
+            SaveLoadManager.Instance.LoadData(
+                staminaData,
+                "StaminaData");
+
+            if (staminaData.lastSavedDateTime == DateTime.MinValue)
+            {
+                BaseResponse response = await SupabaseManager.Instance.Client.Rpc("get_server_time", new {});
+
+                if (response.Content != null)
+                {
+                    DateTime serverTime = JsonConvert
+                        .DeserializeObject<DateTime>(response.Content)
+                        .ToUniversalTime();
+                    
+                    staminaData.lastSavedDateTime = serverTime;
+                }
+            }
             
             SaveLoadManager.Instance.LoadData(
                 localProfileData,
@@ -506,6 +536,8 @@ namespace _01.Scripts._00.Manager
                 );
 
                 await _supabaseDataRepository.SaveComboData(comboData);
+
+                await _supabaseDataRepository.SaveStaminaData(staminaData);
                 
                 _useSupabase = true;
 
@@ -856,6 +888,34 @@ namespace _01.Scripts._00.Manager
             {
                 Debug.LogError(
                     $"SaveGoldData failed.\n{e}"
+                );
+            }
+        }
+
+        public async void SaveStaminaData()
+        {
+            // todo : 스태미너 매니저에서 게임 매니저로 가져오기
+            
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SaveStaminaData(
+                        staminaData
+                    );
+                }
+                else
+                {
+                    SaveLoadManager.Instance.SaveData(
+                        staminaData,
+                        "StaminaData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveStaminaData failed.\n{e}"
                 );
             }
         }

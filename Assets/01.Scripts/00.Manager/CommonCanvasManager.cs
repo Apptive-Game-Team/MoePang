@@ -17,6 +17,7 @@ namespace _01.Scripts._00.Manager
         [Header("Text Setting")]
         private TextMeshProUGUI goldText;
         private TextMeshProUGUI diaText;
+        private TextMeshProUGUI staminaText;
 
         [Header("Button Settings")] 
         private Button _optionButton;
@@ -59,19 +60,29 @@ namespace _01.Scripts._00.Manager
 
         private void OnEnable()
         {
-            if (GoldManager.Instance != null)
+            if (GoldManager.Instance)
             {
-                GoldManager.Instance.OnGoldChanged += UpdateUI;
-                GoldManager.Instance.OnDiaChanged += UpdateUI;
+                GoldManager.Instance.OnGoldChanged += UpdateGoldUI;
+                GoldManager.Instance.OnDiaChanged += UpdateDiaUI;
+            }
+
+            if (StaminaManager.Instance)
+            {
+                StaminaManager.Instance.OnStaminaChanged += UpdateStaminaUI;
             }
         }
 
         private void OnDisable()
         {
-            if (GoldManager.Instance != null)
+            if (GoldManager.Instance)
             {
-                GoldManager.Instance.OnGoldChanged -= UpdateUI;
-                GoldManager.Instance.OnDiaChanged -= UpdateUI;
+                GoldManager.Instance.OnGoldChanged -= UpdateGoldUI;
+                GoldManager.Instance.OnDiaChanged -= UpdateDiaUI;
+            }
+            
+            if (StaminaManager.Instance)
+            {
+                StaminaManager.Instance.OnStaminaChanged -= UpdateStaminaUI;
             }
         }
 
@@ -92,6 +103,10 @@ namespace _01.Scripts._00.Manager
                 {
                     diaText = textComp;
                 }
+                else if (textComp.gameObject.name == "StaminaCardText")
+                {
+                    staminaText = textComp;
+                }
             }
 
             if (goldText == null) Debug.LogWarning("[CommonCanvasManager] 'GoldCardText' 이름을 가진 오브젝트를 찾을 수 없습니다!");
@@ -101,10 +116,35 @@ namespace _01.Scripts._00.Manager
         /// <summary>
         /// 텍스트 데이터 갱신
         /// </summary>
-        public void UpdateUI()
+        private void UpdateUI()
         {
-            if (goldText != null) goldText.text = $"{GoldManager.Instance.Gold}";
-            if (diaText != null) diaText.text = $"{GoldManager.Instance.Dia}";
+            UpdateGoldUI();
+            UpdateDiaUI();
+            UpdateStaminaUI();
+        }
+        
+        private void UpdateGoldUI()
+        {
+            if (goldText)
+            {
+                goldText.text = $"{GoldManager.Instance.Gold}";
+            }
+        }
+
+        private void UpdateDiaUI()
+        {
+            if (diaText)
+            {
+                diaText.text = $"{GoldManager.Instance.Dia}";
+            }
+        }
+
+        private void UpdateStaminaUI()
+        {
+            if (staminaText)
+            {
+                staminaText.text = $"{GameManager.Instance.staminaData.stamina}/100";
+            }
         }
 
         private void SetButtons()
