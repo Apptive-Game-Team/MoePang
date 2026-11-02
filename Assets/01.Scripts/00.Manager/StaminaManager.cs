@@ -170,14 +170,14 @@ namespace _01.Scripts._00.Manager
                 yield return new WaitUntil(() => recoveryTask.IsCompleted);
                 
                 TimeSpan remainingTime = GetRemainingRecoveryTime();
-                
-                Debug.Log($"Stamina Recovery Remaining Time : {remainingTime}");
 
                 if (remainingTime <= TimeSpan.Zero)
                 {
                     yield return null;
                     continue;
                 }
+                
+                Debug.Log($"Stamina Recovery Remaining Time : {remainingTime}");
                 
                 yield return new WaitForSecondsRealtime((float)remainingTime.TotalSeconds);
             }
