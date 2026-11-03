@@ -2,10 +2,13 @@
 using System.Collections;
 using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
+using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+// StageManager의 Awake 이후, 전투 오브젝트의 Start 이전에 스테이지를 적용한다.
+[DefaultExecutionOrder(100)]
 public class TutorialManager : MonoBehaviour
 {
     public enum WaitType { Swap, NextClick, Delay, Hold, SpecialTile }
@@ -26,6 +29,10 @@ public class TutorialManager : MonoBehaviour
         public ObstaclePuzzleType obstacleType;
         [Min(0f)] public float delay = 1f;
     }
+
+    [Header("Tutorial Stage")]
+    [Tooltip("내부 스테이지 번호입니다. 0 = 화면의 1스테이지(최저 난이도).")]
+    [Min(0)] [SerializeField] private int tutorialStage = 0;
 
     [SerializeField] private CanvasGroup timeInfo;
     [SerializeField] private CanvasGroup lockButton;
@@ -98,11 +105,27 @@ public class TutorialManager : MonoBehaviour
     private bool actionCompleted;
     private bool nextClicked;
     private bool ownsInputRestriction;
+    private StageManager stageManager;
+    private HabitatModeManager habitatModeManager;
+    private int previousStage;
+    private bool previousHabitatBattle;
+    private bool stageApplied;
 
     private void Awake()
     {
         if (!GameManager.Instance.Istutorial)
             return;
+
+        stageManager = StageManager.Instance;
+        previousStage = stageManager.CurrentStage;
+        stageManager.SetStage(Mathf.Max(0, tutorialStage));
+        habitatModeManager = HabitatModeManager.Instance;
+        if (habitatModeManager != null)
+        {
+            previousHabitatBattle = habitatModeManager.IsHabitatBattle;
+            habitatModeManager.IsHabitatBattle = false;
+        }
+        stageApplied = true;
 
         if (puzzleGenerator == null)
             puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
@@ -301,6 +324,17 @@ public class TutorialManager : MonoBehaviour
             puzzleGenerator.OnSpecialTileResolved -= HandleSpecialTile;
         }
         ReleaseInputRestriction();
+    }
+
+    private void OnDestroy()
+    {
+        if (!stageApplied)
+            return;
+
+        if (stageManager != null)
+            stageManager.SetStage(previousStage);
+        if (habitatModeManager != null)
+            habitatModeManager.IsHabitatBattle = previousHabitatBattle;
     }
 
     private void ReleaseInputRestriction()
