@@ -13,7 +13,7 @@ namespace _01.Scripts._01.ThreeMatch
         
         private void OnMouseUp()
         {
-            if (Generator.IsProcessing)
+            if (Generator.IsProcessing || Generator.IsTutorialInputRestricted)
             {
                 return;
             }

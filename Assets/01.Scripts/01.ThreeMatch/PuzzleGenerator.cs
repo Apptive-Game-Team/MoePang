@@ -99,6 +99,18 @@ namespace _01.Scripts._01.ThreeMatch
 
         private bool _isProcessing;
         public bool IsProcessing => _isProcessing;
+        public bool IsBoardReady => _puzzles != null && !_isProcessing &&
+                                    _taskQueue.Count == 0 && IsAllPuzzlesIdle();
+        public bool IsTutorialInputRestricted { get; private set; }
+        private Func<Vector2Int, Vector2Int, bool> _tutorialSwapAllowed;
+        public event Action<Vector2Int, Vector2Int> OnSuccessfulSwapResolved;
+
+        public void SetTutorialInputRestriction(bool restricted,
+            Func<Vector2Int, Vector2Int, bool> swapAllowed = null)
+        {
+            IsTutorialInputRestricted = restricted;
+            _tutorialSwapAllowed = restricted ? swapAllowed : null;
+        }
         private int _swapCount;
         public int maxSwapCount = -1;
         private Habitat? _lastMovedHabitat;
@@ -1298,6 +1310,11 @@ namespace _01.Scripts._01.ThreeMatch
         #region Swap And Match Puzzle
         public void TrySwapPuzzles(int x1, int y1, int x2, int y2)
         {
+            if (IsTutorialInputRestricted &&
+                (_tutorialSwapAllowed == null ||
+                 !_tutorialSwapAllowed(new Vector2Int(x1, y1), new Vector2Int(x2, y2))))
+                return;
+
             if (x2 < 0 || x2 >= x || y2 < 0 || y2 >= y)
             {
                 return;
@@ -1383,7 +1400,8 @@ namespace _01.Scripts._01.ThreeMatch
                 yield return ActivateSpecialBomb(x2, y2, sp2.specialPuzzleType, !delayedBombPos.HasValue);
             }
             
-            if (CheckAnyMatches() || isSpecialPuzzleExist)
+            bool successfulSwap = CheckAnyMatches() || isSpecialPuzzleExist;
+            if (successfulSwap)
             {
                 yield return MatchPuzzle(delayedBombPos);
             }
@@ -1407,6 +1425,9 @@ namespace _01.Scripts._01.ThreeMatch
                 p1.puzzleState = PuzzleState.Idle;
                 p2.puzzleState = PuzzleState.Idle;
             }
+
+            if (successfulSwap)
+                OnSuccessfulSwapResolved?.Invoke(new Vector2Int(x1, y1), new Vector2Int(x2, y2));
 
             if (maxSwapCount != -1 && _swapCount >= maxSwapCount)
             {
