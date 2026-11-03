@@ -6590,9 +6590,50 @@ MonoBehaviour:
   timeInfo: {fileID: 1219555817}
   lockButton: {fileID: 2066411931}
   tutorialPanel: {fileID: 1066944211}
-  underTutorialPanel: {fileID: 0}
+  underTutorialPanel: {fileID: 907994692}
   tutorialTextList: {fileID: 11400000, guid: c9229ade5d69d71429a0104df0e505a0, type: 2}
   tutorialText: {fileID: 1022030060}
+  underTutorialText: {fileID: 218399597}
+  puzzleGenerator: {fileID: 1669581474}
+  nextButton: {fileID: 0}
+  underNextButton: {fileID: 0}
+  steps:
+  - dialogueIndex: 0
+    waitType: 0
+    panel: 0
+    from: {x: 3, y: 4}
+    to: {x: 3, y: 3}
+    delay: 1
+  - dialogueIndex: 1
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
+  - dialogueIndex: 2
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
+  - dialogueIndex: 3
+    waitType: 1
+    panel: 1
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
+  - dialogueIndex: 4
+    waitType: 1
+    panel: 1
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
+  - dialogueIndex: 5
+    waitType: 3
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
 --- !u!4 &707969074
 Transform:
   m_ObjectHideFlags: 0

@@ -9,12 +9,14 @@ using UnityEngine.UI;
 public class TutorialManager : MonoBehaviour
 {
     public enum WaitType { Swap, NextClick, Delay, Hold }
+    public enum PanelType { Top, Under }
 
     [Serializable]
     public class TutorialStep
     {
         [Min(0)] public int dialogueIndex;
         public WaitType waitType;
+        public PanelType panel;
         public Vector2Int from;
         public Vector2Int to;
         [Min(0f)] public float delay = 1f;
@@ -26,9 +28,12 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private CanvasGroup underTutorialPanel;
     [SerializeField] private TutorialText tutorialTextList;
     [SerializeField] private TextMeshProUGUI tutorialText;
+    [SerializeField] private TextMeshProUGUI underTutorialText;
     [SerializeField] private PuzzleGenerator puzzleGenerator;
     [Tooltip("미지정 시 상단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
     [SerializeField] private Button nextButton;
+    [Tooltip("미지정 시 하단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
+    [SerializeField] private Button underNextButton;
 
     [SerializeField] private TutorialStep[] steps =
     {
@@ -38,7 +43,10 @@ public class TutorialManager : MonoBehaviour
             from = new Vector2Int(3, 4), to = new Vector2Int(3, 3)
         },
         new TutorialStep { dialogueIndex = 1, waitType = WaitType.NextClick },
-        new TutorialStep { dialogueIndex = 2, waitType = WaitType.Hold }
+        new TutorialStep { dialogueIndex = 2, waitType = WaitType.NextClick },
+        new TutorialStep { dialogueIndex = 3, waitType = WaitType.NextClick, panel = PanelType.Under },
+        new TutorialStep { dialogueIndex = 4, waitType = WaitType.NextClick, panel = PanelType.Under },
+        new TutorialStep { dialogueIndex = 5, waitType = WaitType.Hold }
     };
 
     private TutorialStep currentStep;
@@ -73,18 +81,9 @@ public class TutorialManager : MonoBehaviour
             yield break;
         }
 
-        if (nextButton == null)
-        {
-            nextButton = tutorialPanel.GetComponent<Button>();
-            if (nextButton == null)
-            {
-                nextButton = tutorialPanel.gameObject.AddComponent<Button>();
-                nextButton.transition = Selectable.Transition.None;
-                nextButton.targetGraphic = tutorialPanel.GetComponent<Graphic>();
-            }
-        }
-
-        nextButton.onClick.AddListener(NextDialogue);
+        nextButton = ConfigureNextButton(tutorialPanel, nextButton);
+        if (underTutorialPanel != null)
+            underNextButton = ConfigureNextButton(underTutorialPanel, underNextButton);
         puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
         SetUi(timeInfo, 0f);
         SetUi(lockButton, 0f);
@@ -96,9 +95,7 @@ public class TutorialManager : MonoBehaviour
             actionCompleted = false;
             nextClicked = false;
             puzzleGenerator.SetTutorialInputRestriction(true);
-            tutorialText.text = tutorialTextList.GetDialogue(step.dialogueIndex);
-            SetUi(tutorialPanel, 1f, step.waitType == WaitType.NextClick);
-            nextButton.interactable = step.waitType == WaitType.NextClick;
+            ShowStep(step);
 
             switch (step.waitType)
             {
@@ -115,15 +112,55 @@ public class TutorialManager : MonoBehaviour
                     yield return new WaitForSecondsRealtime(step.delay);
                     break;
                 case WaitType.Hold:
-                    // 이번 구현은 text02를 유지한다. 후속 단계 추가 시 대기 유형을 변경한다.
+                    // 후속 단계가 준비될 때까지 현재 대사를 유지한다.
                     yield return new WaitUntil(() => false);
                     break;
             }
         }
 
         currentStep = null;
-        SetUi(tutorialPanel, 0f);
+        SetPanel(tutorialPanel, false, false);
+        SetPanel(underTutorialPanel, false, false);
         ReleaseInputRestriction();
+    }
+
+    private Button ConfigureNextButton(CanvasGroup panel, Button button)
+    {
+        if (button == null)
+        {
+            button = panel.GetComponent<Button>();
+            if (button == null)
+            {
+                button = panel.gameObject.AddComponent<Button>();
+                button.transition = Selectable.Transition.None;
+                button.targetGraphic = panel.GetComponent<Graphic>();
+            }
+        }
+        button.onClick.AddListener(NextDialogue);
+        return button;
+    }
+
+    private void ShowStep(TutorialStep step)
+    {
+        bool useUnderPanel = step.panel == PanelType.Under;
+        bool canAdvance = step.waitType == WaitType.NextClick;
+        TextMeshProUGUI text = useUnderPanel ? underTutorialText : tutorialText;
+        text.text = tutorialTextList.GetDialogue(step.dialogueIndex);
+
+        SetPanel(tutorialPanel, !useUnderPanel, canAdvance);
+        SetPanel(underTutorialPanel, useUnderPanel, canAdvance);
+        nextButton.interactable = !useUnderPanel && canAdvance;
+        if (underNextButton != null)
+            underNextButton.interactable = useUnderPanel && canAdvance;
+    }
+
+    private static void SetPanel(CanvasGroup panel, bool visible, bool interactable)
+    {
+        if (panel == null)
+            return;
+
+        SetUi(panel, visible ? 1f : 0f, visible && interactable);
+        panel.gameObject.SetActive(visible);
     }
 
     public void NextDialogue()
@@ -165,6 +202,11 @@ public class TutorialManager : MonoBehaviour
                 Debug.LogError("TutorialManager: 단계의 대사 인덱스가 유효하지 않습니다.", this);
                 return false;
             }
+            if (step.panel == PanelType.Under && (underTutorialPanel == null || underTutorialText == null))
+            {
+                Debug.LogError("TutorialManager: 하단 대사 패널과 하단 대사 UI를 연결해 주세요.", this);
+                return false;
+            }
         }
         return true;
     }
@@ -175,6 +217,8 @@ public class TutorialManager : MonoBehaviour
         currentStep = null;
         if (nextButton != null)
             nextButton.onClick.RemoveListener(NextDialogue);
+        if (underNextButton != null)
+            underNextButton.onClick.RemoveListener(NextDialogue);
         if (puzzleGenerator != null)
             puzzleGenerator.OnSuccessfulSwapResolved -= HandleSuccessfulSwap;
         ReleaseInputRestriction();
