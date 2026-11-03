@@ -6642,6 +6642,25 @@ MonoBehaviour:
     specialType: 2
     delay: 1
   - dialogueIndex: 7
+    waitType: 0
+    panel: 0
+    from: {x: 3, y: 4}
+    to: {x: 3, y: 3}
+    delay: 1
+  - dialogueIndex: 8
+    waitType: 4
+    panel: 0
+    from: {x: 3, y: 3}
+    to: {x: 0, y: 0}
+    specialType: 0
+    delay: 1
+  - dialogueIndex: 9
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
+  - dialogueIndex: 10
     waitType: 3
     panel: 0
     from: {x: 0, y: 0}

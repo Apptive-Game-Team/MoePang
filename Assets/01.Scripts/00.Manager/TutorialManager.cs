@@ -57,7 +57,18 @@ public class TutorialManager : MonoBehaviour
             dialogueIndex = 6, waitType = WaitType.SpecialTile,
             from = new Vector2Int(2, 2), specialType = SpecialPuzzleType.RowBomb
         },
-        new TutorialStep { dialogueIndex = 7, waitType = WaitType.Hold }
+        new TutorialStep
+        {
+            dialogueIndex = 7, waitType = WaitType.Swap,
+            from = new Vector2Int(3, 4), to = new Vector2Int(3, 3)
+        },
+        new TutorialStep
+        {
+            dialogueIndex = 8, waitType = WaitType.SpecialTile,
+            from = new Vector2Int(3, 3), specialType = SpecialPuzzleType.CircleBomb
+        },
+        new TutorialStep { dialogueIndex = 9, waitType = WaitType.NextClick },
+        new TutorialStep { dialogueIndex = 10, waitType = WaitType.Hold }
     };
 
     private TutorialStep currentStep;
