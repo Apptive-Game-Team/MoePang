@@ -2473,7 +2473,59 @@ namespace _01.Scripts._01.ThreeMatch
             return new Vector2Int(target.column, target.row);
         }
         
-        private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
+        // 튜토리얼에서는 랜덤 생성 대신 지정한 정상 타일의 서식지를 유지하여 교체한다.
+        public bool TryCreateTutorialObstacle(Vector2Int position, ObstaclePuzzleType type)
+        {
+            if (!GameManager.Instance.Istutorial || !IsBoardReady ||
+                position.x < 0 || position.x >= x || position.y < 0 || position.y >= y ||
+                _puzzles[position.x, position.y] is not NormalPuzzleObject ||
+                (type != ObstaclePuzzleType.Fixed && type != ObstaclePuzzleType.DeActivated) ||
+                obstacleWarningPrefab == null ||
+                obstaclePuzzlePrefabs == null || (int)type >= obstaclePuzzlePrefabs.Length ||
+                obstaclePuzzlePrefabs[(int)type] == null ||
+                obstaclePuzzlePrefabs[(int)type].GetComponent<ObstaclePuzzleObject>() == null)
+            {
+                Debug.LogError($"PuzzleGenerator: 튜토리얼 장애물 생성 실패 ({position}, {type}).", this);
+                return false;
+            }
+
+            AddTask(() => CreateTutorialObstacle(position, type));
+            return true;
+        }
+
+        private IEnumerator CreateTutorialObstacle(Vector2Int position, ObstaclePuzzleType type)
+        {
+            yield return PlayObstacleSpawnWarning(position.x, position.y);
+            NormalPuzzleObject target = (NormalPuzzleObject)_puzzles[position.x, position.y];
+
+            Habitat habitat = target.habitat;
+            GameObject replacement = Instantiate(obstaclePuzzlePrefabs[(int)type], puzzleFrame);
+            replacement.transform.position = target.transform.position;
+            replacement.transform.localScale = Vector3.zero;
+            replacement.name = $"Puzzle({position.x + 1},{position.y + 1})";
+
+            ObstaclePuzzleObject obstacle = replacement.GetComponent<ObstaclePuzzleObject>();
+            obstacle.Init(this, position.x, position.y);
+            obstacle.habitat = habitat;
+            obstacle.isMatchable = type == ObstaclePuzzleType.Fixed;
+            obstacle.isSwappable = false;
+            obstacle.isMatched = false;
+            obstacle.isTriggered = false;
+            obstacle.puzzleState = PuzzleState.Spawn;
+            if (type == ObstaclePuzzleType.Fixed)
+            {
+                obstacle.transform.GetChild(0).GetComponent<Image>().sprite = normalPuzzleImages[(int)habitat];
+                obstacle.SetMaterial(normalPuzzlePrefabs[(int)habitat].GetComponent<Image>().material);
+            }
+
+            _puzzles[position.x, position.y] = obstacle;
+            Destroy(target.gameObject);
+            yield return replacement.transform.DOScale(tileScale, 0.2f)
+                .SetEase(Ease.InSine).WaitForCompletion();
+            obstacle.puzzleState = PuzzleState.Idle;
+        }
+
+        private IEnumerator PlayObstacleSpawnWarning(int curX, int curY)
         {
             Vector2 pos = CalculatePos(curX, curY);
             GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
@@ -2482,20 +2534,28 @@ namespace _01.Scripts._01.ThreeMatch
             warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
                 .SetLoops(-1, LoopType.Yoyo);
 
-            yield return new WaitForSeconds(obstacleSpawnDelay);
-            
-            yield return new WaitUntil(() =>
-                _puzzles[curX, curY] &&
-                _puzzles[curX, curY].puzzleState == PuzzleState.Idle
-            );
-
-            if (warningOb)
+            try
+            {
+                yield return new WaitForSeconds(obstacleSpawnDelay);
+                yield return new WaitUntil(() =>
+                    _puzzles[curX, curY] &&
+                    _puzzles[curX, curY].puzzleState == PuzzleState.Idle);
+            }
+            finally
             {
                 _obstacleSpawnIndicator.Remove(warningOb);
-                DOTween.Kill(warningOb);
-                Destroy(warningOb);
+                if (warningOb)
+                {
+                    DOTween.Kill(warningOb);
+                    Destroy(warningOb);
+                }
             }
-            
+        }
+
+        private IEnumerator SpawnRandomObstaclePuzzleCoroutine(int curX, int curY)
+        {
+            yield return PlayObstacleSpawnWarning(curX, curY);
+
             PuzzleObject target = _puzzles[curX, curY];
 
             if (target is ObstaclePuzzleObject)

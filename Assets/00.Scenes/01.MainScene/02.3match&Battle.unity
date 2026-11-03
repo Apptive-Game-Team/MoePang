@@ -6661,6 +6661,36 @@ MonoBehaviour:
     to: {x: 0, y: 0}
     delay: 1
   - dialogueIndex: 10
+    waitType: 2
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    enterAction: 1
+    obstaclePosition: {x: 4, y: 2}
+    obstacleType: 1
+    delay: 0
+  - dialogueIndex: 11
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    delay: 1
+  - dialogueIndex: 12
+    waitType: 0
+    panel: 0
+    from: {x: 3, y: 1}
+    to: {x: 3, y: 2}
+    delay: 1
+  - dialogueIndex: 13
+    waitType: 0
+    panel: 0
+    from: {x: 2, y: 1}
+    to: {x: 2, y: 2}
+    enterAction: 1
+    obstaclePosition: {x: 3, y: 3}
+    obstacleType: 0
+    delay: 1
+  - dialogueIndex: 14
     waitType: 3
     panel: 0
     from: {x: 0, y: 0}

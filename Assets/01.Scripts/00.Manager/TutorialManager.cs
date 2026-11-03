@@ -10,6 +10,7 @@ public class TutorialManager : MonoBehaviour
 {
     public enum WaitType { Swap, NextClick, Delay, Hold, SpecialTile }
     public enum PanelType { Top, Under }
+    public enum StepAction { None, CreateObstacle }
 
     [Serializable]
     public class TutorialStep
@@ -20,6 +21,9 @@ public class TutorialManager : MonoBehaviour
         public Vector2Int from;
         public Vector2Int to;
         public SpecialPuzzleType specialType = SpecialPuzzleType.RowBomb;
+        public StepAction enterAction;
+        public Vector2Int obstaclePosition;
+        public ObstaclePuzzleType obstacleType;
         [Min(0f)] public float delay = 1f;
     }
 
@@ -68,7 +72,26 @@ public class TutorialManager : MonoBehaviour
             from = new Vector2Int(3, 3), specialType = SpecialPuzzleType.CircleBomb
         },
         new TutorialStep { dialogueIndex = 9, waitType = WaitType.NextClick },
-        new TutorialStep { dialogueIndex = 10, waitType = WaitType.Hold }
+        new TutorialStep
+        {
+            dialogueIndex = 10, waitType = WaitType.Delay, delay = 0f,
+            enterAction = StepAction.CreateObstacle,
+            obstaclePosition = new Vector2Int(4, 2), obstacleType = ObstaclePuzzleType.Fixed
+        },
+        new TutorialStep { dialogueIndex = 11, waitType = WaitType.NextClick },
+        new TutorialStep
+        {
+            dialogueIndex = 12, waitType = WaitType.Swap,
+            from = new Vector2Int(3, 1), to = new Vector2Int(3, 2)
+        },
+        new TutorialStep
+        {
+            dialogueIndex = 13, waitType = WaitType.Swap,
+            enterAction = StepAction.CreateObstacle,
+            obstaclePosition = new Vector2Int(3, 3), obstacleType = ObstaclePuzzleType.DeActivated,
+            from = new Vector2Int(2, 1), to = new Vector2Int(2, 2)
+        },
+        new TutorialStep { dialogueIndex = 14, waitType = WaitType.Hold }
     };
 
     private TutorialStep currentStep;
@@ -119,6 +142,15 @@ public class TutorialManager : MonoBehaviour
             nextClicked = false;
             puzzleGenerator.SetTutorialInputRestriction(true);
             ShowStep(step);
+
+            if (step.enterAction == StepAction.CreateObstacle)
+            {
+                yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+                if (!puzzleGenerator.TryCreateTutorialObstacle(
+                        step.obstaclePosition, step.obstacleType))
+                    yield break;
+                yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+            }
 
             switch (step.waitType)
             {
