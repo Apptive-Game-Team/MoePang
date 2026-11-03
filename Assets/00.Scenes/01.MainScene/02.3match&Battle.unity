@@ -6748,6 +6748,8 @@ MonoBehaviour:
   tutorialText: {fileID: 1022030060}
   underTutorialText: {fileID: 218399597}
   puzzleGenerator: {fileID: 1669581474}
+  tutorialEndButton: {fileID: 1378125088}
+  tutorialEndPopup: {fileID: 1691265928}
   nextButton: {fileID: 0}
   underNextButton: {fileID: 0}
   steps:
@@ -13648,7 +13650,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1378125089
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16715,7 +16717,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4379940642145891419, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4950656450378589269, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
       propertyPath: m_text
@@ -16734,6 +16736,11 @@ PrefabInstance:
 --- !u!224 &1691265927 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1555359975909320754, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
+  m_PrefabInstance: {fileID: 1691265926}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1691265928 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4379940642145891419, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
   m_PrefabInstance: {fileID: 1691265926}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1705609264

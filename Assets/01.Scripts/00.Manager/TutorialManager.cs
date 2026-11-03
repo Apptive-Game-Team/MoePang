@@ -6,6 +6,7 @@ using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 // StageManager의 Awake 이후, 전투 오브젝트의 Start 이전에 스테이지를 적용한다.
 [DefaultExecutionOrder(100)]
@@ -62,6 +63,8 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private TextMeshProUGUI underTutorialText;
     [SerializeField] private PuzzleGenerator puzzleGenerator;
+    [SerializeField] private GameObject tutorialEndButton;
+    [SerializeField] private GameObject tutorialEndPopup;
     [Tooltip("미지정 시 상단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
     [SerializeField] private Button nextButton;
     [Tooltip("미지정 시 하단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
@@ -130,6 +133,12 @@ public class TutorialManager : MonoBehaviour
     private int previousStage;
     private bool previousHabitatBattle;
     private bool stageApplied;
+    private Button endButton;
+    private Button endAcceptButton;
+    private Button endCloseButton;
+    private GameObject previousSelection;
+    private bool endPopupOpen;
+    private float previousTimeScale;
 
     private void Awake()
     {
@@ -161,9 +170,15 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator Start()
     {
+        if (tutorialEndPopup != null)
+            tutorialEndPopup.SetActive(false);
+        if (tutorialEndButton != null)
+            tutorialEndButton.SetActive(GameManager.Instance.Istutorial);
+
         if (!GameManager.Instance.Istutorial)
             yield break;
 
+        ConfigureEndPopup();
         if (!ValidateSetup())
         {
             ReleaseInputRestriction();
@@ -190,32 +205,34 @@ public class TutorialManager : MonoBehaviour
 
             if (step.enterAction == StepAction.CreateObstacle)
             {
-                yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+                yield return new WaitUntil(CanContinueTutorial);
                 if (!puzzleGenerator.TryCreateTutorialObstacle(
                         step.obstaclePosition, step.obstacleType))
                     yield break;
-                yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+                yield return new WaitUntil(CanContinueTutorial);
             }
 
             switch (step.waitType)
             {
                 case WaitType.Swap:
-                    yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
-                    puzzleGenerator.SetTutorialInputRestriction(true, IsExpectedSwap);
-                    yield return new WaitUntil(() => actionCompleted);
-                    yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+                    yield return new WaitUntil(CanContinueTutorial);
+                    puzzleGenerator.SetTutorialInputRestriction(true,
+                        (from, to) => !endPopupOpen && IsExpectedSwap(from, to));
+                    yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
+                    yield return new WaitUntil(CanContinueTutorial);
                     break;
                 case WaitType.NextClick:
-                    yield return new WaitUntil(() => nextClicked);
+                    yield return new WaitUntil(() => !endPopupOpen && nextClicked);
                     break;
                 case WaitType.SpecialTile:
-                    yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
-                    puzzleGenerator.SetTutorialInputRestriction(true, specialAllowed: IsExpectedSpecialTile);
-                    yield return new WaitUntil(() => actionCompleted);
-                    yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+                    yield return new WaitUntil(CanContinueTutorial);
+                    puzzleGenerator.SetTutorialInputRestriction(true,
+                        specialAllowed: (position, type) => !endPopupOpen && IsExpectedSpecialTile(position, type));
+                    yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
+                    yield return new WaitUntil(CanContinueTutorial);
                     break;
                 case WaitType.Delay:
-                    yield return new WaitForSecondsRealtime(step.delay);
+                    yield return WaitTutorialDelay(step.delay);
                     break;
                 case WaitType.Hold:
                     // 후속 단계가 준비될 때까지 현재 대사를 유지한다.
@@ -228,6 +245,95 @@ public class TutorialManager : MonoBehaviour
         SetPanel(tutorialPanel, false, false);
         SetPanel(underTutorialPanel, false, false);
         ReleaseInputRestriction();
+    }
+
+    private bool CanContinueTutorial() => !endPopupOpen && puzzleGenerator.IsBoardReady;
+
+    private IEnumerator WaitTutorialDelay(float duration)
+    {
+        float elapsed = 0f;
+        while (endPopupOpen || elapsed < duration)
+        {
+            yield return null;
+            if (!endPopupOpen)
+                elapsed += Time.unscaledDeltaTime;
+        }
+    }
+
+    private void ConfigureEndPopup()
+    {
+        if (tutorialEndButton == null || tutorialEndPopup == null ||
+            tutorialEndPopup.transform.childCount < 4)
+        {
+            Debug.LogError("TutorialManager: 종료 버튼과 팝업(자식 3: Accept, 4: Close)을 연결해 주세요.", this);
+            return;
+        }
+
+        endButton = tutorialEndButton.GetComponent<Button>();
+        endAcceptButton = tutorialEndPopup.transform.GetChild(2).GetComponent<Button>();
+        endCloseButton = tutorialEndPopup.transform.GetChild(3).GetComponent<Button>();
+        if (endButton == null || endAcceptButton == null || endCloseButton == null)
+        {
+            Debug.LogError("TutorialManager: 종료/확인/닫기 오브젝트에 Button이 필요합니다.", this);
+            return;
+        }
+
+        // 복제한 상점 팝업의 기존 이벤트는 이 팝업에서만 교체한다.
+        endAcceptButton.onClick = new Button.ButtonClickedEvent();
+        endCloseButton.onClick = new Button.ButtonClickedEvent();
+        endButton.onClick.AddListener(OpenEndPopup);
+        endAcceptButton.onClick.AddListener(AcceptEndPopup);
+        endCloseButton.onClick.AddListener(CloseEndPopup);
+        Navigation navigation = new Navigation { mode = Navigation.Mode.None };
+        endAcceptButton.navigation = navigation;
+        endCloseButton.navigation = navigation;
+
+        Canvas parentCanvas = tutorialEndPopup.GetComponentInParent<Canvas>(true).rootCanvas;
+        // 독립 Canvas도 부모 UIBlur와 같은 카메라가 렌더하도록 레이어를 맞춘다.
+        // 팝업 프리팹은 UI(5), UIBlurCamera는 UIBlur(8)만 렌더한다.
+        foreach (Transform child in tutorialEndPopup.GetComponentsInChildren<Transform>(true))
+            child.gameObject.layer = parentCanvas.gameObject.layer;
+
+        Canvas popupCanvas = tutorialEndPopup.GetComponent<Canvas>();
+        if (popupCanvas == null)
+            popupCanvas = tutorialEndPopup.AddComponent<Canvas>();
+        popupCanvas.overrideSorting = true;
+        popupCanvas.sortingLayerID = parentCanvas.sortingLayerID;
+        popupCanvas.sortingOrder = parentCanvas.sortingOrder + 2;
+        if (tutorialEndPopup.GetComponent<GraphicRaycaster>() == null)
+            tutorialEndPopup.AddComponent<GraphicRaycaster>();
+    }
+
+    private void OpenEndPopup()
+    {
+        if (endPopupOpen || tutorialEndPopup == null || endCloseButton == null)
+            return;
+
+        endPopupOpen = true;
+        previousTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        previousSelection = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+        tutorialEndPopup.SetActive(true);
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(endCloseButton.gameObject);
+    }
+
+    private void AcceptEndPopup()
+    {
+        Debug.Log("TutorialManager: 튜토리얼 종료 확인 버튼 클릭 (종료 동작 미구현).", this);
+    }
+
+    private void CloseEndPopup()
+    {
+        if (!endPopupOpen)
+            return;
+
+        endPopupOpen = false;
+        if (tutorialEndPopup != null)
+            tutorialEndPopup.SetActive(false);
+        Time.timeScale = previousTimeScale;
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(previousSelection);
     }
 
     private Button ConfigureNextButton(CanvasGroup panel, Button button)
@@ -271,7 +377,7 @@ public class TutorialManager : MonoBehaviour
 
     public void NextDialogue()
     {
-        if (currentStep != null && currentStep.waitType == WaitType.NextClick)
+        if (!endPopupOpen && currentStep != null && currentStep.waitType == WaitType.NextClick)
             nextClicked = true;
     }
 
@@ -334,6 +440,13 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDisable()
     {
+        CloseEndPopup();
+        if (endButton != null)
+            endButton.onClick.RemoveListener(OpenEndPopup);
+        if (endAcceptButton != null)
+            endAcceptButton.onClick.RemoveListener(AcceptEndPopup);
+        if (endCloseButton != null)
+            endCloseButton.onClick.RemoveListener(CloseEndPopup);
         StopAllCoroutines();
         currentStep = null;
         if (nextButton != null)
