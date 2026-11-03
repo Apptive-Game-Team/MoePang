@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class TutorialManager : MonoBehaviour
 {
-    public enum WaitType { Swap, NextClick, Delay, Hold }
+    public enum WaitType { Swap, NextClick, Delay, Hold, SpecialTile }
     public enum PanelType { Top, Under }
 
     [Serializable]
@@ -19,6 +19,7 @@ public class TutorialManager : MonoBehaviour
         public PanelType panel;
         public Vector2Int from;
         public Vector2Int to;
+        public SpecialPuzzleType specialType = SpecialPuzzleType.RowBomb;
         [Min(0f)] public float delay = 1f;
     }
 
@@ -46,7 +47,17 @@ public class TutorialManager : MonoBehaviour
         new TutorialStep { dialogueIndex = 2, waitType = WaitType.NextClick },
         new TutorialStep { dialogueIndex = 3, waitType = WaitType.NextClick, panel = PanelType.Under },
         new TutorialStep { dialogueIndex = 4, waitType = WaitType.NextClick, panel = PanelType.Under },
-        new TutorialStep { dialogueIndex = 5, waitType = WaitType.Hold }
+        new TutorialStep
+        {
+            dialogueIndex = 5, waitType = WaitType.Swap,
+            from = new Vector2Int(2, 3), to = new Vector2Int(2, 2)
+        },
+        new TutorialStep
+        {
+            dialogueIndex = 6, waitType = WaitType.SpecialTile,
+            from = new Vector2Int(2, 2), specialType = SpecialPuzzleType.RowBomb
+        },
+        new TutorialStep { dialogueIndex = 7, waitType = WaitType.Hold }
     };
 
     private TutorialStep currentStep;
@@ -85,6 +96,7 @@ public class TutorialManager : MonoBehaviour
         if (underTutorialPanel != null)
             underNextButton = ConfigureNextButton(underTutorialPanel, underNextButton);
         puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
+        puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
         SetUi(timeInfo, 0f);
         SetUi(lockButton, 0f);
         SetUi(underTutorialPanel, 0f);
@@ -107,6 +119,12 @@ public class TutorialManager : MonoBehaviour
                     break;
                 case WaitType.NextClick:
                     yield return new WaitUntil(() => nextClicked);
+                    break;
+                case WaitType.SpecialTile:
+                    yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
+                    puzzleGenerator.SetTutorialInputRestriction(true, specialAllowed: IsExpectedSpecialTile);
+                    yield return new WaitUntil(() => actionCompleted);
+                    yield return new WaitUntil(() => puzzleGenerator.IsBoardReady);
                     break;
                 case WaitType.Delay:
                     yield return new WaitForSecondsRealtime(step.delay);
@@ -186,6 +204,21 @@ public class TutorialManager : MonoBehaviour
         puzzleGenerator.SetTutorialInputRestriction(true);
     }
 
+    private bool IsExpectedSpecialTile(Vector2Int position, SpecialPuzzleType type)
+    {
+        return currentStep != null && currentStep.waitType == WaitType.SpecialTile &&
+               !actionCompleted && position == currentStep.from && type == currentStep.specialType;
+    }
+
+    private void HandleSpecialTile(Vector2Int position, SpecialPuzzleType type)
+    {
+        if (!IsExpectedSpecialTile(position, type))
+            return;
+
+        actionCompleted = true;
+        puzzleGenerator.SetTutorialInputRestriction(true);
+    }
+
     private bool ValidateSetup()
     {
         if (puzzleGenerator == null || tutorialTextList == null ||
@@ -220,7 +253,10 @@ public class TutorialManager : MonoBehaviour
         if (underNextButton != null)
             underNextButton.onClick.RemoveListener(NextDialogue);
         if (puzzleGenerator != null)
+        {
             puzzleGenerator.OnSuccessfulSwapResolved -= HandleSuccessfulSwap;
+            puzzleGenerator.OnSpecialTileResolved -= HandleSpecialTile;
+        }
         ReleaseInputRestriction();
     }
 

@@ -103,13 +103,17 @@ namespace _01.Scripts._01.ThreeMatch
                                     _taskQueue.Count == 0 && IsAllPuzzlesIdle();
         public bool IsTutorialInputRestricted { get; private set; }
         private Func<Vector2Int, Vector2Int, bool> _tutorialSwapAllowed;
+        private Func<Vector2Int, SpecialPuzzleType, bool> _tutorialSpecialAllowed;
         public event Action<Vector2Int, Vector2Int> OnSuccessfulSwapResolved;
+        public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileResolved;
 
         public void SetTutorialInputRestriction(bool restricted,
-            Func<Vector2Int, Vector2Int, bool> swapAllowed = null)
+            Func<Vector2Int, Vector2Int, bool> swapAllowed = null,
+            Func<Vector2Int, SpecialPuzzleType, bool> specialAllowed = null)
         {
             IsTutorialInputRestricted = restricted;
             _tutorialSwapAllowed = restricted ? swapAllowed : null;
+            _tutorialSpecialAllowed = restricted ? specialAllowed : null;
         }
         private int _swapCount;
         public int maxSwapCount = -1;
@@ -2049,6 +2053,30 @@ namespace _01.Scripts._01.ThreeMatch
         /// 특수 및 장애물 타일 관련 함수
         /// </summary>
         #region Abnormal Puzzle
+        public void TryActivateSpecialPuzzle(int column, int row, SpecialPuzzleType type)
+        {
+            if (_isProcessing || _taskQueue.Count > 0 || _puzzles == null ||
+                column < 0 || column >= x || row < 0 || row >= y)
+                return;
+
+            Vector2Int position = new Vector2Int(column, row);
+            if (IsTutorialInputRestricted &&
+                (_tutorialSpecialAllowed == null || !_tutorialSpecialAllowed(position, type)))
+                return;
+
+            if (_puzzles[column, row] is not SpecialPuzzleObject special ||
+                special.specialPuzzleType != type)
+                return;
+
+            AddTask(() => ActivateSpecialPuzzleFromInput(position, type));
+        }
+
+        private IEnumerator ActivateSpecialPuzzleFromInput(Vector2Int position, SpecialPuzzleType type)
+        {
+            yield return ActivateSpecialBomb(position.x, position.y, type);
+            OnSpecialTileResolved?.Invoke(position, type);
+        }
+
         public IEnumerator ActivateSpecialBomb(int curX, int curY, SpecialPuzzleType type, bool dropAfter = true)
         {
             yield return SpecialMatch(curX, curY, type);

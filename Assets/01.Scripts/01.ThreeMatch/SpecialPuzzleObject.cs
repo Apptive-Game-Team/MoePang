@@ -13,7 +13,7 @@ namespace _01.Scripts._01.ThreeMatch
         
         private void OnMouseUp()
         {
-            if (Generator.IsProcessing || Generator.IsTutorialInputRestricted)
+            if (Generator.IsProcessing)
             {
                 return;
             }
@@ -24,7 +24,7 @@ namespace _01.Scripts._01.ThreeMatch
                 return;
             }
             
-            Generator.AddTask(() => Generator.ActivateSpecialBomb(column, row, specialPuzzleType));
+            Generator.TryActivateSpecialPuzzle(column, row, specialPuzzleType);
         }
     }
 }
