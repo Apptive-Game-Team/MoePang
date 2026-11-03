@@ -91,6 +91,9 @@ namespace _01.Scripts._02.Unit
                 return;
             }
 
+            if (TrySpawnTutorialFriendly(unitList))
+                return;
+
             FriendlyUnitData data;
         
             //서식지 모드 시 마지막 단계 유닛 소환
@@ -120,7 +123,20 @@ namespace _01.Scripts._02.Unit
                 return;
             }
         
+            if (TrySpawnTutorialFriendly(unitList))
+                return;
+
             UnitPool.Instance.Get(friendlyPrefab, unitList[^1], friendlySpawnPosition);
+        }
+
+        private bool TrySpawnTutorialFriendly(List<FriendlyUnitData> candidates)
+        {
+            if (!TutorialManager.TryGetFriendlyUnitOverride(candidates, out FriendlyUnitData unit))
+                return false;
+
+            if (unit != null)
+                UnitPool.Instance.Get(friendlyPrefab, unit, friendlySpawnPosition);
+            return true;
         }
 
         /// <summary>

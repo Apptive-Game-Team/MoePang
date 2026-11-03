@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._11.HabitatMode;
@@ -40,6 +41,29 @@ public class TutorialManager : MonoBehaviour
     [Min(0f)] [SerializeField] private float tutorialEnemyAttackDamage = 0f;
 
     private static TutorialManager activeTutorial;
+    private bool firstGradeFriendlyOnly = true;
+
+    public static bool TryGetFriendlyUnitOverride(
+        IReadOnlyList<FriendlyUnitData> candidates, out FriendlyUnitData unit)
+    {
+        unit = null;
+        if (activeTutorial == null || !activeTutorial.isActiveAndEnabled ||
+            !GameManager.Instance.Istutorial || !activeTutorial.firstGradeFriendlyOnly)
+            return false;
+
+        foreach (FriendlyUnitData candidate in candidates)
+        {
+            if (candidate != null && candidate.UnitGrade == 1)
+            {
+                unit = candidate;
+                return true;
+            }
+        }
+
+        // 1단계가 없다면 높은 단계로 대체하지 않는다.
+        Debug.LogError("TutorialManager: 해당 서식지의 소환 목록에 1단계 기물이 없습니다.", activeTutorial);
+        return true;
+    }
 
     public static bool TryGetEnemyStats(out float maxHp, out float attackDamage)
     {
@@ -146,6 +170,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         activeTutorial = this;
+        firstGradeFriendlyOnly = true;
         stageManager = StageManager.Instance;
         previousStage = stageManager.CurrentStage;
         stageManager.SetStage(Mathf.Max(0, tutorialStage));
@@ -408,6 +433,9 @@ public class TutorialManager : MonoBehaviour
     {
         if (!IsExpectedSpecialTile(position, type))
             return;
+
+        if (type == SpecialPuzzleType.CircleBomb)
+            firstGradeFriendlyOnly = false;
 
         actionCompleted = true;
         puzzleGenerator.SetTutorialInputRestriction(true);
