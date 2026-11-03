@@ -34,6 +34,25 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("내부 스테이지 번호입니다. 0 = 화면의 1스테이지(최저 난이도).")]
     [Min(0)] [SerializeField] private int tutorialStage = 0;
 
+    [Header("Tutorial Enemy Stats")]
+    [Min(1f)] [SerializeField] private float tutorialEnemyMaxHp = 2f;
+    [Min(0f)] [SerializeField] private float tutorialEnemyAttackDamage = 0f;
+
+    private static TutorialManager activeTutorial;
+
+    public static bool TryGetEnemyStats(out float maxHp, out float attackDamage)
+    {
+        maxHp = 0f;
+        attackDamage = 0f;
+        if (activeTutorial == null || !activeTutorial.isActiveAndEnabled ||
+            !GameManager.Instance.Istutorial)
+            return false;
+
+        maxHp = Mathf.Max(1f, activeTutorial.tutorialEnemyMaxHp);
+        attackDamage = Mathf.Max(0f, activeTutorial.tutorialEnemyAttackDamage);
+        return true;
+    }
+
     [SerializeField] private CanvasGroup timeInfo;
     [SerializeField] private CanvasGroup lockButton;
     [SerializeField] private CanvasGroup tutorialPanel;
@@ -116,6 +135,7 @@ public class TutorialManager : MonoBehaviour
         if (!GameManager.Instance.Istutorial)
             return;
 
+        activeTutorial = this;
         stageManager = StageManager.Instance;
         previousStage = stageManager.CurrentStage;
         stageManager.SetStage(Mathf.Max(0, tutorialStage));
@@ -328,6 +348,9 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (activeTutorial == this)
+            activeTutorial = null;
+
         if (!stageApplied)
             return;
 
