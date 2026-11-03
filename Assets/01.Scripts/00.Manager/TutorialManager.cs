@@ -55,6 +55,7 @@ public class TutorialManager : MonoBehaviour
 
     [SerializeField] private CanvasGroup timeInfo;
     [SerializeField] private CanvasGroup lockButton;
+    [SerializeField] private CanvasGroup pauseButton;
     [SerializeField] private CanvasGroup tutorialPanel;
     [SerializeField] private CanvasGroup underTutorialPanel;
     [SerializeField] private TutorialText tutorialTextList;
@@ -176,6 +177,7 @@ public class TutorialManager : MonoBehaviour
         puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
         SetUi(timeInfo, 0f);
         SetUi(lockButton, 0f);
+        SetUi(pauseButton, 0f);
         SetUi(underTutorialPanel, 0f);
 
         foreach (TutorialStep step in steps)

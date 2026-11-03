@@ -491,6 +491,7 @@ GameObject:
   - component: {fileID: 45294193}
   - component: {fileID: 45294192}
   - component: {fileID: 45294191}
+  - component: {fileID: 45294194}
   m_Layer: 8
   m_Name: StopButton
   m_TagString: Untagged
@@ -611,6 +612,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 45294189}
   m_CullTransparentMesh: 1
+--- !u!225 &45294194
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 45294189}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &68062172
 GameObject:
   m_ObjectHideFlags: 0
@@ -6587,8 +6600,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d38bf924babfcfe44bb77873ace9670c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tutorialStage: 0
+  tutorialEnemyMaxHp: 2
+  tutorialEnemyAttackDamage: 0
   timeInfo: {fileID: 1219555817}
   lockButton: {fileID: 2066411931}
+  pauseButton: {fileID: 45294194}
   tutorialPanel: {fileID: 1066944211}
   underTutorialPanel: {fileID: 907994692}
   tutorialTextList: {fileID: 11400000, guid: c9229ade5d69d71429a0104df0e505a0, type: 2}
@@ -6603,36 +6620,60 @@ MonoBehaviour:
     panel: 0
     from: {x: 3, y: 4}
     to: {x: 3, y: 3}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 1
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 2
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 3
     waitType: 1
     panel: 1
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 4
     waitType: 1
     panel: 1
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 5
     waitType: 0
     panel: 0
     from: {x: 2, y: 3}
     to: {x: 2, y: 2}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 6
     waitType: 4
@@ -6640,12 +6681,19 @@ MonoBehaviour:
     from: {x: 2, y: 2}
     to: {x: 0, y: 0}
     specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 7
     waitType: 0
     panel: 0
     from: {x: 3, y: 4}
     to: {x: 3, y: 3}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 8
     waitType: 4
@@ -6653,18 +6701,26 @@ MonoBehaviour:
     from: {x: 3, y: 3}
     to: {x: 0, y: 0}
     specialType: 0
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 9
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 10
     waitType: 2
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
     enterAction: 1
     obstaclePosition: {x: 4, y: 2}
     obstacleType: 1
@@ -6674,18 +6730,27 @@ MonoBehaviour:
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 12
     waitType: 0
     panel: 0
     from: {x: 3, y: 1}
     to: {x: 3, y: 2}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
   - dialogueIndex: 13
     waitType: 0
     panel: 0
     from: {x: 2, y: 1}
     to: {x: 2, y: 2}
+    specialType: 2
     enterAction: 1
     obstaclePosition: {x: 3, y: 3}
     obstacleType: 0
@@ -6695,6 +6760,10 @@ MonoBehaviour:
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
     delay: 1
 --- !u!4 &707969074
 Transform:
