@@ -79,6 +79,14 @@ namespace _01.Scripts._02.Unit
         /// </summary>
         public void SpawnFriendly(Habitat habitat)
         {
+            SpawnFriendly(habitat, TutorialManager.FriendlyGradeOverride);
+        }
+
+        public void SpawnFriendly(Habitat habitat, int tutorialGrade)
+        {
+            if (TrySpawnTutorialFriendly(habitat, tutorialGrade))
+                return;
+
             if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
             {
                 Debug.Log($"{habitat} 서식지 없음");
@@ -90,9 +98,6 @@ namespace _01.Scripts._02.Unit
                 Debug.Log($"{habitat} 해금 유닛 없음");
                 return;
             }
-
-            if (TrySpawnTutorialFriendly(unitList))
-                return;
 
             FriendlyUnitData data;
         
@@ -111,6 +116,9 @@ namespace _01.Scripts._02.Unit
 
         public void SpawnHighestFriendly(Habitat habitat)
         {
+            if (TrySpawnTutorialFriendly(habitat, TutorialManager.FriendlyGradeOverride))
+                return;
+
             if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
             {
                 Debug.Log($"{habitat} 서식지 없음");
@@ -123,15 +131,13 @@ namespace _01.Scripts._02.Unit
                 return;
             }
         
-            if (TrySpawnTutorialFriendly(unitList))
-                return;
-
             UnitPool.Instance.Get(friendlyPrefab, unitList[^1], friendlySpawnPosition);
         }
 
-        private bool TrySpawnTutorialFriendly(List<FriendlyUnitData> candidates)
+        private bool TrySpawnTutorialFriendly(Habitat habitat, int grade)
         {
-            if (!TutorialManager.TryGetFriendlyUnitOverride(candidates, out FriendlyUnitData unit))
+            if (grade == 0 || !TutorialManager.TryGetFriendlyUnitOverride(
+                    friendlyUnitList.GetUnits(habitat), out FriendlyUnitData unit, grade))
                 return false;
 
             if (unit != null)

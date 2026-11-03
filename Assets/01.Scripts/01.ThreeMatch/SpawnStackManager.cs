@@ -24,7 +24,12 @@ namespace _01.Scripts._01.ThreeMatch
 
         public void AddStack(Habitat type, int num)
         {
-            stacks.First(s => s.type == type).AddStack(num);
+            AddStack(type, num, TutorialManager.FriendlyGradeOverride);
+        }
+
+        public void AddStack(Habitat type, int num, int tutorialGrade)
+        {
+            stacks.First(s => s.type == type).AddStack(num, tutorialGrade);
         }
 
         public SpawnStack SetStack(Habitat type)

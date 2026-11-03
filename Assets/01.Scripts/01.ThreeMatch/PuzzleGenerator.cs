@@ -106,6 +106,7 @@ namespace _01.Scripts._01.ThreeMatch
         private Func<Vector2Int, SpecialPuzzleType, bool> _tutorialSpecialAllowed;
         public event Action<Vector2Int, Vector2Int> OnSuccessfulSwapResolved;
         public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileResolved;
+        public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileStarted;
 
         public void SetTutorialInputRestriction(bool restricted,
             Func<Vector2Int, Vector2Int, bool> swapAllowed = null,
@@ -1834,6 +1835,7 @@ namespace _01.Scripts._01.ThreeMatch
                     float duration = distance / speed;
                     float jumpPower = distance * 0.3f;
                     
+                    int tutorialGrade = TutorialManager.FriendlyGradeOverride;
                     Sequence seq = DOTween.Sequence();
 
                     seq.Append(DOTween.To(
@@ -1850,7 +1852,7 @@ namespace _01.Scripts._01.ThreeMatch
                     ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
-                        spawnStackManager.AddStack(group.habitat, 1);
+                        spawnStackManager.AddStack(group.habitat, 1, tutorialGrade);
                         StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     }));
@@ -2073,6 +2075,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator ActivateSpecialPuzzleFromInput(Vector2Int position, SpecialPuzzleType type)
         {
+            OnSpecialTileStarted?.Invoke(position, type);
             yield return ActivateSpecialBomb(position.x, position.y, type);
             OnSpecialTileResolved?.Invoke(position, type);
         }
@@ -2345,6 +2348,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         private void FlyingTileEffect(PuzzleObject targetPuzzle)
         {
+            int tutorialGrade = TutorialManager.FriendlyGradeOverride;
             if (targetPuzzle is NormalPuzzleObject no)
             {
                 targetPuzzle.transform.SetParent(puzzleFrame.parent.parent);
@@ -2371,7 +2375,7 @@ namespace _01.Scripts._01.ThreeMatch
                     ).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
-                        spawnStackManager.AddStack(no.habitat, 1);
+                        spawnStackManager.AddStack(no.habitat, 1, tutorialGrade);
                         StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     });

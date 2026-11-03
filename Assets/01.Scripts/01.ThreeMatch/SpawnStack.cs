@@ -98,12 +98,17 @@ namespace _01.Scripts._01.ThreeMatch
         
         public void AddStack(int num)
         {
+            AddStack(num, TutorialManager.FriendlyGradeOverride);
+        }
+
+        public void AddStack(int num, int tutorialGrade)
+        {
             if (isBanned)
             {
                 return;
             }
             
-            _taskQueue.Enqueue(() => AddStackProcess(num));
+            _taskQueue.Enqueue(() => AddStackProcess(num, tutorialGrade));
 
             if (!_isProcessing)
             {
@@ -122,7 +127,7 @@ namespace _01.Scripts._01.ThreeMatch
             _isProcessing = false;
         }
         
-        private IEnumerator AddStackProcess(int num)
+        private IEnumerator AddStackProcess(int num, int tutorialGrade)
         {
             AddStackEffect();
             PlayStackAddedSFX(num);
@@ -142,7 +147,7 @@ namespace _01.Scripts._01.ThreeMatch
                 
                 // todo : Add Spawn Effect
                 
-                Spawn(spawnCount);
+                Spawn(spawnCount, tutorialGrade);
                 FillStack(_stackCount);
             }
             else
@@ -194,11 +199,11 @@ namespace _01.Scripts._01.ThreeMatch
             });
         }
 
-        private void Spawn(int num)
+        private void Spawn(int num, int tutorialGrade)
         {
             for (int i = 0; i < num; i++)
             {
-                _spawner.SpawnFriendly(type);
+                _spawner.SpawnFriendly(type, tutorialGrade);
             }
         }
 

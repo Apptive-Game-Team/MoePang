@@ -41,27 +41,35 @@ public class TutorialManager : MonoBehaviour
     [Min(0f)] [SerializeField] private float tutorialEnemyAttackDamage = 0f;
 
     private static TutorialManager activeTutorial;
-    private bool firstGradeFriendlyOnly = true;
+    // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
+    private int friendlyGradeOverride = 1;
+
+    public static int FriendlyGradeOverride =>
+        activeTutorial != null && activeTutorial.isActiveAndEnabled && GameManager.Instance.Istutorial
+            ? activeTutorial.friendlyGradeOverride : 0;
 
     public static bool TryGetFriendlyUnitOverride(
-        IReadOnlyList<FriendlyUnitData> candidates, out FriendlyUnitData unit)
+        IReadOnlyList<FriendlyUnitData> candidates, out FriendlyUnitData unit, int grade)
     {
         unit = null;
         if (activeTutorial == null || !activeTutorial.isActiveAndEnabled ||
-            !GameManager.Instance.Istutorial || !activeTutorial.firstGradeFriendlyOnly)
+            !GameManager.Instance.Istutorial || grade == 0)
             return false;
 
-        foreach (FriendlyUnitData candidate in candidates)
+        if (candidates != null)
         {
-            if (candidate != null && candidate.UnitGrade == 1)
+            foreach (FriendlyUnitData candidate in candidates)
             {
-                unit = candidate;
-                return true;
+                if (candidate != null && candidate.UnitGrade == grade)
+                {
+                    unit = candidate;
+                    return true;
+                }
             }
         }
 
-        // 1단계가 없다면 높은 단계로 대체하지 않는다.
-        Debug.LogError("TutorialManager: 해당 서식지의 소환 목록에 1단계 기물이 없습니다.", activeTutorial);
+        // 요청한 등급이 없다면 다른 등급으로 대체하지 않는다.
+        Debug.LogError($"TutorialManager: 해당 서식지에 {grade}단계 기물이 없습니다.", activeTutorial);
         return true;
     }
 
@@ -170,7 +178,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         activeTutorial = this;
-        firstGradeFriendlyOnly = true;
+        friendlyGradeOverride = 1;
         stageManager = StageManager.Instance;
         previousStage = stageManager.CurrentStage;
         stageManager.SetStage(Mathf.Max(0, tutorialStage));
@@ -215,6 +223,7 @@ public class TutorialManager : MonoBehaviour
             underNextButton = ConfigureNextButton(underTutorialPanel, underNextButton);
         puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
         puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
+        puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
         SetUi(timeInfo, 0f);
         SetUi(lockButton, 0f);
         SetUi(pauseButton, 0f);
@@ -429,13 +438,19 @@ public class TutorialManager : MonoBehaviour
                !actionCompleted && position == currentStep.from && type == currentStep.specialType;
     }
 
+    private void HandleSpecialTileStarted(Vector2Int position, SpecialPuzzleType type)
+    {
+        if (IsExpectedSpecialTile(position, type) && type == SpecialPuzzleType.CircleBomb)
+            friendlyGradeOverride = 2;
+    }
+
     private void HandleSpecialTile(Vector2Int position, SpecialPuzzleType type)
     {
         if (!IsExpectedSpecialTile(position, type))
             return;
 
         if (type == SpecialPuzzleType.CircleBomb)
-            firstGradeFriendlyOnly = false;
+            friendlyGradeOverride = 0;
 
         actionCompleted = true;
         puzzleGenerator.SetTutorialInputRestriction(true);
@@ -485,6 +500,7 @@ public class TutorialManager : MonoBehaviour
         {
             puzzleGenerator.OnSuccessfulSwapResolved -= HandleSuccessfulSwap;
             puzzleGenerator.OnSpecialTileResolved -= HandleSpecialTile;
+            puzzleGenerator.OnSpecialTileStarted -= HandleSpecialTileStarted;
         }
         ReleaseInputRestriction();
     }
