@@ -102,6 +102,17 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("미지정 시 하단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
     [SerializeField] private Button underNextButton;
 
+    [Header("첫 단계 하이라이트")]
+    [SerializeField] private TutorialHighlightMask highlightMask;
+    [Tooltip("0부터 시작하는 보드 좌표입니다. 필요한 만큼 칸을 추가할 수 있습니다.")]
+    [SerializeField] private Vector2Int[] firstStepHighlightCells =
+    {
+        new Vector2Int(3, 4),
+        new Vector2Int(2, 3),
+        new Vector2Int(3, 3),
+        new Vector2Int(4, 3)
+    };
+
     [SerializeField] private TutorialStep[] steps =
     {
         new TutorialStep
@@ -174,6 +185,9 @@ public class TutorialManager : MonoBehaviour
 
     private void Awake()
     {
+        if (highlightMask == null)
+            highlightMask = GetComponent<TutorialHighlightMask>();
+
         if (!GameManager.Instance.Istutorial)
             return;
 
@@ -203,6 +217,9 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator Start()
     {
+        if (highlightMask != null)
+            highlightMask.HideHighlights();
+
         if (tutorialEndPopup != null)
             tutorialEndPopup.SetActive(false);
         if (tutorialEndButton != null)
@@ -250,10 +267,18 @@ public class TutorialManager : MonoBehaviour
             {
                 case WaitType.Swap:
                     yield return new WaitUntil(CanContinueTutorial);
+                    if (step == steps[0] && highlightMask != null)
+                    {
+                        highlightMask.ShowHighlights(
+                            new[] { tutorialPanel.gameObject, tutorialEndButton },
+                            puzzleGenerator, firstStepHighlightCells);
+                    }
                     puzzleGenerator.SetTutorialInputRestriction(true,
                         (from, to) => !endPopupOpen && IsExpectedSwap(from, to));
                     yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
                     yield return new WaitUntil(CanContinueTutorial);
+                    if (step == steps[0] && highlightMask != null)
+                        highlightMask.HideHighlights();
                     break;
                 case WaitType.NextClick:
                     yield return new WaitUntil(() => !endPopupOpen && nextClicked);
@@ -483,6 +508,9 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDisable()
     {
+        if (highlightMask != null)
+            highlightMask.HideHighlights();
+
         CloseEndPopup();
         if (endButton != null)
             endButton.onClick.RemoveListener(OpenEndPopup);

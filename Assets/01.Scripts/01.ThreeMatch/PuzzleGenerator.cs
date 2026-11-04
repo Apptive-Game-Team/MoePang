@@ -763,6 +763,21 @@ namespace _01.Scripts._01.ThreeMatch
         /// 실제 퍼즐 위치, 떨어지기 전의 퍼즐 위치 계산
         /// </summary>
         #region Puzzle Position
+        // 타일 그림 크기 대신 보드의 한 칸 전체를 반환합니다.
+        public bool TryGetTutorialCellRect(
+            Vector2Int position, out RectTransform frame, out Rect cellRect)
+        {
+            frame = puzzleFrame;
+            cellRect = default;
+            if (frame == null || space <= 0f || position.x < 0 || position.x >= x ||
+                position.y < 0 || position.y >= y)
+                return false;
+
+            Vector3 center = CalculatePos(position.x, position.y);
+            cellRect = new Rect(center.x - space * 0.5f, center.y - space * 0.5f, space, space);
+            return true;
+        }
+
         private Vector3 CalculatePos(int col, int row)
         {
             float offsetX = (x - 1) * space / 2f;

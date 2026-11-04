@@ -5977,9 +5977,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.9254902}
-  m_RaycastTarget: 1
+  m_Material: {fileID: 2100000, guid: 19940cbb290b61b46a483fe31a660507, type: 2}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.7372549}
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -6717,6 +6717,7 @@ GameObject:
   m_Component:
   - component: {fileID: 707969074}
   - component: {fileID: 707969073}
+  - component: {fileID: 707969075}
   m_Layer: 0
   m_Name: TutorialManager
   m_TagString: Untagged
@@ -6752,6 +6753,12 @@ MonoBehaviour:
   tutorialEndPopup: {fileID: 1691265928}
   nextButton: {fileID: 0}
   underNextButton: {fileID: 0}
+  highlightMask: {fileID: 707969075}
+  firstStepHighlightCells:
+  - {x: 3, y: 4}
+  - {x: 2, y: 3}
+  - {x: 3, y: 3}
+  - {x: 4, y: 3}
   steps:
   - dialogueIndex: 0
     waitType: 0
@@ -6918,6 +6925,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &707969075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 707969072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63fae1ff60c35c04b804a64bc016eb8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dimImage: {fileID: 675161178}
+  maskWriterShader: {fileID: 4800000, guid: ae9f7391e199e8b43a3d8dd03c84a840, type: 3}
+  targets: []
+  spriteCamera: {fileID: 1162275566}
+  imageTargets: []
 --- !u!1 &707973106
 GameObject:
   m_ObjectHideFlags: 0
