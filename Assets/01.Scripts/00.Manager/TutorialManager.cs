@@ -40,6 +40,10 @@ public class TutorialManager : MonoBehaviour
     [Min(1f)] [SerializeField] private float tutorialEnemyMaxHp = 2f;
     [Min(0f)] [SerializeField] private float tutorialEnemyAttackDamage = 0f;
 
+    [Header("대사 진행")]
+    [Tooltip("대사 표시 후 다음 이벤트까지 기다리는 시간입니다. 화면을 누르면 즉시 진행합니다.")]
+    [Min(0f)] [SerializeField] private float dialogueDuration = 5f;
+
     private static TutorialManager activeTutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
     private int friendlyGradeOverride = 1;
@@ -202,6 +206,7 @@ public class TutorialManager : MonoBehaviour
     private TutorialStep currentStep;
     private bool actionCompleted;
     private bool nextClicked;
+    private bool waitingForDialogue;
     private bool ownsInputRestriction;
     private StageManager stageManager;
     private HabitatModeManager habitatModeManager;
@@ -287,7 +292,9 @@ public class TutorialManager : MonoBehaviour
             actionCompleted = false;
             nextClicked = false;
             puzzleGenerator.SetTutorialInputRestriction(true);
+            waitingForDialogue = true;
             ShowStep(step);
+            yield return WaitForDialogue();
 
             if (step.enterAction == StepAction.CreateObstacle)
             {
@@ -313,7 +320,7 @@ public class TutorialManager : MonoBehaviour
                         highlightMask.HideHighlights();
                     break;
                 case WaitType.NextClick:
-                    yield return new WaitUntil(() => !endPopupOpen && nextClicked);
+                    // 설명 단계는 공통 대사 대기가 끝나면 다음 대사로 진행합니다.
                     break;
                 case WaitType.SpecialTile:
                     yield return new WaitUntil(CanContinueTutorial);
@@ -344,6 +351,22 @@ public class TutorialManager : MonoBehaviour
     }
 
     private bool CanContinueTutorial() => !endPopupOpen && puzzleGenerator.IsBoardReady;
+
+    private IEnumerator WaitForDialogue()
+    {
+        float elapsed = 0f;
+        while (endPopupOpen || (!nextClicked && elapsed < dialogueDuration))
+        {
+            bool popupWasOpen = endPopupOpen;
+            yield return null;
+            // 종료 팝업을 보고 있던 시간은 대사 표시 시간에서 제외합니다.
+            if (!popupWasOpen && !endPopupOpen)
+                elapsed += Time.unscaledDeltaTime;
+        }
+
+        waitingForDialogue = false;
+        UpdateScreenNextInput();
+    }
 
     private IEnumerator WaitTutorialDelay(float duration)
     {
@@ -475,7 +498,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         bool canAdvance = isActiveAndEnabled && !endPopupOpen && !nextClicked &&
-                          currentStep != null && currentStep.waitType == WaitType.NextClick;
+                          currentStep != null && waitingForDialogue;
         screenNextInput.gameObject.SetActive(canAdvance);
     }
 
@@ -527,7 +550,7 @@ public class TutorialManager : MonoBehaviour
 
     public void NextDialogue()
     {
-        if (!endPopupOpen && currentStep != null && currentStep.waitType == WaitType.NextClick)
+        if (isActiveAndEnabled && !endPopupOpen && currentStep != null && waitingForDialogue)
         {
             nextClicked = true;
             UpdateScreenNextInput();
@@ -602,6 +625,8 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDisable()
     {
+        waitingForDialogue = false;
+
         if (highlightMask != null)
             highlightMask.HideHighlights();
 
