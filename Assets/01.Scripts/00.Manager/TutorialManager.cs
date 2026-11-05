@@ -113,6 +113,17 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(4, 3)
     };
 
+    [Header("5단계 하이라이트")]
+    [Tooltip("교환하는 두 칸과 교환 후 극지방 4매치가 되는 칸입니다. 보드 좌표는 0부터 시작합니다.")]
+    [SerializeField] private Vector2Int[] step5HighlightCells =
+    {
+        new Vector2Int(2, 3),
+        new Vector2Int(1, 2),
+        new Vector2Int(2, 2),
+        new Vector2Int(3, 2),
+        new Vector2Int(4, 2)
+    };
+
     [SerializeField] private TutorialStep[] steps =
     {
         new TutorialStep
@@ -267,17 +278,20 @@ public class TutorialManager : MonoBehaviour
             {
                 case WaitType.Swap:
                     yield return new WaitUntil(CanContinueTutorial);
-                    if (step == steps[0] && highlightMask != null)
+                    Vector2Int[] highlightCells = step == steps[0]
+                        ? firstStepHighlightCells
+                        : step.dialogueIndex == 5 ? step5HighlightCells : null;
+                    if (highlightCells != null && highlightMask != null)
                     {
                         highlightMask.ShowHighlights(
                             new[] { tutorialPanel.gameObject, tutorialEndButton },
-                            puzzleGenerator, firstStepHighlightCells);
+                            puzzleGenerator, highlightCells);
                     }
                     puzzleGenerator.SetTutorialInputRestriction(true,
                         (from, to) => !endPopupOpen && IsExpectedSwap(from, to));
                     yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
                     yield return new WaitUntil(CanContinueTutorial);
-                    if (step == steps[0] && highlightMask != null)
+                    if (highlightCells != null && highlightMask != null)
                         highlightMask.HideHighlights();
                     break;
                 case WaitType.NextClick:
