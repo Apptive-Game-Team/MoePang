@@ -97,10 +97,9 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private PuzzleGenerator puzzleGenerator;
     [SerializeField] private GameObject tutorialEndButton;
     [SerializeField] private GameObject tutorialEndPopup;
-    [Tooltip("미지정 시 상단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
-    [SerializeField] private Button nextButton;
-    [Tooltip("미지정 시 하단 대사 패널 전체를 다음 버튼으로 사용합니다.")]
-    [SerializeField] private Button underNextButton;
+    // 기존 씬의 참조는 보존하되, 대사 진행 입력은 화면 전체 영역에서 받습니다.
+    [SerializeField, HideInInspector] private Button nextButton;
+    [SerializeField, HideInInspector] private Button underNextButton;
 
     [Header("첫 단계 하이라이트")]
     [SerializeField] private TutorialHighlightMask highlightMask;
@@ -215,6 +214,7 @@ public class TutorialManager : MonoBehaviour
     private GameObject previousSelection;
     private bool endPopupOpen;
     private float previousTimeScale;
+    private TutorialScreenNextInput screenNextInput;
 
     private void Awake()
     {
@@ -268,9 +268,11 @@ public class TutorialManager : MonoBehaviour
             yield break;
         }
 
-        nextButton = ConfigureNextButton(tutorialPanel, nextButton);
-        if (underTutorialPanel != null)
-            underNextButton = ConfigureNextButton(underTutorialPanel, underNextButton);
+        if (!ConfigureScreenNextInput())
+        {
+            ReleaseInputRestriction();
+            yield break;
+        }
         puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
         puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
         puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
@@ -335,6 +337,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         currentStep = null;
+        UpdateScreenNextInput();
         SetPanel(tutorialPanel, false, false);
         SetPanel(underTutorialPanel, false, false);
         ReleaseInputRestriction();
@@ -403,6 +406,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         endPopupOpen = true;
+        UpdateScreenNextInput();
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
         previousSelection = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
@@ -427,22 +431,52 @@ public class TutorialManager : MonoBehaviour
         Time.timeScale = previousTimeScale;
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(previousSelection);
+        UpdateScreenNextInput();
     }
 
-    private Button ConfigureNextButton(CanvasGroup panel, Button button)
+    private bool ConfigureScreenNextInput()
     {
-        if (button == null)
+        Canvas parentCanvas = tutorialEndButton != null
+            ? tutorialEndButton.GetComponentInParent<Canvas>(true)
+            : null;
+        if (parentCanvas == null)
         {
-            button = panel.GetComponent<Button>();
-            if (button == null)
-            {
-                button = panel.gameObject.AddComponent<Button>();
-                button.transition = Selectable.Transition.None;
-                button.targetGraphic = panel.GetComponent<Graphic>();
-            }
+            Debug.LogError("TutorialManager: 종료 버튼을 기존 Canvas 안에 연결해 주세요.", this);
+            return false;
         }
-        button.onClick.AddListener(NextDialogue);
-        return button;
+
+        if (nextButton != null)
+            nextButton.interactable = false;
+        if (underNextButton != null)
+            underNextButton.interactable = false;
+
+        Canvas rootCanvas = parentCanvas.rootCanvas;
+        var inputObject = new GameObject("TutorialScreenNextInput",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(TutorialScreenNextInput));
+        inputObject.SetActive(false);
+        inputObject.layer = rootCanvas.gameObject.layer;
+        inputObject.transform.SetParent(rootCanvas.transform, false);
+        inputObject.transform.SetAsLastSibling();
+
+        var rect = (RectTransform)inputObject.transform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        screenNextInput = inputObject.GetComponent<TutorialScreenNextInput>();
+        screenNextInput.Configure(this, tutorialEndButton.GetComponent<RectTransform>());
+        return true;
+    }
+
+    private void UpdateScreenNextInput()
+    {
+        if (screenNextInput == null)
+            return;
+
+        bool canAdvance = isActiveAndEnabled && !endPopupOpen && !nextClicked &&
+                          currentStep != null && currentStep.waitType == WaitType.NextClick;
+        screenNextInput.gameObject.SetActive(canAdvance);
     }
 
     private Vector2Int[] GetSwapHighlightCells(TutorialStep step)
@@ -474,15 +508,12 @@ public class TutorialManager : MonoBehaviour
     private void ShowStep(TutorialStep step)
     {
         bool useUnderPanel = step.panel == PanelType.Under;
-        bool canAdvance = step.waitType == WaitType.NextClick;
         TextMeshProUGUI text = useUnderPanel ? underTutorialText : tutorialText;
         text.text = tutorialTextList.GetDialogue(step.dialogueIndex);
 
-        SetPanel(tutorialPanel, !useUnderPanel, canAdvance);
-        SetPanel(underTutorialPanel, useUnderPanel, canAdvance);
-        nextButton.interactable = !useUnderPanel && canAdvance;
-        if (underNextButton != null)
-            underNextButton.interactable = useUnderPanel && canAdvance;
+        SetPanel(tutorialPanel, !useUnderPanel, false);
+        SetPanel(underTutorialPanel, useUnderPanel, false);
+        UpdateScreenNextInput();
     }
 
     private static void SetPanel(CanvasGroup panel, bool visible, bool interactable)
@@ -497,7 +528,10 @@ public class TutorialManager : MonoBehaviour
     public void NextDialogue()
     {
         if (!endPopupOpen && currentStep != null && currentStep.waitType == WaitType.NextClick)
+        {
             nextClicked = true;
+            UpdateScreenNextInput();
+        }
     }
 
     private bool IsExpectedSwap(Vector2Int from, Vector2Int to)
@@ -572,6 +606,7 @@ public class TutorialManager : MonoBehaviour
             highlightMask.HideHighlights();
 
         CloseEndPopup();
+        UpdateScreenNextInput();
         if (endButton != null)
             endButton.onClick.RemoveListener(OpenEndPopup);
         if (endAcceptButton != null)
@@ -595,6 +630,9 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (screenNextInput != null)
+            Destroy(screenNextInput.gameObject);
+
         if (activeTutorial == this)
             activeTutorial = null;
 
