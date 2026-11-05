@@ -124,6 +124,28 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(4, 2)
     };
 
+    [Header("7단계 하이라이트")]
+    [Tooltip("교환하는 두 칸과 교환 후 극지방 5매치가 되는 칸입니다. 보드 좌표는 0부터 시작합니다.")]
+    [SerializeField] private Vector2Int[] step7HighlightCells =
+    {
+        new Vector2Int(3, 4),
+        new Vector2Int(1, 3),
+        new Vector2Int(2, 3),
+        new Vector2Int(3, 3),
+        new Vector2Int(4, 3),
+        new Vector2Int(5, 3)
+    };
+
+    [Header("12단계 하이라이트")]
+    [Tooltip("교환하는 두 칸과 자물쇠 타일을 포함한 숲 3매치 칸입니다. 보드 좌표는 0부터 시작합니다.")]
+    [SerializeField] private Vector2Int[] step12HighlightCells =
+    {
+        new Vector2Int(3, 1),
+        new Vector2Int(2, 2),
+        new Vector2Int(3, 2),
+        new Vector2Int(4, 2)
+    };
+
     [SerializeField] private TutorialStep[] steps =
     {
         new TutorialStep
@@ -278,15 +300,9 @@ public class TutorialManager : MonoBehaviour
             {
                 case WaitType.Swap:
                     yield return new WaitUntil(CanContinueTutorial);
-                    Vector2Int[] highlightCells = step == steps[0]
-                        ? firstStepHighlightCells
-                        : step.dialogueIndex == 5 ? step5HighlightCells : null;
-                    if (highlightCells != null && highlightMask != null)
-                    {
-                        highlightMask.ShowHighlights(
-                            new[] { tutorialPanel.gameObject, tutorialEndButton },
-                            puzzleGenerator, highlightCells);
-                    }
+                    Vector2Int[] highlightCells = GetSwapHighlightCells(step);
+                    if (highlightCells != null)
+                        ShowStepHighlights(step, highlightCells);
                     puzzleGenerator.SetTutorialInputRestriction(true,
                         (from, to) => !endPopupOpen && IsExpectedSwap(from, to));
                     yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
@@ -299,10 +315,14 @@ public class TutorialManager : MonoBehaviour
                     break;
                 case WaitType.SpecialTile:
                     yield return new WaitUntil(CanContinueTutorial);
+                    // 바람/햇빛 모두 해당 단계에서 사용할 특수 타일을 강조합니다.
+                    ShowStepHighlights(step, new[] { step.from });
                     puzzleGenerator.SetTutorialInputRestriction(true,
                         specialAllowed: (position, type) => !endPopupOpen && IsExpectedSpecialTile(position, type));
                     yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
                     yield return new WaitUntil(CanContinueTutorial);
+                    if (highlightMask != null)
+                        highlightMask.HideHighlights();
                     break;
                 case WaitType.Delay:
                     yield return WaitTutorialDelay(step.delay);
@@ -423,6 +443,32 @@ public class TutorialManager : MonoBehaviour
         }
         button.onClick.AddListener(NextDialogue);
         return button;
+    }
+
+    private Vector2Int[] GetSwapHighlightCells(TutorialStep step)
+    {
+        if (step == steps[0])
+            return firstStepHighlightCells;
+
+        return step.dialogueIndex switch
+        {
+            5 => step5HighlightCells,
+            7 => step7HighlightCells,
+            12 => step12HighlightCells,
+            _ => null
+        };
+    }
+
+    // 하이라이트에는 현재 단계의 대사 패널과 종료 버튼을 항상 포함합니다.
+    private void ShowStepHighlights(TutorialStep step, IEnumerable<Vector2Int> cells)
+    {
+        if (highlightMask == null)
+            return;
+
+        CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
+        highlightMask.ShowHighlights(
+            new[] { panel != null ? panel.gameObject : null, tutorialEndButton },
+            puzzleGenerator, cells);
     }
 
     private void ShowStep(TutorialStep step)
