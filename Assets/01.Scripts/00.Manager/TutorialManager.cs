@@ -115,6 +115,10 @@ public class TutorialManager : MonoBehaviour
     [SerializeField, HideInInspector] private Button nextButton;
     [SerializeField, HideInInspector] private Button underNextButton;
 
+    [Header("에너지 소환 설명 하이라이트 (Tutorial02)")]
+    [Tooltip("서식지 아이콘과 에너지 원을 포함하는 SpawnStack 부모 영역입니다.")]
+    [SerializeField] private RectTransform spawnStackHighlightRoot;
+
     [Header("첫 단계 하이라이트")]
     [SerializeField] private TutorialHighlightMask highlightMask;
     [Tooltip("0부터 시작하는 보드 좌표입니다. 필요한 만큼 칸을 추가할 수 있습니다.")]
@@ -338,6 +342,8 @@ public class TutorialManager : MonoBehaviour
 
         foreach (TutorialStep step in steps)
         {
+            if (highlightMask != null)
+                highlightMask.HideHighlights();
             swapHint?.Stop();
             DestroyHintCircle();
             hintPressedTile = null;
@@ -644,6 +650,23 @@ public class TutorialManager : MonoBehaviour
         SetPanel(tutorialPanel, !useUnderPanel, false);
         SetPanel(underTutorialPanel, useUnderPanel, false);
         UpdateScreenNextInput();
+
+        if (step.dialogueIndex == 2)
+            ShowSpawnStackHighlights(step);
+    }
+
+    private void ShowSpawnStackHighlights(TutorialStep step)
+    {
+        if (highlightMask == null || spawnStackHighlightRoot == null)
+            return;
+
+        CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
+        var targets = new List<GameObject>
+        {
+            panel != null ? panel.gameObject : null,
+            tutorialEndButton
+        };
+        highlightMask.ShowHighlights(targets, null, null, new[] { spawnStackHighlightRoot });
     }
 
     private static void SetPanel(CanvasGroup panel, bool visible, bool interactable)

@@ -38,6 +38,7 @@ public class TutorialHighlightMask : MonoBehaviour
     private int meshIndex;
     private PuzzleGenerator puzzleGenerator;
     private readonly List<Vector2Int> puzzleCells = new();
+    private readonly List<RectTransform> rectTargets = new();
 
     private static readonly int HighlightMaskId =
         Shader.PropertyToID("_HighlightMask");
@@ -155,6 +156,10 @@ public class TutorialHighlightMask : MonoBehaviour
         foreach (Vector2Int cell in puzzleCells)
             DrawPuzzleCell(cell);
 
+        foreach (RectTransform target in rectTargets)
+            if (target != null && target.gameObject.activeInHierarchy)
+                DrawRect(target, target.rect);
+
         Graphics.ExecuteCommandBuffer(commands);
     }
 
@@ -163,6 +168,13 @@ public class TutorialHighlightMask : MonoBehaviour
         if (puzzleGenerator == null ||
             !puzzleGenerator.TryGetTutorialCellRect(cell, out RectTransform frame, out Rect rect))
             return;
+
+        DrawRect(frame, rect);
+    }
+
+    // 이미지의 알파와 관계없이 UI 영역 전체를 DIM에서 제외합니다.
+    private void DrawRect(RectTransform frame, Rect rect)
+    {
 
         Rect dimRect = dimImage.rectTransform.rect;
         if (dimRect.width <= 0f || dimRect.height <= 0f)
@@ -413,7 +425,8 @@ public class TutorialHighlightMask : MonoBehaviour
 
     // UI 오브젝트와 임의 개수의 퍼즐 칸을 한 번에 지정하고 즉시 표시합니다.
     public void ShowHighlights(
-        IEnumerable<GameObject> objects, PuzzleGenerator generator, IEnumerable<Vector2Int> cells)
+        IEnumerable<GameObject> objects, PuzzleGenerator generator, IEnumerable<Vector2Int> cells,
+        IEnumerable<RectTransform> rects = null)
     {
         if (!isActiveAndEnabled || dimMaterial == null)
             return;
@@ -425,6 +438,11 @@ public class TutorialHighlightMask : MonoBehaviour
                     targets.Add(target);
 
         puzzleGenerator = generator;
+        rectTargets.Clear();
+        if (rects != null)
+            foreach (RectTransform rect in rects)
+                if (rect != null && !rectTargets.Contains(rect))
+                    rectTargets.Add(rect);
         puzzleCells.Clear();
         if (cells != null)
             foreach (Vector2Int cell in cells)
@@ -440,6 +458,7 @@ public class TutorialHighlightMask : MonoBehaviour
     {
         Canvas.willRenderCanvases -= RefreshBeforeRender;
         targets.Clear();
+        rectTargets.Clear();
         puzzleCells.Clear();
         puzzleGenerator = null;
         if (dimImage != null)
@@ -455,6 +474,7 @@ public class TutorialHighlightMask : MonoBehaviour
     public void ClearTargets()
     {
         targets.Clear();
+        rectTargets.Clear();
         puzzleCells.Clear();
         puzzleGenerator = null;
         RequestRefresh();
