@@ -334,6 +334,8 @@ namespace _01.Scripts._00.Manager
 
         public bool isTestMode;
         public Sprite googleAvatarSprite;
+        [SerializeField] private bool isTutorial;
+        public bool Istutorial => isTutorial;
 
         protected override void Awake()
         {
