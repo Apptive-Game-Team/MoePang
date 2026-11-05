@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class TutorialHighlightMask : MonoBehaviour
 {
+    public RectTransform DimRectTransform => dimImage != null ? dimImage.rectTransform : null;
+
     [Header("DIM")]
     [SerializeField] private Image dimImage;
     [SerializeField] private Shader maskWriterShader;

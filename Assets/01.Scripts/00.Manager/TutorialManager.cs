@@ -126,6 +126,10 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(4, 3)
     };
 
+    [Header("첫 교환 원형 힌트")]
+    [Tooltip("첫 단계에서 매치 줄 밖의 숲 타일 (3,4) 중앙에 표시할 UI 프리팹입니다.")]
+    [SerializeField] private GameObject hintCirclePrefab;
+
     [Header("교환 타일 힌트 애니메이션")]
     [Range(0f, 1f)] [SerializeField] private float swapHintBrightness = 0.6f;
     [Range(0f, 0.3f)] [SerializeField] private float swapHintScaleAmount = 0.08f;
@@ -249,6 +253,7 @@ public class TutorialManager : MonoBehaviour
     private TutorialScreenNextInput screenNextInput;
     private TutorialSwapHintAnimation swapHint;
     private PuzzleObject hintPressedTile;
+    private RectTransform hintCircleInstance;
 
     private void Awake()
     {
@@ -334,6 +339,7 @@ public class TutorialManager : MonoBehaviour
         foreach (TutorialStep step in steps)
         {
             swapHint?.Stop();
+            DestroyHintCircle();
             hintPressedTile = null;
             SetTutorialPaused(true);
             currentStep = step;
@@ -521,6 +527,7 @@ public class TutorialManager : MonoBehaviour
 
         endPopupOpen = true;
         swapHint?.Stop();
+        HideHintCircle();
         UpdateScreenNextInput();
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
@@ -680,7 +687,73 @@ public class TutorialManager : MonoBehaviour
         {
             swapHint.Play(firstNormal, secondNormal, swapHintBrightness, swapHintScaleAmount,
                 swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
+            ShowFirstHintCircle();
         }
+    }
+
+    private void ShowFirstHintCircle()
+    {
+        // 이번 테스트는 첫 교환만 적용합니다. 매치 줄 밖의 타일은 step.from = (3,4)입니다.
+        if (currentStep != steps[0] || hintCirclePrefab == null || highlightMask == null)
+            return;
+
+        RectTransform overlay = highlightMask.DimRectTransform;
+        if (overlay == null ||
+            !puzzleGenerator.TryGetTutorialCellRect(currentStep.from, out RectTransform frame, out Rect cell))
+            return;
+
+        Canvas sourceCanvas = frame.GetComponentInParent<Canvas>().rootCanvas;
+        Canvas overlayCanvas = overlay.GetComponentInParent<Canvas>().rootCanvas;
+        Camera sourceCamera = sourceCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+            ? null : sourceCanvas.worldCamera;
+        Camera overlayCamera = overlayCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+            ? null : overlayCanvas.worldCamera;
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(
+            sourceCamera, frame.TransformPoint(cell.center));
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                overlay, screen, overlayCamera, out Vector2 local))
+            return;
+
+        if (hintCircleInstance == null)
+        {
+            GameObject instance = Instantiate(hintCirclePrefab, overlay, false);
+            hintCircleInstance = instance.GetComponent<RectTransform>();
+            if (hintCircleInstance == null)
+            {
+                Destroy(instance);
+                Debug.LogError("TutorialManager: Hint Circle에는 RectTransform이 있는 UI 프리팹을 지정해 주세요.", this);
+                return;
+            }
+
+            // DIM의 자식으로 앞에 표시하고, 기존 Canvas 구조와 퍼즐 입력은 유지합니다.
+            foreach (Transform child in instance.GetComponentsInChildren<Transform>(true))
+                child.gameObject.layer = overlay.gameObject.layer;
+            foreach (Graphic graphic in instance.GetComponentsInChildren<Graphic>(true))
+                graphic.raycastTarget = false;
+        }
+
+        // 프리팹의 크기/색상은 유지하고 저장된 위치 오프셋만 타일 중앙으로 바꿉니다.
+        hintCircleInstance.anchorMin = overlay.pivot;
+        hintCircleInstance.anchorMax = overlay.pivot;
+        hintCircleInstance.pivot = new Vector2(0.5f, 0.5f);
+        hintCircleInstance.anchoredPosition3D = new Vector3(local.x, local.y, 0f);
+        hintCircleInstance.SetAsLastSibling();
+        hintCircleInstance.gameObject.SetActive(true);
+    }
+
+    private void HideHintCircle()
+    {
+        if (hintCircleInstance != null)
+            hintCircleInstance.gameObject.SetActive(false);
+    }
+
+    private void DestroyHintCircle()
+    {
+        if (hintCircleInstance == null)
+            return;
+        hintCircleInstance.gameObject.SetActive(false);
+        Destroy(hintCircleInstance.gameObject);
+        hintCircleInstance = null;
     }
 
     private void HandlePuzzlePointerDown(PuzzleObject puzzle)
@@ -690,6 +763,7 @@ public class TutorialManager : MonoBehaviour
 
         hintPressedTile = puzzle;
         swapHint?.Stop();
+        HideHintCircle();
     }
 
     private void HandlePuzzlePointerUp(PuzzleObject puzzle)
@@ -710,6 +784,7 @@ public class TutorialManager : MonoBehaviour
     private void BeginPuzzleAction()
     {
         swapHint?.Stop();
+        DestroyHintCircle();
         hintPressedTile = null;
         waitingForPuzzleAction = false;
         puzzleActionRunning = true;
@@ -788,6 +863,7 @@ public class TutorialManager : MonoBehaviour
     private void OnDisable()
     {
         swapHint?.Stop();
+        DestroyHintCircle();
         hintPressedTile = null;
         waitingForDialogue = false;
         waitingForPuzzleAction = false;
@@ -828,6 +904,7 @@ public class TutorialManager : MonoBehaviour
     private void OnDestroy()
     {
         swapHint?.Stop();
+        DestroyHintCircle();
         RestoreTutorialTimeScale();
         if (screenNextInput != null)
             Destroy(screenNextInput.gameObject);
