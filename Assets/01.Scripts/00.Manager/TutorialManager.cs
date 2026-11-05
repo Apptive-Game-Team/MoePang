@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._02.Unit;
+using _01.Scripts._04.UI.InGame;
 using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
@@ -119,6 +120,9 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("서식지 아이콘과 에너지 원을 포함하는 SpawnStack 부모 영역입니다.")]
     [SerializeField] private RectTransform spawnStackHighlightRoot;
 
+    [Header("2단계 유닛 설명 카메라 (Tutorial09)")]
+    [SerializeField] private BattleUIController battleCameraController;
+
     [Header("첫 단계 하이라이트")]
     [SerializeField] private TutorialHighlightMask highlightMask;
     [Tooltip("0부터 시작하는 보드 좌표입니다. 필요한 만큼 칸을 추가할 수 있습니다.")]
@@ -207,7 +211,7 @@ public class TutorialManager : MonoBehaviour
             dialogueIndex = 8, waitType = WaitType.SpecialTile,
             from = new Vector2Int(3, 3), specialType = SpecialPuzzleType.CircleBomb
         },
-        new TutorialStep { dialogueIndex = 9, waitType = WaitType.NextClick },
+        new TutorialStep { dialogueIndex = 9, waitType = WaitType.NextClick, panel = PanelType.Under },
         new TutorialStep
         {
             dialogueIndex = 10, waitType = WaitType.Delay, delay = 0f,
@@ -239,6 +243,8 @@ public class TutorialManager : MonoBehaviour
     private bool usesUnscaledPuzzleTime;
     private bool puzzleActionRunning;
     private UnitSpawner friendlySpawner;
+    private readonly List<FriendlyUnit> sunlightSpawnedUnits = new();
+    private readonly Dictionary<SpriteRenderer, int> highlightedUnitSortingOrders = new();
     private bool tutorialPaused;
     private float originalTimeScale;
     private float gameplayTimeScale;
@@ -342,6 +348,8 @@ public class TutorialManager : MonoBehaviour
 
         foreach (TutorialStep step in steps)
         {
+            RestoreHighlightedUnitSortingOrders();
+            battleCameraController?.EndTutorialFocus();
             if (highlightMask != null)
                 highlightMask.HideHighlights();
             swapHint?.Stop();
@@ -653,6 +661,71 @@ public class TutorialManager : MonoBehaviour
 
         if (step.dialogueIndex == 2)
             ShowSpawnStackHighlights(step);
+        else if (step.dialogueIndex == 9)
+            ShowFrontSunlightUnitHighlight(step);
+    }
+
+    private void ShowFrontSunlightUnitHighlight(TutorialStep step)
+    {
+        if (highlightMask == null)
+            return;
+
+        FriendlyUnit frontUnit = null;
+        foreach (FriendlyUnit unit in sunlightSpawnedUnits)
+        {
+            if (unit == null || !unit.isActiveAndEnabled || unit.CurrentHp <= 0f ||
+                unit.Data == null || unit.Data.UnitGrade != 2)
+                continue;
+
+            // 아군은 +X 방향으로 전진하므로 X가 가장 큰 유닛이 선두입니다.
+            if (frontUnit == null || unit.transform.position.x > frontUnit.transform.position.x)
+                frontUnit = unit;
+        }
+
+        if (frontUnit != null)
+        {
+            BringHighlightedUnitToFront(frontUnit);
+            battleCameraController?.BeginTutorialFocus(frontUnit.transform);
+        }
+
+        CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
+        highlightMask.ShowHighlights(new[]
+        {
+            panel != null ? panel.gameObject : null,
+            tutorialEndButton,
+            frontUnit != null ? frontUnit.gameObject : null
+        }, null, null);
+    }
+
+    private void BringHighlightedUnitToFront(FriendlyUnit unit)
+    {
+        RestoreHighlightedUnitSortingOrders();
+        SpriteRenderer body = unit.GetComponent<SpriteRenderer>();
+        if (body == null)
+            return;
+
+        // 본체와 자식 스프라이트의 앞뒤 관계를 유지하며 설명 중에만 다른 유닛보다 앞에 그립니다.
+        int offset = 32000 - body.sortingOrder;
+        foreach (SpriteRenderer renderer in unit.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            highlightedUnitSortingOrders.Add(renderer, renderer.sortingOrder);
+            renderer.sortingOrder = Mathf.Clamp(renderer.sortingOrder + offset, -32768, 32767);
+        }
+    }
+
+    private void RestoreHighlightedUnitSortingOrders()
+    {
+        foreach (var entry in highlightedUnitSortingOrders)
+            if (entry.Key != null)
+                entry.Key.sortingOrder = entry.Value;
+        highlightedUnitSortingOrders.Clear();
+    }
+
+    private void LateUpdate()
+    {
+        // 대사 중 카메라가 이동해도 선택한 유닛 위치에 마스크를 맞춥니다.
+        if (waitingForDialogue && currentStep != null && currentStep.dialogueIndex == 9)
+            highlightMask?.RequestRefresh();
     }
 
     private void ShowSpawnStackHighlights(TutorialStep step)
@@ -817,6 +890,10 @@ public class TutorialManager : MonoBehaviour
 
     private void HandleFriendlySpawned(FriendlyUnit unit)
     {
+        if (currentStep != null && currentStep.dialogueIndex == 8 &&
+            unit != null && unit.Data != null && unit.Data.UnitGrade == 2)
+            sunlightSpawnedUnits.Add(unit);
+
         if (puzzleActionRunning)
             SetTutorialPaused(false);
     }
@@ -842,7 +919,10 @@ public class TutorialManager : MonoBehaviour
             return;
 
         if (type == SpecialPuzzleType.CircleBomb)
+        {
+            sunlightSpawnedUnits.Clear();
             friendlyGradeOverride = 2;
+        }
         BeginPuzzleAction();
     }
 
@@ -885,12 +965,16 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDisable()
     {
+        RestoreHighlightedUnitSortingOrders();
+        battleCameraController?.EndTutorialFocus();
         swapHint?.Stop();
         DestroyHintCircle();
         hintPressedTile = null;
         waitingForDialogue = false;
         waitingForPuzzleAction = false;
         puzzleActionRunning = false;
+
+        sunlightSpawnedUnits.Clear();
 
         if (highlightMask != null)
             highlightMask.HideHighlights();

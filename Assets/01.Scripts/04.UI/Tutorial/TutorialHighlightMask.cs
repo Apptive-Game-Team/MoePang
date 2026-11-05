@@ -19,6 +19,8 @@ public class TutorialHighlightMask : MonoBehaviour
     [Header("유닛을 그리는 카메라")]
     [Tooltip("BattleCamera를 연결하세요. 비워두면 대상 레이어를 그리는 카메라를 찾습니다.")]
     [SerializeField] private Camera spriteCamera;
+    [Tooltip("유닛 카메라가 RenderTexture를 사용하는 경우, 해당 텍스처를 표시하는 UI입니다.")]
+    [SerializeField] private RawImage spriteCameraOutput;
 
     // Preserve and migrate existing Inspector assignments.
     [SerializeField, HideInInspector] private List<Image> imageTargets = new();
@@ -296,7 +298,37 @@ public class TutorialHighlightMask : MonoBehaviour
             Vector2 point = sourceVertices[i];
             Vector3 local = new Vector3(renderer.flipX ? -point.x : point.x,
                 renderer.flipY ? -point.y : point.y, 0f);
-            Vector3 screen = camera.WorldToScreenPoint(renderer.transform.TransformPoint(local));
+            Vector3 world = renderer.transform.TransformPoint(local);
+            Vector3 screen;
+            if (camera.targetTexture != null)
+            {
+                if (spriteCameraOutput == null || spriteCameraOutput.texture != camera.targetTexture)
+                    return;
+
+                Vector3 viewport = camera.WorldToViewportPoint(world);
+                if (viewport.z <= 0f)
+                    return;
+
+                Rect uv = spriteCameraOutput.uvRect;
+                if (Mathf.Approximately(uv.width, 0f) || Mathf.Approximately(uv.height, 0f))
+                    return;
+
+                Rect cameraRect = camera.rect;
+                Vector2 textureUv = cameraRect.position +
+                    Vector2.Scale(new Vector2(viewport.x, viewport.y), cameraRect.size);
+                Rect outputRect = spriteCameraOutput.rectTransform.rect;
+                Vector3 outputLocal = new Vector3(
+                    outputRect.xMin + (textureUv.x - uv.x) / uv.width * outputRect.width,
+                    outputRect.yMin + (textureUv.y - uv.y) / uv.height * outputRect.height, 0f);
+                Vector2 outputScreen = RectTransformUtility.WorldToScreenPoint(
+                    GetCanvasCamera(spriteCameraOutput.canvas),
+                    spriteCameraOutput.rectTransform.TransformPoint(outputLocal));
+                screen = new Vector3(outputScreen.x, outputScreen.y, viewport.z);
+            }
+            else
+            {
+                screen = camera.WorldToScreenPoint(world);
+            }
             // Units behind the camera must not cut holes in the DIM.
             if (screen.z <= 0f)
                 return;

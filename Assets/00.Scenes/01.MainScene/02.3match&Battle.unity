@@ -6712,6 +6712,7 @@ MonoBehaviour:
   underNextButton: {fileID: 0}
   highlightMask: {fileID: 707969075}
   spawnStackHighlightRoot: {fileID: 1195533397}
+  battleCameraController: {fileID: 1162275569}
   firstStepHighlightCells:
   - {x: 3, y: 4}
   - {x: 2, y: 3}
@@ -6835,7 +6836,7 @@ MonoBehaviour:
     delay: 1
   - dialogueIndex: 9
     waitType: 1
-    panel: 0
+    panel: 1
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
     specialType: 2
@@ -6924,6 +6925,7 @@ MonoBehaviour:
   maskWriterShader: {fileID: 4800000, guid: ae9f7391e199e8b43a3d8dd03c84a840, type: 3}
   targets: []
   spriteCamera: {fileID: 1162275566}
+  spriteCameraOutput: {fileID: 683930344}
   imageTargets: []
 --- !u!1 &707973106
 GameObject:
