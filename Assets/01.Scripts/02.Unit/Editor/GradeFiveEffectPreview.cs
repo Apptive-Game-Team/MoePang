@@ -26,7 +26,7 @@ public sealed class GradeFiveEffectPreview : EditorWindow
         for (int i = 0; i < _names.Length; i++)
         {
             _sheets[i] = AssetDatabase.LoadAssetAtPath<Texture2D>(
-                "Assets/MoePang_Art/00.Unit/02.UnitEffect/" + _names[i] + "-attack-hit-sheet.png");
+                "Assets/MoePang_Art/00.Sprites/00.Unit/02.UnitEffect/" + _names[i] + "-attack-hit-sheet.png");
         }
         
         _start = EditorApplication.timeSinceStartup;
