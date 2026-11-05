@@ -135,6 +135,21 @@ namespace _01.Scripts._01.ThreeMatch
         public event Action<Vector2Int, Vector2Int> OnSwapStarted;
         public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileResolved;
         public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileStarted;
+        public event Action<PuzzleObject> OnPuzzlePointerDown;
+        public event Action<PuzzleObject> OnPuzzlePointerUp;
+
+        public void NotifyPuzzlePointerDown(PuzzleObject puzzle) => OnPuzzlePointerDown?.Invoke(puzzle);
+        public void NotifyPuzzlePointerUp(PuzzleObject puzzle) => OnPuzzlePointerUp?.Invoke(puzzle);
+
+        public bool TryGetTutorialPuzzle(Vector2Int position, out PuzzleObject puzzle)
+        {
+            puzzle = null;
+            if (_puzzles == null || position.x < 0 || position.x >= x ||
+                position.y < 0 || position.y >= y)
+                return false;
+            puzzle = _puzzles[position.x, position.y];
+            return puzzle != null;
+        }
 
         public void SetTutorialInputRestriction(bool restricted,
             Func<Vector2Int, Vector2Int, bool> swapAllowed = null,

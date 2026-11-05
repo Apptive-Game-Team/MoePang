@@ -126,6 +126,15 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(4, 3)
     };
 
+    [Header("교환 타일 힌트 애니메이션")]
+    [Range(0f, 1f)] [SerializeField] private float swapHintBrightness = 0.6f;
+    [Range(0f, 0.3f)] [SerializeField] private float swapHintScaleAmount = 0.08f;
+    [Min(0.05f)] [SerializeField] private float swapHintPulseDuration = 0.25f;
+    [Min(0f)] [SerializeField] private float swapHintPulseGap = 0.12f;
+    [Min(0f)] [SerializeField] private float swapHintRepeatDelay = 1f;
+    [Tooltip("타일이 밝아질 때 함께 표시하는 외곽 글로우 색입니다. HDR 색상과 알파로 강도를 조절합니다.")]
+    [ColorUsage(true, true)] [SerializeField] private Color swapHintGlowColor = new Color(5f, 4.5f, 2.5f, 0.65f);
+
     [Header("5단계 하이라이트")]
     [Tooltip("교환하는 두 칸과 교환 후 극지방 4매치가 되는 칸입니다. 보드 좌표는 0부터 시작합니다.")]
     [SerializeField] private Vector2Int[] step5HighlightCells =
@@ -238,6 +247,8 @@ public class TutorialManager : MonoBehaviour
     private bool endPopupOpen;
     private float previousTimeScale;
     private TutorialScreenNextInput screenNextInput;
+    private TutorialSwapHintAnimation swapHint;
+    private PuzzleObject hintPressedTile;
 
     private void Awake()
     {
@@ -248,6 +259,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         activeTutorial = this;
+        swapHint = new TutorialSwapHintAnimation();
         friendlyGradeOverride = 1;
         stageManager = StageManager.Instance;
         previousStage = stageManager.CurrentStage;
@@ -297,6 +309,8 @@ public class TutorialManager : MonoBehaviour
             yield break;
         }
         puzzleGenerator.OnSwapStarted += HandleSwapStarted;
+        puzzleGenerator.OnPuzzlePointerDown += HandlePuzzlePointerDown;
+        puzzleGenerator.OnPuzzlePointerUp += HandlePuzzlePointerUp;
         puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
         puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
         puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
@@ -319,6 +333,8 @@ public class TutorialManager : MonoBehaviour
 
         foreach (TutorialStep step in steps)
         {
+            swapHint?.Stop();
+            hintPressedTile = null;
             SetTutorialPaused(true);
             currentStep = step;
             actionCompleted = false;
@@ -354,6 +370,7 @@ public class TutorialManager : MonoBehaviour
                     waitingForPuzzleAction = true;
                     puzzleGenerator.SetTutorialInputRestriction(true,
                         (from, to) => !endPopupOpen && waitingForPuzzleAction && IsExpectedSwap(from, to));
+                    TryStartSwapHint();
                     yield return WaitForPuzzleResolution();
                     break;
                 case WaitType.NextClick:
@@ -503,6 +520,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         endPopupOpen = true;
+        swapHint?.Stop();
         UpdateScreenNextInput();
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
@@ -536,6 +554,7 @@ public class TutorialManager : MonoBehaviour
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(previousSelection);
         UpdateScreenNextInput();
+        TryStartSwapHint();
     }
 
     private bool ConfigureScreenNextInput()
@@ -646,6 +665,42 @@ public class TutorialManager : MonoBehaviour
                 (from == currentStep.to && to == currentStep.from));
     }
 
+    private bool IsSwapHintWaiting => isActiveAndEnabled && currentStep != null &&
+        currentStep.waitType == WaitType.Swap && waitingForPuzzleAction && !endPopupOpen;
+
+    private void TryStartSwapHint()
+    {
+        if (!IsSwapHintWaiting || hintPressedTile != null || swapHint == null ||
+            puzzleGenerator == null || !puzzleGenerator.IsBoardReady)
+            return;
+
+        if (puzzleGenerator.TryGetTutorialPuzzle(currentStep.from, out PuzzleObject first) &&
+            puzzleGenerator.TryGetTutorialPuzzle(currentStep.to, out PuzzleObject second) &&
+            first is NormalPuzzleObject firstNormal && second is NormalPuzzleObject secondNormal)
+        {
+            swapHint.Play(firstNormal, secondNormal, swapHintBrightness, swapHintScaleAmount,
+                swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
+        }
+    }
+
+    private void HandlePuzzlePointerDown(PuzzleObject puzzle)
+    {
+        if (!IsSwapHintWaiting)
+            return;
+
+        hintPressedTile = puzzle;
+        swapHint?.Stop();
+    }
+
+    private void HandlePuzzlePointerUp(PuzzleObject puzzle)
+    {
+        if (hintPressedTile != puzzle)
+            return;
+
+        hintPressedTile = null;
+        TryStartSwapHint();
+    }
+
     private void HandleSwapStarted(Vector2Int from, Vector2Int to)
     {
         if (waitingForPuzzleAction && !endPopupOpen && IsExpectedSwap(from, to))
@@ -654,6 +709,8 @@ public class TutorialManager : MonoBehaviour
 
     private void BeginPuzzleAction()
     {
+        swapHint?.Stop();
+        hintPressedTile = null;
         waitingForPuzzleAction = false;
         puzzleActionRunning = true;
         puzzleGenerator.SetTutorialInputRestriction(true);
@@ -730,6 +787,8 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDisable()
     {
+        swapHint?.Stop();
+        hintPressedTile = null;
         waitingForDialogue = false;
         waitingForPuzzleAction = false;
         puzzleActionRunning = false;
@@ -754,6 +813,8 @@ public class TutorialManager : MonoBehaviour
         if (puzzleGenerator != null)
         {
             puzzleGenerator.OnSwapStarted -= HandleSwapStarted;
+            puzzleGenerator.OnPuzzlePointerDown -= HandlePuzzlePointerDown;
+            puzzleGenerator.OnPuzzlePointerUp -= HandlePuzzlePointerUp;
             puzzleGenerator.OnSuccessfulSwapResolved -= HandleSuccessfulSwap;
             puzzleGenerator.OnSpecialTileResolved -= HandleSpecialTile;
             puzzleGenerator.OnSpecialTileStarted -= HandleSpecialTileStarted;
@@ -766,6 +827,7 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        swapHint?.Stop();
         RestoreTutorialTimeScale();
         if (screenNextInput != null)
             Destroy(screenNextInput.gameObject);

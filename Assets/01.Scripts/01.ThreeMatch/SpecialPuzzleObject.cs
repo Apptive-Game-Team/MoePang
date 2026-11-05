@@ -11,8 +11,9 @@ namespace _01.Scripts._01.ThreeMatch
 
         public override int GetPuzzleSubType() => (int)specialPuzzleType;
         
-        private void OnMouseUp()
+        protected override void OnMouseUp()
         {
+            base.OnMouseUp();
             if (Generator.IsProcessing)
             {
                 return;
