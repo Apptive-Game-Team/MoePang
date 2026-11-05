@@ -2590,6 +2590,34 @@ namespace _01.Scripts._01.ThreeMatch
             return true;
         }
 
+        // 조작 전 설명을 다시 볼 때만, 장애물이 기억하는 원래 서식지의 정상 타일로 복원합니다.
+        public bool TryRestoreTutorialObstacle(Vector2Int position, ObstaclePuzzleType expectedType)
+        {
+            if (!GameManager.Instance.Istutorial || !IsBoardReady ||
+                position.x < 0 || position.x >= x || position.y < 0 || position.y >= y ||
+                _puzzles[position.x, position.y] is not ObstaclePuzzleObject obstacle ||
+                obstacle.obstaclePuzzleType != expectedType ||
+                (expectedType != ObstaclePuzzleType.Fixed && expectedType != ObstaclePuzzleType.DeActivated))
+            {
+                Debug.LogError($"PuzzleGenerator: 튜토리얼 장애물 복원 실패 ({position}, {expectedType}).", this);
+                return false;
+            }
+
+            GameObject replacement = Instantiate(normalPuzzlePrefabs[(int)obstacle.habitat], puzzleFrame);
+            replacement.transform.position = obstacle.transform.position;
+            replacement.transform.localScale = Vector3.one * tileScale;
+            replacement.name = $"Puzzle({position.x + 1},{position.y + 1})";
+            NormalPuzzleObject normal = replacement.GetComponent<NormalPuzzleObject>();
+            normal.Init(this, position.x, position.y);
+            normal.habitat = obstacle.habitat;
+            normal.isMatched = false;
+            normal.puzzleState = PuzzleState.Idle;
+            _puzzles[position.x, position.y] = normal;
+            obstacle.gameObject.SetActive(false);
+            Destroy(obstacle.gameObject);
+            return true;
+        }
+
         private IEnumerator CreateTutorialObstacle(Vector2Int position, ObstaclePuzzleType type)
         {
             yield return PlayObstacleSpawnWarning(position.x, position.y);

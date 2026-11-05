@@ -112,6 +112,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private PuzzleGenerator puzzleGenerator;
     [SerializeField] private GameObject tutorialEndButton;
     [SerializeField] private GameObject tutorialEndPopup;
+    [SerializeField] private Button tutorialTextReplayButton;
     // 기존 씬의 참조는 보존하되, 대사 진행 입력은 화면 전체 영역에서 받습니다.
     [SerializeField, HideInInspector] private Button nextButton;
     [SerializeField, HideInInspector] private Button underNextButton;
@@ -264,6 +265,11 @@ public class TutorialManager : MonoBehaviour
     private TutorialSwapHintAnimation swapHint;
     private PuzzleObject hintPressedTile;
     private RectTransform hintCircleInstance;
+    private int currentStepIndex;
+    private int replayStartIndex = -1;
+    private bool replayRequested;
+    private bool isReplaying;
+    private bool presentationFailed;
 
     private void Awake()
     {
@@ -307,6 +313,7 @@ public class TutorialManager : MonoBehaviour
             tutorialEndPopup.SetActive(false);
         if (tutorialEndButton != null)
             tutorialEndButton.SetActive(GameManager.Instance.Istutorial);
+        SetReplayButtonVisible(false);
 
         if (!GameManager.Instance.Istutorial)
             yield break;
@@ -322,6 +329,11 @@ public class TutorialManager : MonoBehaviour
         {
             ReleaseInputRestriction();
             yield break;
+        }
+        if (tutorialTextReplayButton != null)
+        {
+            tutorialTextReplayButton.navigation = new Navigation { mode = Navigation.Mode.None };
+            tutorialTextReplayButton.onClick.AddListener(ReplayExplanation);
         }
         puzzleGenerator.OnSwapStarted += HandleSwapStarted;
         puzzleGenerator.OnPuzzlePointerDown += HandlePuzzlePointerDown;
@@ -346,65 +358,27 @@ public class TutorialManager : MonoBehaviour
         SetTutorialPaused(false);
         yield return new WaitUntil(CanContinueTutorial);
 
-        foreach (TutorialStep step in steps)
+        for (currentStepIndex = 0; currentStepIndex < steps.Length; currentStepIndex++)
         {
-            RestoreHighlightedUnitSortingOrders();
-            battleCameraController?.EndTutorialFocus();
-            if (highlightMask != null)
-                highlightMask.HideHighlights();
-            swapHint?.Stop();
-            DestroyHintCircle();
-            hintPressedTile = null;
-            SetTutorialPaused(true);
-            currentStep = step;
+            TutorialStep step = steps[currentStepIndex];
+            replayStartIndex = GetReplayStartIndex(currentStepIndex);
             actionCompleted = false;
             puzzleActionRunning = false;
-            waitingForPuzzleAction = false;
-            nextClicked = false;
-            puzzleGenerator.SetTutorialInputRestriction(true);
-            waitingForDialogue = true;
-            ShowStep(step);
-            yield return WaitForDialogue();
-
-            if (step.enterAction == StepAction.CreateObstacle)
-            {
-                yield return new WaitUntil(CanContinueTutorial);
-                if (!puzzleGenerator.TryCreateTutorialObstacle(
-                        step.obstaclePosition, step.obstacleType))
-                {
-                    ReleaseInputRestriction();
-                    RestoreTutorialTimeScale();
-                    yield break;
-                }
-                yield return new WaitUntil(CanContinueTutorial);
-                SetTutorialPaused(true);
-            }
+            yield return PresentStep(step);
+            if (presentationFailed)
+                yield break;
 
             switch (step.waitType)
             {
                 case WaitType.Swap:
-                    yield return new WaitUntil(CanContinueTutorial);
-                    Vector2Int[] highlightCells = GetSwapHighlightCells(step);
-                    if (highlightCells != null)
-                        ShowStepHighlights(step, highlightCells);
-                    waitingForPuzzleAction = true;
-                    puzzleGenerator.SetTutorialInputRestriction(true,
-                        (from, to) => !endPopupOpen && waitingForPuzzleAction && IsExpectedSwap(from, to));
-                    TryStartSwapHint();
-                    yield return WaitForPuzzleResolution();
-                    break;
-                case WaitType.NextClick:
-                    // 설명 단계는 공통 대사 대기가 끝나면 다음 대사로 진행합니다.
-                    break;
                 case WaitType.SpecialTile:
                     yield return new WaitUntil(CanContinueTutorial);
-                    // 바람/햇빛 모두 해당 단계에서 사용할 특수 타일을 강조합니다.
-                    ShowStepHighlights(step, new[] { step.from });
-                    waitingForPuzzleAction = true;
-                    puzzleGenerator.SetTutorialInputRestriction(true,
-                        specialAllowed: (position, type) => !endPopupOpen && waitingForPuzzleAction &&
-                                                           IsExpectedSpecialTile(position, type));
+                    BeginPuzzleActionWait();
                     yield return WaitForPuzzleResolution();
+                    if (presentationFailed)
+                        yield break;
+                    break;
+                case WaitType.NextClick:
                     break;
                 case WaitType.Delay:
                     yield return WaitTutorialDelay(step.delay);
@@ -423,6 +397,151 @@ public class TutorialManager : MonoBehaviour
         UpdateScreenNextInput();
         SetPanel(tutorialPanel, false, false);
         SetPanel(underTutorialPanel, false, false);
+        ReleaseInputRestriction();
+        RestoreTutorialTimeScale();
+    }
+
+    private static bool IsPuzzleActionStep(TutorialStep step) =>
+        step.waitType == WaitType.Swap || step.waitType == WaitType.SpecialTile;
+
+    private int GetReplayStartIndex(int actionIndex)
+    {
+        if (!IsPuzzleActionStep(steps[actionIndex]))
+            return -1;
+
+        int start = actionIndex;
+        while (start > 0 && (steps[start - 1].waitType == WaitType.NextClick ||
+                             steps[start - 1].waitType == WaitType.Delay))
+            start--;
+        return start < actionIndex ? start : -1;
+    }
+
+    private void ClearStepPresentation()
+    {
+        RestoreHighlightedUnitSortingOrders();
+        battleCameraController?.EndTutorialFocus();
+        highlightMask?.HideHighlights();
+        swapHint?.Stop();
+        DestroyHintCircle();
+        hintPressedTile = null;
+        SetReplayButtonVisible(false);
+    }
+
+    private IEnumerator PresentStep(TutorialStep step)
+    {
+        ClearStepPresentation();
+        SetTutorialPaused(true);
+        currentStep = step;
+        waitingForPuzzleAction = false;
+        nextClicked = false;
+        puzzleGenerator.SetTutorialInputRestriction(true);
+        waitingForDialogue = true;
+        ShowStep(step);
+        yield return WaitForDialogue();
+
+        if (step.enterAction == StepAction.CreateObstacle)
+        {
+            yield return new WaitUntil(CanContinueTutorial);
+            if (!puzzleGenerator.TryCreateTutorialObstacle(step.obstaclePosition, step.obstacleType))
+            {
+                FailTutorialPresentation();
+                yield break;
+            }
+            yield return new WaitUntil(CanContinueTutorial);
+            SetTutorialPaused(true);
+        }
+    }
+
+    private void BeginPuzzleActionWait()
+    {
+        waitingForPuzzleAction = true;
+        SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
+        if (currentStep.waitType == WaitType.Swap)
+        {
+            Vector2Int[] cells = GetSwapHighlightCells(currentStep);
+            if (cells != null || replayStartIndex >= 0)
+                ShowStepHighlights(currentStep, cells);
+            puzzleGenerator.SetTutorialInputRestriction(true,
+                (from, to) => !endPopupOpen && waitingForPuzzleAction && IsExpectedSwap(from, to));
+            TryStartSwapHint();
+        }
+        else
+        {
+            ShowStepHighlights(currentStep, new[] { currentStep.from });
+            puzzleGenerator.SetTutorialInputRestriction(true,
+                specialAllowed: (position, type) => !endPopupOpen && waitingForPuzzleAction &&
+                                                   IsExpectedSpecialTile(position, type));
+        }
+    }
+
+    private void SetReplayButtonVisible(bool visible)
+    {
+        if (tutorialTextReplayButton == null)
+            return;
+        bool changed = tutorialTextReplayButton.gameObject.activeSelf != visible;
+        tutorialTextReplayButton.gameObject.SetActive(visible);
+        tutorialTextReplayButton.interactable = visible && !endPopupOpen;
+        if (changed)
+            highlightMask?.RequestRefresh();
+    }
+
+    public void ReplayExplanation()
+    {
+        if (!isActiveAndEnabled || !waitingForPuzzleAction || endPopupOpen || isReplaying ||
+            replayRequested || replayStartIndex < 0 || actionCompleted || !puzzleGenerator.IsBoardReady)
+            return;
+
+        // 클릭한 프레임부터 조작을 막아 재생 요청과 교환이 동시에 시작되지 않게 합니다.
+        replayRequested = true;
+        waitingForPuzzleAction = false;
+        puzzleGenerator.SetTutorialInputRestriction(true);
+        swapHint?.Stop();
+        DestroyHintCircle();
+        SetReplayButtonVisible(false);
+    }
+
+    private IEnumerator ReplayExplanationRange()
+    {
+        replayRequested = false;
+        isReplaying = true;
+        ClearStepPresentation();
+        yield return new WaitUntil(CanContinueTutorial);
+
+        // 설명 중 만든 장애물만 되돌립니다. 매치, 에너지, 소환 결과는 건드리지 않습니다.
+        for (int index = currentStepIndex; index >= replayStartIndex; index--)
+        {
+            TutorialStep step = steps[index];
+            if (step.enterAction == StepAction.CreateObstacle &&
+                !puzzleGenerator.TryRestoreTutorialObstacle(step.obstaclePosition, step.obstacleType))
+            {
+                FailTutorialPresentation();
+                yield break;
+            }
+        }
+
+        for (int index = replayStartIndex; index <= currentStepIndex; index++)
+        {
+            TutorialStep step = steps[index];
+            yield return PresentStep(step);
+            if (presentationFailed)
+                yield break;
+            if (step.waitType == WaitType.Delay)
+                yield return WaitTutorialDelay(step.delay);
+        }
+
+        isReplaying = false;
+        yield return new WaitUntil(CanContinueTutorial);
+        BeginPuzzleActionWait();
+    }
+
+    private void FailTutorialPresentation()
+    {
+        presentationFailed = true;
+        isReplaying = false;
+        ClearStepPresentation();
+        waitingForDialogue = false;
+        waitingForPuzzleAction = false;
+        UpdateScreenNextInput();
         ReleaseInputRestriction();
         RestoreTutorialTimeScale();
     }
@@ -452,7 +571,16 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator WaitForPuzzleResolution()
     {
-        yield return new WaitUntil(() => !endPopupOpen && actionCompleted && puzzleGenerator.IsBoardReady);
+        while (endPopupOpen || !actionCompleted || !puzzleGenerator.IsBoardReady)
+        {
+            if (replayRequested && !endPopupOpen)
+            {
+                yield return ReplayExplanationRange();
+                if (presentationFailed)
+                    yield break;
+            }
+            yield return null;
+        }
         if (highlightMask != null)
             highlightMask.HideHighlights();
 
@@ -540,6 +668,8 @@ public class TutorialManager : MonoBehaviour
             return;
 
         endPopupOpen = true;
+        if (tutorialTextReplayButton != null)
+            tutorialTextReplayButton.interactable = false;
         swapHint?.Stop();
         HideHintCircle();
         UpdateScreenNextInput();
@@ -576,6 +706,9 @@ public class TutorialManager : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(previousSelection);
         UpdateScreenNextInput();
         TryStartSwapHint();
+        if (tutorialTextReplayButton != null)
+            tutorialTextReplayButton.interactable = waitingForPuzzleAction && replayStartIndex >= 0 &&
+                                                    !isReplaying && !replayRequested;
     }
 
     private bool ConfigureScreenNextInput()
@@ -645,7 +778,9 @@ public class TutorialManager : MonoBehaviour
 
         CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
         highlightMask.ShowHighlights(
-            new[] { panel != null ? panel.gameObject : null, tutorialEndButton },
+            new[] { panel != null ? panel.gameObject : null, tutorialEndButton,
+                tutorialTextReplayButton != null && tutorialTextReplayButton.gameObject.activeInHierarchy
+                    ? tutorialTextReplayButton.gameObject : null },
             puzzleGenerator, cells);
     }
 
@@ -879,6 +1014,7 @@ public class TutorialManager : MonoBehaviour
 
     private void BeginPuzzleAction()
     {
+        SetReplayButtonVisible(false);
         swapHint?.Stop();
         DestroyHintCircle();
         hintPressedTile = null;
@@ -965,6 +1101,11 @@ public class TutorialManager : MonoBehaviour
 
     private void OnDisable()
     {
+        SetReplayButtonVisible(false);
+        if (tutorialTextReplayButton != null)
+            tutorialTextReplayButton.onClick.RemoveListener(ReplayExplanation);
+        replayRequested = false;
+        isReplaying = false;
         RestoreHighlightedUnitSortingOrders();
         battleCameraController?.EndTutorialFocus();
         swapHint?.Stop();
