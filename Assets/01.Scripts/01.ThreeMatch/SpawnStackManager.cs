@@ -14,6 +14,16 @@ namespace _01.Scripts._01.ThreeMatch
         
         private SpawnStack[] activeStacks;
 
+        public bool IsIdle => stacks == null || stacks.All(stack => stack == null || stack.IsIdle);
+        public UnitSpawner UnitSpawner => unitSpawner;
+
+        public void SetTutorialEffectsPaused(bool paused)
+        {
+            foreach (SpawnStack stack in stacks)
+                if (stack != null)
+                    stack.SetTutorialEffectsPaused(paused);
+        }
+
         private void Awake()
         {
             foreach (SpawnStack stack in stacks)

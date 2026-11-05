@@ -31,6 +31,15 @@ namespace _01.Scripts._02.Unit
 
         private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
 
+        public event Action<FriendlyUnit> OnFriendlySpawned;
+
+        private void CreateFriendly(FriendlyUnitData data)
+        {
+            var unit = (FriendlyUnit)UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
+            // 풀에서 꺼내 활성화하고 데이터 적용까지 끝난 실제 소환 시점입니다.
+            OnFriendlySpawned?.Invoke(unit);
+        }
+
         private void Start()
         {
             var testSpawn = FindFirstObjectByType<TestSpawn>(
@@ -111,7 +120,7 @@ namespace _01.Scripts._02.Unit
                 data = GetWeightedFriendlyUnit(unitList);
             }
 
-            UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
+            CreateFriendly(data);
         }
 
         public void SpawnHighestFriendly(Habitat habitat)
@@ -131,7 +140,7 @@ namespace _01.Scripts._02.Unit
                 return;
             }
         
-            UnitPool.Instance.Get(friendlyPrefab, unitList[^1], friendlySpawnPosition);
+            CreateFriendly(unitList[^1]);
         }
 
         private bool TrySpawnTutorialFriendly(Habitat habitat, int grade)
@@ -141,7 +150,7 @@ namespace _01.Scripts._02.Unit
                 return false;
 
             if (unit != null)
-                UnitPool.Instance.Get(friendlyPrefab, unit, friendlySpawnPosition);
+                CreateFriendly(unit);
             return true;
         }
 

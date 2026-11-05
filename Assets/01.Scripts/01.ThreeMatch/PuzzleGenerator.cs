@@ -2,6 +2,7 @@ using _01.Scripts._01.ThreeMatch.Obstacle;
 using _01.Scripts._04.UI.InGame;
 using _01.Scripts._11.HabitatMode;
 using _01.Scripts._00.Manager;
+using _01.Scripts._02.Unit;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -101,10 +102,37 @@ namespace _01.Scripts._01.ThreeMatch
         public bool IsProcessing => _isProcessing;
         public bool IsBoardReady => _puzzles != null && !_isProcessing &&
                                     _taskQueue.Count == 0 && IsAllPuzzlesIdle();
+        // 보드 밖으로 날아가는 타일과 그 타일로 발생하는 소환까지 기다립니다.
+        public bool IsTutorialResolutionComplete => IsBoardReady && pendingTileEffects == 0 &&
+            (spawnStackManager == null || spawnStackManager.IsIdle);
+        private int pendingTileEffects;
+        public UnitSpawner FriendlySpawner => spawnStackManager != null ? spawnStackManager.UnitSpawner : null;
+        private readonly List<ParticleSystem> tutorialParticles = new();
+
+        public void SetTutorialEffectsPaused(bool paused)
+        {
+            if (paused)
+                DOTween.Pause(this);
+            else
+                DOTween.Play(this);
+
+            if (spawnStackManager != null)
+                spawnStackManager.SetTutorialEffectsPaused(paused);
+
+            tutorialParticles.RemoveAll(particle => particle == null);
+            foreach (ParticleSystem particle in tutorialParticles)
+            {
+                if (paused && particle.isPlaying)
+                    particle.Pause();
+                else if (!paused && particle.isPaused)
+                    particle.Play();
+            }
+        }
         public bool IsTutorialInputRestricted { get; private set; }
         private Func<Vector2Int, Vector2Int, bool> _tutorialSwapAllowed;
         private Func<Vector2Int, SpecialPuzzleType, bool> _tutorialSpecialAllowed;
         public event Action<Vector2Int, Vector2Int> OnSuccessfulSwapResolved;
+        public event Action<Vector2Int, Vector2Int> OnSwapStarted;
         public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileResolved;
         public event Action<Vector2Int, SpecialPuzzleType> OnSpecialTileStarted;
 
@@ -216,7 +244,8 @@ namespace _01.Scripts._01.ThreeMatch
 
                 while (_taskQueue.Count > 0)
                 {
-                    while (Time.timeScale == 0f)
+                    while ((Time.timeScale == 0f && !TutorialManager.UseUnscaledPuzzleTime) ||
+                           TutorialManager.IsTutorialPopupOpen)
                     {
                         yield return new WaitForSecondsRealtime(0.05f);
                     }
@@ -317,7 +346,7 @@ namespace _01.Scripts._01.ThreeMatch
         
         private IEnumerator SetStartPuzzle()
         {
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().UseTutorialPuzzleClock(this);
             
             for (int i = 0; i < x; i++)
             {
@@ -343,11 +372,11 @@ namespace _01.Scripts._01.ThreeMatch
                     float duration = distance / dropSpeed;
                     float startAt = columnDropDelay * i + rowDropDelay * j;
                     
-                    Tween fallTween = po.transform.DOLocalMove(targetPos, duration)
+                    Tween fallTween = po.transform.DOLocalMove(targetPos, duration).UseTutorialPuzzleClock(this)
                         .SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
-                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                            po.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8).UseTutorialPuzzleClock(this)
                                 .OnComplete(() =>
                                 {
                                     po.puzzleState = PuzzleState.Idle;
@@ -837,7 +866,7 @@ namespace _01.Scripts._01.ThreeMatch
 
             while (timer < duration)
             {
-                timer += Time.deltaTime;
+                timer += TutorialPuzzleClock.DeltaTime;
 
                 float normalizedTime = Mathf.Clamp01(timer / duration);
 
@@ -934,7 +963,7 @@ namespace _01.Scripts._01.ThreeMatch
 
             while (timer < resetEffectDuration)
             {
-                timer += Time.deltaTime;
+                timer += TutorialPuzzleClock.DeltaTime;
 
                 float t = Mathf.Clamp01(timer / resetEffectDuration);
                 t = Mathf.SmoothStep(0f, 1f, t);
@@ -1209,7 +1238,7 @@ namespace _01.Scripts._01.ThreeMatch
             
             _desertSandStorm = Instantiate(sandStormPrefab, downParticleFrame.transform);
             Material mat = _desertSandStorm.GetComponent<SpriteRenderer>().material;
-            mat.DOFloat(1, "_Appear", 1f).WaitForCompletion();
+            mat.DOFloat(1, "_Appear", 1f).UseTutorialPuzzleClock(this).WaitForCompletion();
             
             float timer = 0f;
 
@@ -1218,7 +1247,7 @@ namespace _01.Scripts._01.ThreeMatch
                 StartCoroutine(AttachDesertCoversToCurrentPuzzles(coverPrefab));
 
                 timer += refreshInterval;
-                yield return new WaitForSeconds(refreshInterval);
+                yield return TutorialPuzzleClock.WaitForSeconds(refreshInterval);
             }
 
             StartCoroutine(ClearDesertPuzzleCovers());
@@ -1280,7 +1309,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             Material targetMaterial = _puzzles[0, 0].transform.Find(DesertCoverName).GetChild(0).GetComponent<Image>().material;
-            yield return targetMaterial.DOFloat(1f, "_Appear", 1.0f).WaitForCompletion();
+            yield return targetMaterial.DOFloat(1f, "_Appear", 1.0f).UseTutorialPuzzleClock(this).WaitForCompletion();
         }
         
         private IEnumerator ClearDesertPuzzleCovers()
@@ -1294,11 +1323,11 @@ namespace _01.Scripts._01.ThreeMatch
             emission.enabled = false;
             
             Material mat = _desertSandStorm.GetComponent<SpriteRenderer>().material;
-            mat.DOFloat(0, "_Appear", 1f).WaitForCompletion();
+            mat.DOFloat(0, "_Appear", 1f).UseTutorialPuzzleClock(this).WaitForCompletion();
             Destroy(_desertSandStorm);
             
             Material targetMaterial = _puzzles[0, 0].transform.Find(DesertCoverName).GetChild(0).GetComponent<Image>().material;
-            yield return targetMaterial.DOFloat(0f, "_Appear", 1.0f).WaitForCompletion();
+            yield return targetMaterial.DOFloat(0f, "_Appear", 1.0f).UseTutorialPuzzleClock(this).WaitForCompletion();
 
             for (int i = 0; i < x; i++)
             {
@@ -1370,6 +1399,8 @@ namespace _01.Scripts._01.ThreeMatch
             _swapCount++;
             OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
             
+            // TimeScale 0에서 받은 입력도 큐 실행 전에 시간을 복구할 수 있게 알립니다.
+            OnSwapStarted?.Invoke(new Vector2Int(x1, y1), new Vector2Int(x2, y2));
             AddTask(() => SwapAndCheck(x1, y1, x2, y2));
         }
 
@@ -1394,9 +1425,9 @@ namespace _01.Scripts._01.ThreeMatch
             Vector3 pos1 = p1.transform.position;
             Vector3 pos2 = p2.transform.position;
             
-            Sequence seq1 = DOTween.Sequence();
-            Tween t1 = p1.transform.DOMove(pos2, 0.2f);
-            Tween t2 = p2.transform.DOMove(pos1, 0.2f);
+            Sequence seq1 = DOTween.Sequence().UseTutorialPuzzleClock(this);
+            Tween t1 = p1.transform.DOMove(pos2, 0.2f).UseTutorialPuzzleClock(this);
+            Tween t2 = p2.transform.DOMove(pos1, 0.2f).UseTutorialPuzzleClock(this);
             seq1.Append(t1);
             seq1.Join(t2);
             
@@ -1427,13 +1458,13 @@ namespace _01.Scripts._01.ThreeMatch
             }
             else
             {
-                yield return new WaitForSeconds(0.2f);
+                yield return TutorialPuzzleClock.WaitForSeconds(0.2f);
                 _puzzles[x1, y1] = p1;
                 _puzzles[x2, y2] = p2;
             
-                Sequence seq2 = DOTween.Sequence();
-                Tween t3 = p1.transform.DOMove(pos1, 0.2f);
-                Tween t4 = p2.transform.DOMove(pos2, 0.2f);
+                Sequence seq2 = DOTween.Sequence().UseTutorialPuzzleClock(this);
+                Tween t3 = p1.transform.DOMove(pos1, 0.2f).UseTutorialPuzzleClock(this);
+                Tween t4 = p2.transform.DOMove(pos2, 0.2f).UseTutorialPuzzleClock(this);
                 seq2.Append(t3);
                 seq2.Join(t4);
             
@@ -1770,7 +1801,7 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 Vector3 destination = CalculatePos(group.spawnPos.x, group.spawnPos.y);
                 
-                Sequence seq1 = DOTween.Sequence();
+                Sequence seq1 = DOTween.Sequence().UseTutorialPuzzleClock(this);
                 foreach (var pos in group.positions)
                 {
                     if (_puzzles[pos.x, pos.y] is NormalPuzzleObject no)
@@ -1780,19 +1811,19 @@ namespace _01.Scripts._01.ThreeMatch
                             goldUI.ShowUI();
                         }
                         
-                        seq1.Join(no.HighlightEffect());
+                        seq1.Join(no.HighlightEffect().UseTutorialPuzzleClock(this));
                     }
 
                     if (_puzzles[pos.x, pos.y] is ObstaclePuzzleObject { isMatchable : true } op)
                     {
-                        seq1.Join(op.HighlightEffect());
+                        seq1.Join(op.HighlightEffect().UseTutorialPuzzleClock(this));
                     }
                 }
                 yield return seq1.WaitForCompletion();
                 
                 OnComboDetected?.Invoke();
                 
-                Sequence seq2 = DOTween.Sequence();
+                Sequence seq2 = DOTween.Sequence().UseTutorialPuzzleClock(this);
                 List<PuzzleObject> targets = new();
                 foreach (var pos in group.positions)
                 {
@@ -1813,7 +1844,7 @@ namespace _01.Scripts._01.ThreeMatch
 
                     if (group.resultType != null)
                     {
-                        Tween t1 = targetPuzzle.transform.DOLocalMove(destination, 0.2f);
+                        Tween t1 = targetPuzzle.transform.DOLocalMove(destination, 0.2f).UseTutorialPuzzleClock(this);
                         seq2.Join(t1);
                     }
 
@@ -1828,7 +1859,7 @@ namespace _01.Scripts._01.ThreeMatch
                         OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
                     }
                     
-                    Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f).SetEase(Ease.InSine);
+                    Tween t2 = targetPuzzle.transform.DOScale(tileScale / 3, 0.2f).UseTutorialPuzzleClock(this).SetEase(Ease.InSine);
                     seq2.Join(t2);
                 }
                 yield return seq2.WaitForCompletion();
@@ -1851,7 +1882,8 @@ namespace _01.Scripts._01.ThreeMatch
                     float jumpPower = distance * 0.3f;
                     
                     int tutorialGrade = TutorialManager.FriendlyGradeOverride;
-                    Sequence seq = DOTween.Sequence();
+                    Sequence seq = DOTween.Sequence().UseTutorialPuzzleClock(this);
+                    TrackTileFlight(seq);
 
                     seq.Append(DOTween.To(
                         () => 0f,
@@ -1864,7 +1896,7 @@ namespace _01.Scripts._01.ThreeMatch
                         },
                         1f,
                         duration
-                    ).SetEase(Ease.OutSine)
+                    ).UseTutorialPuzzleClock(this).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(group.habitat, 1, tutorialGrade);
@@ -1885,7 +1917,7 @@ namespace _01.Scripts._01.ThreeMatch
                     po.Init(this, group.spawnPos.x, group.spawnPos.y);
                     po.isMatched = false;
             
-                    yield return newPuzzle.transform.DOScale(tileScale, 0.2f)
+                    yield return newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                         .SetEase(Ease.InSine)
                         .OnComplete(() =>
                         {
@@ -1913,7 +1945,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator DropBlocks()
         {
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().UseTutorialPuzzleClock(this);
 
             bool hasEmptySlot = true;
             
@@ -2010,16 +2042,16 @@ namespace _01.Scripts._01.ThreeMatch
 
                                     Vector3 linkedPortalPos = linkedPortal.transform.localPosition;
                                     Vector3 portalPos = portal.transform.localPosition;
-                                    fallTween = targetPo.transform.DOLocalMove(linkedPortalPos, duration1)
+                                    fallTween = targetPo.transform.DOLocalMove(linkedPortalPos, duration1).UseTutorialPuzzleClock(this)
                                         .SetEase(Ease.InSine)
                                         .OnComplete(() =>
                                         {
                                             targetPo.transform.localPosition = portalPos;
-                                            targetPo.transform.DOLocalMove(targetPos, duration2)
+                                            targetPo.transform.DOLocalMove(targetPos, duration2).UseTutorialPuzzleClock(this)
                                                 .SetEase(Ease.InSine)
                                                 .OnComplete(() =>
                                                 {
-                                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                                                    targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8).UseTutorialPuzzleClock(this)
                                                         .OnComplete(() =>
                                                         {
                                                             targetPo.puzzleState = PuzzleState.Idle;
@@ -2029,11 +2061,11 @@ namespace _01.Scripts._01.ThreeMatch
                                 }
                                 else
                                 {
-                                    fallTween = targetPo.transform.DOLocalMove(targetPos, duration)
+                                    fallTween = targetPo.transform.DOLocalMove(targetPos, duration).UseTutorialPuzzleClock(this)
                                         .SetEase(Ease.InSine)
                                         .OnComplete(() =>
                                         {
-                                            targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8)
+                                            targetPo.transform.DOPunchPosition(Vector3.down * 0.05f, 0.15f, 8).UseTutorialPuzzleClock(this)
                                                 .OnComplete(() =>
                                                 {
                                                     targetPo.puzzleState = PuzzleState.Idle;
@@ -2049,7 +2081,7 @@ namespace _01.Scripts._01.ThreeMatch
             }
             
             yield return seq.WaitForCompletion();
-            yield return new WaitForSeconds(0.1f);
+            yield return TutorialPuzzleClock.WaitForSeconds(0.1f);
             
             if (CheckAnyMatches())
             {
@@ -2085,12 +2117,13 @@ namespace _01.Scripts._01.ThreeMatch
                 special.specialPuzzleType != type)
                 return;
 
+            // 큐는 TimeScale 0에서 대기하므로, 시작 이벤트는 큐에 넣기 전에 보냅니다.
+            OnSpecialTileStarted?.Invoke(position, type);
             AddTask(() => ActivateSpecialPuzzleFromInput(position, type));
         }
 
         private IEnumerator ActivateSpecialPuzzleFromInput(Vector2Int position, SpecialPuzzleType type)
         {
-            OnSpecialTileStarted?.Invoke(position, type);
             yield return ActivateSpecialBomb(position.x, position.y, type);
             OnSpecialTileResolved?.Invoke(position, type);
         }
@@ -2099,7 +2132,7 @@ namespace _01.Scripts._01.ThreeMatch
         {
             yield return SpecialMatch(curX, curY, type);
             
-            yield return new WaitForSeconds(0.2f);
+            yield return TutorialPuzzleClock.WaitForSeconds(0.2f);
 
             if (dropAfter)
             {
@@ -2128,7 +2161,7 @@ namespace _01.Scripts._01.ThreeMatch
             Vector2 center = new (self.transform.position.x, self.transform.position.y);
             _puzzles[curX, curY] = null;
 
-            yield return self.transform.DOScale(tileScale * 1.2f, 0.1f)
+            yield return self.transform.DOScale(tileScale * 1.2f, 0.1f).UseTutorialPuzzleClock(this)
                 .SetLoops(2, LoopType.Yoyo)
                 .OnComplete(() =>
                 {
@@ -2174,7 +2207,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         private IEnumerator DelayedSpecialMatch(int curX, int curY, SpecialPuzzleType type, float delay = 0.1f)
         {
-            yield return new WaitForSeconds(delay);
+            yield return TutorialPuzzleClock.WaitForSeconds(delay);
             yield return StartCoroutine(SpecialMatch(curX, curY, type));
         }
         
@@ -2310,7 +2343,7 @@ namespace _01.Scripts._01.ThreeMatch
                     }
                     break; 
             }
-            yield return new WaitForSeconds(0.1f);
+            yield return TutorialPuzzleClock.WaitForSeconds(0.1f);
         }
 
         private void PlayParticleEffect(GameObject effect)
@@ -2318,13 +2351,37 @@ namespace _01.Scripts._01.ThreeMatch
             ParticleSystem[] particles = effect.GetComponentsInChildren<ParticleSystem>();
             foreach (var particle in particles)
             {
-                particle.Play();
+                if (TutorialManager.UseUnscaledPuzzleTime)
+                {
+                    var main = particle.main;
+                    main.useUnscaledTime = true;
+                    tutorialParticles.Add(particle);
+                }
+                if (TutorialManager.IsTutorialPopupOpen)
+                    particle.Pause();
+                else
+                    particle.Play();
             }
         }
 
         private IEnumerator DelayedTileEffect(PuzzleObject po, float delay)
         {
-            yield return new WaitForSeconds(delay);
+            pendingTileEffects++;
+            // 햇빛 처리 완료 후 등급 제한이 해제되어도 이 효과의 소환 등급은 유지합니다.
+            int tutorialGrade = TutorialManager.FriendlyGradeOverride;
+            try
+            {
+                yield return RunDelayedTileEffect(po, delay, tutorialGrade);
+            }
+            finally
+            {
+                pendingTileEffects--;
+            }
+        }
+
+        private IEnumerator RunDelayedTileEffect(PuzzleObject po, float delay, int tutorialGrade)
+        {
+            yield return TutorialPuzzleClock.WaitForSeconds(delay);
             
             if (po is NormalPuzzleObject no1)
             {
@@ -2332,17 +2389,17 @@ namespace _01.Scripts._01.ThreeMatch
                 {
                     goldUI.ShowUI();
                 }
-                yield return no1.HighlightEffect().WaitForCompletion();
+                yield return no1.HighlightEffect().UseTutorialPuzzleClock(this).WaitForCompletion();
             }
 
             if (po is ForcedRowColumnPuzzleObject frc)
             {
-                yield return frc.HighlightEffect().WaitForCompletion();
+                yield return frc.HighlightEffect().UseTutorialPuzzleClock(this).WaitForCompletion();
             }
             
             if (po is ChangingHabitatPuzzleObject ch)
             {
-                yield return ch.HighlightEffect().WaitForCompletion();
+                yield return ch.HighlightEffect().UseTutorialPuzzleClock(this).WaitForCompletion();
             }
             
             if (po is NormalPuzzleObject no2 && TryGetGoldTile(no2, out GameObject gold))
@@ -2356,14 +2413,19 @@ namespace _01.Scripts._01.ThreeMatch
                 OnSwapCountChanged?.Invoke(maxSwapCount - _swapCount);
             }
             
-            yield return po.transform.DOScale(tileScale / 3f, 0.2f).WaitForCompletion();
+            yield return po.transform.DOScale(tileScale / 3f, 0.2f).UseTutorialPuzzleClock(this).WaitForCompletion();
             
-            FlyingTileEffect(po);
+            FlyingTileEffect(po, tutorialGrade);
         }
 
-        private void FlyingTileEffect(PuzzleObject targetPuzzle)
+        private void TrackTileFlight(Tween tween)
         {
-            int tutorialGrade = TutorialManager.FriendlyGradeOverride;
+            pendingTileEffects++;
+            tween.SetAutoKill(true).OnKill(() => pendingTileEffects--);
+        }
+
+        private void FlyingTileEffect(PuzzleObject targetPuzzle, int tutorialGrade)
+        {
             if (targetPuzzle is NormalPuzzleObject no)
             {
                 targetPuzzle.transform.SetParent(puzzleFrame.parent.parent);
@@ -2376,7 +2438,7 @@ namespace _01.Scripts._01.ThreeMatch
                 float duration = distance / speed;
                 float jumpPower = distance * 0.3f;
                 
-                DOTween.To(
+                Tween flight = DOTween.To(
                         () => 0f,
                         t => {
                             Vector3 pos = Vector3.Lerp(startPos, endPos, t);
@@ -2387,13 +2449,14 @@ namespace _01.Scripts._01.ThreeMatch
                         },
                         1f,
                         duration
-                    ).SetEase(Ease.OutSine)
+                    ).UseTutorialPuzzleClock(this).SetEase(Ease.OutSine)
                     .OnComplete(() =>
                     {
                         spawnStackManager.AddStack(no.habitat, 1, tutorialGrade);
                         StageManager.Instance.SetUsedTile(1);
                         Destroy(targetPuzzle.gameObject);
                     });
+                TrackTileFlight(flight);
             }
             else
             {
@@ -2440,7 +2503,7 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, grid.x, grid.y);
             po.isMatched = false;
 
-            yield return newPuzzle.transform.DOScale(tileScale, 0.2f)
+            yield return newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
@@ -2456,7 +2519,7 @@ namespace _01.Scripts._01.ThreeMatch
                 if (GameManager.Instance.Istutorial)
                     yield break;
                 
-                yield return new WaitForSeconds(obstacleSpawnInterval);
+                yield return TutorialPuzzleClock.WaitForSeconds(obstacleSpawnInterval);
                 Vector2Int pos = SetObstacleSpawnPos();
                 if (pos == new Vector2Int(-1, -1))
                 {
@@ -2539,7 +2602,7 @@ namespace _01.Scripts._01.ThreeMatch
 
             _puzzles[position.x, position.y] = obstacle;
             Destroy(target.gameObject);
-            yield return replacement.transform.DOScale(tileScale, 0.2f)
+            yield return replacement.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine).WaitForCompletion();
             obstacle.puzzleState = PuzzleState.Idle;
         }
@@ -2550,12 +2613,12 @@ namespace _01.Scripts._01.ThreeMatch
             GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
             _obstacleSpawnIndicator.Add(warningOb);
             warningOb.transform.localPosition = pos;
-            warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4)
+            warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4).UseTutorialPuzzleClock(this)
                 .SetLoops(-1, LoopType.Yoyo);
 
             try
             {
-                yield return new WaitForSeconds(obstacleSpawnDelay);
+                yield return TutorialPuzzleClock.WaitForSeconds(obstacleSpawnDelay);
                 yield return new WaitUntil(() =>
                     _puzzles[curX, curY] &&
                     _puzzles[curX, curY].puzzleState == PuzzleState.Idle);
@@ -2633,7 +2696,7 @@ namespace _01.Scripts._01.ThreeMatch
                     break;
             }
             
-            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine);
             yield return t.WaitForCompletion();
         }
@@ -2773,7 +2836,7 @@ namespace _01.Scripts._01.ThreeMatch
                 case ObstaclePuzzleType.Infection:
                     GameObject go = _puzzles[curX, curY].gameObject;
                     _puzzles[curX, curY] = null;
-                    go.transform.DOScale(0, 0.2f)
+                    go.transform.DOScale(0, 0.2f).UseTutorialPuzzleClock(this)
                         .SetEase(Ease.OutSine)
                         .OnComplete(() =>
                         {
@@ -2805,7 +2868,7 @@ namespace _01.Scripts._01.ThreeMatch
             po.Init(this, curX, curY);
             po.isMatched = false;
 
-            newPuzzle.transform.DOScale(tileScale, 0.2f)
+            newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
@@ -2884,7 +2947,7 @@ namespace _01.Scripts._01.ThreeMatch
             newPuzzle.Init(this, selected.x, selected.y);
             newPuzzle.isMatched = false;
             
-            newPuzzle.transform.DOScale(tileScale, 0.2f)
+            newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
@@ -2950,7 +3013,7 @@ namespace _01.Scripts._01.ThreeMatch
             puzzle.puzzleState = PuzzleState.Idle;
             puzzle.isMatched = false;
             
-            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine);
             yield return t.WaitForCompletion();
             
@@ -2974,7 +3037,7 @@ namespace _01.Scripts._01.ThreeMatch
             _puzzles[curX, curY].puzzleState = PuzzleState.Swapping;
             _puzzles[curX, curY] = null;
 
-            Tween t = po.transform.DOScale(0, 0.2f)
+            Tween t = po.transform.DOScale(0, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine)
                 .OnComplete(() =>
                 {
@@ -3018,7 +3081,7 @@ namespace _01.Scripts._01.ThreeMatch
             puzzle.puzzleState = PuzzleState.Idle;
             puzzle.isMatched = false;
             
-            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f)
+            Tween t =  newPuzzle.transform.DOScale(tileScale, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.InSine);
             yield return t.WaitForCompletion();
             
@@ -3068,12 +3131,12 @@ namespace _01.Scripts._01.ThreeMatch
         {
             Transform tr = gold.transform;
             Vector3 scale = tr.localScale;
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().UseTutorialPuzzleClock(this);
 
             tr.SetParent(puzzleFrame.parent.parent);
-            Tween t1 = tr.DOMove(goldUI.GoldImagePos, 0.4f)
+            Tween t1 = tr.DOMove(goldUI.GoldImagePos, 0.4f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.OutSine);
-            Tween t2 = tr.DOScale(scale * 1.2f, 0.2f)
+            Tween t2 = tr.DOScale(scale * 1.2f, 0.2f).UseTutorialPuzzleClock(this)
                 .SetEase(Ease.OutSine)
                 .SetLoops(2, LoopType.Yoyo);
 

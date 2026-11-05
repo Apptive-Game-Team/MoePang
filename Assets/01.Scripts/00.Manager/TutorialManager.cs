@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
+using _01.Scripts._02.Unit;
 using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
@@ -44,6 +45,9 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("대사 표시 후 다음 이벤트까지 기다리는 시간입니다. 화면을 누르면 즉시 진행합니다.")]
     [Min(0f)] [SerializeField] private float dialogueDuration = 5f;
 
+    [Tooltip("퍼즐 처리와 모든 소환이 끝난 뒤 다음 대사까지 기다리는 시간입니다.")]
+    [Min(0f)] [SerializeField] private float postActionDelay = 1f;
+
     private static TutorialManager activeTutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
     private int friendlyGradeOverride = 1;
@@ -51,6 +55,12 @@ public class TutorialManager : MonoBehaviour
     public static int FriendlyGradeOverride =>
         activeTutorial != null && activeTutorial.isActiveAndEnabled && GameManager.Instance.Istutorial
             ? activeTutorial.friendlyGradeOverride : 0;
+
+    public static bool UseUnscaledPuzzleTime => activeTutorial != null &&
+        activeTutorial.isActiveAndEnabled && activeTutorial.ownsTimeScale &&
+        activeTutorial.usesUnscaledPuzzleTime;
+
+    public static bool IsTutorialPopupOpen => UseUnscaledPuzzleTime && activeTutorial.endPopupOpen;
 
     public static bool TryGetFriendlyUnitOverride(
         IReadOnlyList<FriendlyUnitData> candidates, out FriendlyUnitData unit, int grade)
@@ -207,6 +217,14 @@ public class TutorialManager : MonoBehaviour
     private bool actionCompleted;
     private bool nextClicked;
     private bool waitingForDialogue;
+    private bool waitingForPuzzleAction;
+    private bool ownsTimeScale;
+    private bool usesUnscaledPuzzleTime;
+    private bool puzzleActionRunning;
+    private UnitSpawner friendlySpawner;
+    private bool tutorialPaused;
+    private float originalTimeScale;
+    private float gameplayTimeScale;
     private bool ownsInputRestriction;
     private StageManager stageManager;
     private HabitatModeManager habitatModeManager;
@@ -278,18 +296,34 @@ public class TutorialManager : MonoBehaviour
             ReleaseInputRestriction();
             yield break;
         }
+        puzzleGenerator.OnSwapStarted += HandleSwapStarted;
         puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
         puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
         puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
+        friendlySpawner = puzzleGenerator.FriendlySpawner;
+        if (friendlySpawner != null)
+            friendlySpawner.OnFriendlySpawned += HandleFriendlySpawned;
         SetUi(timeInfo, 0f);
         SetUi(lockButton, 0f);
         SetUi(pauseButton, 0f);
-        SetUi(underTutorialPanel, 0f);
+        SetPanel(tutorialPanel, false, false);
+        SetPanel(underTutorialPanel, false, false);
+
+        originalTimeScale = Time.timeScale;
+        gameplayTimeScale = originalTimeScale > 0f ? originalTimeScale : 1f;
+        ownsTimeScale = true;
+        usesUnscaledPuzzleTime = true;
+        // 초기 보드의 낙하가 끝난 뒤 첫 대사를 표시합니다.
+        SetTutorialPaused(false);
+        yield return new WaitUntil(CanContinueTutorial);
 
         foreach (TutorialStep step in steps)
         {
+            SetTutorialPaused(true);
             currentStep = step;
             actionCompleted = false;
+            puzzleActionRunning = false;
+            waitingForPuzzleAction = false;
             nextClicked = false;
             puzzleGenerator.SetTutorialInputRestriction(true);
             waitingForDialogue = true;
@@ -301,8 +335,13 @@ public class TutorialManager : MonoBehaviour
                 yield return new WaitUntil(CanContinueTutorial);
                 if (!puzzleGenerator.TryCreateTutorialObstacle(
                         step.obstaclePosition, step.obstacleType))
+                {
+                    ReleaseInputRestriction();
+                    RestoreTutorialTimeScale();
                     yield break;
+                }
                 yield return new WaitUntil(CanContinueTutorial);
+                SetTutorialPaused(true);
             }
 
             switch (step.waitType)
@@ -312,12 +351,10 @@ public class TutorialManager : MonoBehaviour
                     Vector2Int[] highlightCells = GetSwapHighlightCells(step);
                     if (highlightCells != null)
                         ShowStepHighlights(step, highlightCells);
+                    waitingForPuzzleAction = true;
                     puzzleGenerator.SetTutorialInputRestriction(true,
-                        (from, to) => !endPopupOpen && IsExpectedSwap(from, to));
-                    yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
-                    yield return new WaitUntil(CanContinueTutorial);
-                    if (highlightCells != null && highlightMask != null)
-                        highlightMask.HideHighlights();
+                        (from, to) => !endPopupOpen && waitingForPuzzleAction && IsExpectedSwap(from, to));
+                    yield return WaitForPuzzleResolution();
                     break;
                 case WaitType.NextClick:
                     // 설명 단계는 공통 대사 대기가 끝나면 다음 대사로 진행합니다.
@@ -326,18 +363,20 @@ public class TutorialManager : MonoBehaviour
                     yield return new WaitUntil(CanContinueTutorial);
                     // 바람/햇빛 모두 해당 단계에서 사용할 특수 타일을 강조합니다.
                     ShowStepHighlights(step, new[] { step.from });
+                    waitingForPuzzleAction = true;
                     puzzleGenerator.SetTutorialInputRestriction(true,
-                        specialAllowed: (position, type) => !endPopupOpen && IsExpectedSpecialTile(position, type));
-                    yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
-                    yield return new WaitUntil(CanContinueTutorial);
-                    if (highlightMask != null)
-                        highlightMask.HideHighlights();
+                        specialAllowed: (position, type) => !endPopupOpen && waitingForPuzzleAction &&
+                                                           IsExpectedSpecialTile(position, type));
+                    yield return WaitForPuzzleResolution();
                     break;
                 case WaitType.Delay:
                     yield return WaitTutorialDelay(step.delay);
                     break;
                 case WaitType.Hold:
-                    // 후속 단계가 준비될 때까지 현재 대사를 유지한다.
+                    // 마지막 안내 후에는 전투와 자유 퍼즐 조작을 계속할 수 있습니다.
+                    usesUnscaledPuzzleTime = false;
+                    SetTutorialPaused(false);
+                    ReleaseInputRestriction();
                     yield return new WaitUntil(() => false);
                     break;
             }
@@ -348,9 +387,43 @@ public class TutorialManager : MonoBehaviour
         SetPanel(tutorialPanel, false, false);
         SetPanel(underTutorialPanel, false, false);
         ReleaseInputRestriction();
+        RestoreTutorialTimeScale();
     }
 
     private bool CanContinueTutorial() => !endPopupOpen && puzzleGenerator.IsBoardReady;
+
+    private void SetTutorialPaused(bool paused)
+    {
+        tutorialPaused = paused;
+        ApplyTutorialTimeScale();
+    }
+
+    private void ApplyTutorialTimeScale()
+    {
+        if (ownsTimeScale)
+            Time.timeScale = endPopupOpen || tutorialPaused ? 0f : gameplayTimeScale;
+    }
+
+    private void RestoreTutorialTimeScale()
+    {
+        if (!ownsTimeScale)
+            return;
+        ownsTimeScale = false;
+        usesUnscaledPuzzleTime = false;
+        Time.timeScale = originalTimeScale;
+    }
+
+    private IEnumerator WaitForPuzzleResolution()
+    {
+        yield return new WaitUntil(() => !endPopupOpen && actionCompleted && puzzleGenerator.IsBoardReady);
+        if (highlightMask != null)
+            highlightMask.HideHighlights();
+
+        yield return new WaitUntil(() => !endPopupOpen && puzzleGenerator.IsTutorialResolutionComplete);
+        yield return WaitTutorialDelay(postActionDelay);
+        puzzleActionRunning = false;
+        SetTutorialPaused(true);
+    }
 
     private IEnumerator WaitForDialogue()
     {
@@ -373,8 +446,9 @@ public class TutorialManager : MonoBehaviour
         float elapsed = 0f;
         while (endPopupOpen || elapsed < duration)
         {
+            bool popupWasOpen = endPopupOpen;
             yield return null;
-            if (!endPopupOpen)
+            if (!popupWasOpen && !endPopupOpen)
                 elapsed += Time.unscaledDeltaTime;
         }
     }
@@ -432,6 +506,8 @@ public class TutorialManager : MonoBehaviour
         UpdateScreenNextInput();
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
+        if (UseUnscaledPuzzleTime && puzzleGenerator != null)
+            puzzleGenerator.SetTutorialEffectsPaused(true);
         previousSelection = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
         tutorialEndPopup.SetActive(true);
         if (EventSystem.current != null)
@@ -449,9 +525,14 @@ public class TutorialManager : MonoBehaviour
             return;
 
         endPopupOpen = false;
+        if (puzzleGenerator != null)
+            puzzleGenerator.SetTutorialEffectsPaused(false);
         if (tutorialEndPopup != null)
             tutorialEndPopup.SetActive(false);
-        Time.timeScale = previousTimeScale;
+        if (ownsTimeScale)
+            ApplyTutorialTimeScale();
+        else
+            Time.timeScale = previousTimeScale;
         if (EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(previousSelection);
         UpdateScreenNextInput();
@@ -565,6 +646,26 @@ public class TutorialManager : MonoBehaviour
                 (from == currentStep.to && to == currentStep.from));
     }
 
+    private void HandleSwapStarted(Vector2Int from, Vector2Int to)
+    {
+        if (waitingForPuzzleAction && !endPopupOpen && IsExpectedSwap(from, to))
+            BeginPuzzleAction();
+    }
+
+    private void BeginPuzzleAction()
+    {
+        waitingForPuzzleAction = false;
+        puzzleActionRunning = true;
+        puzzleGenerator.SetTutorialInputRestriction(true);
+        // 매치와 에너지 이동은 별도 퍼즐 시간으로 진행하며 전투는 정지 상태를 유지합니다.
+    }
+
+    private void HandleFriendlySpawned(FriendlyUnit unit)
+    {
+        if (puzzleActionRunning)
+            SetTutorialPaused(false);
+    }
+
     private void HandleSuccessfulSwap(Vector2Int from, Vector2Int to)
     {
         if (!IsExpectedSwap(from, to))
@@ -582,8 +683,12 @@ public class TutorialManager : MonoBehaviour
 
     private void HandleSpecialTileStarted(Vector2Int position, SpecialPuzzleType type)
     {
-        if (IsExpectedSpecialTile(position, type) && type == SpecialPuzzleType.CircleBomb)
+        if (!waitingForPuzzleAction || endPopupOpen || !IsExpectedSpecialTile(position, type))
+            return;
+
+        if (type == SpecialPuzzleType.CircleBomb)
             friendlyGradeOverride = 2;
+        BeginPuzzleAction();
     }
 
     private void HandleSpecialTile(Vector2Int position, SpecialPuzzleType type)
@@ -626,6 +731,8 @@ public class TutorialManager : MonoBehaviour
     private void OnDisable()
     {
         waitingForDialogue = false;
+        waitingForPuzzleAction = false;
+        puzzleActionRunning = false;
 
         if (highlightMask != null)
             highlightMask.HideHighlights();
@@ -646,15 +753,20 @@ public class TutorialManager : MonoBehaviour
             underNextButton.onClick.RemoveListener(NextDialogue);
         if (puzzleGenerator != null)
         {
+            puzzleGenerator.OnSwapStarted -= HandleSwapStarted;
             puzzleGenerator.OnSuccessfulSwapResolved -= HandleSuccessfulSwap;
             puzzleGenerator.OnSpecialTileResolved -= HandleSpecialTile;
             puzzleGenerator.OnSpecialTileStarted -= HandleSpecialTileStarted;
         }
+        if (friendlySpawner != null)
+            friendlySpawner.OnFriendlySpawned -= HandleFriendlySpawned;
         ReleaseInputRestriction();
+        RestoreTutorialTimeScale();
     }
 
     private void OnDestroy()
     {
+        RestoreTutorialTimeScale();
         if (screenNextInput != null)
             Destroy(screenNextInput.gameObject);
 
