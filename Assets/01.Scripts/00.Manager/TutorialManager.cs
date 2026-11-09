@@ -1007,7 +1007,13 @@ public class TutorialManager : MonoBehaviour
 
     private void HandlePuzzlePointerDown(PuzzleObject puzzle)
     {
-        if (!IsSwapHintWaiting)
+        if (!IsSwapHintWaiting || puzzle == null)
+            return;
+
+        Vector2Int position = new Vector2Int(puzzle.column, puzzle.row);
+        bool isHintTile = position == currentStep.from ||
+            (currentStep.waitType == WaitType.Swap && position == currentStep.to);
+        if (!isHintTile)
             return;
 
         hintPressedTile = puzzle;
