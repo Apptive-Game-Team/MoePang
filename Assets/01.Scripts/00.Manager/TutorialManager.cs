@@ -47,7 +47,7 @@ public class TutorialManager : MonoBehaviour
     [Min(0f)] [SerializeField] private float dialogueDuration = 5f;
 
     [Tooltip("퍼즐 처리와 모든 소환이 끝난 뒤 다음 대사까지 기다리는 시간입니다.")]
-    [Min(0f)] [SerializeField] private float postActionDelay = 1f;
+    [Min(0f)] [SerializeField] private float postActionDelay = 2f;
 
     private static TutorialManager activeTutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
