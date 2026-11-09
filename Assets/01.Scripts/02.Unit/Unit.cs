@@ -67,7 +67,7 @@ public class Unit : MonoBehaviour, IDamageable
     [Header("Long Melee Attack")]
     [SerializeField] protected RangeAttackPrefab attackProjectilePrefab;
     
-    // Suppresses the common puff only while a dedicated grade-five hit is played.
+    // Suppresses the common puff only while a dedicated unit hit effect is played.
     private bool suppressCommonHitEffect;
 
     private List<Buff> _activeBuffs = new();
@@ -471,7 +471,18 @@ public class Unit : MonoBehaviour, IDamageable
             return;
         }
 
-        target.TakeDamage(attackDamage);
+        bool dedicatedEffect = GradeFiveEffectLibrary.Supports(data);
+        if (dedicatedEffect)
+        {
+            Vector2 boxCenter = GetAttackBoxCenter();
+            Vector3 effectCenter = new(boxCenter.x, transform.position.y + unitSize * 0.45f, transform.position.z);
+            GradeFiveEffectLibrary.Play(data.UnitName, false, effectCenter, direction,
+                attackRange, spriteRenderer, transform);
+        }
+        if (dedicatedEffect && target is Unit targetUnit)
+            targetUnit.TakeUnitEffectDamage(attackDamage, data.UnitName, direction);
+        else
+            target.TakeDamage(attackDamage);
     }
 
     private IDamageable GetRaycastTarget()
@@ -574,7 +585,7 @@ public class Unit : MonoBehaviour, IDamageable
         if (dedicatedEffect)
         {
             Vector3 effectCenter = new(boxCenter.x, transform.position.y + unitSize * 0.45f, transform.position.z);
-            GradeFiveEffectLibrary.Play(data.UnitName, false, effectCenter, direction, attackRange, spriteRenderer);
+            GradeFiveEffectLibrary.Play(data.UnitName, false, effectCenter, direction, attackRange, spriteRenderer, transform);
         }
 
         foreach (Collider2D hit in hits)
@@ -585,7 +596,7 @@ public class Unit : MonoBehaviour, IDamageable
             if (target.GetTeam() == team) continue;
 
             if (dedicatedEffect && target is Unit targetUnit)
-                targetUnit.TakeGradeFiveAreaDamage(attackDamage, data.UnitName, direction);
+                targetUnit.TakeUnitEffectDamage(attackDamage, data.UnitName, direction);
             else
                 target.TakeDamage(attackDamage);
         }
@@ -597,13 +608,28 @@ public class Unit : MonoBehaviour, IDamageable
     {
         TeamType enemyTeam = (team == TeamType.Friendly) ? TeamType.Enemy : TeamType.Friendly;
         List<IDamageable> targets = UTQ.PeekTargets(enemyTeam, 3);
+        bool dedicatedEffect = GradeFiveEffectLibrary.Supports(data);
+        bool attackEffectPlayed = false;
 
         foreach (IDamageable target in targets)
         {
             if (target == null) continue;
             if (target is Castle && !IsTargetInAttackRange(target)) continue;
 
-            target.TakeDamage(attackDamage);
+            if (dedicatedEffect && !attackEffectPlayed)
+            {
+                Vector2 boxCenter = GetAttackBoxCenter();
+                Vector3 effectCenter = new(boxCenter.x, transform.position.y + unitSize * 0.45f, transform.position.z);
+                GradeFiveEffectLibrary.Play(data.UnitName, false, effectCenter, direction,
+                    attackRange, spriteRenderer, transform);
+                attackEffectPlayed = true;
+            }
+
+            // One attack visual on the attacker; one hit visual per selected unit.
+            if (dedicatedEffect && target is Unit targetUnit)
+                targetUnit.TakeUnitEffectDamage(attackDamage, data.UnitName, direction);
+            else
+                target.TakeDamage(attackDamage);
         }
     }
     
@@ -763,7 +789,7 @@ public class Unit : MonoBehaviour, IDamageable
     }
 
     // Preserve the public IDamageable signature and all existing health/state transitions.
-    private void TakeGradeFiveAreaDamage(float damage, UnitName source, float hitDirection)
+    private void TakeUnitEffectDamage(float damage, UnitName source, float hitDirection)
     {
         if (isDying || isDamaging)
         {
@@ -773,7 +799,7 @@ public class Unit : MonoBehaviour, IDamageable
         Vector3 hitPosition = transform.position + Vector3.up * (unitSize * 0.45f);
         bool previousSuppression = suppressCommonHitEffect;
         suppressCommonHitEffect = GradeFiveEffectLibrary.Play(source, true, hitPosition,
-            hitDirection, unitSize, spriteRenderer);
+            hitDirection, unitSize, spriteRenderer, transform);
         try
         {
             TakeDamage(damage);
