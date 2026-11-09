@@ -39,7 +39,7 @@ public class TutorialManager : MonoBehaviour
     [Min(0)] [SerializeField] private int tutorialStage = 0;
 
     [Header("Tutorial Enemy Stats")]
-    [Min(1f)] [SerializeField] private float tutorialEnemyMaxHp = 2f;
+    [Min(1f)] [SerializeField] private float tutorialEnemyMaxHp = 16f;
     [Min(0f)] [SerializeField] private float tutorialEnemyAttackDamage = 0f;
 
     [Header("대사 진행")]
