@@ -39,6 +39,8 @@ namespace _01.Scripts._01.ThreeMatch
         private readonly Queue<Func<IEnumerator>> _taskQueue = new();
         private bool _isProcessing;
 
+        public bool IsIdle => !_isProcessing && _taskQueue.Count == 0;
+
         private void Awake()
         {
             Image img = GetComponent<Image>();
@@ -98,12 +100,17 @@ namespace _01.Scripts._01.ThreeMatch
         
         public void AddStack(int num)
         {
+            AddStack(num, TutorialManager.FriendlyGradeOverride);
+        }
+
+        public void AddStack(int num, int tutorialGrade)
+        {
             if (isBanned)
             {
                 return;
             }
             
-            _taskQueue.Enqueue(() => AddStackProcess(num));
+            _taskQueue.Enqueue(() => AddStackProcess(num, tutorialGrade));
 
             if (!_isProcessing)
             {
@@ -116,13 +123,15 @@ namespace _01.Scripts._01.ThreeMatch
             _isProcessing = true;
             while (_taskQueue.Count > 0)
             {
+                while (TutorialManager.IsTutorialPopupOpen)
+                    yield return null;
                 var task = _taskQueue.Dequeue();
                 yield return task();
             }
             _isProcessing = false;
         }
         
-        private IEnumerator AddStackProcess(int num)
+        private IEnumerator AddStackProcess(int num, int tutorialGrade)
         {
             AddStackEffect();
             PlayStackAddedSFX(num);
@@ -135,14 +144,14 @@ namespace _01.Scripts._01.ThreeMatch
             {
                 FillStack(StackMaxCount);
                 
-                yield return new WaitForSeconds(0.2f);
+                yield return TutorialPuzzleClock.WaitForSeconds(0.2f);
                 
                 int spawnCount = totalNewCount / StackMaxCount;
                 _stackCount = totalNewCount % StackMaxCount;
                 
                 // todo : Add Spawn Effect
                 
-                Spawn(spawnCount);
+                Spawn(spawnCount, tutorialGrade);
                 FillStack(_stackCount);
             }
             else
@@ -151,7 +160,7 @@ namespace _01.Scripts._01.ThreeMatch
                 FillStack(_stackCount);
             }
 
-            yield return new WaitForSeconds(0.1f);
+            yield return TutorialPuzzleClock.WaitForSeconds(0.1f);
         }
 
         private void PlayStackAddedSFX(int count)
@@ -178,7 +187,7 @@ namespace _01.Scripts._01.ThreeMatch
 
             _material.SetFloat(Highlight, 0f);
 
-            _effectSeq = DOTween.Sequence();
+            _effectSeq = DOTween.Sequence().UseTutorialPuzzleClock(this);
             
             Tween t1 = transform.DOScale(0.8f, 0.1f).SetLoops(2, LoopType.Yoyo);
             Tween t2 = _material.DOFloat(1f, Highlight, 0.1f).SetLoops(2, LoopType.Yoyo);
@@ -194,11 +203,21 @@ namespace _01.Scripts._01.ThreeMatch
             });
         }
 
-        private void Spawn(int num)
+        public void SetTutorialEffectsPaused(bool paused)
+        {
+            if (_effectSeq == null || !_effectSeq.IsActive())
+                return;
+            if (paused)
+                _effectSeq.Pause();
+            else
+                _effectSeq.Play();
+        }
+
+        private void Spawn(int num, int tutorialGrade)
         {
             for (int i = 0; i < num; i++)
             {
-                _spawner.SpawnFriendly(type);
+                _spawner.SpawnFriendly(type, tutorialGrade);
             }
         }
 

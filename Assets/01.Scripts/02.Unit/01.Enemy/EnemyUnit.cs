@@ -19,6 +19,12 @@ public class EnemyUnit : Unit
 
     private void ApplyStageStatMultiplier()
     {
+        if (TutorialManager.TryGetEnemyStats(out float tutorialHp, out float tutorialDamage))
+        {
+            FinalStatApply(tutorialHp, tutorialDamage);
+            return;
+        }
+
         if (enemyData == null || StageManager.Instance == null)
         {
             return;
