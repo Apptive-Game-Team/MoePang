@@ -88,6 +88,12 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    public static bool TryGetCastleHp(out float maxHp)
+    {
+        maxHp = 500f;
+        return GameManager.Instance.Istutorial;
+    }
+
     public static bool TryGetEnemyStats(out float maxHp, out float attackDamage)
     {
         maxHp = 0f;
