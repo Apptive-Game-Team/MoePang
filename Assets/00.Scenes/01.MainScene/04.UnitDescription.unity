@@ -1087,6 +1087,7 @@ GameObject:
   - component: {fileID: 779954600}
   - component: {fileID: 779954599}
   - component: {fileID: 779954598}
+  - component: {fileID: 779954601}
   m_Layer: 5
   m_Name: LevelUpBox
   m_TagString: Untagged
@@ -2706,6 +2707,7 @@ GameObject:
   - component: {fileID: 2153080058293592421}
   - component: {fileID: 7599796062827861596}
   - component: {fileID: 6935147264031292188}
+  - component: {fileID: 7599796062827861597}
   m_Layer: 5
   m_Name: AcceptButton
   m_TagString: Untagged
@@ -3411,6 +3413,7 @@ GameObject:
   - component: {fileID: 4259215659439591761}
   - component: {fileID: 6932215657453125962}
   - component: {fileID: 1733899222229471915}
+  - component: {fileID: 7562389213923015222}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -3574,3 +3577,45 @@ SceneRoots:
   - {fileID: 858790410}
   - {fileID: 1095091450}
   - {fileID: 1610229944}
+--- !u!114 &779954601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779954596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &7562389213923015222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562389213923015221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &7599796062827861597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524940479363724243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1

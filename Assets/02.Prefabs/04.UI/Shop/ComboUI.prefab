@@ -148,6 +148,7 @@ GameObject:
   - component: {fileID: 2775947642343382030}
   - component: {fileID: 7043790472344632733}
   - component: {fileID: 7484170559563409441}
+  - component: {fileID: 4298048974771533816}
   m_Layer: 5
   m_Name: UpgradeButton
   m_TagString: Untagged
@@ -557,6 +558,7 @@ GameObject:
   - component: {fileID: 9194645038339800468}
   - component: {fileID: 2466196258869300056}
   - component: {fileID: 4749981002448118063}
+  - component: {fileID: 5243080294532999863}
   m_Layer: 5
   m_Name: OrderButton
   m_TagString: Untagged
@@ -690,6 +692,7 @@ GameObject:
   - component: {fileID: 6117676374819557910}
   - component: {fileID: 2780816709326679025}
   - component: {fileID: 1828554161219050714}
+  - component: {fileID: 5613816006324260854}
   m_Layer: 5
   m_Name: ComboUI
   m_TagString: Untagged
@@ -1132,3 +1135,45 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &4298048974771533816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2408680243633170570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &5243080294532999863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4598578865524220999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &5613816006324260854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4767557665500755861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1

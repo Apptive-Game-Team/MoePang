@@ -284,6 +284,7 @@ GameObject:
   - component: {fileID: 2153080058224546266}
   - component: {fileID: 7599796062901429987}
   - component: {fileID: 6935147264096193443}
+  - component: {fileID: 5175850092134125191}
   m_Layer: 5
   m_Name: AcceptButton
   m_TagString: Untagged
@@ -961,6 +962,7 @@ GameObject:
   - component: {fileID: 2227010857859929823}
   - component: {fileID: 1108708646724372568}
   - component: {fileID: 8528682244160343146}
+  - component: {fileID: 5596762214655072381}
   m_Layer: 5
   m_Name: CountDecreaseButton
   m_TagString: Untagged
@@ -1279,6 +1281,7 @@ GameObject:
   - component: {fileID: 4259215659500511726}
   - component: {fileID: 6932215657505731061}
   - component: {fileID: 1733899222303040020}
+  - component: {fileID: 8675328198683070857}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -1412,6 +1415,7 @@ GameObject:
   - component: {fileID: 5460484990480671654}
   - component: {fileID: 8143741507672779651}
   - component: {fileID: 905777807494141178}
+  - component: {fileID: 3249155352026662527}
   m_Layer: 5
   m_Name: CountIncreaseButton
   m_TagString: Untagged
@@ -1928,3 +1932,59 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &5175850092134125191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524940479424365420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &5596762214655072381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3894544734964767258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &8675328198683070857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562389213866543754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &3249155352026662527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7597001405144582421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1

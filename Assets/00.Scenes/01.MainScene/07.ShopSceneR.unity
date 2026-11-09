@@ -2954,6 +2954,7 @@ GameObject:
   - component: {fileID: 2153080059050973211}
   - component: {fileID: 7599796062007635746}
   - component: {fileID: 6935147264318866018}
+  - component: {fileID: 7599796062007635747}
   m_Layer: 5
   m_Name: AcceptButton
   m_TagString: Untagged
@@ -3660,6 +3661,7 @@ GameObject:
   - component: {fileID: 4259215658615138351}
   - component: {fileID: 6932215656695855156}
   - component: {fileID: 1733899221443324885}
+  - component: {fileID: 7562389213132653388}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -3822,3 +3824,31 @@ SceneRoots:
   - {fileID: 1010318967}
   - {fileID: 545674534}
   - {fileID: 2069707481}
+--- !u!114 &7562389213132653388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562389213132653387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &7599796062007635747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524940478606887597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
