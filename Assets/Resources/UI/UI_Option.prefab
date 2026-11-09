@@ -166,6 +166,7 @@ GameObject:
   - component: {fileID: 4746780477625726105}
   - component: {fileID: 7108371474744313951}
   - component: {fileID: 8492567206811438591}
+  - component: {fileID: 7500828413473378212}
   m_Layer: 5
   m_Name: ConnectMigrationRejectButton
   m_TagString: Untagged
@@ -275,6 +276,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7500828413473378212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231358985542095186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &628107986973706270
 GameObject:
   m_ObjectHideFlags: 0
@@ -692,6 +707,7 @@ GameObject:
   - component: {fileID: 4408774229431075300}
   - component: {fileID: 8886455443334180776}
   - component: {fileID: 7622772937369736869}
+  - component: {fileID: 4110540318934071011}
   m_Layer: 5
   m_Name: ConnectMigrationConfirmButton
   m_TagString: Untagged
@@ -801,6 +817,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4110540318934071011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212267391647992566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &1316661972610934634
 GameObject:
   m_ObjectHideFlags: 0
@@ -1102,6 +1132,7 @@ GameObject:
   - component: {fileID: 5414849924250353324}
   - component: {fileID: 4655957138398346578}
   - component: {fileID: 4297270325856348689}
+  - component: {fileID: 8356979976162924485}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -1222,6 +1253,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8356979976162924485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811101254365306993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &1865443756409708287
 GameObject:
   m_ObjectHideFlags: 0
@@ -1341,6 +1386,7 @@ GameObject:
   - component: {fileID: 5715025732237253649}
   - component: {fileID: 9180178247039422062}
   - component: {fileID: 3188319155647064483}
+  - component: {fileID: 4936656305160171427}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -1463,6 +1509,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &4936656305160171427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1897351145063745504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &2125980005727911124
 GameObject:
   m_ObjectHideFlags: 0
@@ -1475,6 +1535,7 @@ GameObject:
   - component: {fileID: 4684844662040491406}
   - component: {fileID: 1151815458129852280}
   - component: {fileID: 2464781073267382814}
+  - component: {fileID: 9201721460364403878}
   m_Layer: 5
   m_Name: LogoutButton
   m_TagString: Untagged
@@ -1584,6 +1645,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &9201721460364403878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2125980005727911124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &3035529562487877302
 GameObject:
   m_ObjectHideFlags: 0
@@ -1596,7 +1671,7 @@ GameObject:
   - component: {fileID: 12069738174086220}
   - component: {fileID: 5168505324297909134}
   m_Layer: 5
-  m_Name: UI_Option
+  m_Name: UI_OptionBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2067,6 +2142,7 @@ GameObject:
   - component: {fileID: 6888995755179258704}
   - component: {fileID: 6377573402814152876}
   - component: {fileID: 6462278712167051414}
+  - component: {fileID: 7290038777934613875}
   m_Layer: 5
   m_Name: GoogleLogin
   m_TagString: Untagged
@@ -2176,6 +2252,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7290038777934613875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3470464769040625840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &4047632785425680559
 GameObject:
   m_ObjectHideFlags: 0
@@ -2884,6 +2974,7 @@ GameObject:
   - component: {fileID: 7662959302112811644}
   - component: {fileID: 9045988036680720068}
   - component: {fileID: 4097993511864820862}
+  - component: {fileID: 1713599823188839040}
   m_Layer: 5
   m_Name: ConnectMigrationCancelButton
   m_TagString: Untagged
@@ -2992,6 +3083,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1713599823188839040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5157978547769921155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &5290022423640763050
 GameObject:
   m_ObjectHideFlags: 0
@@ -3147,6 +3252,7 @@ GameObject:
   - component: {fileID: 9194256446070827148}
   - component: {fileID: 1280086031907162758}
   - component: {fileID: 440022388417380224}
+  - component: {fileID: 3815578720951348049}
   m_Layer: 5
   m_Name: ExitButton
   m_TagString: Untagged
@@ -3268,6 +3374,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3815578720951348049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5304489525087300354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &5471048843686589215
 GameObject:
   m_ObjectHideFlags: 0
@@ -3447,6 +3567,7 @@ GameObject:
   - component: {fileID: 4526048627557540327}
   - component: {fileID: 878120232405132257}
   - component: {fileID: 3067375438602970137}
+  - component: {fileID: 8620599049019369590}
   m_Layer: 5
   m_Name: GoogleLoginButton
   m_TagString: Untagged
@@ -3556,6 +3677,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8620599049019369590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5765004114428090648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
 --- !u!1 &6022518961559109928
 GameObject:
   m_ObjectHideFlags: 0

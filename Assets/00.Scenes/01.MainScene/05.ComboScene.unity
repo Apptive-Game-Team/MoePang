@@ -777,6 +777,7 @@ GameObject:
   - component: {fileID: 1369588082}
   - component: {fileID: 1369588081}
   - component: {fileID: 1369588080}
+  - component: {fileID: 1369588084}
   m_Layer: 5
   m_Name: ComboOrderButton
   m_TagString: Untagged
@@ -1311,6 +1312,7 @@ GameObject:
   - component: {fileID: 2153080057756951829}
   - component: {fileID: 7599796061217083948}
   - component: {fileID: 6935147263494651756}
+  - component: {fileID: 7599796061217083949}
   m_Layer: 5
   m_Name: AcceptButton
   m_TagString: Untagged
@@ -1888,6 +1890,7 @@ GameObject:
   - component: {fileID: 4259215657828619553}
   - component: {fileID: 6932215655842219322}
   - component: {fileID: 1733899220619220699}
+  - component: {fileID: 7562389214460247622}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -2042,3 +2045,45 @@ SceneRoots:
   - {fileID: 2098116763}
   - {fileID: 360718421}
   - {fileID: 770022680}
+--- !u!114 &1369588084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369588079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &7562389214460247622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562389214460247621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &7599796061217083949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524940479900891043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
