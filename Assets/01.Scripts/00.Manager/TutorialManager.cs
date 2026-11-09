@@ -477,6 +477,7 @@ public class TutorialManager : MonoBehaviour
             puzzleGenerator.SetTutorialInputRestriction(true,
                 specialAllowed: (position, type) => !endPopupOpen && waitingForPuzzleAction &&
                                                    IsExpectedSpecialTile(position, type));
+            TryStartSwapHint();
         }
     }
 
@@ -910,13 +911,24 @@ public class TutorialManager : MonoBehaviour
     }
 
     private bool IsSwapHintWaiting => isActiveAndEnabled && currentStep != null &&
-        currentStep.waitType == WaitType.Swap && waitingForPuzzleAction && !endPopupOpen;
+        IsPuzzleActionStep(currentStep) && waitingForPuzzleAction && !endPopupOpen;
 
     private void TryStartSwapHint()
     {
         if (!IsSwapHintWaiting || hintPressedTile != null || swapHint == null ||
             puzzleGenerator == null || !puzzleGenerator.IsBoardReady)
             return;
+
+        if (currentStep.waitType == WaitType.SpecialTile)
+        {
+            if (puzzleGenerator.TryGetTutorialPuzzle(currentStep.from, out PuzzleObject puzzle) &&
+                puzzle is SpecialPuzzleObject special && special.specialPuzzleType == currentStep.specialType)
+            {
+                swapHint.Play(special, null, swapHintBrightness, swapHintScaleAmount,
+                    swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
+            }
+            return;
+        }
 
         if (puzzleGenerator.TryGetTutorialPuzzle(currentStep.from, out PuzzleObject first) &&
             puzzleGenerator.TryGetTutorialPuzzle(currentStep.to, out PuzzleObject second) &&
