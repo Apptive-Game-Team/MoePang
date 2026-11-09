@@ -1050,6 +1050,13 @@ public class TutorialManager : MonoBehaviour
 
     private void HandleFriendlySpawned(FriendlyUnit unit)
     {
+        if (unit != null && GameManager.Instance.Istutorial)
+        {
+            // 실제 아군 한 마리 소환마다 같은 프레임에 Farmer(0) 또는 Axe(2)를 한 마리 소환합니다.
+            int enemyIndex = UnityEngine.Random.Range(0, 2) == 0 ? 0 : 2;
+            friendlySpawner.SpawnTutorialEnemy(enemyIndex);
+        }
+
         if (currentStep != null && currentStep.dialogueIndex == 8 &&
             unit != null && unit.Data != null && unit.Data.UnitGrade == 2)
             sunlightSpawnedUnits.Add(unit);

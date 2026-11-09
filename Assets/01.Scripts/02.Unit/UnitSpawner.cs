@@ -179,6 +179,21 @@ namespace _01.Scripts._02.Unit
             return unlockedUnits[0];
         }
 
+        public void SpawnTutorialEnemy(int unitIndex)
+        {
+            if (!GameManager.Instance.Istutorial)
+                return;
+
+            var list = enemyUnitList.GetUnits();
+            if (list == null || unitIndex < 0 || unitIndex >= list.Count || list[unitIndex] == null)
+            {
+                Debug.LogError($"UnitSpawner: 튜토리얼 적 유닛 인덱스 {unitIndex}를 확인해 주세요.", this);
+                return;
+            }
+
+            UnitPool.Instance.Get(enemyPrefab, list[unitIndex], enemySpawnPosition);
+        }
+
         private void SpawnEnemy()
         {
             var list = enemyUnitList.GetUnits();
