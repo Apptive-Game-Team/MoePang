@@ -141,8 +141,8 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(4, 3)
     };
 
-    [Header("첫 교환 원형 힌트")]
-    [Tooltip("첫 단계에서 매치 줄 밖의 숲 타일 (3,4) 중앙에 표시할 UI 프리팹입니다.")]
+    [Header("교환 원형 힌트")]
+    [Tooltip("첫 단계와 Tutorial18에서 교환을 시작할 타일 중앙에 표시할 UI 프리팹입니다.")]
     [SerializeField] private GameObject hintCirclePrefab;
 
     [Header("교환 타일 힌트 애니메이션")]
@@ -185,6 +185,17 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(2, 2),
         new Vector2Int(3, 2),
         new Vector2Int(4, 2)
+    };
+
+    [Header("Tutorial18 하이라이트")]
+    [Tooltip("교환하는 두 칸, 바다 3매치 칸과 인접한 비활성화 장애물입니다.")]
+    [SerializeField] private Vector2Int[] step18HighlightCells =
+    {
+        new Vector2Int(2, 1),
+        new Vector2Int(1, 2),
+        new Vector2Int(2, 2),
+        new Vector2Int(3, 2),
+        new Vector2Int(3, 3)
     };
 
     [SerializeField] private TutorialStep[] steps =
@@ -784,6 +795,7 @@ public class TutorialManager : MonoBehaviour
             5 => step5HighlightCells,
             9 => step7HighlightCells,
             16 => step12HighlightCells,
+            18 => step18HighlightCells,
             _ => null
         };
     }
@@ -956,14 +968,15 @@ public class TutorialManager : MonoBehaviour
         {
             swapHint.Play(firstNormal, secondNormal, swapHintBrightness, swapHintScaleAmount,
                 swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
-            ShowFirstHintCircle();
+            ShowSwapHintCircle();
         }
     }
 
-    private void ShowFirstHintCircle()
+    private void ShowSwapHintCircle()
     {
-        // 이번 테스트는 첫 교환만 적용합니다. 매치 줄 밖의 타일은 step.from = (3,4)입니다.
-        if (currentStep != steps[0] || hintCirclePrefab == null || highlightMask == null)
+        // 매치 줄 밖에서 교환을 시작하는 타일을 안내합니다.
+        if ((currentStep != steps[0] && currentStep.dialogueIndex != 18) ||
+            hintCirclePrefab == null || highlightMask == null)
             return;
 
         RectTransform overlay = highlightMask.DimRectTransform;
