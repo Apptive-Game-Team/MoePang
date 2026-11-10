@@ -293,10 +293,6 @@ MonoBehaviour:
     m_Localized: Rat
     m_Metadata:
       m_Items: []
-  - m_Id: 80016016152010753
-    m_Localized: Dear
-    m_Metadata:
-      m_Items: []
   - m_Id: 80016016152010754
     m_Localized: Wolf
     m_Metadata:
@@ -433,11 +429,6 @@ MonoBehaviour:
   - m_Id: 80018093347512340
     m_Localized: A relaxed and gentle animal that makes everyone feel at ease. But
       when its friends are in danger, it quietly stands guard.
-    m_Metadata:
-      m_Items: []
-  - m_Id: 80018093347512325
-    m_Localized: With long legs and sharp senses, it notices distant danger before
-      anyone else. Quiet, but never hesitates to protect the meadow.
     m_Metadata:
       m_Items: []
   - m_Id: 80018093347512343
@@ -688,47 +679,44 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 90967021731520517
-    m_Localized: Matching 4 tiles at once created a Wind Tile, nya! Click it or move
-      it to activate it, nya!
+    m_Localized: Matching 4 tiles at once created a Wind Tile, nya!
     m_Metadata:
       m_Items: []
   - m_Id: 90967021731520518
+    m_Localized: Click the Wind Tile to activate it, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520519
+    m_Localized: Clicking or moving a Wind Tile like you just did turns an entire
+      line of tiles into energy, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520520
     m_Localized: Here's a chance to match 5 tiles, nya! Swap the polar tile with
       the ocean tile to make a match, nya!
     m_Metadata:
       m_Items: []
-  - m_Id: 90967021731520519
-    m_Localized: Matching 5 tiles creates a Sunlight Tile, nya! Give it a try, nya!
+  - m_Id: 90967021731520521
+    m_Localized: Matching 5 tiles creates a Sunlight Tile, nya!
     m_Metadata:
       m_Items: []
-  - m_Id: 90967021731520520
+  - m_Id: 90967021731520522
+    m_Localized: Give the Sunlight Tile a try, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520523
+    m_Localized: Clicking or moving a Sunlight Tile also turns all the tiles in a
+      circular area around it into energy at once, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520524
     m_Localized: Lucky you, a Tier 2 friend was summoned, nya! Matching tiles summons
       a random friend from that habitat, nya!
     m_Metadata:
       m_Items: []
-  - m_Id: 90967021731520521
+  - m_Id: 90967021731520525
     m_Localized: The humans are trying to make it harder for us to summon friends,
       nya!
-    m_Metadata:
-      m_Items: []
-  - m_Id: 90967021731520522
-    m_Localized: Every 3 seconds, the humans stop a tile from moving or cover it
-      up, nya!
-    m_Metadata:
-      m_Items: []
-  - m_Id: 90967021731520523
-    m_Localized: That tile just got locked, nya! Move another tile to include the
-      locked tile in a match, nya!
-    m_Metadata:
-      m_Items: []
-  - m_Id: 90967021731520524
-    m_Localized: This time, they've completely disabled a tile, nya! Make a match
-      next to it to restore it, nya!
-    m_Metadata:
-      m_Items: []
-  - m_Id: 90967021731520525
-    m_Localized: That covers the basics, nya! Join your friends, push back the humans,
-      and destroy the building at the far end to protect us, nya!
     m_Metadata:
       m_Items: []
   - m_Id: 92801934655037440
@@ -741,6 +729,38 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 92803728244285441
     m_Localized: You can revisit the tutorial in Settings.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265498800128
+    m_Localized: Deer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265528160256
+    m_Localized: With long legs and sharp senses, it notices distant danger before
+      anyone else. Quiet, but never hesitates to protect the meadow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354560
+    m_Localized: Every 3 seconds, the humans stop a tile from moving or cover it
+      up, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354561
+    m_Localized: That tile just got locked, nya! Move another tile to include the
+      locked tile in a match, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354562
+    m_Localized: This time, they've completely disabled a tile, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354563
+    m_Localized: Make a match next to that tile to restore it, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354564
+    m_Localized: That covers the basics, nya! Join your friends, push back the humans,
+      and destroy the building at the far end to protect us, nya!
     m_Metadata:
       m_Items: []
   references:
