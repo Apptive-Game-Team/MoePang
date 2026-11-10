@@ -127,7 +127,7 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("서식지 아이콘과 에너지 원을 포함하는 SpawnStack 부모 영역입니다.")]
     [SerializeField] private RectTransform spawnStackHighlightRoot;
 
-    [Header("2단계 유닛 설명 카메라 (Tutorial09)")]
+    [Header("2단계 유닛 설명 카메라 (Tutorial13)")]
     [SerializeField] private BattleUIController battleCameraController;
 
     [Header("첫 단계 하이라이트")]
@@ -165,7 +165,7 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(4, 2)
     };
 
-    [Header("7단계 하이라이트")]
+    [Header("Tutorial09 하이라이트")]
     [Tooltip("교환하는 두 칸과 교환 후 극지방 5매치가 되는 칸입니다. 보드 좌표는 0부터 시작합니다.")]
     [SerializeField] private Vector2Int[] step7HighlightCells =
     {
@@ -177,7 +177,7 @@ public class TutorialManager : MonoBehaviour
         new Vector2Int(5, 3)
     };
 
-    [Header("12단계 하이라이트")]
+    [Header("Tutorial16 하이라이트")]
     [Tooltip("교환하는 두 칸과 자물쇠 타일을 포함한 숲 3매치 칸입니다. 보드 좌표는 0부터 시작합니다.")]
     [SerializeField] private Vector2Int[] step12HighlightCells =
     {
@@ -203,42 +203,50 @@ public class TutorialManager : MonoBehaviour
             dialogueIndex = 5, waitType = WaitType.Swap,
             from = new Vector2Int(2, 3), to = new Vector2Int(2, 2)
         },
+        new TutorialStep { dialogueIndex = 6, waitType = WaitType.NextClick },
         new TutorialStep
         {
-            dialogueIndex = 6, waitType = WaitType.SpecialTile,
+            dialogueIndex = 7, waitType = WaitType.SpecialTile,
             from = new Vector2Int(2, 2), specialType = SpecialPuzzleType.RowBomb
         },
+        new TutorialStep { dialogueIndex = 8, waitType = WaitType.NextClick },
         new TutorialStep
         {
-            dialogueIndex = 7, waitType = WaitType.Swap,
+            dialogueIndex = 9, waitType = WaitType.Swap,
             from = new Vector2Int(3, 4), to = new Vector2Int(3, 3)
         },
+        new TutorialStep { dialogueIndex = 10, waitType = WaitType.NextClick },
         new TutorialStep
         {
-            dialogueIndex = 8, waitType = WaitType.SpecialTile,
+            dialogueIndex = 11, waitType = WaitType.SpecialTile,
             from = new Vector2Int(3, 3), specialType = SpecialPuzzleType.CircleBomb
         },
-        new TutorialStep { dialogueIndex = 9, waitType = WaitType.NextClick, panel = PanelType.Under },
+        new TutorialStep { dialogueIndex = 12, waitType = WaitType.NextClick },
+        new TutorialStep { dialogueIndex = 13, waitType = WaitType.NextClick, panel = PanelType.Under },
         new TutorialStep
         {
-            dialogueIndex = 10, waitType = WaitType.Delay, delay = 0f,
+            dialogueIndex = 14, waitType = WaitType.NextClick,
             enterAction = StepAction.CreateObstacle,
             obstaclePosition = new Vector2Int(4, 2), obstacleType = ObstaclePuzzleType.Fixed
         },
-        new TutorialStep { dialogueIndex = 11, waitType = WaitType.NextClick },
+        new TutorialStep { dialogueIndex = 15, waitType = WaitType.NextClick },
         new TutorialStep
         {
-            dialogueIndex = 12, waitType = WaitType.Swap,
+            dialogueIndex = 16, waitType = WaitType.Swap,
             from = new Vector2Int(3, 1), to = new Vector2Int(3, 2)
         },
         new TutorialStep
         {
-            dialogueIndex = 13, waitType = WaitType.Swap,
+            dialogueIndex = 17, waitType = WaitType.NextClick,
             enterAction = StepAction.CreateObstacle,
-            obstaclePosition = new Vector2Int(3, 3), obstacleType = ObstaclePuzzleType.DeActivated,
+            obstaclePosition = new Vector2Int(3, 3), obstacleType = ObstaclePuzzleType.DeActivated
+        },
+        new TutorialStep
+        {
+            dialogueIndex = 18, waitType = WaitType.Swap,
             from = new Vector2Int(2, 1), to = new Vector2Int(2, 2)
         },
-        new TutorialStep { dialogueIndex = 14, waitType = WaitType.Hold }
+        new TutorialStep { dialogueIndex = 19, waitType = WaitType.Hold }
     };
 
     private TutorialStep currentStep;
@@ -441,9 +449,8 @@ public class TutorialManager : MonoBehaviour
         waitingForPuzzleAction = false;
         nextClicked = false;
         puzzleGenerator.SetTutorialInputRestriction(true);
-        waitingForDialogue = true;
+        waitingForDialogue = step.enterAction != StepAction.CreateObstacle;
         ShowStep(step);
-        yield return WaitForDialogue();
 
         if (step.enterAction == StepAction.CreateObstacle)
         {
@@ -455,7 +462,11 @@ public class TutorialManager : MonoBehaviour
             }
             yield return new WaitUntil(CanContinueTutorial);
             SetTutorialPaused(true);
+            // 생성이 끝난 시점부터 대사 대기를 시작하고 화면 클릭도 허용합니다.
+            waitingForDialogue = true;
+            UpdateScreenNextInput();
         }
+        yield return WaitForDialogue();
     }
 
     private void BeginPuzzleActionWait()
@@ -771,8 +782,8 @@ public class TutorialManager : MonoBehaviour
         return step.dialogueIndex switch
         {
             5 => step5HighlightCells,
-            7 => step7HighlightCells,
-            12 => step12HighlightCells,
+            9 => step7HighlightCells,
+            16 => step12HighlightCells,
             _ => null
         };
     }
@@ -803,7 +814,7 @@ public class TutorialManager : MonoBehaviour
 
         if (step.dialogueIndex == 2)
             ShowSpawnStackHighlights(step);
-        else if (step.dialogueIndex == 9)
+        else if (step.dialogueIndex == 13)
             ShowFrontSunlightUnitHighlight(step);
     }
 
@@ -866,7 +877,7 @@ public class TutorialManager : MonoBehaviour
     private void LateUpdate()
     {
         // 대사 중 카메라가 이동해도 선택한 유닛 위치에 마스크를 맞춥니다.
-        if (waitingForDialogue && currentStep != null && currentStep.dialogueIndex == 9)
+        if (waitingForDialogue && currentStep != null && currentStep.dialogueIndex == 13)
             highlightMask?.RequestRefresh();
     }
 
@@ -1057,7 +1068,7 @@ public class TutorialManager : MonoBehaviour
             friendlySpawner.SpawnTutorialEnemy(enemyIndex);
         }
 
-        if (currentStep != null && currentStep.dialogueIndex == 8 &&
+        if (currentStep != null && currentStep.dialogueIndex == 11 &&
             unit != null && unit.Data != null && unit.Data.UnitGrade == 2)
             sunlightSpawnedUnits.Add(unit);
 

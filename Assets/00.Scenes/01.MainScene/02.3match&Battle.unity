@@ -7076,6 +7076,16 @@ MonoBehaviour:
     obstacleType: 0
     delay: 1
   - dialogueIndex: 6
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
+    delay: 1
+  - dialogueIndex: 7
     waitType: 4
     panel: 0
     from: {x: 2, y: 2}
@@ -7085,7 +7095,17 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 7
+  - dialogueIndex: 8
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
+    delay: 1
+  - dialogueIndex: 9
     waitType: 0
     panel: 0
     from: {x: 3, y: 4}
@@ -7095,7 +7115,17 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 8
+  - dialogueIndex: 10
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
+    delay: 1
+  - dialogueIndex: 11
     waitType: 4
     panel: 0
     from: {x: 3, y: 3}
@@ -7105,7 +7135,17 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 9
+  - dialogueIndex: 12
+    waitType: 1
+    panel: 0
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
+    delay: 1
+  - dialogueIndex: 13
     waitType: 1
     panel: 1
     from: {x: 0, y: 0}
@@ -7115,8 +7155,8 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 10
-    waitType: 2
+  - dialogueIndex: 14
+    waitType: 1
     panel: 0
     from: {x: 0, y: 0}
     to: {x: 0, y: 0}
@@ -7125,7 +7165,7 @@ MonoBehaviour:
     obstaclePosition: {x: 4, y: 2}
     obstacleType: 1
     delay: 0
-  - dialogueIndex: 11
+  - dialogueIndex: 15
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7135,7 +7175,7 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 12
+  - dialogueIndex: 16
     waitType: 0
     panel: 0
     from: {x: 3, y: 1}
@@ -7145,17 +7185,27 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 13
-    waitType: 0
+  - dialogueIndex: 17
+    waitType: 1
     panel: 0
-    from: {x: 2, y: 1}
-    to: {x: 2, y: 2}
+    from: {x: 0, y: 0}
+    to: {x: 0, y: 0}
     specialType: 2
     enterAction: 1
     obstaclePosition: {x: 3, y: 3}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 14
+  - dialogueIndex: 18
+    waitType: 0
+    panel: 0
+    from: {x: 2, y: 1}
+    to: {x: 2, y: 2}
+    specialType: 2
+    enterAction: 0
+    obstaclePosition: {x: 0, y: 0}
+    obstacleType: 0
+    delay: 1
+  - dialogueIndex: 19
     waitType: 3
     panel: 0
     from: {x: 0, y: 0}
