@@ -368,7 +368,10 @@ public class TutorialManager : MonoBehaviour
         puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
         friendlySpawner = puzzleGenerator.FriendlySpawner;
         if (friendlySpawner != null)
+        {
+            friendlySpawner.OnFriendlySpawning += HandleFriendlySpawning;
             friendlySpawner.OnFriendlySpawned += HandleFriendlySpawned;
+        }
         SetUi(timeInfo, 0f);
         SetUi(lockButton, 0f);
         SetUi(pauseButton, 0f);
@@ -397,8 +400,6 @@ public class TutorialManager : MonoBehaviour
             {
                 case WaitType.Swap:
                 case WaitType.SpecialTile:
-                    yield return new WaitUntil(CanContinueTutorial);
-                    BeginPuzzleActionWait();
                     yield return WaitForPuzzleResolution();
                     if (presentationFailed)
                         yield break;
@@ -410,6 +411,9 @@ public class TutorialManager : MonoBehaviour
                     break;
                 case WaitType.Hold:
                     // 마지막 안내 후에는 전투와 자유 퍼즐 조작을 계속할 수 있습니다.
+                    SetPanel(tutorialPanel, false, false);
+                    SetPanel(underTutorialPanel, false, false);
+                    ClearStepPresentation();
                     usesUnscaledPuzzleTime = false;
                     SetTutorialPaused(false);
                     ReleaseInputRestriction();
@@ -460,8 +464,15 @@ public class TutorialManager : MonoBehaviour
         waitingForPuzzleAction = false;
         nextClicked = false;
         puzzleGenerator.SetTutorialInputRestriction(true);
-        waitingForDialogue = step.enterAction != StepAction.CreateObstacle;
+        waitingForDialogue = !IsPuzzleActionStep(step) && step.enterAction != StepAction.CreateObstacle;
         ShowStep(step);
+
+        if (IsPuzzleActionStep(step))
+        {
+            // 조작 안내는 대사 표시와 같은 프레임에 입력과 힌트를 활성화합니다.
+            BeginPuzzleActionWait();
+            yield break;
+        }
 
         if (step.enterAction == StepAction.CreateObstacle)
         {
@@ -559,8 +570,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         isReplaying = false;
-        yield return new WaitUntil(CanContinueTutorial);
-        BeginPuzzleActionWait();
+        SetReplayButtonVisible(waitingForPuzzleAction && replayStartIndex >= 0);
     }
 
     private void FailTutorialPresentation()
@@ -1081,6 +1091,16 @@ public class TutorialManager : MonoBehaviour
         // 매치와 에너지 이동은 별도 퍼즐 시간으로 진행하며 전투는 정지 상태를 유지합니다.
     }
 
+    private void HandleFriendlySpawning()
+    {
+        if (!puzzleActionRunning)
+            return;
+
+        SetPanel(tutorialPanel, false, false);
+        SetPanel(underTutorialPanel, false, false);
+        highlightMask?.RequestRefresh();
+    }
+
     private void HandleFriendlySpawned(FriendlyUnit unit)
     {
         if (unit != null && GameManager.Instance.Istutorial)
@@ -1208,7 +1228,10 @@ public class TutorialManager : MonoBehaviour
             puzzleGenerator.OnSpecialTileStarted -= HandleSpecialTileStarted;
         }
         if (friendlySpawner != null)
+        {
+            friendlySpawner.OnFriendlySpawning -= HandleFriendlySpawning;
             friendlySpawner.OnFriendlySpawned -= HandleFriendlySpawned;
+        }
         ReleaseInputRestriction();
         RestoreTutorialTimeScale();
     }
