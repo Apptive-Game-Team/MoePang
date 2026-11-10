@@ -6962,7 +6962,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d38bf924babfcfe44bb77873ace9670c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoStart: 1
+  requireTutorialMode: 1
+  useBattleRules: 1
+  pauseGameplay: 1
+  localizationTable: LocalizationDataTable
+  onCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopped:
+    m_PersistentCalls:
+      m_Calls: []
   tutorialStage: 0
+  applyTutorialStage: 1
+  initialFriendlyGrade: 1
+  tutorialCastleHp: 500
+  mirrorEnemySpawns: 1
+  tutorialEnemyIndices:
+  - 0
+  - 2
   tutorialEnemyMaxHp: 16
   tutorialEnemyAttackDamage: 0
   dialogueDuration: 5
@@ -6984,11 +7002,6 @@ MonoBehaviour:
   spawnStackHighlightRoot: {fileID: 1195533397}
   battleCameraController: {fileID: 1162275569}
   highlightMask: {fileID: 707969075}
-  firstStepHighlightCells:
-  - {x: 3, y: 4}
-  - {x: 2, y: 3}
-  - {x: 3, y: 3}
-  - {x: 4, y: 3}
   hintCirclePrefab: {fileID: 1022351411252221748, guid: cd5e84ba8749b0748a92f6733d17e7a3, type: 3}
   swapHintBrightness: 0.6
   swapHintScaleAmount: 0.2
@@ -6996,26 +7009,9 @@ MonoBehaviour:
   swapHintPulseGap: 0.12
   swapHintRepeatDelay: 1
   swapHintGlowColor: {r: 5, g: 4.5, b: 4.240838, a: 0.65}
-  step5HighlightCells:
-  - {x: 2, y: 3}
-  - {x: 1, y: 2}
-  - {x: 2, y: 2}
-  - {x: 3, y: 2}
-  - {x: 4, y: 2}
-  step7HighlightCells:
-  - {x: 3, y: 4}
-  - {x: 1, y: 3}
-  - {x: 2, y: 3}
-  - {x: 3, y: 3}
-  - {x: 4, y: 3}
-  - {x: 5, y: 3}
-  step12HighlightCells:
-  - {x: 3, y: 1}
-  - {x: 2, y: 2}
-  - {x: 3, y: 2}
-  - {x: 4, y: 2}
   steps:
-  - dialogueIndex: 0
+  - dialogueKey: Tutorial00
+    dialogueIndex: 0
     waitType: 0
     panel: 0
     from: {x: 3, y: 4}
@@ -7025,7 +7021,36 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 1
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells:
+    - {x: 3, y: 4}
+    - {x: 2, y: 3}
+    - {x: 3, y: 3}
+    - {x: 4, y: 3}
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 1
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial01
+    dialogueIndex: 1
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7035,7 +7060,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 2
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial02
+    dialogueIndex: 2
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7045,7 +7095,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 3
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 1
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial03
+    dialogueIndex: 3
     waitType: 1
     panel: 1
     from: {x: 0, y: 0}
@@ -7055,7 +7130,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 4
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial04
+    dialogueIndex: 4
     waitType: 1
     panel: 1
     from: {x: 0, y: 0}
@@ -7065,7 +7165,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 5
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 1
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial05
+    dialogueIndex: 5
     waitType: 0
     panel: 0
     from: {x: 2, y: 3}
@@ -7075,7 +7200,37 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 6
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells:
+    - {x: 2, y: 3}
+    - {x: 1, y: 2}
+    - {x: 2, y: 2}
+    - {x: 3, y: 2}
+    - {x: 4, y: 2}
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial06
+    dialogueIndex: 6
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7085,7 +7240,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 7
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial07
+    dialogueIndex: 7
     waitType: 4
     panel: 0
     from: {x: 2, y: 2}
@@ -7095,7 +7275,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 8
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial08
+    dialogueIndex: 8
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7105,7 +7310,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 9
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial09
+    dialogueIndex: 9
     waitType: 0
     panel: 0
     from: {x: 3, y: 4}
@@ -7115,7 +7345,38 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 10
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells:
+    - {x: 3, y: 4}
+    - {x: 1, y: 3}
+    - {x: 2, y: 3}
+    - {x: 3, y: 3}
+    - {x: 4, y: 3}
+    - {x: 5, y: 3}
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial10
+    dialogueIndex: 10
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7125,7 +7386,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 11
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial11
+    dialogueIndex: 11
     waitType: 4
     panel: 0
     from: {x: 3, y: 3}
@@ -7135,7 +7421,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 12
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: 2
+    afterActionFriendlyGrade: 0
+    recordSpawnedUnits: 1
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial12
+    dialogueIndex: 12
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7145,7 +7456,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 13
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial13
+    dialogueIndex: 13
     waitType: 1
     panel: 1
     from: {x: 0, y: 0}
@@ -7155,7 +7491,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 14
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 1
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial14
+    dialogueIndex: 14
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7165,7 +7526,32 @@ MonoBehaviour:
     obstaclePosition: {x: 4, y: 2}
     obstacleType: 1
     delay: 0
-  - dialogueIndex: 15
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial15
+    dialogueIndex: 15
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7175,7 +7561,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 16
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial16
+    dialogueIndex: 16
     waitType: 0
     panel: 0
     from: {x: 3, y: 1}
@@ -7185,7 +7596,36 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 17
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells:
+    - {x: 3, y: 1}
+    - {x: 2, y: 2}
+    - {x: 3, y: 2}
+    - {x: 4, y: 2}
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial17
+    dialogueIndex: 17
     waitType: 1
     panel: 0
     from: {x: 0, y: 0}
@@ -7195,7 +7635,32 @@ MonoBehaviour:
     obstaclePosition: {x: 3, y: 3}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 18
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial18
+    dialogueIndex: 18
     waitType: 0
     panel: 0
     from: {x: 2, y: 1}
@@ -7205,7 +7670,37 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
-  - dialogueIndex: 19
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells:
+    - {x: 2, y: 1}
+    - {x: 1, y: 2}
+    - {x: 2, y: 2}
+    - {x: 3, y: 2}
+    - {x: 3, y: 3}
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 1
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  - dialogueKey: Tutorial19
+    dialogueIndex: 19
     waitType: 3
     panel: 0
     from: {x: 0, y: 0}
@@ -7215,6 +7710,32 @@ MonoBehaviour:
     obstaclePosition: {x: 0, y: 0}
     obstacleType: 0
     delay: 1
+    dialogueDuration: -1
+    dimBackground: 0
+    highlightObjects: []
+    highlightRects: []
+    highlightCells: []
+    highlightSpawnStack: 0
+    showCameraButton: 0
+    focusSpawnedUnit: 0
+    focusUnitGrade: 2
+    playHintAnimation: 1
+    showHintCircle: 0
+    hidePanelBeforeSpawn: 1
+    actionFriendlyGrade: -1
+    afterActionFriendlyGrade: -1
+    recordSpawnedUnits: 0
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onActionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
+  endAcceptButton: {fileID: 707969076}
+  endCloseButton: {fileID: 707969077}
 --- !u!4 &707969074
 Transform:
   m_ObjectHideFlags: 0
@@ -17478,6 +17999,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: DetailText
       objectReference: {fileID: 0}
+    - target: {fileID: 6935147264096193443, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1733899222303040020, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -17493,6 +18022,28 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4379940642145891419, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
   m_PrefabInstance: {fileID: 1691265926}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &707969076 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6935147264096193443, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
+  m_PrefabInstance: {fileID: 1691265926}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+--- !u!114 &707969077 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1733899222303040020, guid: 1e74d4a1fba2b3c4c8e5c2af3abd48d5, type: 3}
+  m_PrefabInstance: {fileID: 1691265926}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
 --- !u!1 &1705609264
 GameObject:
   m_ObjectHideFlags: 0

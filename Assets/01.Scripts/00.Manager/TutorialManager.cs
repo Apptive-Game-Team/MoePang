@@ -10,18 +10,24 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.Events;
+using UnityEngine.Localization.Settings;
+using UnityEngine.SceneManagement;
 
 // StageManager의 Awake 이후, 전투 오브젝트의 Start 이전에 스테이지를 적용한다.
 [DefaultExecutionOrder(100)]
 public class TutorialManager : MonoBehaviour
 {
-    public enum WaitType { Swap, NextClick, Delay, Hold, SpecialTile }
+    public enum WaitType { Swap, NextClick, Delay, Hold, SpecialTile, Event }
     public enum PanelType { Top, Under }
     public enum StepAction { None, CreateObstacle }
 
     [Serializable]
     public class TutorialStep
     {
+        [Tooltip("직접 사용할 번역 키입니다. 비워 두면 기존 대사 목록의 인덱스를 사용합니다.")]
+        public string dialogueKey;
+        [Tooltip("Dialogue Key가 비어 있을 때만 사용하는 기존 대사 목록 인덱스입니다.")]
         [Min(0)] public int dialogueIndex;
         public WaitType waitType;
         public PanelType panel;
@@ -32,11 +38,55 @@ public class TutorialManager : MonoBehaviour
         public Vector2Int obstaclePosition;
         public ObstaclePuzzleType obstacleType;
         [Min(0f)] public float delay = 1f;
+
+        [Header("표시와 하이라이트")]
+        [Tooltip("-1이면 공통 대사 시간을 사용합니다.")]
+        public float dialogueDuration = -1f;
+        public bool dimBackground;
+        public GameObject[] highlightObjects = Array.Empty<GameObject>();
+        public RectTransform[] highlightRects = Array.Empty<RectTransform>();
+        public Vector2Int[] highlightCells = Array.Empty<Vector2Int>();
+        public bool highlightSpawnStack;
+        public bool showCameraButton;
+        public bool focusSpawnedUnit;
+        [Min(1)] public int focusUnitGrade = 2;
+        public bool playHintAnimation = true;
+        public bool showHintCircle;
+        public bool hidePanelBeforeSpawn = true;
+
+        [Header("동작 중 소환 설정")]
+        [Tooltip("-1이면 등급 설정을 유지, 0이면 일반 소환 규칙을 사용합니다.")]
+        public int actionFriendlyGrade = -1;
+        public int afterActionFriendlyGrade = -1;
+        public bool recordSpawnedUnits;
+
+        [Header("추가 이벤트 (설명 다시 보기에서도 실행됩니다)")]
+        public UnityEvent onEnter = new();
+        public UnityEvent onActionStarted = new();
+        public UnityEvent onExit = new();
     }
+
+    [Header("실행 방식")]
+    [SerializeField] private bool autoStart = true;
+    [SerializeField] private bool requireTutorialMode = true;
+    [Tooltip("일반 UI 안내에서는 끄세요. 퍼즐, 전투 스탯, 소환 제어를 사용하지 않습니다.")]
+    [SerializeField] private bool useBattleRules = true;
+    [SerializeField] private bool pauseGameplay = true;
+    [SerializeField] private string localizationTable = "LocalizationDataTable";
+    [SerializeField] private UnityEvent onCompleted = new();
+    [SerializeField] private UnityEvent onStopped = new();
+    public bool IsRunning { get; private set; }
+    public bool IsInstructionComplete { get; private set; }
+    public int CurrentStepIndex => currentStep != null ? currentStepIndex : -1;
 
     [Header("Tutorial Stage")]
     [Tooltip("내부 스테이지 번호입니다. 0 = 화면의 1스테이지(최저 난이도).")]
     [Min(0)] [SerializeField] private int tutorialStage = 0;
+    [SerializeField] private bool applyTutorialStage = true;
+    [Min(0)] [SerializeField] private int initialFriendlyGrade = 1;
+    [Min(1f)] [SerializeField] private float tutorialCastleHp = 500f;
+    [SerializeField] private bool mirrorEnemySpawns = true;
+    [SerializeField] private int[] tutorialEnemyIndices = { 0, 2 };
 
     [Header("Tutorial Enemy Stats")]
     [Min(1f)] [SerializeField] private float tutorialEnemyMaxHp = 16f;
@@ -50,11 +100,29 @@ public class TutorialManager : MonoBehaviour
     [Min(0f)] [SerializeField] private float postActionDelay = 2f;
 
     private static TutorialManager activeTutorial;
+    private static string pendingRestartScene;
+    private static string pendingRestartOwner;
+    private bool sessionPrepared;
+    private int runVersion;
+    private bool habitatApplied;
+    private readonly Dictionary<CanvasGroup, UiState> savedUiStates = new();
+
+    private struct UiState
+    {
+        public bool active;
+        public float alpha;
+        public bool interactable;
+        public bool blocksRaycasts;
+    }
+
+    private static bool HasActiveBattle => activeTutorial != null &&
+        activeTutorial.isActiveAndEnabled && activeTutorial.sessionPrepared &&
+        activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.Istutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
     private int friendlyGradeOverride = 1;
 
     public static int FriendlyGradeOverride =>
-        activeTutorial != null && activeTutorial.isActiveAndEnabled && GameManager.Instance.Istutorial
+        HasActiveBattle
             ? activeTutorial.friendlyGradeOverride : 0;
 
     public static bool UseUnscaledPuzzleTime => activeTutorial != null &&
@@ -67,8 +135,7 @@ public class TutorialManager : MonoBehaviour
         IReadOnlyList<FriendlyUnitData> candidates, out FriendlyUnitData unit, int grade)
     {
         unit = null;
-        if (activeTutorial == null || !activeTutorial.isActiveAndEnabled ||
-            !GameManager.Instance.Istutorial || grade == 0)
+        if (!HasActiveBattle || grade == 0)
             return false;
 
         if (candidates != null)
@@ -90,16 +157,15 @@ public class TutorialManager : MonoBehaviour
 
     public static bool TryGetCastleHp(out float maxHp)
     {
-        maxHp = 500f;
-        return GameManager.Instance.Istutorial;
+        maxHp = HasActiveBattle ? Mathf.Max(1f, activeTutorial.tutorialCastleHp) : 0f;
+        return HasActiveBattle;
     }
 
     public static bool TryGetEnemyStats(out float maxHp, out float attackDamage)
     {
         maxHp = 0f;
         attackDamage = 0f;
-        if (activeTutorial == null || !activeTutorial.isActiveAndEnabled ||
-            !GameManager.Instance.Istutorial)
+        if (!HasActiveBattle)
             return false;
 
         maxHp = Mathf.Max(1f, activeTutorial.tutorialEnemyMaxHp);
@@ -123,26 +189,18 @@ public class TutorialManager : MonoBehaviour
     [SerializeField, HideInInspector] private Button nextButton;
     [SerializeField, HideInInspector] private Button underNextButton;
 
-    [Header("에너지 소환 설명 하이라이트 (Tutorial02)")]
+    [Header("공통 하이라이트 대상")]
     [Tooltip("서식지 아이콘과 에너지 원을 포함하는 SpawnStack 부모 영역입니다.")]
     [SerializeField] private RectTransform spawnStackHighlightRoot;
 
-    [Header("2단계 유닛 설명 카메라 (Tutorial13)")]
+    [Header("유닛 집중 카메라")]
     [SerializeField] private BattleUIController battleCameraController;
 
-    [Header("첫 단계 하이라이트")]
+    [Header("하이라이트")]
     [SerializeField] private TutorialHighlightMask highlightMask;
-    [Tooltip("0부터 시작하는 보드 좌표입니다. 필요한 만큼 칸을 추가할 수 있습니다.")]
-    [SerializeField] private Vector2Int[] firstStepHighlightCells =
-    {
-        new Vector2Int(3, 4),
-        new Vector2Int(2, 3),
-        new Vector2Int(3, 3),
-        new Vector2Int(4, 3)
-    };
 
     [Header("교환 원형 힌트")]
-    [Tooltip("첫 단계와 Tutorial18에서 교환을 시작할 타일 중앙에 표시할 UI 프리팹입니다.")]
+    [Tooltip("Show Hint Circle을 켠 단계에서 사용할 UI 프리팹입니다.")]
     [SerializeField] private GameObject hintCirclePrefab;
 
     [Header("교환 타일 힌트 애니메이션")]
@@ -154,111 +212,7 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("타일이 밝아질 때 함께 표시하는 외곽 글로우 색입니다. HDR 색상과 알파로 강도를 조절합니다.")]
     [ColorUsage(true, true)] [SerializeField] private Color swapHintGlowColor = new Color(5f, 4.5f, 2.5f, 0.65f);
 
-    [Header("5단계 하이라이트")]
-    [Tooltip("교환하는 두 칸과 교환 후 극지방 4매치가 되는 칸입니다. 보드 좌표는 0부터 시작합니다.")]
-    [SerializeField] private Vector2Int[] step5HighlightCells =
-    {
-        new Vector2Int(2, 3),
-        new Vector2Int(1, 2),
-        new Vector2Int(2, 2),
-        new Vector2Int(3, 2),
-        new Vector2Int(4, 2)
-    };
-
-    [Header("Tutorial09 하이라이트")]
-    [Tooltip("교환하는 두 칸과 교환 후 극지방 5매치가 되는 칸입니다. 보드 좌표는 0부터 시작합니다.")]
-    [SerializeField] private Vector2Int[] step7HighlightCells =
-    {
-        new Vector2Int(3, 4),
-        new Vector2Int(1, 3),
-        new Vector2Int(2, 3),
-        new Vector2Int(3, 3),
-        new Vector2Int(4, 3),
-        new Vector2Int(5, 3)
-    };
-
-    [Header("Tutorial16 하이라이트")]
-    [Tooltip("교환하는 두 칸과 자물쇠 타일을 포함한 숲 3매치 칸입니다. 보드 좌표는 0부터 시작합니다.")]
-    [SerializeField] private Vector2Int[] step12HighlightCells =
-    {
-        new Vector2Int(3, 1),
-        new Vector2Int(2, 2),
-        new Vector2Int(3, 2),
-        new Vector2Int(4, 2)
-    };
-
-    [Header("Tutorial18 하이라이트")]
-    [Tooltip("교환하는 두 칸, 바다 3매치 칸과 인접한 비활성화 장애물입니다.")]
-    [SerializeField] private Vector2Int[] step18HighlightCells =
-    {
-        new Vector2Int(2, 1),
-        new Vector2Int(1, 2),
-        new Vector2Int(2, 2),
-        new Vector2Int(3, 2),
-        new Vector2Int(3, 3)
-    };
-
-    [SerializeField] private TutorialStep[] steps =
-    {
-        new TutorialStep
-        {
-            dialogueIndex = 0, waitType = WaitType.Swap,
-            from = new Vector2Int(3, 4), to = new Vector2Int(3, 3)
-        },
-        new TutorialStep { dialogueIndex = 1, waitType = WaitType.NextClick },
-        new TutorialStep { dialogueIndex = 2, waitType = WaitType.NextClick },
-        new TutorialStep { dialogueIndex = 3, waitType = WaitType.NextClick, panel = PanelType.Under },
-        new TutorialStep { dialogueIndex = 4, waitType = WaitType.NextClick, panel = PanelType.Under },
-        new TutorialStep
-        {
-            dialogueIndex = 5, waitType = WaitType.Swap,
-            from = new Vector2Int(2, 3), to = new Vector2Int(2, 2)
-        },
-        new TutorialStep { dialogueIndex = 6, waitType = WaitType.NextClick },
-        new TutorialStep
-        {
-            dialogueIndex = 7, waitType = WaitType.SpecialTile,
-            from = new Vector2Int(2, 2), specialType = SpecialPuzzleType.RowBomb
-        },
-        new TutorialStep { dialogueIndex = 8, waitType = WaitType.NextClick },
-        new TutorialStep
-        {
-            dialogueIndex = 9, waitType = WaitType.Swap,
-            from = new Vector2Int(3, 4), to = new Vector2Int(3, 3)
-        },
-        new TutorialStep { dialogueIndex = 10, waitType = WaitType.NextClick },
-        new TutorialStep
-        {
-            dialogueIndex = 11, waitType = WaitType.SpecialTile,
-            from = new Vector2Int(3, 3), specialType = SpecialPuzzleType.CircleBomb
-        },
-        new TutorialStep { dialogueIndex = 12, waitType = WaitType.NextClick },
-        new TutorialStep { dialogueIndex = 13, waitType = WaitType.NextClick, panel = PanelType.Under },
-        new TutorialStep
-        {
-            dialogueIndex = 14, waitType = WaitType.NextClick,
-            enterAction = StepAction.CreateObstacle,
-            obstaclePosition = new Vector2Int(4, 2), obstacleType = ObstaclePuzzleType.Fixed
-        },
-        new TutorialStep { dialogueIndex = 15, waitType = WaitType.NextClick },
-        new TutorialStep
-        {
-            dialogueIndex = 16, waitType = WaitType.Swap,
-            from = new Vector2Int(3, 1), to = new Vector2Int(3, 2)
-        },
-        new TutorialStep
-        {
-            dialogueIndex = 17, waitType = WaitType.NextClick,
-            enterAction = StepAction.CreateObstacle,
-            obstaclePosition = new Vector2Int(3, 3), obstacleType = ObstaclePuzzleType.DeActivated
-        },
-        new TutorialStep
-        {
-            dialogueIndex = 18, waitType = WaitType.Swap,
-            from = new Vector2Int(2, 1), to = new Vector2Int(2, 2)
-        },
-        new TutorialStep { dialogueIndex = 19, waitType = WaitType.Hold }
-    };
+    [SerializeField] private TutorialStep[] steps = Array.Empty<TutorialStep>();
 
     private TutorialStep currentStep;
     private bool actionCompleted;
@@ -269,7 +223,7 @@ public class TutorialManager : MonoBehaviour
     private bool usesUnscaledPuzzleTime;
     private bool puzzleActionRunning;
     private UnitSpawner friendlySpawner;
-    private readonly List<FriendlyUnit> sunlightSpawnedUnits = new();
+    private readonly List<FriendlyUnit> recordedSpawnedUnits = new();
     private readonly Dictionary<SpriteRenderer, int> highlightedUnitSortingOrders = new();
     private bool tutorialPaused;
     private float originalTimeScale;
@@ -281,8 +235,8 @@ public class TutorialManager : MonoBehaviour
     private bool previousHabitatBattle;
     private bool stageApplied;
     private Button endButton;
-    private Button endAcceptButton;
-    private Button endCloseButton;
+    [SerializeField] private Button endAcceptButton;
+    [SerializeField] private Button endCloseButton;
     private GameObject previousSelection;
     private bool endPopupOpen;
     private float previousTimeScale;
@@ -300,23 +254,44 @@ public class TutorialManager : MonoBehaviour
     {
         if (highlightMask == null)
             highlightMask = GetComponent<TutorialHighlightMask>();
+        swapHint = new TutorialSwapHintAnimation();
 
-        if (!GameManager.Instance.Istutorial)
+        // 전투 오브젝트의 Start보다 먼저 스테이지와 스탯 재정의를 준비합니다.
+        if ((autoStart || HasPendingRestart) && CanStartInCurrentMode)
+            PrepareSession();
+    }
+
+    private bool CanStartInCurrentMode => !requireTutorialMode ||
+        (GameManager.Instance != null && GameManager.Instance.Istutorial);
+
+    private bool HasPendingRestart => pendingRestartScene == gameObject.scene.path &&
+        pendingRestartOwner == name;
+
+    private void PrepareSession()
+    {
+        if (sessionPrepared || (activeTutorial != null && activeTutorial != this))
             return;
 
         activeTutorial = this;
-        swapHint = new TutorialSwapHintAnimation();
-        friendlyGradeOverride = 1;
+        sessionPrepared = true;
+        friendlyGradeOverride = initialFriendlyGrade;
+        if (!useBattleRules)
+            return;
+
         stageManager = StageManager.Instance;
-        previousStage = stageManager.CurrentStage;
-        stageManager.SetStage(Mathf.Max(0, tutorialStage));
+        if (applyTutorialStage && stageManager != null)
+        {
+            previousStage = stageManager.CurrentStage;
+            stageManager.SetStage(Mathf.Max(0, tutorialStage));
+            stageApplied = true;
+        }
         habitatModeManager = HabitatModeManager.Instance;
         if (habitatModeManager != null)
         {
             previousHabitatBattle = habitatModeManager.IsHabitatBattle;
             habitatModeManager.IsHabitatBattle = false;
+            habitatApplied = true;
         }
-        stageApplied = true;
 
         if (puzzleGenerator == null)
             puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
@@ -329,44 +304,79 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
-        if (highlightMask != null)
-            highlightMask.HideHighlights();
+        if (IsRunning)
+            return;
 
+        highlightMask?.HideHighlights();
+        SetPanel(tutorialPanel, false, false);
+        SetPanel(underTutorialPanel, false, false);
         if (tutorialEndPopup != null)
             tutorialEndPopup.SetActive(false);
         if (tutorialEndButton != null)
-            tutorialEndButton.SetActive(GameManager.Instance.Istutorial);
+            tutorialEndButton.SetActive(false);
         SetReplayButtonVisible(false);
 
-        if (!GameManager.Instance.Istutorial)
-            yield break;
+        bool restart = HasPendingRestart;
+        if (restart)
+        {
+            pendingRestartScene = null;
+            pendingRestartOwner = null;
+        }
+        if ((autoStart || restart) && CanStartInCurrentMode)
+            StartTutorial();
+    }
 
+    /// <summary>현재 씬에서 설정된 안내를 시작합니다. 전투 보드를 초기화하지는 않습니다.</summary>
+    public void StartTutorial()
+    {
+        if (IsRunning || !isActiveAndEnabled || !CanStartInCurrentMode)
+            return;
+        if (activeTutorial != null && activeTutorial != this)
+        {
+            Debug.LogError("TutorialManager: 다른 튜토리얼을 먼저 중지해 주세요.", this);
+            return;
+        }
+
+        if (useBattleRules && puzzleGenerator == null)
+            puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+        if (!ValidateSetup() || !ConfigureScreenNextInput())
+        {
+            StopTutorial();
+            return;
+        }
+        PrepareSession();
+        IsRunning = true;
+        IsInstructionComplete = false;
+        presentationFailed = false;
+        actionCompleted = false;
+        replayRequested = false;
+        isReplaying = false;
+        currentStep = null;
+        currentStepIndex = 0;
+        recordedSpawnedUnits.Clear();
+        SaveUiState(timeInfo);
+        SaveUiState(lockButton);
+        SaveUiState(pauseButton);
         ConfigureEndPopup();
-        if (!ValidateSetup())
-        {
-            ReleaseInputRestriction();
-            yield break;
-        }
-
-        if (!ConfigureScreenNextInput())
-        {
-            ReleaseInputRestriction();
-            yield break;
-        }
+        if (tutorialEndButton != null)
+            tutorialEndButton.SetActive(true);
         if (tutorialTextReplayButton != null)
         {
             tutorialTextReplayButton.navigation = new Navigation { mode = Navigation.Mode.None };
             tutorialTextReplayButton.onClick.AddListener(ReplayExplanation);
         }
-        puzzleGenerator.OnSwapStarted += HandleSwapStarted;
-        puzzleGenerator.OnPuzzlePointerDown += HandlePuzzlePointerDown;
-        puzzleGenerator.OnPuzzlePointerUp += HandlePuzzlePointerUp;
-        puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
-        puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
-        puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
-        friendlySpawner = puzzleGenerator.FriendlySpawner;
+        if (useBattleRules)
+        {
+            puzzleGenerator.OnSwapStarted += HandleSwapStarted;
+            puzzleGenerator.OnPuzzlePointerDown += HandlePuzzlePointerDown;
+            puzzleGenerator.OnPuzzlePointerUp += HandlePuzzlePointerUp;
+            puzzleGenerator.OnSuccessfulSwapResolved += HandleSuccessfulSwap;
+            puzzleGenerator.OnSpecialTileResolved += HandleSpecialTile;
+            puzzleGenerator.OnSpecialTileStarted += HandleSpecialTileStarted;
+            friendlySpawner = puzzleGenerator.FriendlySpawner;
+        }
         if (friendlySpawner != null)
         {
             friendlySpawner.OnFriendlySpawning += HandleFriendlySpawning;
@@ -380,8 +390,62 @@ public class TutorialManager : MonoBehaviour
 
         originalTimeScale = Time.timeScale;
         gameplayTimeScale = originalTimeScale > 0f ? originalTimeScale : 1f;
-        ownsTimeScale = true;
-        usesUnscaledPuzzleTime = true;
+        ownsTimeScale = pauseGameplay;
+        usesUnscaledPuzzleTime = useBattleRules;
+        StartCoroutine(RunTutorial(++runVersion));
+    }
+
+    /// <summary>이벤트 구독, 입력 제한과 임시 설정을 해제합니다.</summary>
+    public void StopTutorial()
+    {
+        EndSession(true);
+    }
+
+    private void EndSession(bool notifyStopped)
+    {
+        bool wasRunning = IsRunning;
+        IsRunning = false;
+        runVersion++;
+        StopAllCoroutines();
+        CleanUpSession();
+        if (wasRunning && notifyStopped)
+            onStopped?.Invoke();
+    }
+
+    /// <summary>전투는 보드·유닛까지 초기화하도록 씬을 재로드하고, UI 안내는 현재 씬에서 재시작합니다.</summary>
+    public void RestartTutorial()
+    {
+        if (!isActiveAndEnabled || !CanStartInCurrentMode)
+            return;
+        if (useBattleRules)
+        {
+            string scenePath = gameObject.scene.path;
+            if (string.IsNullOrEmpty(scenePath))
+            {
+                Debug.LogError("TutorialManager: 전투 재시작에는 저장된 씬이 필요합니다.", this);
+                return;
+            }
+            pendingRestartScene = scenePath;
+            pendingRestartOwner = name;
+            StopTutorial();
+            SceneManager.LoadScene(scenePath);
+        }
+        else
+        {
+            StopTutorial();
+            StartTutorial();
+        }
+    }
+
+    /// <summary>Event 대기 단계에서 외부 버튼이나 시스템이 호출합니다.</summary>
+    public void CompleteCurrentAction()
+    {
+        if (IsRunning && currentStep != null && currentStep.waitType == WaitType.Event && !endPopupOpen)
+            actionCompleted = true;
+    }
+
+    private IEnumerator RunTutorial(int version)
+    {
         // 초기 보드의 낙하가 끝난 뒤 첫 대사를 표시합니다.
         SetTutorialPaused(false);
         yield return new WaitUntil(CanContinueTutorial);
@@ -393,7 +457,7 @@ public class TutorialManager : MonoBehaviour
             actionCompleted = false;
             puzzleActionRunning = false;
             yield return PresentStep(step);
-            if (presentationFailed)
+            if (presentationFailed || !IsRunning || version != runVersion)
                 yield break;
 
             switch (step.waitType)
@@ -409,6 +473,9 @@ public class TutorialManager : MonoBehaviour
                 case WaitType.Delay:
                     yield return WaitTutorialDelay(step.delay);
                     break;
+                case WaitType.Event:
+                    yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
+                    break;
                 case WaitType.Hold:
                     // 마지막 안내 후에는 전투와 자유 퍼즐 조작을 계속할 수 있습니다.
                     SetPanel(tutorialPanel, false, false);
@@ -417,17 +484,23 @@ public class TutorialManager : MonoBehaviour
                     usesUnscaledPuzzleTime = false;
                     SetTutorialPaused(false);
                     ReleaseInputRestriction();
-                    yield return new WaitUntil(() => false);
-                    break;
+                    currentStep = null;
+                    IsInstructionComplete = true;
+                    step.onExit?.Invoke();
+                    if (IsRunning && version == runVersion)
+                        onCompleted?.Invoke();
+                    yield break;
             }
+            if (presentationFailed || !IsRunning || version != runVersion)
+                yield break;
+            step.onExit?.Invoke();
+            if (!IsRunning || version != runVersion)
+                yield break;
         }
 
-        currentStep = null;
-        UpdateScreenNextInput();
-        SetPanel(tutorialPanel, false, false);
-        SetPanel(underTutorialPanel, false, false);
-        ReleaseInputRestriction();
-        RestoreTutorialTimeScale();
+        EndSession(false);
+        IsInstructionComplete = true;
+        onCompleted?.Invoke();
     }
 
     private static bool IsPuzzleActionStep(TutorialStep step) =>
@@ -458,21 +531,20 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator PresentStep(TutorialStep step)
     {
+        int version = runVersion;
         ClearStepPresentation();
         SetTutorialPaused(true);
         currentStep = step;
         waitingForPuzzleAction = false;
         nextClicked = false;
-        puzzleGenerator.SetTutorialInputRestriction(true);
-        waitingForDialogue = !IsPuzzleActionStep(step) && step.enterAction != StepAction.CreateObstacle;
+        if (useBattleRules)
+            puzzleGenerator.SetTutorialInputRestriction(true);
+        waitingForDialogue = !IsPuzzleActionStep(step) && step.waitType != WaitType.Event &&
+            step.enterAction != StepAction.CreateObstacle;
         ShowStep(step);
-
-        if (IsPuzzleActionStep(step))
-        {
-            // 조작 안내는 대사 표시와 같은 프레임에 입력과 힌트를 활성화합니다.
-            BeginPuzzleActionWait();
+        step.onEnter?.Invoke();
+        if (!IsRunning || version != runVersion)
             yield break;
-        }
 
         if (step.enterAction == StepAction.CreateObstacle)
         {
@@ -485,8 +557,16 @@ public class TutorialManager : MonoBehaviour
             yield return new WaitUntil(CanContinueTutorial);
             SetTutorialPaused(true);
             // 생성이 끝난 시점부터 대사 대기를 시작하고 화면 클릭도 허용합니다.
-            waitingForDialogue = true;
+            waitingForDialogue = !IsPuzzleActionStep(step) && step.waitType != WaitType.Event;
             UpdateScreenNextInput();
+        }
+        if (step.waitType == WaitType.Event)
+            yield break;
+        if (IsPuzzleActionStep(step))
+        {
+            // 별도 생성 연출이 없다면 대사 표시와 같은 프레임에 조작과 힌트를 활성화합니다.
+            BeginPuzzleActionWait();
+            yield break;
         }
         yield return WaitForDialogue();
     }
@@ -497,16 +577,18 @@ public class TutorialManager : MonoBehaviour
         SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
         if (currentStep.waitType == WaitType.Swap)
         {
-            Vector2Int[] cells = GetSwapHighlightCells(currentStep);
-            if (cells != null || replayStartIndex >= 0)
-                ShowStepHighlights(currentStep, cells);
+            Vector2Int[] cells = currentStep.highlightCells != null && currentStep.highlightCells.Length > 0
+                ? currentStep.highlightCells : new[] { currentStep.from, currentStep.to };
+            ShowStepHighlights(currentStep, cells);
             puzzleGenerator.SetTutorialInputRestriction(true,
                 (from, to) => !endPopupOpen && waitingForPuzzleAction && IsExpectedSwap(from, to));
             TryStartSwapHint();
         }
         else
         {
-            ShowStepHighlights(currentStep, new[] { currentStep.from });
+            ShowStepHighlights(currentStep,
+                currentStep.highlightCells != null && currentStep.highlightCells.Length > 0
+                    ? currentStep.highlightCells : new[] { currentStep.from });
             puzzleGenerator.SetTutorialInputRestriction(true,
                 specialAllowed: (position, type) => !endPopupOpen && waitingForPuzzleAction &&
                                                    IsExpectedSpecialTile(position, type));
@@ -542,6 +624,7 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator ReplayExplanationRange()
     {
+        int version = runVersion;
         replayRequested = false;
         isReplaying = true;
         ClearStepPresentation();
@@ -563,10 +646,14 @@ public class TutorialManager : MonoBehaviour
         {
             TutorialStep step = steps[index];
             yield return PresentStep(step);
-            if (presentationFailed)
+            if (presentationFailed || !IsRunning || version != runVersion)
                 yield break;
             if (step.waitType == WaitType.Delay)
                 yield return WaitTutorialDelay(step.delay);
+            if (index < currentStepIndex)
+                step.onExit?.Invoke();
+            if (!IsRunning || version != runVersion)
+                yield break;
         }
 
         isReplaying = false;
@@ -576,16 +663,11 @@ public class TutorialManager : MonoBehaviour
     private void FailTutorialPresentation()
     {
         presentationFailed = true;
-        isReplaying = false;
-        ClearStepPresentation();
-        waitingForDialogue = false;
-        waitingForPuzzleAction = false;
-        UpdateScreenNextInput();
-        ReleaseInputRestriction();
-        RestoreTutorialTimeScale();
+        StopTutorial();
     }
 
-    private bool CanContinueTutorial() => !endPopupOpen && puzzleGenerator.IsBoardReady;
+    private bool CanContinueTutorial() => !endPopupOpen &&
+        (!useBattleRules || puzzleGenerator.IsBoardReady);
 
     private void SetTutorialPaused(bool paused)
     {
@@ -632,7 +714,8 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator WaitForDialogue()
     {
         float elapsed = 0f;
-        while (endPopupOpen || (!nextClicked && elapsed < dialogueDuration))
+        float duration = currentStep.dialogueDuration >= 0f ? currentStep.dialogueDuration : dialogueDuration;
+        while (endPopupOpen || (!nextClicked && elapsed < duration))
         {
             bool popupWasOpen = endPopupOpen;
             yield return null;
@@ -659,33 +742,29 @@ public class TutorialManager : MonoBehaviour
 
     private void ConfigureEndPopup()
     {
-        if (tutorialEndButton == null || tutorialEndPopup == null ||
-            tutorialEndPopup.transform.childCount < 4)
-        {
-            Debug.LogError("TutorialManager: 종료 버튼과 팝업(자식 3: Accept, 4: Close)을 연결해 주세요.", this);
+        if (tutorialEndButton == null)
             return;
-        }
 
         endButton = tutorialEndButton.GetComponent<Button>();
-        endAcceptButton = tutorialEndPopup.transform.GetChild(2).GetComponent<Button>();
-        endCloseButton = tutorialEndPopup.transform.GetChild(3).GetComponent<Button>();
-        if (endButton == null || endAcceptButton == null || endCloseButton == null)
+        if (endButton != null)
+            endButton.onClick.AddListener(OpenEndPopup);
+        if (tutorialEndPopup == null)
+            return;
+        if (endAcceptButton == null || endCloseButton == null)
         {
-            Debug.LogError("TutorialManager: 종료/확인/닫기 오브젝트에 Button이 필요합니다.", this);
+            Debug.LogError("TutorialManager: 종료 팝업의 확인/닫기 버튼을 연결해 주세요.", this);
             return;
         }
 
-        // 복제한 상점 팝업의 기존 이벤트는 이 팝업에서만 교체한다.
-        endAcceptButton.onClick = new Button.ButtonClickedEvent();
-        endCloseButton.onClick = new Button.ButtonClickedEvent();
-        endButton.onClick.AddListener(OpenEndPopup);
         endAcceptButton.onClick.AddListener(AcceptEndPopup);
         endCloseButton.onClick.AddListener(CloseEndPopup);
         Navigation navigation = new Navigation { mode = Navigation.Mode.None };
         endAcceptButton.navigation = navigation;
         endCloseButton.navigation = navigation;
 
-        Canvas parentCanvas = tutorialEndPopup.GetComponentInParent<Canvas>(true).rootCanvas;
+        Canvas parentCanvas = tutorialEndPopup.GetComponentInParent<Canvas>(true)?.rootCanvas;
+        if (parentCanvas == null)
+            return;
         // 독립 Canvas도 부모 UIBlur와 같은 카메라가 렌더하도록 레이어를 맞춘다.
         // 팝업 프리팹은 UI(5), UIBlurCamera는 UIBlur(8)만 렌더한다.
         foreach (Transform child in tutorialEndPopup.GetComponentsInChildren<Transform>(true))
@@ -703,7 +782,14 @@ public class TutorialManager : MonoBehaviour
 
     private void OpenEndPopup()
     {
-        if (endPopupOpen || tutorialEndPopup == null || endCloseButton == null)
+        if (!IsRunning || endPopupOpen)
+            return;
+        if (tutorialEndPopup == null)
+        {
+            StopTutorial();
+            return;
+        }
+        if (endCloseButton == null)
             return;
 
         endPopupOpen = true;
@@ -724,7 +810,7 @@ public class TutorialManager : MonoBehaviour
 
     private void AcceptEndPopup()
     {
-        Debug.Log("TutorialManager: 튜토리얼 종료 확인 버튼 클릭 (종료 동작 미구현).", this);
+        StopTutorial();
     }
 
     private void CloseEndPopup()
@@ -754,10 +840,10 @@ public class TutorialManager : MonoBehaviour
     {
         Canvas parentCanvas = tutorialEndButton != null
             ? tutorialEndButton.GetComponentInParent<Canvas>(true)
-            : null;
+            : tutorialPanel != null ? tutorialPanel.GetComponentInParent<Canvas>(true) : null;
         if (parentCanvas == null)
         {
-            Debug.LogError("TutorialManager: 종료 버튼을 기존 Canvas 안에 연결해 주세요.", this);
+            Debug.LogError("TutorialManager: 대사 패널을 Canvas 안에 연결해 주세요.", this);
             return false;
         }
 
@@ -767,6 +853,12 @@ public class TutorialManager : MonoBehaviour
             underNextButton.interactable = false;
 
         Canvas rootCanvas = parentCanvas.rootCanvas;
+        if (screenNextInput != null)
+        {
+            screenNextInput.Configure(this, tutorialEndButton != null
+                ? tutorialEndButton.GetComponent<RectTransform>() : null);
+            return true;
+        }
         var inputObject = new GameObject("TutorialScreenNextInput",
             typeof(RectTransform), typeof(CanvasRenderer), typeof(TutorialScreenNextInput));
         inputObject.SetActive(false);
@@ -781,7 +873,8 @@ public class TutorialManager : MonoBehaviour
         rect.offsetMax = Vector2.zero;
 
         screenNextInput = inputObject.GetComponent<TutorialScreenNextInput>();
-        screenNextInput.Configure(this, tutorialEndButton.GetComponent<RectTransform>());
+        screenNextInput.Configure(this, tutorialEndButton != null
+            ? tutorialEndButton.GetComponent<RectTransform>() : null);
         return true;
     }
 
@@ -790,75 +883,83 @@ public class TutorialManager : MonoBehaviour
         if (screenNextInput == null)
             return;
 
-        bool canAdvance = isActiveAndEnabled && !endPopupOpen && !nextClicked &&
+        bool canAdvance = IsRunning && isActiveAndEnabled && !endPopupOpen && !nextClicked &&
                           currentStep != null && waitingForDialogue;
         screenNextInput.gameObject.SetActive(canAdvance);
     }
 
-    private Vector2Int[] GetSwapHighlightCells(TutorialStep step)
-    {
-        if (step == steps[0])
-            return firstStepHighlightCells;
-
-        return step.dialogueIndex switch
-        {
-            5 => step5HighlightCells,
-            9 => step7HighlightCells,
-            16 => step12HighlightCells,
-            18 => step18HighlightCells,
-            _ => null
-        };
-    }
-
     // 하이라이트에는 현재 단계의 대사 패널과 종료 버튼을 항상 포함합니다.
-    private void ShowStepHighlights(TutorialStep step, IEnumerable<Vector2Int> cells,
-        GameObject extraTarget = null)
+    private void ShowStepHighlights(TutorialStep step, IEnumerable<Vector2Int> cells)
     {
         if (highlightMask == null)
             return;
 
         CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
-        highlightMask.ShowHighlights(
-            new[] { panel != null ? panel.gameObject : null, tutorialEndButton, extraTarget,
-                tutorialTextReplayButton != null && tutorialTextReplayButton.gameObject.activeInHierarchy
-                    ? tutorialTextReplayButton.gameObject : null },
-            puzzleGenerator, cells);
+        var targets = new List<GameObject>
+        {
+            panel != null ? panel.gameObject : null, tutorialEndButton,
+            tutorialTextReplayButton != null && tutorialTextReplayButton.gameObject.activeInHierarchy
+                ? tutorialTextReplayButton.gameObject : null
+        };
+        if (step.highlightObjects != null)
+            targets.AddRange(step.highlightObjects);
+        if (step.showCameraButton && lockButton != null)
+            targets.Add(lockButton.gameObject);
+        if (step.focusSpawnedUnit)
+        {
+            FriendlyUnit unit = GetFrontRecordedUnit(step.focusUnitGrade);
+            if (unit != null)
+                targets.Add(unit.gameObject);
+        }
+        var rects = new List<RectTransform>();
+        if (step.highlightRects != null)
+            rects.AddRange(step.highlightRects);
+        if (step.highlightSpawnStack && spawnStackHighlightRoot != null)
+            rects.Add(spawnStackHighlightRoot);
+        highlightMask.ShowHighlights(targets, useBattleRules ? puzzleGenerator : null, cells, rects);
     }
 
     private void ShowStep(TutorialStep step)
     {
         bool useUnderPanel = step.panel == PanelType.Under;
         TextMeshProUGUI text = useUnderPanel ? underTutorialText : tutorialText;
-        text.text = tutorialTextList.GetDialogue(step.dialogueIndex);
+        text.text = !string.IsNullOrWhiteSpace(step.dialogueKey)
+            ? LocalizationSettings.StringDatabase.GetLocalizedString(localizationTable, step.dialogueKey)
+            : tutorialTextList.GetDialogue(step.dialogueIndex);
 
         SetPanel(tutorialPanel, !useUnderPanel, false);
         SetPanel(underTutorialPanel, useUnderPanel, false);
         // 시작 시 숨겨 둔 카메라 버튼은 조작 설명 단계에서만 표시합니다.
-        bool showCameraButton = step.dialogueIndex == 4;
+        bool showCameraButton = step.showCameraButton;
         SetUi(lockButton, showCameraButton ? 1f : 0f, showCameraButton);
         // 버튼의 비활성 색상은 해제하고, 설명 진행 입력은 기존 화면 전체 클릭으로 받습니다.
         if (showCameraButton && lockButton != null)
             lockButton.blocksRaycasts = false;
         UpdateScreenNextInput();
 
-        if (step.dialogueIndex == 2)
-            ShowSpawnStackHighlights(step);
-        else if (step.dialogueIndex == 4)
-            ShowStepHighlights(step, null, lockButton != null ? lockButton.gameObject : null);
-        else if (step.dialogueIndex == 13)
-            ShowFrontSunlightUnitHighlight(step);
+        if (step.focusSpawnedUnit)
+        {
+            FriendlyUnit unit = GetFrontRecordedUnit(step.focusUnitGrade);
+            if (unit != null)
+            {
+                BringHighlightedUnitToFront(unit);
+                battleCameraController?.BeginTutorialFocus(unit.transform);
+            }
+        }
+        if (step.dimBackground || step.highlightSpawnStack || step.showCameraButton ||
+            step.focusSpawnedUnit || (step.highlightObjects != null && step.highlightObjects.Length > 0) ||
+            (step.highlightRects != null && step.highlightRects.Length > 0) ||
+            (step.highlightCells != null && step.highlightCells.Length > 0))
+            ShowStepHighlights(step, step.highlightCells);
     }
 
-    private void ShowFrontSunlightUnitHighlight(TutorialStep step)
+    private FriendlyUnit GetFrontRecordedUnit(int grade)
     {
-        if (highlightMask == null)
-            return;
-
         FriendlyUnit frontUnit = null;
-        foreach (FriendlyUnit unit in sunlightSpawnedUnits)
+        foreach (FriendlyUnit unit in recordedSpawnedUnits)
         {
             if (unit == null || !unit.isActiveAndEnabled || unit.CurrentHp <= 0f ||
-                unit.Data == null || unit.Data.UnitGrade != 2)
+                unit.Data == null || unit.Data.UnitGrade != grade)
                 continue;
 
             // 아군은 +X 방향으로 전진하므로 X가 가장 큰 유닛이 선두입니다.
@@ -866,19 +967,7 @@ public class TutorialManager : MonoBehaviour
                 frontUnit = unit;
         }
 
-        if (frontUnit != null)
-        {
-            BringHighlightedUnitToFront(frontUnit);
-            battleCameraController?.BeginTutorialFocus(frontUnit.transform);
-        }
-
-        CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
-        highlightMask.ShowHighlights(new[]
-        {
-            panel != null ? panel.gameObject : null,
-            tutorialEndButton,
-            frontUnit != null ? frontUnit.gameObject : null
-        }, null, null);
+        return frontUnit;
     }
 
     private void BringHighlightedUnitToFront(FriendlyUnit unit)
@@ -908,22 +997,8 @@ public class TutorialManager : MonoBehaviour
     private void LateUpdate()
     {
         // 대사 중 카메라가 이동해도 선택한 유닛 위치에 마스크를 맞춥니다.
-        if (waitingForDialogue && currentStep != null && currentStep.dialogueIndex == 13)
+        if (waitingForDialogue && currentStep != null && currentStep.focusSpawnedUnit)
             highlightMask?.RequestRefresh();
-    }
-
-    private void ShowSpawnStackHighlights(TutorialStep step)
-    {
-        if (highlightMask == null || spawnStackHighlightRoot == null)
-            return;
-
-        CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
-        var targets = new List<GameObject>
-        {
-            panel != null ? panel.gameObject : null,
-            tutorialEndButton
-        };
-        highlightMask.ShowHighlights(targets, null, null, new[] { spawnStackHighlightRoot });
     }
 
     private static void SetPanel(CanvasGroup panel, bool visible, bool interactable)
@@ -952,7 +1027,7 @@ public class TutorialManager : MonoBehaviour
                 (from == currentStep.to && to == currentStep.from));
     }
 
-    private bool IsSwapHintWaiting => isActiveAndEnabled && currentStep != null &&
+    private bool IsSwapHintWaiting => IsRunning && isActiveAndEnabled && currentStep != null &&
         IsPuzzleActionStep(currentStep) && waitingForPuzzleAction && !endPopupOpen;
 
     private void TryStartSwapHint()
@@ -966,8 +1041,10 @@ public class TutorialManager : MonoBehaviour
             if (puzzleGenerator.TryGetTutorialPuzzle(currentStep.from, out PuzzleObject puzzle) &&
                 puzzle is SpecialPuzzleObject special && special.specialPuzzleType == currentStep.specialType)
             {
-                swapHint.Play(special, null, swapHintBrightness, swapHintScaleAmount,
-                    swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
+                if (currentStep.playHintAnimation)
+                    swapHint.Play(special, null, swapHintBrightness, swapHintScaleAmount,
+                        swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
+                ShowSwapHintCircle();
             }
             return;
         }
@@ -976,8 +1053,9 @@ public class TutorialManager : MonoBehaviour
             puzzleGenerator.TryGetTutorialPuzzle(currentStep.to, out PuzzleObject second) &&
             first is NormalPuzzleObject firstNormal && second is NormalPuzzleObject secondNormal)
         {
-            swapHint.Play(firstNormal, secondNormal, swapHintBrightness, swapHintScaleAmount,
-                swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
+            if (currentStep.playHintAnimation)
+                swapHint.Play(firstNormal, secondNormal, swapHintBrightness, swapHintScaleAmount,
+                    swapHintPulseDuration, swapHintPulseGap, swapHintRepeatDelay, swapHintGlowColor);
             ShowSwapHintCircle();
         }
     }
@@ -985,8 +1063,7 @@ public class TutorialManager : MonoBehaviour
     private void ShowSwapHintCircle()
     {
         // 매치 줄 밖에서 교환을 시작하는 타일을 안내합니다.
-        if ((currentStep != steps[0] && currentStep.dialogueIndex != 18) ||
-            hintCirclePrefab == null || highlightMask == null)
+        if (!currentStep.showHintCircle || hintCirclePrefab == null || highlightMask == null)
             return;
 
         RectTransform overlay = highlightMask.DimRectTransform;
@@ -1088,12 +1165,17 @@ public class TutorialManager : MonoBehaviour
         waitingForPuzzleAction = false;
         puzzleActionRunning = true;
         puzzleGenerator.SetTutorialInputRestriction(true);
+        if (currentStep.recordSpawnedUnits)
+            recordedSpawnedUnits.Clear();
+        if (currentStep.actionFriendlyGrade >= 0)
+            friendlyGradeOverride = currentStep.actionFriendlyGrade;
         // 매치와 에너지 이동은 별도 퍼즐 시간으로 진행하며 전투는 정지 상태를 유지합니다.
+        currentStep.onActionStarted?.Invoke();
     }
 
     private void HandleFriendlySpawning()
     {
-        if (!puzzleActionRunning)
+        if (!puzzleActionRunning || currentStep == null || !currentStep.hidePanelBeforeSpawn)
             return;
 
         SetPanel(tutorialPanel, false, false);
@@ -1103,16 +1185,15 @@ public class TutorialManager : MonoBehaviour
 
     private void HandleFriendlySpawned(FriendlyUnit unit)
     {
-        if (unit != null && GameManager.Instance.Istutorial)
+        if (unit != null && HasActiveBattle && mirrorEnemySpawns)
         {
             // 실제 아군 한 마리 소환마다 같은 프레임에 Farmer(0) 또는 Axe(2)를 한 마리 소환합니다.
-            int enemyIndex = UnityEngine.Random.Range(0, 2) == 0 ? 0 : 2;
+            int enemyIndex = tutorialEnemyIndices[UnityEngine.Random.Range(0, tutorialEnemyIndices.Length)];
             friendlySpawner.SpawnTutorialEnemy(enemyIndex);
         }
 
-        if (currentStep != null && currentStep.dialogueIndex == 11 &&
-            unit != null && unit.Data != null && unit.Data.UnitGrade == 2)
-            sunlightSpawnedUnits.Add(unit);
+        if (currentStep != null && currentStep.recordSpawnedUnits && unit != null)
+            recordedSpawnedUnits.Add(unit);
 
         if (puzzleActionRunning)
             SetTutorialPaused(false);
@@ -1124,6 +1205,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         actionCompleted = true;
+        ApplyAfterActionSettings();
         puzzleGenerator.SetTutorialInputRestriction(true);
     }
 
@@ -1138,11 +1220,6 @@ public class TutorialManager : MonoBehaviour
         if (!waitingForPuzzleAction || endPopupOpen || !IsExpectedSpecialTile(position, type))
             return;
 
-        if (type == SpecialPuzzleType.CircleBomb)
-        {
-            sunlightSpawnedUnits.Clear();
-            friendlyGradeOverride = 2;
-        }
         BeginPuzzleAction();
     }
 
@@ -1151,27 +1228,55 @@ public class TutorialManager : MonoBehaviour
         if (!IsExpectedSpecialTile(position, type))
             return;
 
-        if (type == SpecialPuzzleType.CircleBomb)
-            friendlyGradeOverride = 0;
-
         actionCompleted = true;
+        ApplyAfterActionSettings();
         puzzleGenerator.SetTutorialInputRestriction(true);
+    }
+
+    private void ApplyAfterActionSettings()
+    {
+        if (currentStep.afterActionFriendlyGrade >= 0)
+            friendlyGradeOverride = currentStep.afterActionFriendlyGrade;
     }
 
     private bool ValidateSetup()
     {
-        if (puzzleGenerator == null || tutorialTextList == null ||
-            tutorialText == null || tutorialPanel == null || steps == null || steps.Length == 0)
+        if (tutorialText == null || tutorialPanel == null || steps == null || steps.Length == 0)
         {
-            Debug.LogError("TutorialManager: 퍼즐, 대사 목록, 대사 UI, 패널 및 단계를 확인해 주세요.", this);
+            Debug.LogError("TutorialManager: 대사 UI, 패널 및 단계를 확인해 주세요.", this);
+            return false;
+        }
+        if (useBattleRules && (puzzleGenerator == null || GameManager.Instance == null ||
+            !GameManager.Instance.Istutorial || StageManager.Instance == null))
+        {
+            Debug.LogError("TutorialManager: 전투 규칙에는 튜토리얼 모드, PuzzleGenerator와 StageManager가 필요합니다.", this);
+            return false;
+        }
+        if (useBattleRules && mirrorEnemySpawns &&
+            (tutorialEnemyIndices == null || tutorialEnemyIndices.Length == 0 ||
+             Array.Exists(tutorialEnemyIndices, index => index < 0)))
+        {
+            Debug.LogError("TutorialManager: 적 소환 인덱스를 하나 이상 지정해 주세요.", this);
+            return false;
+        }
+        if (useBattleRules && mirrorEnemySpawns && puzzleGenerator.FriendlySpawner == null)
+        {
+            Debug.LogError("TutorialManager: 아군/적 동시 소환에 사용할 UnitSpawner가 필요합니다.", this);
             return false;
         }
 
         foreach (TutorialStep step in steps)
         {
-            if (step == null || step.dialogueIndex < 0 || step.dialogueIndex >= tutorialTextList.Count)
+            if (step == null || (string.IsNullOrWhiteSpace(step.dialogueKey) &&
+                (tutorialTextList == null || step.dialogueIndex < 0 || step.dialogueIndex >= tutorialTextList.Count)))
             {
-                Debug.LogError("TutorialManager: 단계의 대사 인덱스가 유효하지 않습니다.", this);
+                Debug.LogError("TutorialManager: 단계에 대사 키 또는 유효한 대사 목록 인덱스를 지정해 주세요.", this);
+                return false;
+            }
+            if (!useBattleRules && (IsPuzzleActionStep(step) || step.enterAction == StepAction.CreateObstacle ||
+                step.focusSpawnedUnit || step.recordSpawnedUnits))
+            {
+                Debug.LogError("TutorialManager: 퍼즐/소환 단계에는 Use Battle Rules를 켜 주세요.", this);
                 return false;
             }
             if (step.panel == PanelType.Under && (underTutorialPanel == null || underTutorialText == null))
@@ -1184,6 +1289,11 @@ public class TutorialManager : MonoBehaviour
     }
 
     private void OnDisable()
+    {
+        StopTutorial();
+    }
+
+    private void CleanUpSession()
     {
         SetReplayButtonVisible(false);
         if (tutorialTextReplayButton != null)
@@ -1199,7 +1309,7 @@ public class TutorialManager : MonoBehaviour
         waitingForPuzzleAction = false;
         puzzleActionRunning = false;
 
-        sunlightSpawnedUnits.Clear();
+        recordedSpawnedUnits.Clear();
 
         if (highlightMask != null)
             highlightMask.HideHighlights();
@@ -1212,13 +1322,16 @@ public class TutorialManager : MonoBehaviour
             endAcceptButton.onClick.RemoveListener(AcceptEndPopup);
         if (endCloseButton != null)
             endCloseButton.onClick.RemoveListener(CloseEndPopup);
-        StopAllCoroutines();
         currentStep = null;
+        SetPanel(tutorialPanel, false, false);
+        SetPanel(underTutorialPanel, false, false);
+        if (tutorialEndButton != null)
+            tutorialEndButton.SetActive(false);
         if (nextButton != null)
             nextButton.onClick.RemoveListener(NextDialogue);
         if (underNextButton != null)
             underNextButton.onClick.RemoveListener(NextDialogue);
-        if (puzzleGenerator != null)
+        if (useBattleRules && puzzleGenerator != null)
         {
             puzzleGenerator.OnSwapStarted -= HandleSwapStarted;
             puzzleGenerator.OnPuzzlePointerDown -= HandlePuzzlePointerDown;
@@ -1234,26 +1347,53 @@ public class TutorialManager : MonoBehaviour
         }
         ReleaseInputRestriction();
         RestoreTutorialTimeScale();
+        RestoreSessionSettings();
+        friendlySpawner = null;
+        sessionPrepared = false;
+        if (activeTutorial == this)
+            activeTutorial = null;
     }
 
     private void OnDestroy()
     {
-        swapHint?.Stop();
-        DestroyHintCircle();
-        RestoreTutorialTimeScale();
+        // OnDisable 이후에도 안전하게 호출할 수 있습니다.
+        StopTutorial();
         if (screenNextInput != null)
             Destroy(screenNextInput.gameObject);
+    }
 
-        if (activeTutorial == this)
-            activeTutorial = null;
-
-        if (!stageApplied)
-            return;
-
-        if (stageManager != null)
+    private void RestoreSessionSettings()
+    {
+        if (stageApplied && stageManager != null)
             stageManager.SetStage(previousStage);
-        if (habitatModeManager != null)
+        if (habitatApplied && habitatModeManager != null)
             habitatModeManager.IsHabitatBattle = previousHabitatBattle;
+        stageApplied = false;
+        habitatApplied = false;
+        foreach (var pair in savedUiStates)
+        {
+            if (pair.Key == null)
+                continue;
+            UiState state = pair.Value;
+            pair.Key.alpha = state.alpha;
+            pair.Key.interactable = state.interactable;
+            pair.Key.blocksRaycasts = state.blocksRaycasts;
+            pair.Key.gameObject.SetActive(state.active);
+        }
+        savedUiStates.Clear();
+    }
+
+    private void SaveUiState(CanvasGroup group)
+    {
+        if (group == null || savedUiStates.ContainsKey(group))
+            return;
+        savedUiStates.Add(group, new UiState
+        {
+            active = group.gameObject.activeSelf,
+            alpha = group.alpha,
+            interactable = group.interactable,
+            blocksRaycasts = group.blocksRaycasts
+        });
     }
 
     private void ReleaseInputRestriction()
