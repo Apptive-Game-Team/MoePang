@@ -789,14 +789,15 @@ public class TutorialManager : MonoBehaviour
     }
 
     // 하이라이트에는 현재 단계의 대사 패널과 종료 버튼을 항상 포함합니다.
-    private void ShowStepHighlights(TutorialStep step, IEnumerable<Vector2Int> cells)
+    private void ShowStepHighlights(TutorialStep step, IEnumerable<Vector2Int> cells,
+        GameObject extraTarget = null)
     {
         if (highlightMask == null)
             return;
 
         CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
         highlightMask.ShowHighlights(
-            new[] { panel != null ? panel.gameObject : null, tutorialEndButton,
+            new[] { panel != null ? panel.gameObject : null, tutorialEndButton, extraTarget,
                 tutorialTextReplayButton != null && tutorialTextReplayButton.gameObject.activeInHierarchy
                     ? tutorialTextReplayButton.gameObject : null },
             puzzleGenerator, cells);
@@ -810,10 +811,18 @@ public class TutorialManager : MonoBehaviour
 
         SetPanel(tutorialPanel, !useUnderPanel, false);
         SetPanel(underTutorialPanel, useUnderPanel, false);
+        // 시작 시 숨겨 둔 카메라 버튼은 조작 설명 단계에서만 표시합니다.
+        bool showCameraButton = step.dialogueIndex == 4;
+        SetUi(lockButton, showCameraButton ? 1f : 0f, showCameraButton);
+        // 버튼의 비활성 색상은 해제하고, 설명 진행 입력은 기존 화면 전체 클릭으로 받습니다.
+        if (showCameraButton && lockButton != null)
+            lockButton.blocksRaycasts = false;
         UpdateScreenNextInput();
 
         if (step.dialogueIndex == 2)
             ShowSpawnStackHighlights(step);
+        else if (step.dialogueIndex == 4)
+            ShowStepHighlights(step, null, lockButton != null ? lockButton.gameObject : null);
         else if (step.dialogueIndex == 13)
             ShowFrontSunlightUnitHighlight(step);
     }
