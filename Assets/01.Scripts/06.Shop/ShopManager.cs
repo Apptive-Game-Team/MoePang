@@ -157,7 +157,7 @@ public class ShopManager : MonoBehaviour
     #endregion
     
     /// <summary>
-    /// 유닛이 클릭됐을 때 실행되는 함수 (UnitInfoIcon의 OnClick 다음에 실행)
+    /// 유닛 클릭 시 선택한 유닛의 상세정보 씬으로 이동합니다.
     /// </summary>
     public void UnitClicked(UnitInfoIcon clickedUI)
     {
@@ -176,6 +176,7 @@ public class ShopManager : MonoBehaviour
         currentSelected.Select();
         currentSelected.SetHighlight(new Material(uiHighlightMaterial), true);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
 
     /// <summary>
