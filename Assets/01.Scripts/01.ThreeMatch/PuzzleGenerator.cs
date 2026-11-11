@@ -2656,8 +2656,11 @@ namespace _01.Scripts._01.ThreeMatch
             GameObject warningOb = Instantiate(obstacleWarningPrefab, puzzleFrame);
             _obstacleSpawnIndicator.Add(warningOb);
             warningOb.transform.localPosition = pos;
-            warningOb.GetComponent<SpriteRenderer>().DOFade(0.1f, obstacleSpawnDelay / 4).UseTutorialPuzzleClock(this)
-                .SetLoops(-1, LoopType.Yoyo);
+            SpriteRenderer originalRenderer = warningOb.GetComponent<SpriteRenderer>();
+            originalRenderer.enabled = false;
+            var visual = warningOb.AddComponent<ObstacleSpawnWarningVisual>();
+            visual.Initialize(space, obstacleSpawnDelay, originalRenderer.sortingLayerID, originalRenderer.sortingOrder);
+            bool canConsume = false;
 
             try
             {
@@ -2665,6 +2668,7 @@ namespace _01.Scripts._01.ThreeMatch
                 yield return new WaitUntil(() =>
                     _puzzles[curX, curY] &&
                     _puzzles[curX, curY].puzzleState == PuzzleState.Idle);
+                canConsume = _puzzles[curX, curY] is not ObstaclePuzzleObject;
             }
             finally
             {
@@ -2672,7 +2676,14 @@ namespace _01.Scripts._01.ThreeMatch
                 if (warningOb)
                 {
                     DOTween.Kill(warningOb);
-                    Destroy(warningOb);
+                    if (canConsume)
+                    {
+                        visual.Consume();
+                    }
+                    else
+                    {
+                        Destroy(warningOb);
+                    }
                 }
             }
         }
