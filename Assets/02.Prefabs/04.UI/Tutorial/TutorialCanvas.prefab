@@ -180,8 +180,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63fae1ff60c35c04b804a64bc016eb8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dimImage: {fileID: 0}
-  maskWriterShader: {fileID: 0}
+  dimImage: {fileID: 7022837928314515473}
+  maskWriterShader: {fileID: 4800000, guid: ae9f7391e199e8b43a3d8dd03c84a840, type: 3}
   targets: []
   spriteCamera: {fileID: 0}
   spriteCameraOutput: {fileID: 0}
@@ -296,6 +296,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2584682511133618106, guid: cd441bc3602592d498afc41a987512fd, type: 3}
   m_PrefabInstance: {fileID: 314057729095960133}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7022837928314515473 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7290729886093194836, guid: cd441bc3602592d498afc41a987512fd, type: 3}
+  m_PrefabInstance: {fileID: 314057729095960133}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1080367303485188600
 PrefabInstance:
   m_ObjectHideFlags: 0
