@@ -30,6 +30,8 @@ public class TutorialManager : MonoBehaviour
         [Tooltip("Dialogue Key가 비어 있을 때만 사용하는 기존 대사 목록 인덱스입니다.")]
         [Min(0)] public int dialogueIndex;
         public WaitType waitType;
+        [Tooltip("Event 단계에서 누를 버튼입니다. 클릭 시 현재 동작을 완료합니다.")]
+        public Button actionButton;
         public PanelType panel;
         public Vector2Int from;
         public Vector2Int to;
@@ -219,6 +221,8 @@ public class TutorialManager : MonoBehaviour
     private bool nextClicked;
     private bool waitingForDialogue;
     private bool waitingForPuzzleAction;
+    private bool waitingForEventAction;
+    private Button currentActionButton;
     private bool ownsTimeScale;
     private bool usesUnscaledPuzzleTime;
     private bool puzzleActionRunning;
@@ -440,7 +444,8 @@ public class TutorialManager : MonoBehaviour
     /// <summary>Event 대기 단계에서 외부 버튼이나 시스템이 호출합니다.</summary>
     public void CompleteCurrentAction()
     {
-        if (IsRunning && currentStep != null && currentStep.waitType == WaitType.Event && !endPopupOpen)
+        if (IsRunning && currentStep != null && currentStep.waitType == WaitType.Event &&
+            waitingForEventAction && !isReplaying && !replayRequested && !endPopupOpen)
             actionCompleted = true;
     }
 
@@ -474,7 +479,7 @@ public class TutorialManager : MonoBehaviour
                     yield return WaitTutorialDelay(step.delay);
                     break;
                 case WaitType.Event:
-                    yield return new WaitUntil(() => !endPopupOpen && actionCompleted);
+                    yield return WaitForEventAction();
                     break;
                 case WaitType.Hold:
                     // 마지막 안내 후에는 전투와 자유 퍼즐 조작을 계속할 수 있습니다.
@@ -508,7 +513,7 @@ public class TutorialManager : MonoBehaviour
 
     private int GetReplayStartIndex(int actionIndex)
     {
-        if (!IsPuzzleActionStep(steps[actionIndex]))
+        if (!IsPuzzleActionStep(steps[actionIndex]) && steps[actionIndex].waitType != WaitType.Event)
             return -1;
 
         int start = actionIndex;
@@ -520,6 +525,7 @@ public class TutorialManager : MonoBehaviour
 
     private void ClearStepPresentation()
     {
+        ReleaseActionButton();
         RestoreHighlightedUnitSortingOrders();
         battleCameraController?.EndTutorialFocus();
         highlightMask?.HideHighlights();
@@ -561,7 +567,15 @@ public class TutorialManager : MonoBehaviour
             UpdateScreenNextInput();
         }
         if (step.waitType == WaitType.Event)
+        {
+            waitingForEventAction = true;
+            currentActionButton = step.actionButton;
+            if (currentActionButton != null)
+                currentActionButton.onClick.AddListener(CompleteCurrentAction);
+            SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
+            ShowStepHighlights(step, step.highlightCells);
             yield break;
+        }
         if (IsPuzzleActionStep(step))
         {
             // 별도 생성 연출이 없다면 대사 표시와 같은 프레임에 조작과 힌트를 활성화합니다.
@@ -569,6 +583,30 @@ public class TutorialManager : MonoBehaviour
             yield break;
         }
         yield return WaitForDialogue();
+    }
+
+    private void ReleaseActionButton()
+    {
+        waitingForEventAction = false;
+        if (currentActionButton != null)
+            currentActionButton.onClick.RemoveListener(CompleteCurrentAction);
+        currentActionButton = null;
+    }
+
+    private IEnumerator WaitForEventAction()
+    {
+        while (endPopupOpen || !actionCompleted)
+        {
+            if (replayRequested && !endPopupOpen)
+            {
+                yield return ReplayExplanationRange();
+                if (presentationFailed)
+                    yield break;
+            }
+            yield return null;
+        }
+        ReleaseActionButton();
+        SetReplayButtonVisible(false);
     }
 
     private void BeginPuzzleActionWait()
@@ -609,14 +647,17 @@ public class TutorialManager : MonoBehaviour
 
     public void ReplayExplanation()
     {
-        if (!isActiveAndEnabled || !waitingForPuzzleAction || endPopupOpen || isReplaying ||
-            replayRequested || replayStartIndex < 0 || actionCompleted || !puzzleGenerator.IsBoardReady)
+        if (!isActiveAndEnabled || (!waitingForPuzzleAction && !waitingForEventAction) ||
+            endPopupOpen || isReplaying || replayRequested || replayStartIndex < 0 || actionCompleted ||
+            (useBattleRules && (puzzleGenerator == null || !puzzleGenerator.IsBoardReady)))
             return;
 
         // 클릭한 프레임부터 조작을 막아 재생 요청과 교환이 동시에 시작되지 않게 합니다.
         replayRequested = true;
         waitingForPuzzleAction = false;
-        puzzleGenerator.SetTutorialInputRestriction(true);
+        ReleaseActionButton();
+        if (useBattleRules)
+            puzzleGenerator.SetTutorialInputRestriction(true);
         swapHint?.Stop();
         DestroyHintCircle();
         SetReplayButtonVisible(false);
@@ -657,7 +698,9 @@ public class TutorialManager : MonoBehaviour
         }
 
         isReplaying = false;
-        SetReplayButtonVisible(waitingForPuzzleAction && replayStartIndex >= 0);
+        SetReplayButtonVisible((waitingForPuzzleAction || waitingForEventAction) && replayStartIndex >= 0);
+        if (waitingForEventAction)
+            ShowStepHighlights(currentStep, currentStep.highlightCells);
     }
 
     private void FailTutorialPresentation()
@@ -833,7 +876,7 @@ public class TutorialManager : MonoBehaviour
         UpdateScreenNextInput();
         TryStartSwapHint();
         if (tutorialTextReplayButton != null)
-            tutorialTextReplayButton.interactable = waitingForPuzzleAction && replayStartIndex >= 0 &&
+            tutorialTextReplayButton.interactable = (waitingForPuzzleAction || waitingForEventAction) && replayStartIndex >= 0 &&
                                                     !isReplaying && !replayRequested;
     }
 
@@ -1303,6 +1346,7 @@ public class TutorialManager : MonoBehaviour
 
     private void CleanUpSession()
     {
+        ReleaseActionButton();
         SetReplayButtonVisible(false);
         if (tutorialTextReplayButton != null)
             tutorialTextReplayButton.onClick.RemoveListener(ReplayExplanation);

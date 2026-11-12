@@ -151,7 +151,7 @@ MonoBehaviour:
   puzzleGenerator: {fileID: 0}
   tutorialEndButton: {fileID: 8065720974977002626}
   tutorialEndPopup: {fileID: 8527665974639451593}
-  tutorialTextReplayButton: {fileID: 0}
+  tutorialTextReplayButton: {fileID: 820000003}
   nextButton: {fileID: 0}
   underNextButton: {fileID: 0}
   spawnStackHighlightRoot: {fileID: 0}
@@ -781,3 +781,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7770993613348759041, guid: 1b6c95625a32bda4389ed51823cf596f, type: 3}
   m_PrefabInstance: {fileID: 5357190258749161778}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &820000003 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1858206229954320473, guid: 1b6c95625a32bda4389ed51823cf596f, type: 3}
+  m_PrefabInstance: {fileID: 5357190258749161778}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
