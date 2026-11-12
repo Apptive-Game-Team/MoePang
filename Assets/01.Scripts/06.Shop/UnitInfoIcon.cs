@@ -29,7 +29,7 @@ public class UnitInfoIcon : MonoBehaviour
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
-    public bool IsUnlocked => HabitatManager.Instance.IsUnlocked(unitData);
+    public bool IsUnlocked => HabitatManager.Instance.IsUnlockedForUI(unitData);
 
     private void Awake()
     {
@@ -89,7 +89,7 @@ public class UnitInfoIcon : MonoBehaviour
     /// </summary>
     public void RefreshUnlockState()
     {
-        bool unlocked = HabitatManager.Instance.IsUnlocked(unitData);
+        bool unlocked = HabitatManager.Instance.IsUnlockedForUI(unitData);
 
         unlockImage.gameObject.SetActive(!unlocked);
         levelImage.gameObject.SetActive(unlocked);

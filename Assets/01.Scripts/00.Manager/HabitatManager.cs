@@ -15,6 +15,9 @@ public class HabitatManager : SingletonObject<HabitatManager>
 
     //참조
     private Dictionary<FriendlyUnitData, bool> unlockDict = new();
+    private readonly HashSet<FriendlyUnitData> tutorialUnlockedUnits = new();
+
+    private bool IsTutorialPreview => GameManager.Instance != null && GameManager.Instance.Istutorial;
 
     protected override void Awake()
     {
@@ -35,6 +38,18 @@ public class HabitatManager : SingletonObject<HabitatManager>
         return unlockDict.TryGetValue(unit, out var unlocked) && unlocked;
     }
 
+    // 전투의 소환 후보와 실제 저장값은 유지하고, UI에서만 튜토리얼 해금 상태를 사용합니다.
+    public bool IsUnlockedForUI(FriendlyUnitData unit)
+    {
+        if (unit == null)
+            return false;
+        if (IsTutorialPreview)
+            return unit.UnitGrade == 1 || tutorialUnlockedUnits.Contains(unit);
+
+        tutorialUnlockedUnits.Clear();
+        return IsUnlocked(unit);
+    }
+
     public int GetUnitLevel(FriendlyUnitData unit)
     {
         return GameManager.Instance.unitData.GetUnitLevel(unit);
@@ -51,6 +66,13 @@ public class HabitatManager : SingletonObject<HabitatManager>
     /// </summary>
     public void Unlock(FriendlyUnitData unit)
     {
+        if (unit == null)
+            return;
+        if (IsTutorialPreview)
+        {
+            tutorialUnlockedUnits.Add(unit);
+            return;
+        }
         if (unlockDict.ContainsKey(unit))
         {
             unlockDict[unit] = true;
@@ -75,7 +97,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
 
         if (index == 0) return true;
 
-        return IsUnlocked(list[index - 1]);
+        return IsUnlockedForUI(list[index - 1]);
     }
 
     public bool AreAllFinalHabitatUnitsUnlocked()

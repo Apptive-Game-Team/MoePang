@@ -283,12 +283,12 @@ public class ShopManager : MonoBehaviour
             return 0;
         }
 
-        return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
+        return HabitatManager.Instance.IsUnlockedForUI(unit) ? unit.UnitCost : unit.UnlockCost;
     }
 
     private bool CanBuyUnit(FriendlyUnitData unit, int cost)
     {
-        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+        bool isUnlocked = HabitatManager.Instance.IsUnlockedForUI(unit);
 
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
         {
@@ -370,7 +370,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+        bool isUnlocked = HabitatManager.Instance.IsUnlockedForUI(unit);
         int cost = GetUnitPurchaseCost(unit);
 
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))

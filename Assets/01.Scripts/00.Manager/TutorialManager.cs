@@ -589,6 +589,7 @@ public class TutorialManager : MonoBehaviour
             SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
             UpdateScreenNextInput();
             ShowStepHighlights(step, step.highlightCells);
+            ShowActionHintCircle();
             yield break;
         }
         if (IsPuzzleActionStep(step))
@@ -936,6 +937,7 @@ public class TutorialManager : MonoBehaviour
         if (tutorialTextReplayButton != null)
             tutorialTextReplayButton.interactable = (waitingForPuzzleAction || waitingForEventAction) && replayStartIndex >= 0 &&
                                                     !isReplaying && !replayRequested;
+        UpdateScreenNextInput();
     }
 
     private bool ConfigureScreenNextInput()
@@ -1112,6 +1114,8 @@ public class TutorialManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (currentStep != null && currentStep.waitType == WaitType.Event && currentStep.showHintCircle)
+            ShowActionHintCircle();
         // 대사 중 카메라가 이동해도 선택한 유닛 위치에 마스크를 맞춥니다.
         if (waitingForDialogue && currentStep != null && currentStep.focusSpawnedUnit)
             highlightMask?.RequestRefresh();
@@ -1190,6 +1194,27 @@ public class TutorialManager : MonoBehaviour
             !puzzleGenerator.TryGetTutorialCellRect(currentStep.from, out RectTransform frame, out Rect cell))
             return;
 
+        ShowHintCircleAt(frame, cell.center, overlay);
+    }
+
+    private void ShowActionHintCircle()
+    {
+        if (!IsRunning || currentStep == null || !currentStep.showHintCircle ||
+            !waitingForEventAction || endPopupOpen || isReplaying || replayRequested || actionCompleted ||
+            currentActionButton == null || !currentActionButton.gameObject.activeInHierarchy)
+        {
+            HideHintCircle();
+            return;
+        }
+
+        RectTransform overlay = highlightMask != null ? highlightMask.DimRectTransform : null;
+        RectTransform target = currentActionButton.GetComponent<RectTransform>();
+        if (hintCirclePrefab != null && overlay != null && target != null)
+            ShowHintCircleAt(target, target.rect.center, overlay);
+    }
+
+    private void ShowHintCircleAt(RectTransform frame, Vector2 center, RectTransform overlay)
+    {
         Canvas sourceCanvas = frame.GetComponentInParent<Canvas>().rootCanvas;
         Canvas overlayCanvas = overlay.GetComponentInParent<Canvas>().rootCanvas;
         Camera sourceCamera = sourceCanvas.renderMode == RenderMode.ScreenSpaceOverlay
@@ -1197,7 +1222,7 @@ public class TutorialManager : MonoBehaviour
         Camera overlayCamera = overlayCanvas.renderMode == RenderMode.ScreenSpaceOverlay
             ? null : overlayCanvas.worldCamera;
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(
-            sourceCamera, frame.TransformPoint(cell.center));
+            sourceCamera, frame.TransformPoint(center));
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 overlay, screen, overlayCamera, out Vector2 local))
             return;
