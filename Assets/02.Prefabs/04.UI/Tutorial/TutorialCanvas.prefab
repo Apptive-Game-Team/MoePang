@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 5217980101304036933}
   - component: {fileID: 1861913608382180429}
   - component: {fileID: 6454081831726819018}
+  - component: {fileID: -5830810380401093282}
+  - component: {fileID: 7213531803145102775}
   m_Layer: 5
   m_Name: TutorialCanvas
   m_TagString: Untagged
@@ -106,6 +108,84 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &-5830810380401093282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6094790636672849077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d38bf924babfcfe44bb77873ace9670c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoStart: 1
+  requireTutorialMode: 1
+  useBattleRules: 1
+  pauseGameplay: 1
+  localizationTable: LocalizationDataTable
+  onCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  tutorialStage: 0
+  applyTutorialStage: 1
+  initialFriendlyGrade: 1
+  tutorialCastleHp: 500
+  mirrorEnemySpawns: 1
+  tutorialEnemyIndices: 0000000002000000
+  tutorialEnemyMaxHp: 16
+  tutorialEnemyAttackDamage: 0
+  dialogueDuration: 5
+  postActionDelay: 2
+  timeInfo: {fileID: 0}
+  lockButton: {fileID: 0}
+  pauseButton: {fileID: 0}
+  tutorialPanel: {fileID: 0}
+  underTutorialPanel: {fileID: 0}
+  tutorialTextList: {fileID: 0}
+  tutorialText: {fileID: 0}
+  underTutorialText: {fileID: 0}
+  puzzleGenerator: {fileID: 0}
+  tutorialEndButton: {fileID: 0}
+  tutorialEndPopup: {fileID: 0}
+  tutorialTextReplayButton: {fileID: 0}
+  nextButton: {fileID: 0}
+  underNextButton: {fileID: 0}
+  spawnStackHighlightRoot: {fileID: 0}
+  battleCameraController: {fileID: 0}
+  highlightMask: {fileID: 0}
+  hintCirclePrefab: {fileID: 0}
+  swapHintBrightness: 0.6
+  swapHintScaleAmount: 0.08
+  swapHintPulseDuration: 0.25
+  swapHintPulseGap: 0.12
+  swapHintRepeatDelay: 1
+  swapHintGlowColor: {r: 5, g: 4.5, b: 2.5, a: 0.65}
+  steps: []
+  endAcceptButton: {fileID: 0}
+  endCloseButton: {fileID: 0}
+--- !u!114 &7213531803145102775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6094790636672849077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63fae1ff60c35c04b804a64bc016eb8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dimImage: {fileID: 0}
+  maskWriterShader: {fileID: 0}
+  targets: []
+  spriteCamera: {fileID: 0}
+  spriteCameraOutput: {fileID: 0}
+  imageTargets: []
 --- !u!1001 &314057729095960133
 PrefabInstance:
   m_ObjectHideFlags: 0
