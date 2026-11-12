@@ -4135,9 +4135,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2847791034282519039, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2847791034282519039, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2847791034282519039, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2847791034282519039, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 250
+      objectReference: {fileID: 0}
+    - target: {fileID: 5217980101304036933, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_SortingOrder
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6094790636672849077, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: m_Name
       value: TutorialCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7433150992851051152, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_Alpha
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
