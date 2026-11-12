@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ItemData = _01.Scripts._06.Shop.ItemData;
 using UnityEngine.Localization.Settings;
@@ -109,7 +108,7 @@ public class ShopManager : MonoBehaviour
     public void OnClickBack()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
     
     /// <summary>
@@ -124,7 +123,7 @@ public class ShopManager : MonoBehaviour
 
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
     
     /// <summary>
@@ -176,7 +175,7 @@ public class ShopManager : MonoBehaviour
         currentSelected.Select();
         currentSelected.SetHighlight(new Material(uiHighlightMaterial), true);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
 
     /// <summary>

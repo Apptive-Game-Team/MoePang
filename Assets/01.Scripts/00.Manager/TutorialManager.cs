@@ -263,6 +263,7 @@ public class TutorialManager : MonoBehaviour
     private bool replayRequested;
     private bool isReplaying;
     private bool presentationFailed;
+    private bool sceneTransitionPending;
 
     private void Awake()
     {
@@ -362,6 +363,7 @@ public class TutorialManager : MonoBehaviour
         }
         PrepareSession();
         IsRunning = true;
+        sceneTransitionPending = false;
         IsInstructionComplete = false;
         presentationFailed = false;
         actionCompleted = false;
@@ -455,18 +457,43 @@ public class TutorialManager : MonoBehaviour
     public void CompleteCurrentAction()
     {
         if (IsRunning && currentStep != null && currentStep.waitType == WaitType.Event &&
-            waitingForEventAction && !isReplaying && !replayRequested && !endPopupOpen)
+            waitingForEventAction && !isReplaying && !replayRequested && !endPopupOpen && !sceneTransitionPending)
         {
             actionCompleted = true;
             UpdateScreenNextInput();
         }
     }
 
+    // 씬 로드가 완료될 때까지 현재 안내를 유지하여 밝아지는 중간 화면을 막습니다.
+    public static void LoadScene(string sceneName)
+    {
+        TutorialManager owner = activeTutorial;
+        if (owner != null && owner.IsRunning)
+        {
+            owner.sceneTransitionPending = true;
+            owner.UpdateScreenNextInput();
+        }
+        try
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+        catch
+        {
+            if (owner != null)
+            {
+                owner.sceneTransitionPending = false;
+                owner.UpdateScreenNextInput();
+            }
+            throw;
+        }
+    }
+
     private IEnumerator RunTutorial(int version)
     {
-        // 초기 보드의 낙하가 끝난 뒤 첫 대사를 표시합니다.
+        // UI 안내는 씬의 첫 화면부터 표시하고, 전투만 초기 보드 낙하를 기다립니다.
         SetTutorialPaused(false);
-        yield return new WaitUntil(CanContinueTutorial);
+        if (useBattleRules)
+            yield return new WaitUntil(CanContinueTutorial);
 
         for (currentStepIndex = 0; currentStepIndex < steps.Length; currentStepIndex++)
         {
@@ -706,7 +733,7 @@ public class TutorialManager : MonoBehaviour
 
     public void ReplayExplanation()
     {
-        if (!isActiveAndEnabled || (!waitingForPuzzleAction && !waitingForEventAction) ||
+        if (!isActiveAndEnabled || sceneTransitionPending || (!waitingForPuzzleAction && !waitingForEventAction) ||
             endPopupOpen || isReplaying || replayRequested || replayStartIndex < 0 || actionCompleted ||
             (useBattleRules && (puzzleGenerator == null || !puzzleGenerator.IsBoardReady)))
             return;
@@ -885,7 +912,7 @@ public class TutorialManager : MonoBehaviour
 
     private void OpenEndPopup()
     {
-        if (!IsRunning || endPopupOpen)
+        if (!IsRunning || sceneTransitionPending || endPopupOpen)
             return;
         if (tutorialEndPopup == null)
         {
@@ -991,15 +1018,15 @@ public class TutorialManager : MonoBehaviour
         if (screenNextInput == null)
             return;
 
-        bool canAdvance = IsRunning && isActiveAndEnabled && !endPopupOpen && !nextClicked &&
+        bool canAdvance = IsRunning && isActiveAndEnabled && !sceneTransitionPending && !endPopupOpen && !nextClicked &&
                           currentStep != null && waitingForDialogue;
         bool restrictButtons = IsRunning && isActiveAndEnabled && !endPopupOpen &&
                                currentStep != null && currentStep.waitType == WaitType.Event &&
                                currentStep.actionButton != null;
-        RectTransform actionRect = waitingForEventAction && !actionCompleted && !isReplaying && !replayRequested &&
+        RectTransform actionRect = waitingForEventAction && !sceneTransitionPending && !actionCompleted && !isReplaying && !replayRequested &&
                                    currentActionButton != null
             ? currentActionButton.GetComponent<RectTransform>() : null;
-        RectTransform replayRect = tutorialTextReplayButton != null && tutorialTextReplayButton.interactable &&
+        RectTransform replayRect = !sceneTransitionPending && tutorialTextReplayButton != null && tutorialTextReplayButton.interactable &&
                                    tutorialTextReplayButton.gameObject.activeInHierarchy
             ? tutorialTextReplayButton.GetComponent<RectTransform>() : null;
         screenNextInput.SetAllowedButtons(actionRect, replayRect);
@@ -1135,7 +1162,7 @@ public class TutorialManager : MonoBehaviour
 
     public void NextDialogue()
     {
-        if (isActiveAndEnabled && !endPopupOpen && currentStep != null && waitingForDialogue)
+        if (isActiveAndEnabled && !sceneTransitionPending && !endPopupOpen && currentStep != null && waitingForDialogue)
         {
             nextClicked = true;
             UpdateScreenNextInput();
