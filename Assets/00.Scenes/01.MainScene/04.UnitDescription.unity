@@ -777,7 +777,183 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: autoStart
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: requireTutorialMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: useBattleRules
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: pauseGameplay
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: dialogueDuration
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5217980101304036933, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dialogueKey
+      value: UiTutorial12
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].waitType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].panel
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].delay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dialogueDuration
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dimBackground
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].focusUnitGrade
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].playHintAnimation
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].hidePanelBeforeSpawn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].actionFriendlyGrade
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].afterActionFriendlyGrade
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[0]
+      value:
+      objectReference: {fileID: 1343039498}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[1]
+      value:
+      objectReference: {fileID: 2128366622}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[2]
+      value:
+      objectReference: {fileID: 1566443428}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[3]
+      value:
+      objectReference: {fileID: 749476257}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[4]
+      value:
+      objectReference: {fileID: 1140593787}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[5]
+      value:
+      objectReference: {fileID: 2124586936}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].highlightObjects.Array.data[6]
+      value:
+      objectReference: {fileID: 1397681734}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dialogueAbove
+      value:
+      objectReference: {fileID: 2124586937}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dialogueGap
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].dialogueKey
+      value: UiTutorial13
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].waitType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].panel
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].delay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].dialogueDuration
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].dimBackground
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].focusUnitGrade
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].playHintAnimation
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].hidePanelBeforeSpawn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].actionFriendlyGrade
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].afterActionFriendlyGrade
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].highlightObjects.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].highlightObjects.Array.data[0]
+      value:
+      objectReference: {fileID: 779954596}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].dialogueAbove
+      value:
+      objectReference: {fileID: 2124586937}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].dialogueGap
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].nextScene
+      value: 03.UnitInfoScene
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[1].nextSceneDialogueKey
+      value: UiTutorial14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

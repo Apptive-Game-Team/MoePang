@@ -37,6 +37,15 @@ public class TutorialManager : MonoBehaviour
         public Image popupBackground;
         public Vector2 popupOffset;
         public Vector2 dialoguePanelOffset;
+        [Tooltip("지정한 UI의 위쪽에 대사 패널을 배치합니다. 앵커는 유지합니다.")]
+        public RectTransform dialogueAbove;
+        [Min(0f)] public float dialogueGap = 24f;
+        [Header("단계 종료 후 씬 이동")]
+        public string nextScene;
+        public string nextSceneDialogueKey;
+        [Header("다른 씬의 설명 다시 듣기")]
+        public string replayScene;
+        public string replayDialogueKey;
         public PanelType panel;
         public Vector2Int from;
         public Vector2Int to;
@@ -59,6 +68,7 @@ public class TutorialManager : MonoBehaviour
         [Min(1)] public int focusUnitGrade = 2;
         public bool playHintAnimation = true;
         public bool showHintCircle;
+        public RectTransform hintCircleTarget;
         public bool hidePanelBeforeSpawn = true;
 
         [Header("동작 중 소환 설정")]
@@ -109,6 +119,8 @@ public class TutorialManager : MonoBehaviour
     private static TutorialManager activeTutorial;
     private static string pendingRestartScene;
     private static string pendingRestartOwner;
+    private static string pendingEntryScene;
+    private static string pendingEntryDialogueKey;
     private bool sessionPrepared;
     private int runVersion;
     private bool habitatApplied;
@@ -233,6 +245,9 @@ public class TutorialManager : MonoBehaviour
     private Color originalPopupColor;
     private Vector2 originalPopupPosition;
     private Vector2 originalPanelPosition;
+    private RectTransform positionedDialoguePanel;
+    private Vector2 originalDialoguePosition;
+    private readonly Vector3[] placementCorners = new Vector3[4];
     private bool ownsTimeScale;
     private bool usesUnscaledPuzzleTime;
     private bool puzzleActionRunning;
@@ -260,6 +275,8 @@ public class TutorialManager : MonoBehaviour
     private RectTransform hintCircleInstance;
     private int currentStepIndex;
     private int replayStartIndex = -1;
+    private bool HasReplayExplanation => replayStartIndex >= 0 ||
+        (currentStep != null && !string.IsNullOrWhiteSpace(currentStep.replayScene));
     private bool replayRequested;
     private bool isReplaying;
     private bool presentationFailed;
@@ -361,6 +378,19 @@ public class TutorialManager : MonoBehaviour
             StopTutorial();
             return;
         }
+        int firstStep = 0;
+        if (pendingEntryScene == gameObject.scene.name)
+        {
+            firstStep = Array.FindIndex(steps, step => step.dialogueKey == pendingEntryDialogueKey);
+            pendingEntryScene = null;
+            pendingEntryDialogueKey = null;
+            if (firstStep < 0)
+            {
+                Debug.LogError("TutorialManager: 이어서 시작할 대사 키가 없습니다.", this);
+                StopTutorial();
+                return;
+            }
+        }
         PrepareSession();
         IsRunning = true;
         sceneTransitionPending = false;
@@ -408,7 +438,7 @@ public class TutorialManager : MonoBehaviour
         gameplayTimeScale = originalTimeScale > 0f ? originalTimeScale : 1f;
         ownsTimeScale = pauseGameplay;
         usesUnscaledPuzzleTime = useBattleRules;
-        StartCoroutine(RunTutorial(++runVersion));
+        StartCoroutine(RunTutorial(++runVersion, firstStep));
     }
 
     /// <summary>이벤트 구독, 입력 제한과 임시 설정을 해제합니다.</summary>
@@ -465,11 +495,15 @@ public class TutorialManager : MonoBehaviour
     }
 
     // 씬 로드가 완료될 때까지 현재 안내를 유지하여 밝아지는 중간 화면을 막습니다.
-    public static void LoadScene(string sceneName)
+    public static void LoadScene(string sceneName, string startDialogueKey = null)
     {
         TutorialManager owner = activeTutorial;
+        string previousEntryScene = pendingEntryScene;
+        string previousEntryKey = pendingEntryDialogueKey;
         if (owner != null && owner.IsRunning)
         {
+            pendingEntryScene = string.IsNullOrWhiteSpace(startDialogueKey) ? null : sceneName;
+            pendingEntryDialogueKey = startDialogueKey;
             owner.sceneTransitionPending = true;
             owner.UpdateScreenNextInput();
         }
@@ -479,6 +513,8 @@ public class TutorialManager : MonoBehaviour
         }
         catch
         {
+            pendingEntryScene = previousEntryScene;
+            pendingEntryDialogueKey = previousEntryKey;
             if (owner != null)
             {
                 owner.sceneTransitionPending = false;
@@ -488,14 +524,14 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private IEnumerator RunTutorial(int version)
+    private IEnumerator RunTutorial(int version, int firstStep)
     {
         // UI 안내는 씬의 첫 화면부터 표시하고, 전투만 초기 보드 낙하를 기다립니다.
         SetTutorialPaused(false);
         if (useBattleRules)
             yield return new WaitUntil(CanContinueTutorial);
 
-        for (currentStepIndex = 0; currentStepIndex < steps.Length; currentStepIndex++)
+        for (currentStepIndex = firstStep; currentStepIndex < steps.Length; currentStepIndex++)
         {
             TutorialStep step = steps[currentStepIndex];
             replayStartIndex = GetReplayStartIndex(currentStepIndex);
@@ -541,6 +577,11 @@ public class TutorialManager : MonoBehaviour
             step.onExit?.Invoke();
             if (!IsRunning || version != runVersion)
                 yield break;
+            if (!string.IsNullOrWhiteSpace(step.nextScene))
+            {
+                LoadScene(step.nextScene, step.nextSceneDialogueKey);
+                yield break;
+            }
         }
 
         EndSession(false);
@@ -613,7 +654,7 @@ public class TutorialManager : MonoBehaviour
             currentActionButton = step.actionButton;
             if (currentActionButton != null)
                 currentActionButton.onClick.AddListener(CompleteCurrentAction);
-            SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
+            SetReplayButtonVisible(HasReplayExplanation && !isReplaying);
             UpdateScreenNextInput();
             ShowStepHighlights(step, step.highlightCells);
             ShowActionHintCircle();
@@ -697,7 +738,7 @@ public class TutorialManager : MonoBehaviour
     private void BeginPuzzleActionWait()
     {
         waitingForPuzzleAction = true;
-        SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
+        SetReplayButtonVisible(HasReplayExplanation && !isReplaying);
         if (currentStep.waitType == WaitType.Swap)
         {
             Vector2Int[] cells = currentStep.highlightCells != null && currentStep.highlightCells.Length > 0
@@ -734,9 +775,15 @@ public class TutorialManager : MonoBehaviour
     public void ReplayExplanation()
     {
         if (!isActiveAndEnabled || sceneTransitionPending || (!waitingForPuzzleAction && !waitingForEventAction) ||
-            endPopupOpen || isReplaying || replayRequested || replayStartIndex < 0 || actionCompleted ||
+            endPopupOpen || isReplaying || replayRequested || !HasReplayExplanation || actionCompleted ||
             (useBattleRules && (puzzleGenerator == null || !puzzleGenerator.IsBoardReady)))
             return;
+
+        if (!string.IsNullOrWhiteSpace(currentStep.replayScene))
+        {
+            LoadScene(currentStep.replayScene, currentStep.replayDialogueKey);
+            return;
+        }
 
         // 클릭한 프레임부터 조작을 막아 재생 요청과 교환이 동시에 시작되지 않게 합니다.
         replayRequested = true;
@@ -784,7 +831,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         isReplaying = false;
-        SetReplayButtonVisible((waitingForPuzzleAction || waitingForEventAction) && replayStartIndex >= 0);
+        SetReplayButtonVisible((waitingForPuzzleAction || waitingForEventAction) && HasReplayExplanation);
         if (waitingForEventAction)
             ShowStepHighlights(currentStep, currentStep.highlightCells);
     }
@@ -962,7 +1009,7 @@ public class TutorialManager : MonoBehaviour
         UpdateScreenNextInput();
         TryStartSwapHint();
         if (tutorialTextReplayButton != null)
-            tutorialTextReplayButton.interactable = (waitingForPuzzleAction || waitingForEventAction) && replayStartIndex >= 0 &&
+            tutorialTextReplayButton.interactable = (waitingForPuzzleAction || waitingForEventAction) && HasReplayExplanation &&
                                                     !isReplaying && !replayRequested;
         UpdateScreenNextInput();
     }
@@ -1074,6 +1121,7 @@ public class TutorialManager : MonoBehaviour
 
         SetPanel(tutorialPanel, !useUnderPanel, false);
         SetPanel(underTutorialPanel, useUnderPanel, false);
+        ApplyDialoguePlacement(step);
         // 시작 시 숨겨 둔 카메라 버튼은 조작 설명 단계에서만 표시합니다.
         bool showCameraButton = step.showCameraButton;
         SetUi(lockButton, showCameraButton ? 1f : 0f, showCameraButton);
@@ -1141,11 +1189,66 @@ public class TutorialManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (positionedDialoguePanel != null && currentStep != null && !sceneTransitionPending &&
+            PositionDialogueAbove(currentStep))
+            highlightMask?.RequestRefresh();
         if (currentStep != null && currentStep.waitType == WaitType.Event && currentStep.showHintCircle)
             ShowActionHintCircle();
         // 대사 중 카메라가 이동해도 선택한 유닛 위치에 마스크를 맞춥니다.
         if (waitingForDialogue && currentStep != null && currentStep.focusSpawnedUnit)
             highlightMask?.RequestRefresh();
+    }
+
+    private void ApplyDialoguePlacement(TutorialStep step)
+    {
+        RectTransform panel = (step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel)
+            ?.GetComponent<RectTransform>();
+        if (step.dialogueAbove == null || positionedDialoguePanel != panel)
+            RestoreDialoguePlacement();
+        if (step.dialogueAbove == null || panel == null)
+            return;
+        if (positionedDialoguePanel == null)
+        {
+            positionedDialoguePanel = panel;
+            originalDialoguePosition = panel.anchoredPosition;
+        }
+        Canvas.ForceUpdateCanvases();
+        PositionDialogueAbove(step);
+    }
+
+    private bool PositionDialogueAbove(TutorialStep step)
+    {
+        if (step.dialogueAbove == null || positionedDialoguePanel == null ||
+            positionedDialoguePanel.parent is not RectTransform parent)
+            return false;
+
+        Canvas sourceCanvas = step.dialogueAbove.GetComponentInParent<Canvas>()?.rootCanvas;
+        Canvas targetCanvas = positionedDialoguePanel.GetComponentInParent<Canvas>()?.rootCanvas;
+        Camera sourceCamera = sourceCanvas != null && sourceCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? sourceCanvas.worldCamera : null;
+        Camera targetCamera = targetCanvas != null && targetCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? targetCanvas.worldCamera : null;
+        step.dialogueAbove.GetWorldCorners(placementCorners);
+        Vector2 screenTop = RectTransformUtility.WorldToScreenPoint(sourceCamera,
+            (placementCorners[1] + placementCorners[2]) * 0.5f);
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenTop, targetCamera,
+                out Vector2 top))
+            return false;
+
+        positionedDialoguePanel.GetWorldCorners(placementCorners);
+        float bottom = parent.InverseTransformPoint((placementCorners[0] + placementCorners[3]) * 0.5f).y;
+        float offset = top.y + step.dialogueGap - bottom;
+        if (Mathf.Abs(offset) < 0.01f)
+            return false;
+        positionedDialoguePanel.anchoredPosition += Vector2.up * offset;
+        return true;
+    }
+
+    private void RestoreDialoguePlacement()
+    {
+        if (positionedDialoguePanel != null)
+            positionedDialoguePanel.anchoredPosition = originalDialoguePosition;
+        positionedDialoguePanel = null;
     }
 
     private void SetPanel(CanvasGroup panel, bool visible, bool interactable)
@@ -1235,7 +1338,8 @@ public class TutorialManager : MonoBehaviour
         }
 
         RectTransform overlay = highlightMask != null ? highlightMask.DimRectTransform : null;
-        RectTransform target = currentActionButton.GetComponent<RectTransform>();
+        RectTransform target = currentStep.hintCircleTarget != null
+            ? currentStep.hintCircleTarget : currentActionButton.GetComponent<RectTransform>();
         if (hintCirclePrefab != null && overlay != null && target != null)
             ShowHintCircleAt(target, target.rect.center, overlay);
     }
@@ -1466,6 +1570,7 @@ public class TutorialManager : MonoBehaviour
 
     private void CleanUpSession()
     {
+        RestoreDialoguePlacement();
         RestorePopupPresentation();
         ReleaseActionButton();
         SetReplayButtonVisible(false);
