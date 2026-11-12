@@ -11901,6 +11901,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: TutorialCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: autoStart
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: requireTutorialMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: useBattleRules
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: pauseGameplay
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: dialogueDuration
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dialogueKey
+      value: UiTutorial00
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].waitType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].panel
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].dialogueDuration
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].actionFriendlyGrade
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: steps.Array.data[0].afterActionFriendlyGrade
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5217980101304036933, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

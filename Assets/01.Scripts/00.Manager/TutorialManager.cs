@@ -745,7 +745,8 @@ public class TutorialManager : MonoBehaviour
         if (tutorialEndButton == null)
             return;
 
-        endButton = tutorialEndButton.GetComponent<Button>();
+        // 종료 버튼을 감싸는 부모 오브젝트를 연결해도 실제 자식 버튼에 입력을 연결합니다.
+        endButton = tutorialEndButton.GetComponentInChildren<Button>(true);
         if (endButton != null)
             endButton.onClick.AddListener(OpenEndPopup);
         if (tutorialEndPopup == null)
@@ -856,7 +857,7 @@ public class TutorialManager : MonoBehaviour
         if (screenNextInput != null)
         {
             screenNextInput.Configure(this, tutorialEndButton != null
-                ? tutorialEndButton.GetComponent<RectTransform>() : null);
+                ? GetEndButtonRect() : null);
             return true;
         }
         var inputObject = new GameObject("TutorialScreenNextInput",
@@ -874,9 +875,13 @@ public class TutorialManager : MonoBehaviour
 
         screenNextInput = inputObject.GetComponent<TutorialScreenNextInput>();
         screenNextInput.Configure(this, tutorialEndButton != null
-            ? tutorialEndButton.GetComponent<RectTransform>() : null);
+            ? GetEndButtonRect() : null);
         return true;
     }
+
+    private RectTransform GetEndButtonRect() => endButton != null
+        ? endButton.GetComponent<RectTransform>()
+        : tutorialEndButton.GetComponentInChildren<Button>(true)?.GetComponent<RectTransform>();
 
     private void UpdateScreenNextInput()
     {
@@ -1001,12 +1006,15 @@ public class TutorialManager : MonoBehaviour
             highlightMask?.RequestRefresh();
     }
 
-    private static void SetPanel(CanvasGroup panel, bool visible, bool interactable)
+    private void SetPanel(CanvasGroup panel, bool visible, bool interactable)
     {
         if (panel == null)
             return;
 
-        SetUi(panel, visible ? 1f : 0f, visible && interactable);
+        // 패널의 자식인 종료 버튼도 부모 CanvasGroup의 입력 제한을 받습니다.
+        bool containsEndButton = tutorialEndButton != null &&
+                                 tutorialEndButton.transform.IsChildOf(panel.transform);
+        SetUi(panel, visible ? 1f : 0f, visible && (interactable || containsEndButton));
         panel.gameObject.SetActive(visible);
     }
 

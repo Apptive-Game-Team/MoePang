@@ -33,10 +33,10 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2414085173593646899}
   - {fileID: 3543393435526480885}
-  - {fileID: 7623350331908247186}
+  - {fileID: 2414085173593646899}
   - {fileID: 2847791034282519039}
+  - {fileID: 7623350331908247186}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -143,20 +143,20 @@ MonoBehaviour:
   timeInfo: {fileID: 0}
   lockButton: {fileID: 0}
   pauseButton: {fileID: 0}
-  tutorialPanel: {fileID: 0}
+  tutorialPanel: {fileID: 7433150992851051152}
   underTutorialPanel: {fileID: 0}
   tutorialTextList: {fileID: 0}
-  tutorialText: {fileID: 0}
+  tutorialText: {fileID: 2974852874791795679}
   underTutorialText: {fileID: 0}
   puzzleGenerator: {fileID: 0}
-  tutorialEndButton: {fileID: 0}
-  tutorialEndPopup: {fileID: 0}
+  tutorialEndButton: {fileID: 8065720974977002626}
+  tutorialEndPopup: {fileID: 8527665974639451593}
   tutorialTextReplayButton: {fileID: 0}
   nextButton: {fileID: 0}
   underNextButton: {fileID: 0}
   spawnStackHighlightRoot: {fileID: 0}
   battleCameraController: {fileID: 0}
-  highlightMask: {fileID: 0}
+  highlightMask: {fileID: 7213531803145102775}
   hintCirclePrefab: {fileID: 0}
   swapHintBrightness: 0.6
   swapHintScaleAmount: 0.08
@@ -165,8 +165,8 @@ MonoBehaviour:
   swapHintRepeatDelay: 1
   swapHintGlowColor: {r: 5, g: 4.5, b: 2.5, a: 0.65}
   steps: []
-  endAcceptButton: {fileID: 0}
-  endCloseButton: {fileID: 0}
+  endAcceptButton: {fileID: 8908499831311217470}
+  endCloseButton: {fileID: 6555681337602494258}
 --- !u!114 &7213531803145102775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63fae1ff60c35c04b804a64bc016eb8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dimImage: {fileID: 7022837928314515473}
+  dimImage: {fileID: 7614131464929421738}
   maskWriterShader: {fileID: 4800000, guid: ae9f7391e199e8b43a3d8dd03c84a840, type: 3}
   targets: []
   spriteCamera: {fileID: 0}
@@ -298,17 +298,22 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2584682511133618106, guid: cd441bc3602592d498afc41a987512fd, type: 3}
   m_PrefabInstance: {fileID: 314057729095960133}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7022837928314515473 stripped
+--- !u!114 &2974852874791795679 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7290729886093194836, guid: cd441bc3602592d498afc41a987512fd, type: 3}
+  m_CorrespondingSourceObject: {fileID: 3247954301854203290, guid: cd441bc3602592d498afc41a987512fd, type: 3}
   m_PrefabInstance: {fileID: 314057729095960133}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!225 &7433150992851051152 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 7168634003895985365, guid: cd441bc3602592d498afc41a987512fd, type: 3}
+  m_PrefabInstance: {fileID: 314057729095960133}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1080367303485188600
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -410,11 +415,38 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2bb26c0e32ce914489892f6d85498f94, type: 3}
+--- !u!114 &6555681337602494258 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6054044234357024458, guid: 2bb26c0e32ce914489892f6d85498f94, type: 3}
+  m_PrefabInstance: {fileID: 1080367303485188600}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7623350331908247186 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7437036083529983850, guid: 2bb26c0e32ce914489892f6d85498f94, type: 3}
   m_PrefabInstance: {fileID: 1080367303485188600}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8527665974639451593 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8693749737314038833, guid: 2bb26c0e32ce914489892f6d85498f94, type: 3}
+  m_PrefabInstance: {fileID: 1080367303485188600}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8908499831311217470 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8457589895240669894, guid: 2bb26c0e32ce914489892f6d85498f94, type: 3}
+  m_PrefabInstance: {fileID: 1080367303485188600}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &4072215724484029967
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -519,6 +551,11 @@ PrefabInstance:
 --- !u!224 &7836066788809276185 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6069769940663473430, guid: 2efb844792b02a54c82f823794040be5, type: 3}
+  m_PrefabInstance: {fileID: 4072215724484029967}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8065720974977002626 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6299507689698001549, guid: 2efb844792b02a54c82f823794040be5, type: 3}
   m_PrefabInstance: {fileID: 4072215724484029967}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4349516856585511627
@@ -627,6 +664,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 968343219674521918, guid: 243c11540db09164aaccd3674c22ce96, type: 3}
   m_PrefabInstance: {fileID: 4349516856585511627}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7614131464929421738 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6194211663682751329, guid: 243c11540db09164aaccd3674c22ce96, type: 3}
+  m_PrefabInstance: {fileID: 4349516856585511627}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &5357190258749161778
 PrefabInstance:
   m_ObjectHideFlags: 0
