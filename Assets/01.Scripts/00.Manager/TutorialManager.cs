@@ -32,6 +32,11 @@ public class TutorialManager : MonoBehaviour
         public WaitType waitType;
         [Tooltip("Event 단계에서 누를 버튼입니다. 클릭 시 현재 동작을 완료합니다.")]
         public Button actionButton;
+        [Header("팝업 설명 중 임시 배치")]
+        [Tooltip("이 Image만 투명하게 하며, 연속된 팝업 설명이 끝나면 색상과 위치를 복원하고 팝업을 닫습니다.")]
+        public Image popupBackground;
+        public Vector2 popupOffset;
+        public Vector2 dialoguePanelOffset;
         public PanelType panel;
         public Vector2Int from;
         public Vector2Int to;
@@ -223,6 +228,11 @@ public class TutorialManager : MonoBehaviour
     private bool waitingForPuzzleAction;
     private bool waitingForEventAction;
     private Button currentActionButton;
+    private Image explainingPopup;
+    private RectTransform explainingPanel;
+    private Color originalPopupColor;
+    private Vector2 originalPopupPosition;
+    private Vector2 originalPanelPosition;
     private bool ownsTimeScale;
     private bool usesUnscaledPuzzleTime;
     private bool puzzleActionRunning;
@@ -446,7 +456,10 @@ public class TutorialManager : MonoBehaviour
     {
         if (IsRunning && currentStep != null && currentStep.waitType == WaitType.Event &&
             waitingForEventAction && !isReplaying && !replayRequested && !endPopupOpen)
+        {
             actionCompleted = true;
+            UpdateScreenNextInput();
+        }
     }
 
     private IEnumerator RunTutorial(int version)
@@ -541,6 +554,7 @@ public class TutorialManager : MonoBehaviour
         ClearStepPresentation();
         SetTutorialPaused(true);
         currentStep = step;
+        ApplyPopupPresentation(step);
         waitingForPuzzleAction = false;
         nextClicked = false;
         if (useBattleRules)
@@ -573,6 +587,7 @@ public class TutorialManager : MonoBehaviour
             if (currentActionButton != null)
                 currentActionButton.onClick.AddListener(CompleteCurrentAction);
             SetReplayButtonVisible(replayStartIndex >= 0 && !isReplaying);
+            UpdateScreenNextInput();
             ShowStepHighlights(step, step.highlightCells);
             yield break;
         }
@@ -591,6 +606,48 @@ public class TutorialManager : MonoBehaviour
         if (currentActionButton != null)
             currentActionButton.onClick.RemoveListener(CompleteCurrentAction);
         currentActionButton = null;
+    }
+
+    private void ApplyPopupPresentation(TutorialStep step)
+    {
+        CanvasGroup panel = step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel;
+        RectTransform panelRect = panel != null ? panel.GetComponent<RectTransform>() : null;
+        if (explainingPopup == step.popupBackground && explainingPanel == panelRect)
+            return;
+
+        RestorePopupPresentation();
+        if (step.popupBackground == null)
+            return;
+
+        explainingPopup = step.popupBackground;
+        explainingPanel = panelRect;
+        originalPopupColor = explainingPopup.color;
+        originalPopupPosition = explainingPopup.rectTransform.anchoredPosition;
+        if (explainingPanel != null)
+        {
+            originalPanelPosition = explainingPanel.anchoredPosition;
+            explainingPanel.anchoredPosition = originalPanelPosition + step.dialoguePanelOffset;
+        }
+
+        Color transparent = originalPopupColor;
+        transparent.a = 0f;
+        explainingPopup.color = transparent;
+        explainingPopup.rectTransform.anchoredPosition = originalPopupPosition + step.popupOffset;
+        explainingPopup.gameObject.SetActive(true);
+    }
+
+    private void RestorePopupPresentation()
+    {
+        if (explainingPopup != null)
+        {
+            explainingPopup.color = originalPopupColor;
+            explainingPopup.rectTransform.anchoredPosition = originalPopupPosition;
+            explainingPopup.gameObject.SetActive(false);
+        }
+        if (explainingPanel != null)
+            explainingPanel.anchoredPosition = originalPanelPosition;
+        explainingPopup = null;
+        explainingPanel = null;
     }
 
     private IEnumerator WaitForEventAction()
@@ -643,6 +700,7 @@ public class TutorialManager : MonoBehaviour
         tutorialTextReplayButton.interactable = visible && !endPopupOpen;
         if (changed)
             highlightMask?.RequestRefresh();
+        UpdateScreenNextInput();
     }
 
     public void ReplayExplanation()
@@ -933,7 +991,17 @@ public class TutorialManager : MonoBehaviour
 
         bool canAdvance = IsRunning && isActiveAndEnabled && !endPopupOpen && !nextClicked &&
                           currentStep != null && waitingForDialogue;
-        screenNextInput.gameObject.SetActive(canAdvance);
+        bool restrictButtons = IsRunning && isActiveAndEnabled && !endPopupOpen &&
+                               currentStep != null && currentStep.waitType == WaitType.Event &&
+                               currentStep.actionButton != null;
+        RectTransform actionRect = waitingForEventAction && !actionCompleted && !isReplaying && !replayRequested &&
+                                   currentActionButton != null
+            ? currentActionButton.GetComponent<RectTransform>() : null;
+        RectTransform replayRect = tutorialTextReplayButton != null && tutorialTextReplayButton.interactable &&
+                                   tutorialTextReplayButton.gameObject.activeInHierarchy
+            ? tutorialTextReplayButton.GetComponent<RectTransform>() : null;
+        screenNextInput.SetAllowedButtons(actionRect, replayRect);
+        screenNextInput.gameObject.SetActive(canAdvance || restrictButtons);
     }
 
     // 하이라이트에는 현재 단계의 대사 패널과 종료 버튼을 항상 포함합니다.
@@ -1346,6 +1414,7 @@ public class TutorialManager : MonoBehaviour
 
     private void CleanUpSession()
     {
+        RestorePopupPresentation();
         ReleaseActionButton();
         SetReplayButtonVisible(false);
         if (tutorialTextReplayButton != null)
