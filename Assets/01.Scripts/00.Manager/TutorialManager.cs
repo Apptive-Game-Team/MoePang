@@ -37,12 +37,15 @@ public class TutorialManager : MonoBehaviour
         public Image popupBackground;
         public Vector2 popupOffset;
         public Vector2 dialoguePanelOffset;
+        [Tooltip("이 단계에서 표시하고, 다음 단계나 튜토리얼 종료 시 닫을 팝업입니다.")]
+        public GameObject shownPopup;
         [Tooltip("지정한 UI의 위쪽에 대사 패널을 배치합니다. 앵커는 유지합니다.")]
         public RectTransform dialogueAbove;
         [Min(0f)] public float dialogueGap = 24f;
         [Header("단계 종료 후 씬 이동")]
         public string nextScene;
         public string nextSceneDialogueKey;
+        public bool finishTutorial;
         [Header("다른 씬의 설명 다시 듣기")]
         public string replayScene;
         public string replayDialogueKey;
@@ -241,6 +244,7 @@ public class TutorialManager : MonoBehaviour
     private bool waitingForEventAction;
     private Button currentActionButton;
     private Image explainingPopup;
+    private GameObject shownStepPopup;
     private RectTransform explainingPanel;
     private Color originalPopupColor;
     private Vector2 originalPopupPosition;
@@ -577,6 +581,14 @@ public class TutorialManager : MonoBehaviour
             step.onExit?.Invoke();
             if (!IsRunning || version != runVersion)
                 yield break;
+            if (step.finishTutorial)
+            {
+                EndSession(false);
+                GameManager.Instance?.CompleteTutorial();
+                IsInstructionComplete = true;
+                onCompleted?.Invoke();
+                yield break;
+            }
             if (!string.IsNullOrWhiteSpace(step.nextScene))
             {
                 LoadScene(step.nextScene, step.nextSceneDialogueKey);
@@ -623,6 +635,7 @@ public class TutorialManager : MonoBehaviour
         SetTutorialPaused(true);
         currentStep = step;
         ApplyPopupPresentation(step);
+        SetShownPopup(step.shownPopup);
         waitingForPuzzleAction = false;
         nextClicked = false;
         if (useBattleRules)
@@ -703,6 +716,17 @@ public class TutorialManager : MonoBehaviour
         explainingPopup.color = transparent;
         explainingPopup.rectTransform.anchoredPosition = originalPopupPosition + step.popupOffset;
         explainingPopup.gameObject.SetActive(true);
+    }
+
+    private void SetShownPopup(GameObject popup)
+    {
+        if (shownStepPopup == popup)
+            return;
+        if (shownStepPopup != null)
+            shownStepPopup.SetActive(false);
+        shownStepPopup = popup;
+        if (shownStepPopup != null)
+            shownStepPopup.SetActive(true);
     }
 
     private void RestorePopupPresentation()
@@ -1570,6 +1594,7 @@ public class TutorialManager : MonoBehaviour
 
     private void CleanUpSession()
     {
+        SetShownPopup(null);
         RestoreDialoguePlacement();
         RestorePopupPresentation();
         ReleaseActionButton();
