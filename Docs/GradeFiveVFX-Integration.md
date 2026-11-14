@@ -87,3 +87,10 @@ Unit.cs에서 위 5개 연결 부분을 되돌리면 기존 전투 이펙트로 
 - 스크립트의 현재 위치는 Assets/01.Scripts/02.Unit/02.Effect/GradeFiveEffectLibrary.cs입니다. 스크립트 이동 자체는 이번 문제의 원인이 아닙니다.
 - 기물 5종의 attackWidthMultiplier=0.8, hitWidthMultiplier=0.9 및 아트 참조는 변경하지 않았습니다.
 - 설정 asset을 Resources 하위의 다른 폴더로 다시 이동할 경우 이 로딩 경로도 갱신해야 합니다.
+
+## Follow-up: unit children and per-unit position offsets
+
+- Attack VFX are parented to the attacking Unit transform; hit VFX are parented to the struck Unit transform. They follow movement and are removed if the pooled unit is disabled.
+- GradeFiveEffects.asset now exposes Attack Position Offset and Hit Position Offset per entry. These are additional local-space offsets from the previous spawn position. Zero preserves the original placement. Positive X follows the attack direction (mirrored for leftward attacks), positive Y is up, and Z adjusts depth. Parent scale affects these local offsets.
+- Hit art and Hit Position Offset still belong to the attacking unit's entry, while placement and parenting use the struck unit. Existing damage logic, timing, width, layer and sorting settings are unchanged.
+- Initial world size is preserved when parenting, so the unit's scale is not applied twice.
