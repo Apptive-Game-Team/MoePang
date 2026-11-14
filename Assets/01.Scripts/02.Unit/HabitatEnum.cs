@@ -11,7 +11,7 @@ public enum UnitName
 {
     //Meadow
     Rat,
-    Dear,
+    Deer,
     Wolf,
     Giraffe,
     Tiger,

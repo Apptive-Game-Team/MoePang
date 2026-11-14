@@ -31,10 +31,12 @@ namespace _01.Scripts._02.Unit
 
         private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
 
+        public event Action OnFriendlySpawning;
         public event Action<FriendlyUnit> OnFriendlySpawned;
 
         private void CreateFriendly(FriendlyUnitData data)
         {
+            OnFriendlySpawning?.Invoke();
             var unit = (FriendlyUnit)UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
             // 풀에서 꺼내 활성화하고 데이터 적용까지 끝난 실제 소환 시점입니다.
             OnFriendlySpawned?.Invoke(unit);
@@ -177,6 +179,21 @@ namespace _01.Scripts._02.Unit
             }
 
             return unlockedUnits[0];
+        }
+
+        public void SpawnTutorialEnemy(int unitIndex)
+        {
+            if (!GameManager.Instance.Istutorial)
+                return;
+
+            var list = enemyUnitList.GetUnits();
+            if (list == null || unitIndex < 0 || unitIndex >= list.Count || list[unitIndex] == null)
+            {
+                Debug.LogError($"UnitSpawner: 튜토리얼 적 유닛 인덱스 {unitIndex}를 확인해 주세요.", this);
+                return;
+            }
+
+            UnitPool.Instance.Get(enemyPrefab, list[unitIndex], enemySpawnPosition);
         }
 
         private void SpawnEnemy()

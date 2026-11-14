@@ -265,7 +265,8 @@ public class TutorialHighlightMask : MonoBehaviour
         mesh.RecalculateBounds();
 
         Material sourceMaterial = target.materialForRendering;
-        bool sdf = (target is TMP_Text || target is TMP_SubMeshUI) &&
+        bool isText = target is TMP_Text || target is TMP_SubMeshUI;
+        bool sdf = isText &&
                    sourceMaterial != null && sourceMaterial.HasProperty("_GradientScale");
         float threshold = 0.5f;
         if (sdf)
@@ -276,7 +277,10 @@ public class TutorialHighlightMask : MonoBehaviour
                 threshold -= sourceMaterial.GetFloat("_OutlineWidth") * 0.5f;
         }
 
-        QueueMesh(mesh, target.mainTexture,
+        // TMP_Text의 Graphic.mainTexture는 흰색 기본 텍스처이므로 실제 폰트 아틀라스를 사용합니다.
+        Texture texture = isText && sourceMaterial != null && sourceMaterial.HasProperty(MainTextureId)
+            ? sourceMaterial.GetTexture(MainTextureId) : target.mainTexture;
+        QueueMesh(mesh, texture,
             target.canvasRenderer.GetAlpha() * target.canvasRenderer.GetInheritedAlpha(),
             sdf, threshold);
     }

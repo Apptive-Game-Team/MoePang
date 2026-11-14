@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ItemData = _01.Scripts._06.Shop.ItemData;
 using UnityEngine.Localization.Settings;
@@ -109,7 +108,7 @@ public class ShopManager : MonoBehaviour
     public void OnClickBack()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
     
     /// <summary>
@@ -124,7 +123,7 @@ public class ShopManager : MonoBehaviour
 
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
     
     /// <summary>
@@ -157,7 +156,7 @@ public class ShopManager : MonoBehaviour
     #endregion
     
     /// <summary>
-    /// 유닛이 클릭됐을 때 실행되는 함수 (UnitInfoIcon의 OnClick 다음에 실행)
+    /// 유닛 클릭 시 선택한 유닛의 상세정보 씬으로 이동합니다.
     /// </summary>
     public void UnitClicked(UnitInfoIcon clickedUI)
     {
@@ -176,6 +175,7 @@ public class ShopManager : MonoBehaviour
         currentSelected.Select();
         currentSelected.SetHighlight(new Material(uiHighlightMaterial), true);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
 
     /// <summary>
@@ -282,12 +282,12 @@ public class ShopManager : MonoBehaviour
             return 0;
         }
 
-        return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
+        return HabitatManager.Instance.IsUnlockedForUI(unit) ? unit.UnitCost : unit.UnlockCost;
     }
 
     private bool CanBuyUnit(FriendlyUnitData unit, int cost)
     {
-        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+        bool isUnlocked = HabitatManager.Instance.IsUnlockedForUI(unit);
 
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
         {
@@ -369,7 +369,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+        bool isUnlocked = HabitatManager.Instance.IsUnlockedForUI(unit);
         int cost = GetUnitPurchaseCost(unit);
 
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))

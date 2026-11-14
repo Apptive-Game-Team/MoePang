@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using _01.Scripts._01.ThreeMatch;
 
-// 각 교환 안내에 사용하는 두 타일의 밝기, 외곽 글로우, 크기를 관리합니다.
+// 교환 안내의 두 타일 또는 특수 타일 하나의 밝기, 외곽 글로우, 크기를 관리합니다.
 public sealed class TutorialSwapHintAnimation
 {
     private struct Target
@@ -11,6 +11,9 @@ public sealed class TutorialSwapHintAnimation
         public Transform transform;
         public Vector3 scale;
         public Material material;
+        public Image image;
+        public Material originalMaterial;
+        public bool ownsMaterial;
         public float highlight;
         public Color outlineColor;
         public bool hasHighlight;
@@ -22,16 +25,16 @@ public sealed class TutorialSwapHintAnimation
     private readonly Target[] targets = new Target[2];
     private Sequence sequence;
 
-    public void Play(NormalPuzzleObject first, NormalPuzzleObject second,
+    public void Play(PuzzleObject first, PuzzleObject second,
         float brightness, float scaleAmount, float pulseDuration, float pulseGap, float repeatDelay,
         Color glowColor)
     {
         Stop();
-        if (first == null || second == null)
+        if (first == null)
             return;
 
         targets[0] = Capture(first);
-        targets[1] = Capture(second);
+        targets[1] = second != null ? Capture(second) : default;
         pulseDuration = Mathf.Max(0.05f, pulseDuration);
 
         // 전투 시간이 0인 조작 대기 중에도 힌트는 재생합니다.
@@ -41,6 +44,9 @@ public sealed class TutorialSwapHintAnimation
             float startTime = sequence.Duration(false);
             foreach (Target target in targets)
             {
+                if (target.transform == null)
+                    continue;
+
                 Vector3 enlarged = new Vector3(
                     target.scale.x * (1f + Mathf.Max(0f, scaleAmount)),
                     target.scale.y * (1f + Mathf.Max(0f, scaleAmount)), target.scale.z);
@@ -68,18 +74,29 @@ public sealed class TutorialSwapHintAnimation
         sequence.AppendInterval(Mathf.Max(0f, repeatDelay));
     }
 
-    private static Target Capture(NormalPuzzleObject puzzle)
+    private static Target Capture(PuzzleObject puzzle)
     {
         Image image = puzzle.GetComponent<Image>();
         Material material = image != null ? image.material : null;
         bool hasHighlight = material != null && material.HasProperty(HighlightId);
         bool hasOutlineColor = material != null && material.HasProperty(OutlineColorId);
+        Material originalMaterial = material;
+        // 특수 타일의 공유 머티리얼을 변경해 다른 타일까지 밝아지는 것을 방지합니다.
+        bool ownsMaterial = puzzle is SpecialPuzzleObject && (hasHighlight || hasOutlineColor);
+        if (ownsMaterial)
+        {
+            material = new Material(material);
+            image.material = material;
+        }
 
         return new Target
         {
             transform = puzzle.transform,
             scale = puzzle.transform.localScale,
             material = material,
+            image = image,
+            originalMaterial = originalMaterial,
+            ownsMaterial = ownsMaterial,
             hasHighlight = hasHighlight,
             hasOutlineColor = hasOutlineColor,
             highlight = hasHighlight ? material.GetFloat(HighlightId) : 0f,
@@ -106,6 +123,12 @@ public sealed class TutorialSwapHintAnimation
                     target.material.SetFloat(HighlightId, target.highlight);
                 if (target.hasOutlineColor)
                     target.material.SetColor(OutlineColorId, target.outlineColor);
+            }
+            if (target.ownsMaterial)
+            {
+                if (target.image != null)
+                    target.image.material = target.originalMaterial;
+                Object.Destroy(target.material);
             }
             targets[i] = default;
         }
