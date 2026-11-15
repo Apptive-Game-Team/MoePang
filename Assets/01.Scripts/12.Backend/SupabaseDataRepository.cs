@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using _01.Scripts._00.Manager;
 using _01.Scripts._06.Shop;
+using _01.Scripts._08.Utility;
 using Supabase.Postgrest;
 using ItemData = _01.Scripts._00.Manager.ItemData;
 using UnitData = _01.Scripts._00.Manager.UnitData;
@@ -369,10 +370,16 @@ namespace _01.Scripts._12.Backend
                     .Filter("user_id", Constants.Operator.Equals,UserId)
                     .Get();
 
+            if (response.Models.Count == 0)
+            {
+                return;
+            }
+
             PlayerStaminaModel data = response.Models[0];
 
+            staminaData.additionalStamina = data.AdditionalStamina;
             staminaData.stamina = data.Stamina;
-            staminaData.lastSavedDateTime = data.LastSavedDateTime;
+            staminaData.lastSavedDateTime = StaminaRules.ToUtc(data.LastSavedDateTime);
         }
 
 
@@ -579,8 +586,9 @@ namespace _01.Scripts._12.Backend
             PlayerStaminaModel data = new()
             {
                 UserId = UserId,
-                Stamina = staminaData.stamina, 
-                LastSavedDateTime = staminaData.lastSavedDateTime,
+                Stamina = staminaData.stamina,
+                AdditionalStamina = staminaData.additionalStamina,
+                LastSavedDateTime = StaminaRules.ToUtc(staminaData.lastSavedDateTime),
             };
             
             await Client

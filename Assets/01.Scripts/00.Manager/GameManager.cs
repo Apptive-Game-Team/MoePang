@@ -316,12 +316,29 @@ namespace _01.Scripts._00.Manager
     }
 
     [Serializable]
-    public class StaminaData
+    public class StaminaData : ISerializationCallbackReceiver
     {
-        public int stamina = 10;
+        public int stamina = StaminaRules.MaxStamina;
+        public int additionalStamina;
         public DateTime lastSavedDateTime;
+
+        [SerializeField] private string lastSavedUtc;
+
+        public int Total => (int)Math.Min(int.MaxValue, Math.Max(0L, stamina) + Math.Max(0L, additionalStamina));
+
+        public void OnBeforeSerialize() => lastSavedUtc = lastSavedDateTime == DateTime.MinValue
+            ? null : StaminaRules.ToUtc(lastSavedDateTime).ToString("O");
+
+        public void OnAfterDeserialize()
+        {
+            if (DateTime.TryParse(lastSavedUtc, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.RoundtripKind, out DateTime parsed))
+            {
+                lastSavedDateTime = StaminaRules.ToUtc(parsed);
+            }
+        }
     }
-    
+
     public class GameManager : SingletonObject<GameManager>
     {
         [SerializeField] private FriendlyUnitList unitList;
@@ -341,6 +358,8 @@ namespace _01.Scripts._00.Manager
 
         private bool _useSupabase;
         private bool _dataLoaded;
+        public bool IsDataLoaded => _dataLoaded;
+        private readonly System.Threading.SemaphoreSlim _staminaSaveLock = new(1, 1);
 
         public bool isTestMode;
         public Sprite googleAvatarSprite;
@@ -429,7 +448,7 @@ namespace _01.Scripts._00.Manager
             _dataLoaded = true;
         }
         
-        private async void LoadLocalData()
+        private void LoadLocalData()
         {
             SaveLoadManager.Instance.LoadData(
                 playData,
@@ -465,20 +484,6 @@ namespace _01.Scripts._00.Manager
                 staminaData,
                 "StaminaData");
 
-            if (staminaData.lastSavedDateTime == DateTime.MinValue)
-            {
-                BaseResponse response = await SupabaseManager.Instance.Client.Rpc("get_server_time", new {});
-
-                if (response.Content != null)
-                {
-                    DateTime serverTime = JsonConvert
-                        .DeserializeObject<DateTime>(response.Content)
-                        .ToUniversalTime();
-                    
-                    staminaData.lastSavedDateTime = serverTime;
-                }
-            }
-            
             SaveLoadManager.Instance.LoadData(
                 localProfileData,
                 "LocalProfileData");
@@ -901,8 +906,7 @@ namespace _01.Scripts._00.Manager
 
         public async void SaveStaminaData()
         {
-            // todo : 스태미너 매니저에서 게임 매니저로 가져오기
-            
+            await _staminaSaveLock.WaitAsync();
             try
             {
                 if (_useSupabase)
@@ -924,6 +928,10 @@ namespace _01.Scripts._00.Manager
                 Debug.LogError(
                     $"SaveStaminaData failed.\n{e}"
                 );
+            }
+            finally
+            {
+                _staminaSaveLock.Release();
             }
         }
 
