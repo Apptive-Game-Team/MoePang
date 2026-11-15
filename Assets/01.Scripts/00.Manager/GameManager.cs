@@ -347,6 +347,11 @@ namespace _01.Scripts._00.Manager
         [SerializeField] private bool isTutorial;
         public bool Istutorial => isTutorial;
 
+        public void CompleteTutorial()
+        {
+            isTutorial = false;
+        }
+
         protected override void Awake()
         {
             base.Awake();

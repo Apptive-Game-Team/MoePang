@@ -47,7 +47,7 @@ namespace _01.Scripts._06.Shop
             unitAnimator.runtimeAnimatorController = data.AnimatorOverride;
             unitAnimator.Play("Walk", 0, 0f);
             
-            bool unlocked = HabitatManager.Instance.IsUnlocked(data);
+            bool unlocked = HabitatManager.Instance.IsUnlockedForUI(data);
             int cost = unlocked ? data.UnitCost : data.UnlockCost;
         }
 

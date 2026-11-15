@@ -3,6 +3,7 @@ using _01.Scripts._08.Utility;
 using _01.Scripts._12.Backend;
 using DG.Tweening;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -41,6 +42,7 @@ public class TitleSceneEvent : MonoBehaviour
     private CanvasGroup tigerCanvasGroup;
     private CanvasGroup titleCanvasGroup;
     private Sequence introSequence;
+    private readonly List<Vector2> introAnimationRanges = new();
     private Tween touchBlinkTween;
     private bool canStartGame;
     private int _loginType;
@@ -61,9 +63,33 @@ public class TitleSceneEvent : MonoBehaviour
 
     private void Update()
     {
-        if (canStartGame && Input.GetMouseButtonUp(0))
+        if (!Input.GetMouseButtonUp(0))
+            return;
+
+        if (canStartGame)
         {
             MoveToNextScene();
+        }
+        else
+        {
+            SkipCurrentIntroAnimation();
+        }
+    }
+
+    private void SkipCurrentIntroAnimation()
+    {
+        if (introSequence == null || !introSequence.IsActive() || !introSequence.IsPlaying())
+            return;
+
+        float elapsed = introSequence.Elapsed();
+        foreach (Vector2 range in introAnimationRanges)
+        {
+            if (elapsed >= range.x && elapsed < range.y)
+            {
+                // 현재 연출의 끝으로 이동하고, 뒤의 stepDelay는 그대로 재생한다.
+                introSequence.Goto(range.y, true);
+                return;
+            }
         }
     }
 
@@ -102,19 +128,23 @@ public class TitleSceneEvent : MonoBehaviour
     private void PlayIntroAnimation()
     {
         introSequence?.Kill();
+        introAnimationRanges.Clear();
         introSequence = DOTween.Sequence();
         introSequence.AppendInterval(introDelay);
 
         if (tiger != null)
         {
+            float animationStart = introSequence.Duration();
             introSequence.AppendCallback(() => tigerCanvasGroup.alpha = 1f);
             introSequence.Append(tiger.DOAnchorPos(tigerTargetPosition, tigerMoveDuration).SetEase(Ease.OutCubic));
+            introAnimationRanges.Add(new Vector2(animationStart, introSequence.Duration()));
         }
 
         introSequence.AppendInterval(stepDelay);
 
         if (title != null)
         {
+            float animationStart = introSequence.Duration();
             introSequence.AppendCallback(() => titleCanvasGroup.alpha = 1f);
             introSequence.Append(title.DOAnchorPos(titleTargetPosition, titleDropDuration).SetEase(Ease.InQuad));
             introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y + titleBounceHeight, 0.18f).SetEase(Ease.OutQuad));
@@ -123,6 +153,7 @@ public class TitleSceneEvent : MonoBehaviour
             introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y, 0.12f).SetEase(Ease.InQuad));
             introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y + titleBounceHeight * 0.18f, 0.09f).SetEase(Ease.OutQuad));
             introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y, 0.08f).SetEase(Ease.InQuad));
+            introAnimationRanges.Add(new Vector2(animationStart, introSequence.Duration()));
         }
 
         introSequence.AppendInterval(stepDelay);

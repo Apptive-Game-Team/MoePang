@@ -40,7 +40,11 @@ public class Castle : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        if (team == TeamType.Friendly)
+        if (TutorialManager.TryGetCastleHp(out float tutorialHp))
+        {
+            maxHp = tutorialHp;
+        }
+        else if (team == TeamType.Friendly)
         {
             maxHp = CastleManager.Instance.MaxHp;
         }

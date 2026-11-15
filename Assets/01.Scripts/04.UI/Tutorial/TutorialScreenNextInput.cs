@@ -7,6 +7,8 @@ public class TutorialScreenNextInput : Image, IPointerClickHandler
 {
     private TutorialManager tutorial;
     private RectTransform endButtonRect;
+    private RectTransform actionButtonRect;
+    private RectTransform replayButtonRect;
 
     public void Configure(TutorialManager owner, RectTransform endButton)
     {
@@ -18,23 +20,31 @@ public class TutorialScreenNextInput : Image, IPointerClickHandler
         canvasRenderer.cullTransparentMesh = false;
     }
 
+    public void SetAllowedButtons(RectTransform actionButton, RectTransform replayButton)
+    {
+        actionButtonRect = actionButton;
+        replayButtonRect = replayButton;
+    }
+
     public override bool Raycast(Vector2 screenPoint, Camera eventCamera)
     {
-        if (endButtonRect != null && endButtonRect.gameObject.activeInHierarchy)
-        {
-            Canvas endCanvas = endButtonRect.GetComponentInParent<Canvas>();
-            Canvas rootCanvas = endCanvas != null ? endCanvas.rootCanvas : null;
-            Camera endCamera = rootCanvas != null &&
-                               rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
-                ? rootCanvas.worldCamera
-                : null;
-
-            if (RectTransformUtility.RectangleContainsScreenPoint(
-                    endButtonRect, screenPoint, endCamera))
-                return false;
-        }
+        if (ContainsScreenPoint(endButtonRect, screenPoint) ||
+            ContainsScreenPoint(actionButtonRect, screenPoint) ||
+            ContainsScreenPoint(replayButtonRect, screenPoint))
+            return false;
 
         return base.Raycast(screenPoint, eventCamera);
+    }
+
+    private static bool ContainsScreenPoint(RectTransform rect, Vector2 point)
+    {
+        if (rect == null || !rect.gameObject.activeInHierarchy)
+            return false;
+
+        Canvas canvas = rect.GetComponentInParent<Canvas>()?.rootCanvas;
+        Camera camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? canvas.worldCamera : null;
+        return RectTransformUtility.RectangleContainsScreenPoint(rect, point, camera);
     }
 
     public void OnPointerClick(PointerEventData eventData)
