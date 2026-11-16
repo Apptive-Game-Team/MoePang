@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3544425adba24c0d987bc9a6024e6c3d, type: 3}
+  m_Name: GradeFourEffects
+  m_EditorClassIdentifier: 
+  entries:
+  - unitName: 3
+    sheet: {fileID: 2800000, guid: aa230596c2b746918cc298150322def2, type: 3}
+    attackDuration: 0.2
+    hitDuration: 0.18
+    attackWidthMultiplier: 0.55
+    hitWidthMultiplier: 0.48
+    attackPositionOffset: {x: 6.51, y: 2.63, z: 0}
+    hitPositionOffset: {x: 0, y: 0, z: 0}
+  - unitName: 8
+    sheet: {fileID: 2800000, guid: af14df937e874b648267bafebd6e1ba5, type: 3}
+    attackDuration: 0.2
+    hitDuration: 0.18
+    attackWidthMultiplier: 0.5
+    hitWidthMultiplier: 0.5
+    attackPositionOffset: {x: 3.75, y: -0.57, z: 0}
+    hitPositionOffset: {x: 0, y: 0, z: 0}
+  - unitName: 13
+    sheet: {fileID: 2800000, guid: 07d5ad5d44c34f57a39ef65b7a0eaba7, type: 3}
+    attackDuration: 0.2
+    hitDuration: 0.18
+    attackWidthMultiplier: 0.4
+    hitWidthMultiplier: 0.42
+    attackPositionOffset: {x: -0.76, y: -1.89, z: 0}
+    hitPositionOffset: {x: 0, y: 0, z: 0}
+  - unitName: 18
+    sheet: {fileID: 2800000, guid: 3d7e5b5df1d84b5eacb8b7d5bec76cfe, type: 3}
+    attackDuration: 0.2
+    hitDuration: 0.18
+    attackWidthMultiplier: 0.42
+    hitWidthMultiplier: 0.42
+    attackPositionOffset: {x: 3.46, y: -1.56, z: 0}
+    hitPositionOffset: {x: 0, y: 0, z: 0}
+  - unitName: 23
+    sheet: {fileID: 2800000, guid: 69ada7b21bba44ac993b4fbc5de13844, type: 3}
+    attackDuration: 0.2
+    hitDuration: 0.18
+    attackWidthMultiplier: 0.5
+    hitWidthMultiplier: 0.48
+    attackPositionOffset: {x: 2.73, y: 0.4, z: 0}
+    hitPositionOffset: {x: 0, y: 0, z: 0}

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ItemData = _01.Scripts._06.Shop.ItemData;
 using UnityEngine.Localization.Settings;
@@ -18,6 +17,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private List<GameObject> panels;
     [SerializeField] private Image unlockPanel;
     [SerializeField] private Material uiHighlightMaterial;
+    [SerializeField] private GameObject unitUpgradePanel;
     
     [Header("서식지 강화 텍스트")]
     [SerializeField] private TextMeshProUGUI meadowText;
@@ -108,7 +108,7 @@ public class ShopManager : MonoBehaviour
     public void OnClickBack()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
     
     /// <summary>
@@ -123,7 +123,7 @@ public class ShopManager : MonoBehaviour
 
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
     
     /// <summary>
@@ -145,12 +145,18 @@ public class ShopManager : MonoBehaviour
         
         int cost = GetUnitPurchaseCost(unit);
         Debug.Log($"Buy requested: {unit.UnitName}, cost: {cost}, gold: {GoldManager.Instance.Gold}");
-        BuyUnitImmediately(unit);
+        
+        if (!CanBuyUnit(unit, cost))
+        {
+            return;
+        }
+        
+        OpenUnitUpgradePanel(unit);
     }
     #endregion
     
     /// <summary>
-    /// 유닛이 클릭됐을 때 실행되는 함수 (UnitInfoIcon의 OnClick 다음에 실행)
+    /// 유닛 클릭 시 선택한 유닛의 상세정보 씬으로 이동합니다.
     /// </summary>
     public void UnitClicked(UnitInfoIcon clickedUI)
     {
@@ -169,6 +175,7 @@ public class ShopManager : MonoBehaviour
         currentSelected.Select();
         currentSelected.SetHighlight(new Material(uiHighlightMaterial), true);
         HabitatManager.Instance.SetSelectedUnit(currentSelected.UnitData);
+        TutorialManager.LoadScene(SceneInfo.GetSceneName(SceneType.UnitDescription));
     }
 
     /// <summary>
@@ -176,13 +183,13 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void UnlockUnit(FriendlyUnitData unitData, Action refreshAction)
     {
-        unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text =
-            $"{unitData.UnlockCost}G\n{LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UnlockPanelText")}";
+        SetUnitUnlockPanelText(unitData);
         
         Button yesButton = unlockPanel.transform.GetChild(2).GetComponent<Button>();
 
         if (GoldManager.Instance.TrySpendGold(unitData.UnlockCost))
         {
+            yesButton.interactable = true;
             yesButton.onClick.RemoveAllListeners();
             yesButton.onClick.AddListener(() =>
             {
@@ -214,6 +221,44 @@ public class ShopManager : MonoBehaviour
         unlockPanel.gameObject.SetActive(true);
     }
 
+    private void SetUnitUnlockPanelText(FriendlyUnitData unitData)
+    {
+        TextMeshProUGUI unlockText = GetUnlockPanelText("UnlockText") ??
+                                     GetUnlockPanelText("NameText") ??
+                                     unlockPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI costText = GetUnlockPanelText("CostText");
+        string unitNameText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", unitData.UnitName.ToString());
+        string unlockFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UnlockTargetTitle");
+        string usedGoldText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UsedGold");
+        string goldUnitText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07G");
+        string title = string.Format(unlockFormat, unitNameText);
+        string cost = $"{usedGoldText} {unitData.UnlockCost}{goldUnitText}";
+
+        unlockText.text = title;
+
+        if (costText != null)
+        {
+            costText.text = cost;
+        }
+        else
+        {
+            unlockText.text = $"{title}\n{cost}";
+        }
+    }
+
+    private TextMeshProUGUI GetUnlockPanelText(string objectName)
+    {
+        foreach (TextMeshProUGUI text in unlockPanel.GetComponentsInChildren<TextMeshProUGUI>(true))
+        {
+            if (text.name == objectName)
+            {
+                return text;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// 선택된 유닛 확인 (Description Scene)
     /// </summary>
@@ -237,7 +282,80 @@ public class ShopManager : MonoBehaviour
             return 0;
         }
 
-        return HabitatManager.Instance.IsUnlocked(unit) ? unit.UnitCost : unit.UnlockCost;
+        return HabitatManager.Instance.IsUnlockedForUI(unit) ? unit.UnitCost : unit.UnlockCost;
+    }
+
+    private bool CanBuyUnit(FriendlyUnitData unit, int cost)
+    {
+        bool isUnlocked = HabitatManager.Instance.IsUnlockedForUI(unit);
+
+        if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))
+        {
+            Debug.LogWarning($"Buy failed: {unit.UnitName} cannot be unlocked yet.");
+            return false;
+        }
+
+        if (!GoldManager.Instance.TrySpendGold(cost))
+        {
+            Debug.LogWarning($"Buy failed: not enough gold. Current: {GoldManager.Instance.Gold}, Cost: {cost}");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void OpenUnitUpgradePanel(FriendlyUnitData unit)
+    {
+        if (unitUpgradePanel == null)
+        {
+            Debug.LogWarning("Unit upgrade panel is null.");
+            return;
+        }
+
+        Button confirmButton = unitUpgradePanel.transform.GetChild(0).GetComponent<Button>();
+        Button cancelButton = unitUpgradePanel.transform.GetChild(1).GetComponent<Button>();
+        int cost = GetUnitPurchaseCost(unit);
+
+        SetUnitUpgradePanelText(unit, cost);
+
+        confirmButton.onClick.RemoveAllListeners();
+        confirmButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+            BuyUnitImmediately(unit);
+            unitUpgradePanel.SetActive(false);
+        });
+
+        cancelButton.onClick.RemoveAllListeners();
+        cancelButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
+            unitUpgradePanel.SetActive(false);
+        });
+
+        unitUpgradePanel.SetActive(true);
+    }
+
+    private void SetUnitUpgradePanelText(FriendlyUnitData unit, int cost)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+
+        TextMeshProUGUI titleText = unitUpgradePanel.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI costText = unitUpgradePanel.transform.Find("CostText").GetComponent<TextMeshProUGUI>();
+
+        string unitNameText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", unit.UnitName.ToString());
+        string titleFormat = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UpgradeTargetTitle");
+        string levelText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "Lv");
+        string usedGoldText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "UsedGold");
+        string goldUnitText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "07G");
+        int currentLevel = Mathf.RoundToInt(unit.UnitLevel);
+
+        titleText.text = string.Format(titleFormat, unitNameText);
+        costText.text = $"{levelText}{currentLevel} => {levelText}{currentLevel + 1}\n" +
+                        $"{usedGoldText} {cost}{goldUnitText}";
     }
 
     /// <summary>
@@ -251,7 +369,7 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        bool isUnlocked = HabitatManager.Instance.IsUnlocked(unit);
+        bool isUnlocked = HabitatManager.Instance.IsUnlockedForUI(unit);
         int cost = GetUnitPurchaseCost(unit);
 
         if (!isUnlocked && !HabitatManager.Instance.CanUnlock(unit))

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8927389043493068366}
   - component: {fileID: 4586907140584961165}
   - component: {fileID: 3805709025172741323}
+  - component: {fileID: 4830890995650700104}
   m_Layer: 5
   m_Name: DecreaseButton
   m_TagString: Untagged
@@ -219,6 +220,7 @@ GameObject:
   - component: {fileID: 4854235779537811893}
   - component: {fileID: 6930518625558212811}
   - component: {fileID: 6881143104588888953}
+  - component: {fileID: 8803585984690117315}
   m_Layer: 5
   m_Name: ForestButton
   m_TagString: Untagged
@@ -903,6 +905,7 @@ GameObject:
   - component: {fileID: 1695743484215629281}
   - component: {fileID: 1367786566827682212}
   - component: {fileID: 7521317410606637733}
+  - component: {fileID: 6709557590951900444}
   m_Layer: 5
   m_Name: OceanButton
   m_TagString: Untagged
@@ -1036,6 +1039,7 @@ GameObject:
   - component: {fileID: 7873925095745219952}
   - component: {fileID: 6115153812460368847}
   - component: {fileID: 8177644362621952394}
+  - component: {fileID: 6955671909813780875}
   m_Layer: 5
   m_Name: DesertButton
   m_TagString: Untagged
@@ -1411,6 +1415,7 @@ GameObject:
   - component: {fileID: 2798390642404545444}
   - component: {fileID: 2060255059684741135}
   - component: {fileID: 3054086296690650197}
+  - component: {fileID: 8476811659370611487}
   m_Layer: 5
   m_Name: MeadowButton
   m_TagString: Untagged
@@ -1544,6 +1549,7 @@ GameObject:
   - component: {fileID: 5982083072554287475}
   - component: {fileID: 623081433511645544}
   - component: {fileID: 4678700322858612240}
+  - component: {fileID: 2649278620928264353}
   m_Layer: 5
   m_Name: IncreaseButton
   m_TagString: Untagged
@@ -1917,6 +1923,7 @@ GameObject:
   - component: {fileID: 5571106510152798790}
   - component: {fileID: 572914460720738254}
   - component: {fileID: 7797682526973973779}
+  - component: {fileID: 1999944474372272461}
   m_Layer: 5
   m_Name: PolarButton
   m_TagString: Untagged
@@ -2312,6 +2319,7 @@ GameObject:
   - component: {fileID: 1284145629476122956}
   - component: {fileID: 3706586155837716657}
   - component: {fileID: 7843337118800112715}
+  - component: {fileID: 600880985048917708}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -2444,6 +2452,7 @@ GameObject:
   - component: {fileID: 8664939154112794631}
   - component: {fileID: 7753838011603084466}
   - component: {fileID: 9214305524709878170}
+  - component: {fileID: 2572341306555815357}
   m_Layer: 5
   m_Name: StartButton
   m_TagString: Untagged
@@ -4030,3 +4039,129 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7389698500596840514, guid: b81e471bbe14aa7469ffbf217a813602, type: 3}
   m_PrefabInstance: {fileID: 8225046538909502274}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4830890995650700104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764431966419862559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &8803585984690117315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207623252237877828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &6709557590951900444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4970620863404685422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &6955671909813780875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5621708660580441879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &8476811659370611487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6984976204801462006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &2649278620928264353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7245613241033527601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &1999944474372272461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7791119615528109218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &600880985048917708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8766053178041648367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &2572341306555815357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8935300749210263065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1

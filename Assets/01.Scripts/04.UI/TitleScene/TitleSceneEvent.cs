@@ -1,37 +1,289 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._08.Utility;
+using _01.Scripts._12.Backend;
+using DG.Tweening;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-/// <summary>
-/// 타이틀 씬 이벤트 담당 스크립트
-/// </summary>
 public class TitleSceneEvent : MonoBehaviour
 {
-    [Header("타이틀 텍스트")]
-    [SerializeField] private TextMeshProUGUI textComponent;
-    [SerializeField] private float blinkSpeed = 2.0f; // 깜빡임 속도
-    [SerializeField] private Image loginImage;
+    [Header("Title Objects")]
+    [SerializeField] private RectTransform tiger;
+    [SerializeField] private RectTransform title;
+    [FormerlySerializedAs("textComponent")]
+    [SerializeField] private TextMeshProUGUI touchToScreen;
+
+    [Header("Intro Animation")]
+    [SerializeField] private float introDelay = 1f;
+    [SerializeField] private float hiddenOffsetY = 900f;
+    [SerializeField] private float tigerMoveDuration = 1f;
+    [SerializeField] private float stepDelay = 1f;
+    [SerializeField] private float titleDropDuration = 0.45f;
+    [SerializeField] private float titleBounceHeight = 120f;
+    [SerializeField] private float touchBlinkDuration = 0.6f;
+
+    [Header("Login UI")] 
+    [SerializeField] private GameObject loginPanel;
+    [SerializeField] private Button googleLoginButton;
+    [SerializeField] private Button localPlayButton;
+    [SerializeField] private Button editorPlayButton;
+    [SerializeField] private Image localPlayUI;
+    [SerializeField] private Button localPlayYesButton;
+    [SerializeField] private Button localPlayNoButton;
+
+    private Vector2 tigerTargetPosition;
+    private Vector2 titleTargetPosition;
+    private CanvasGroup tigerCanvasGroup;
+    private CanvasGroup titleCanvasGroup;
+    private Sequence introSequence;
+    private readonly List<Vector2> introAnimationRanges = new();
+    private Tween touchBlinkTween;
+    private bool canStartGame;
+    private int _loginType;
+    private bool _isLoggingIn;
 
     private void Awake()
     {
         Application.targetFrameRate = 65;
+        
+        _loginType = PlayerPrefs.GetInt("LoginType", 0);
+    }
+
+    private void Start()
+    {
+        InitializeIntroObjects();
+        PlayIntroAnimation();
     }
 
     private void Update()
     {
-        float t = (Mathf.Sin(Time.time * blinkSpeed) + 1.0f) * 0.5f;
-        textComponent.color = Color.Lerp(Color.black, Color.gray, t);
+        if (!Input.GetMouseButtonUp(0))
+            return;
 
-        if (Input.GetMouseButtonUp(0))
+        if (canStartGame)
         {
             MoveToNextScene();
         }
+        else
+        {
+            SkipCurrentIntroAnimation();
+        }
+    }
+
+    private void SkipCurrentIntroAnimation()
+    {
+        if (introSequence == null || !introSequence.IsActive() || !introSequence.IsPlaying())
+            return;
+
+        float elapsed = introSequence.Elapsed();
+        foreach (Vector2 range in introAnimationRanges)
+        {
+            if (elapsed >= range.x && elapsed < range.y)
+            {
+                // 현재 연출의 끝으로 이동하고, 뒤의 stepDelay는 그대로 재생한다.
+                introSequence.Goto(range.y, true);
+                return;
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        introSequence?.Kill();
+        touchBlinkTween?.Kill();
+    }
+
+    private void InitializeIntroObjects()
+    {
+        canStartGame = false;
+
+        if (tiger != null)
+        {
+            tigerTargetPosition = tiger.anchoredPosition;
+            tiger.anchoredPosition = tigerTargetPosition + Vector2.down * hiddenOffsetY;
+            tigerCanvasGroup = GetOrAddCanvasGroup(tiger.gameObject);
+            tigerCanvasGroup.alpha = 0f;
+        }
+
+        if (title != null)
+        {
+            titleTargetPosition = title.anchoredPosition;
+            title.anchoredPosition = titleTargetPosition + Vector2.up * hiddenOffsetY;
+            titleCanvasGroup = GetOrAddCanvasGroup(title.gameObject);
+            titleCanvasGroup.alpha = 0f;
+        }
+
+        if (touchToScreen != null)
+        {
+            touchToScreen.gameObject.SetActive(false);
+        }
+    }
+
+    private void PlayIntroAnimation()
+    {
+        introSequence?.Kill();
+        introAnimationRanges.Clear();
+        introSequence = DOTween.Sequence();
+        introSequence.AppendInterval(introDelay);
+
+        if (tiger != null)
+        {
+            float animationStart = introSequence.Duration();
+            introSequence.AppendCallback(() => tigerCanvasGroup.alpha = 1f);
+            introSequence.Append(tiger.DOAnchorPos(tigerTargetPosition, tigerMoveDuration).SetEase(Ease.OutCubic));
+            introAnimationRanges.Add(new Vector2(animationStart, introSequence.Duration()));
+        }
+
+        introSequence.AppendInterval(stepDelay);
+
+        if (title != null)
+        {
+            float animationStart = introSequence.Duration();
+            introSequence.AppendCallback(() => titleCanvasGroup.alpha = 1f);
+            introSequence.Append(title.DOAnchorPos(titleTargetPosition, titleDropDuration).SetEase(Ease.InQuad));
+            introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y + titleBounceHeight, 0.18f).SetEase(Ease.OutQuad));
+            introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y, 0.16f).SetEase(Ease.InQuad));
+            introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y + titleBounceHeight * 0.45f, 0.13f).SetEase(Ease.OutQuad));
+            introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y, 0.12f).SetEase(Ease.InQuad));
+            introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y + titleBounceHeight * 0.18f, 0.09f).SetEase(Ease.OutQuad));
+            introSequence.Append(title.DOAnchorPosY(titleTargetPosition.y, 0.08f).SetEase(Ease.InQuad));
+            introAnimationRanges.Add(new Vector2(animationStart, introSequence.Duration()));
+        }
+
+        introSequence.AppendInterval(stepDelay);
+        introSequence.AppendCallback(ExecuteLoginFlow);
+    }
+
+    private async void ExecuteLoginFlow()
+    {
+        if (_loginType == 0)
+        {
+            AddButtonListeners();
+            loginPanel.gameObject.SetActive(true);
+        }
+        else
+        {
+            try
+            {
+                if (await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow())
+                {
+                    EnableTouchToScreen();
+                }
+            }
+            catch (Exception)
+            {
+                AddButtonListeners();
+                loginPanel.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    private void AddButtonListeners()
+    {
+#if UNITY_EDITOR
+        editorPlayButton.onClick.AddListener(async () =>
+        {
+            if (_isLoggingIn)
+            {
+                return;
+            }
+            _isLoggingIn = true;
+                
+            await SupabaseLoginManager.Instance.StartGame();
+            EnableTouchToScreen();
+        });
+        editorPlayButton.gameObject.SetActive(true);
+#endif
+        
+        googleLoginButton.onClick.AddListener(async () =>
+        {
+            if (_isLoggingIn)
+            {
+                return;
+            }
+            _isLoggingIn = true;
+
+            try
+            {
+                bool success = await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow();
+
+                if (!success)
+                {
+                    return;
+                }
+
+                EnableTouchToScreen();
+            }
+            finally
+            {
+                _isLoggingIn = false;
+            }
+        });
+        
+        localPlayButton.onClick.AddListener(async () =>
+        {
+            if (_isLoggingIn)
+            {
+                return;
+            }
+            _isLoggingIn = true;
+            
+            localPlayUI.gameObject.SetActive(true);
+        });
+        
+        localPlayYesButton.onClick.AddListener(async () =>
+        {
+            GameManager.Instance.isLoggedIn = false;
+            await GameManager.Instance.LoadData();
+            await Task.Yield();
+            EnableTouchToScreen();
+        });
+        localPlayNoButton.onClick.AddListener(() =>
+        {
+            _isLoggingIn = false;
+            localPlayUI.gameObject.SetActive(false);
+        });
+    }
+
+    private void EnableTouchToScreen()
+    {
+        if (loginPanel.activeInHierarchy)
+        {
+            loginPanel.gameObject.SetActive(false);
+        }
+        
+        if (touchToScreen != null)
+        {
+            touchToScreen.gameObject.SetActive(true);
+            Color color = touchToScreen.color;
+            color.a = 1f;
+            touchToScreen.color = color;
+            touchBlinkTween = touchToScreen.DOFade(0.25f, touchBlinkDuration)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo);
+        }
+
+        canStartGame = true;
+    }
+
+    private CanvasGroup GetOrAddCanvasGroup(GameObject target)
+    {
+        if (!target.TryGetComponent(out CanvasGroup canvasGroup))
+        {
+            canvasGroup = target.AddComponent<CanvasGroup>();
+        }
+
+        return canvasGroup;
     }
 
     private void MoveToNextScene()
     {
-        loginImage.gameObject.SetActive(true);
+        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
     }
 }

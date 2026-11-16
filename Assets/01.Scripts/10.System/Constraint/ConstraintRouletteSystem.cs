@@ -47,7 +47,7 @@ namespace _01.Scripts._10.System.Constraint
                 Constraint data = constraintList[i % constraintList.Count];
                 
                 TextMeshProUGUI tmp = go.GetComponentInChildren<TextMeshProUGUI>();
-                tmp.text = data.constraintDescription;
+                tmp.text = data.LocalizedDescription;
                 
                 float startY = (i * itemHeight) + _bottomThreshold;
                 rect.anchoredPosition = new Vector2(0, startY);

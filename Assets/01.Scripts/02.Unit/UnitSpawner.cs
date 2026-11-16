@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._11.HabitatMode;
 using System;
 using System.Collections;
@@ -30,11 +31,29 @@ namespace _01.Scripts._02.Unit
 
         private Dictionary<Habitat, List<FriendlyUnitData>> _unlockedUnitsByHabitat;
 
+        public event Action OnFriendlySpawning;
+        public event Action<FriendlyUnit> OnFriendlySpawned;
+
+        private void CreateFriendly(FriendlyUnitData data)
+        {
+            OnFriendlySpawning?.Invoke();
+            var unit = (FriendlyUnit)UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
+            // 풀에서 꺼내 활성화하고 데이터 적용까지 끝난 실제 소환 시점입니다.
+            OnFriendlySpawned?.Invoke(unit);
+        }
+
         private void Start()
         {
+            var testSpawn = FindFirstObjectByType<TestSpawn>(
+                FindObjectsInactive.Include);
+
+            if (testSpawn != null)
+                testSpawn.gameObject.SetActive(GameManager.Instance.isTestMode);
+            
             enemySpawnCount = 0;
             BuildUnlockedUnitDictionary();
 
+            if (GameManager.Instance.isTestMode || GameManager.Instance.Istutorial) return;
             StartCoroutine(SpawnEnemyCoroutine());
         }
 
@@ -71,6 +90,14 @@ namespace _01.Scripts._02.Unit
         /// </summary>
         public void SpawnFriendly(Habitat habitat)
         {
+            SpawnFriendly(habitat, TutorialManager.FriendlyGradeOverride);
+        }
+
+        public void SpawnFriendly(Habitat habitat, int tutorialGrade)
+        {
+            if (TrySpawnTutorialFriendly(habitat, tutorialGrade))
+                return;
+
             if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
             {
                 Debug.Log($"{habitat} 서식지 없음");
@@ -95,11 +122,14 @@ namespace _01.Scripts._02.Unit
                 data = GetWeightedFriendlyUnit(unitList);
             }
 
-            UnitPool.Instance.Get(friendlyPrefab, data, friendlySpawnPosition);
+            CreateFriendly(data);
         }
 
         public void SpawnHighestFriendly(Habitat habitat)
         {
+            if (TrySpawnTutorialFriendly(habitat, TutorialManager.FriendlyGradeOverride))
+                return;
+
             if (!_unlockedUnitsByHabitat.TryGetValue(habitat, out var unitList))
             {
                 Debug.Log($"{habitat} 서식지 없음");
@@ -112,7 +142,18 @@ namespace _01.Scripts._02.Unit
                 return;
             }
         
-            UnitPool.Instance.Get(friendlyPrefab, unitList[^1], friendlySpawnPosition);
+            CreateFriendly(unitList[^1]);
+        }
+
+        private bool TrySpawnTutorialFriendly(Habitat habitat, int grade)
+        {
+            if (grade == 0 || !TutorialManager.TryGetFriendlyUnitOverride(
+                    friendlyUnitList.GetUnits(habitat), out FriendlyUnitData unit, grade))
+                return false;
+
+            if (unit != null)
+                CreateFriendly(unit);
+            return true;
         }
 
         /// <summary>
@@ -138,6 +179,21 @@ namespace _01.Scripts._02.Unit
             }
 
             return unlockedUnits[0];
+        }
+
+        public void SpawnTutorialEnemy(int unitIndex)
+        {
+            if (!GameManager.Instance.Istutorial)
+                return;
+
+            var list = enemyUnitList.GetUnits();
+            if (list == null || unitIndex < 0 || unitIndex >= list.Count || list[unitIndex] == null)
+            {
+                Debug.LogError($"UnitSpawner: 튜토리얼 적 유닛 인덱스 {unitIndex}를 확인해 주세요.", this);
+                return;
+            }
+
+            UnitPool.Instance.Get(enemyPrefab, list[unitIndex], enemySpawnPosition);
         }
 
         private void SpawnEnemy()

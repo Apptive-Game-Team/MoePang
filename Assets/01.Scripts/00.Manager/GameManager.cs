@@ -7,6 +7,11 @@ using _01.Scripts._08.Utility;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
 using _01.Scripts._12.Backend;
+using Newtonsoft.Json;
+using Supabase.Postgrest.Responses;
+using System.Collections;
+using UnityEngine.Networking;
+using UnityEngine.Serialization;
 
 namespace _01.Scripts._00.Manager
 {
@@ -302,6 +307,20 @@ namespace _01.Scripts._00.Manager
     {
         public int languageIndex;
     }
+
+    [Serializable]
+    public class LocalProfileData
+    {
+        public int avatarId;
+        public string nickname = "localPlayer";
+    }
+
+    [Serializable]
+    public class StaminaData
+    {
+        public int stamina = 10;
+        public DateTime lastSavedDateTime;
+    }
     
     public class GameManager : SingletonObject<GameManager>
     {
@@ -313,17 +332,30 @@ namespace _01.Scripts._00.Manager
         public ItemData itemData;
         public ComboData comboData;
         public GameData gameData;
+        public StaminaData staminaData;
+        public LocalProfileData localProfileData;
         
         private AuthRepository _authRepository;
+        public bool isLoggedIn = true;
         private SupabaseDataRepository _supabaseDataRepository;
 
         private bool _useSupabase;
         private bool _dataLoaded;
 
+        public bool isTestMode;
+        public Sprite googleAvatarSprite;
+        [SerializeField] private bool isTutorial;
+        public bool Istutorial => isTutorial;
+
+        public void CompleteTutorial()
+        {
+            isTutorial = false;
+        }
+
         protected override void Awake()
         {
             base.Awake();
-            
+
             _authRepository = new AuthRepository();
             _supabaseDataRepository = new SupabaseDataRepository();
             
@@ -333,6 +365,8 @@ namespace _01.Scripts._00.Manager
             itemData = new ItemData();
             comboData = new ComboData();
             gameData = new GameData();
+            staminaData = new StaminaData();
+            localProfileData = new LocalProfileData();
         }
 
         private void Start()
@@ -353,8 +387,6 @@ namespace _01.Scripts._00.Manager
         
         public async Task LoadData()
         {
-            bool isLoggedIn = _authRepository.IsLoggedIn();
-
             if (isLoggedIn)
             {
                 try
@@ -367,8 +399,11 @@ namespace _01.Scripts._00.Manager
                         unitData,
                         itemData,
                         comboData,
+                        staminaData,
                         unitList
                     );
+
+                    LoadGoogleAvatarSprite();
 
                     Debug.Log("Game data loaded from Supabase.");
                 }
@@ -394,7 +429,7 @@ namespace _01.Scripts._00.Manager
             _dataLoaded = true;
         }
         
-        private void LoadLocalData()
+        private async void LoadLocalData()
         {
             SaveLoadManager.Instance.LoadData(
                 playData,
@@ -425,8 +460,108 @@ namespace _01.Scripts._00.Manager
                 gameData,
                 "GameData"
             );
+            
+            SaveLoadManager.Instance.LoadData(
+                staminaData,
+                "StaminaData");
+
+            if (staminaData.lastSavedDateTime == DateTime.MinValue)
+            {
+                BaseResponse response = await SupabaseManager.Instance.Client.Rpc("get_server_time", new {});
+
+                if (response.Content != null)
+                {
+                    DateTime serverTime = JsonConvert
+                        .DeserializeObject<DateTime>(response.Content)
+                        .ToUniversalTime();
+                    
+                    staminaData.lastSavedDateTime = serverTime;
+                }
+            }
+            
+            SaveLoadManager.Instance.LoadData(
+                localProfileData,
+                "LocalProfileData");
 
             Debug.Log("Game data loaded from local JSON.");
+        }
+
+        public async Task<bool> HasInitialGameData()
+        {
+            return await _supabaseDataRepository.HasInitialGameData();
+        }
+        
+        public async Task<bool> MigrateLocalDataToSupabase(bool forceMigrate = false)
+        {
+            if (!_dataLoaded)
+            {
+                Debug.LogError("Game data has not been loaded.");
+                return false;
+            }
+
+            if (!_authRepository.IsLoggedIn())
+            {
+                Debug.LogError("Supabase user is not logged in.");
+                return false;
+            }
+
+            if (_useSupabase)
+            {
+                Debug.LogWarning("Supabase mode is already enabled.");
+                return false;
+            }
+
+            try
+            {
+                if (!forceMigrate)
+                {
+                    bool hasCloudData = await HasInitialGameData();
+
+                    if (hasCloudData)
+                    {
+                        Debug.LogWarning("Cloud game data already exists. Migration cancelled.");
+
+                        return false;
+                    }
+                }
+                
+                await _supabaseDataRepository.SavePlayData(playData);
+
+                await _supabaseDataRepository.SaveCastleData(
+                    castleData,
+                    playData
+                );
+
+                await _supabaseDataRepository.SaveUnitData(
+                    unitData,
+                    playData
+                );
+
+                await _supabaseDataRepository.SaveItemData(
+                    itemData,
+                    playData
+                );
+
+                await _supabaseDataRepository.SaveComboData(comboData);
+
+                await _supabaseDataRepository.SaveStaminaData(staminaData);
+                
+                _useSupabase = true;
+
+                Debug.Log("Local game data migration completed.");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _useSupabase = false;
+
+                Debug.LogError(
+                    $"Local game data migration failed.\n{e}"
+                );
+
+                return false;
+            }
         }
 
         private void PlayBGMForScene(string sceneName)
@@ -700,6 +835,11 @@ namespace _01.Scripts._00.Manager
             SaveLoadManager.Instance.SaveData(gameData, "GameData");
         }
 
+        public void SaveLocalProfileData()
+        {
+            SaveLoadManager.Instance.SaveData(localProfileData, "LocalProfileData");
+        }
+
         public async void SaveComboData()
         {
             try
@@ -759,6 +899,34 @@ namespace _01.Scripts._00.Manager
             }
         }
 
+        public async void SaveStaminaData()
+        {
+            // todo : 스태미너 매니저에서 게임 매니저로 가져오기
+            
+            try
+            {
+                if (_useSupabase)
+                {
+                    await _supabaseDataRepository.SaveStaminaData(
+                        staminaData
+                    );
+                }
+                else
+                {
+                    SaveLoadManager.Instance.SaveData(
+                        staminaData,
+                        "StaminaData"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"SaveStaminaData failed.\n{e}"
+                );
+            }
+        }
+
         public StageType GetStageTypeWithHabitat(HabitatMode mode)
         {
             return mode switch
@@ -783,6 +951,53 @@ namespace _01.Scripts._00.Manager
                 HabitatMode.PolarMode => playData.MaxStages[StageType.Polar],
                 _ => playData.MaxStages[StageType.Meadow]
             };
+        }
+
+        public void LoadGoogleAvatarSprite()
+        {
+            StartCoroutine(LoadGoogleAvatarSprite(SupabaseLoginManager.Instance.profile.GoogleAvatarUrl));
+        }
+
+        private IEnumerator LoadGoogleAvatarSprite(string imageUrl)
+        {
+            if (imageUrl == null)
+            {
+                yield break;
+            }
+            
+            using UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(
+                    $"Google avatar load failed.\n{request.error}"
+                );
+
+                yield break;
+            }
+
+            Texture2D texture = DownloadHandlerTexture.GetContent(request);
+
+            if (texture == null)
+            {
+                Debug.LogError("Google avatar texture is null.");
+                yield break;
+            }
+
+            Sprite sprite = Sprite.Create(
+                texture,
+                new Rect(
+                    0,
+                    0,
+                    texture.width,
+                    texture.height
+                ),
+                new Vector2(0.5f, 0.5f)
+            );
+
+            googleAvatarSprite = sprite;
         }
     }
 }

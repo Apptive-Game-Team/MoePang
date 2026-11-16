@@ -1,3 +1,4 @@
+using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._02.Unit;
 using _01.Scripts._11.HabitatMode;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace _01.Scripts._10.System.Constraint
@@ -38,6 +40,8 @@ namespace _01.Scripts._10.System.Constraint
     
     public class ConstraintSystem : MonoBehaviour
     {
+        private const string LocalizationTableName = "LocalizationDataTable";
+
         [Header("References")]
         [SerializeField] private List<Constraint> constraints;
         [SerializeField] private PuzzleGenerator puzzle;
@@ -54,13 +58,17 @@ namespace _01.Scripts._10.System.Constraint
         private ConstraintContext _constraintContext;
         private ConstraintRouletteSystem _constraintRouletteSystem;
 
+        private int _testConstraintIndex;
+        private Constraint _currentTestConstraint;
+
         private void Awake()
         {
             _constraintContext = new ConstraintContext(puzzle, unitSpawner, spawnStacks);
             _constraintRouletteSystem = GetComponent<ConstraintRouletteSystem>();
             _constraintRouletteSystem.InitializeItems();
 
-            bool setMiddleConstraint = StageManager.Instance.IsMiddleHurdleStage();
+            // todo : 디버깅 용 테스트 코드 추가됨
+            bool setMiddleConstraint = GameManager.Instance.isTestMode ? false : StageManager.Instance.IsMiddleHurdleStage();
             if (setMiddleConstraint)
             {
                 StartCoroutine(StartRoulette());
@@ -71,6 +79,39 @@ namespace _01.Scripts._10.System.Constraint
             {
                 StartCoroutine(ApplyHighConstraint());
             }
+        }
+
+        private void Update()
+        {
+            if (!GameManager.Instance.isTestMode)
+            {
+                return;
+            }
+
+            if (!Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                return;
+            }
+
+            if (constraints == null || constraints.Count == 0)
+            {
+                return;
+            }
+            
+            if (_currentTestConstraint)
+            {
+                _currentTestConstraint.CancelConstraint(_constraintContext);
+            }
+            
+            _testConstraintIndex %= constraints.Count;
+
+            _currentTestConstraint = constraints[_testConstraintIndex];
+
+            Debug.Log($"[Constraint Test] Apply: {_currentTestConstraint.type}");
+
+            ApplyMiddleConstraint(_currentTestConstraint.type);
+
+            _testConstraintIndex++;
         }
 
         private IEnumerator StartRoulette()
@@ -88,7 +129,7 @@ namespace _01.Scripts._10.System.Constraint
         {
             Constraint constraint = constraints.First(c => c.type == type);
             constraint.ApplyConstraint(_constraintContext);
-            constraintText.text = constraint.constraintDescription;
+            constraintText.text = constraint.LocalizedDescription;
             constraintText.transform.parent.gameObject.SetActive(true);
 
             switch (constraint)
@@ -103,6 +144,11 @@ namespace _01.Scripts._10.System.Constraint
                     constraintImage.gameObject.SetActive(true);
                     constraintCount.text = sc.maxSwapCount.ToString();
                     puzzle.OnSwapCountChanged += RegisterSwapCountConstraint;
+                    break;
+                default:
+                    constraintImage.gameObject.SetActive(false);
+                    puzzle.OnSwapCountChanged -= RegisterSwapCountConstraint;
+                    constraintCount.text = "";
                     break;
             }
         }
@@ -140,24 +186,19 @@ namespace _01.Scripts._10.System.Constraint
 
         private void SetHighConstraintText(HabitatMode mode)
         {
-            switch (mode)
+            string key = mode switch
             {
-                case HabitatMode.MeadowMode:
-                    highConstraintText.text = "기물을 소환하는데 더 많은 스택을 필요로 합니다.";
-                    break;
-                case HabitatMode.OceanMode:
-                    highConstraintText.text = "적의 공격속도, 공격력, 이동속도가 증가합니다.";
-                    break;
-                case HabitatMode.DesertMode:
-                    highConstraintText.text = "일정 시간마다 모래바람이 불어 퍼즐 테이블이 잠시 가려집니다.";
-                    break;
-                case HabitatMode.ForestMode:
-                    highConstraintText.text = "적의 체력이 일정 시간마다 회복됩니다.";
-                    break;
-                case HabitatMode.PolarMode:
-                    highConstraintText.text = "아군의 이동속도와 공격속도가 느려집니다.";
-                    break;
-            }
+                HabitatMode.MeadowMode => "MeadowHighConstraint",
+                HabitatMode.OceanMode => "OceanHighConstraint",
+                HabitatMode.DesertMode => "DesertHighConstraint",
+                HabitatMode.ForestMode => "ForestHighConstraint",
+                HabitatMode.PolarMode => "PolarHighConstraint",
+                _ => string.Empty
+            };
+
+            highConstraintText.text = string.IsNullOrEmpty(key)
+                ? string.Empty
+                : LocalizationSettings.StringDatabase.GetLocalizedString(LocalizationTableName, key);
         }
     }
 }

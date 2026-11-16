@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5541361265983550404}
   - component: {fileID: 2262866357220885343}
   - component: {fileID: 1061776447734833869}
+  - component: {fileID: 8742483465543246855}
   m_Layer: 5
   m_Name: OptionButton
   m_TagString: Untagged
@@ -264,6 +265,7 @@ GameObject:
   - component: {fileID: 6029627143278691193}
   - component: {fileID: 972797646426026782}
   - component: {fileID: 1644620725762666942}
+  - component: {fileID: 3832795434426578}
   m_Layer: 5
   m_Name: UnitInfoButton
   m_TagString: Untagged
@@ -409,6 +411,7 @@ GameObject:
   - component: {fileID: 7806674589609647533}
   - component: {fileID: 2123124205655913082}
   - component: {fileID: 550476384778233654}
+  - component: {fileID: 6897277499968783611}
   m_Layer: 5
   m_Name: ComboButton
   m_TagString: Untagged
@@ -554,6 +557,7 @@ GameObject:
   - component: {fileID: 6837836478791302377}
   - component: {fileID: 2105459940789117454}
   - component: {fileID: 6546153054653122016}
+  - component: {fileID: 7106739458327068049}
   m_Layer: 5
   m_Name: ReShopButton
   m_TagString: Untagged
@@ -699,6 +703,7 @@ GameObject:
   - component: {fileID: 7474987506688611921}
   - component: {fileID: 7555095176717563397}
   - component: {fileID: 6399615211807236021}
+  - component: {fileID: 3089789388116020653}
   m_Layer: 5
   m_Name: HabitatModeButton
   m_TagString: Untagged
@@ -831,3 +836,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 672f46e7d8306964eab4bf6355483dca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8742483465543246855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 753911231575573876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &3832795434426578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2006763856072315527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &6897277499968783611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2939519292779824380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &7106739458327068049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5095248158091282361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1
+--- !u!114 &3089789388116020653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5836239731551986138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1

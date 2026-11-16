@@ -293,10 +293,6 @@ MonoBehaviour:
     m_Localized: Rat
     m_Metadata:
       m_Items: []
-  - m_Id: 80016016152010753
-    m_Localized: Dear
-    m_Metadata:
-      m_Items: []
   - m_Id: 80016016152010754
     m_Localized: Wolf
     m_Metadata:
@@ -435,11 +431,6 @@ MonoBehaviour:
       when its friends are in danger, it quietly stands guard.
     m_Metadata:
       m_Items: []
-  - m_Id: 80018093347512325
-    m_Localized: With long legs and sharp senses, it notices distant danger before
-      anyone else. Quiet, but never hesitates to protect the meadow.
-    m_Metadata:
-      m_Items: []
   - m_Id: 80018093347512343
     m_Localized: A reliable guardian of the forest with a huge body and great strength.
       Calm and relaxed, but each step carries a heavy presence.
@@ -529,6 +520,337 @@ MonoBehaviour:
   - m_Id: 80018093347512326
     m_Localized: A clever hunter that moves with its pack and targets enemy openings.
       It may look a little scary, but it is a reliable guardian for its friends.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82517695267151872
+    m_Localized: Stage Failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82518317773168640
+    m_Localized: Stage Clear!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82519722231668736
+    m_Localized: Lv
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82524546595627008
+    m_Localized: Hp
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82524546595627009
+    m_Localized: Damage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82524546595627010
+    m_Localized: Gold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82524546595627011
+    m_Localized: Daily bonuses reduce difficulty and increase rewards! Applies to
+      all habitats on weekends.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 82526918243852288
+    m_Localized: G
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84730488447901696
+    m_Localized: Upgrade the castle.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84730488477261824
+    m_Localized: Gold Used
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84730488477261825
+    m_Localized: Diamond Used
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84733793244880896
+    m_Localized: Upgrade {0}.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84736718042112000
+    m_Localized: Upgrade the Meadow Combo.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84736718042112001
+    m_Localized: Upgrade the Ocean Combo.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84736718042112002
+    m_Localized: Upgrade the Desert Combo.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84736718042112003
+    m_Localized: Upgrade the Forest Combo.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84736718042112004
+    m_Localized: Upgrade the Polar Combo.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84743429129838592
+    m_Localized: Unlock {0}.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84749936546357248
+    m_Localized: Lock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84749582714871808
+    m_Localized: Reset Board
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877952
+    m_Localized: Summoning units now requires more stacks.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877953
+    m_Localized: Enemy attack speed, attack power, and movement speed increase.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877954
+    m_Localized: A sandstorm blows at regular intervals, temporarily obscuring the
+      puzzle board.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877955
+    m_Localized: Enemy health recovers at regular intervals.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877956
+    m_Localized: Ally movement speed and attack speed decrease.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877957
+    m_Localized: Matches involving consecutive habitats are prohibited.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877958
+    m_Localized: Summoning from one random habitat is prohibited.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877959
+    m_Localized: Enemy spawn intervals are reduced.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877960
+    m_Localized: Obstacle tile spawn intervals are reduced.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877961
+    m_Localized: The puzzle board resets at regular intervals.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 84773669914877962
+    m_Localized: Puzzle moves become limited.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021702160384
+    m_Localized: There's no time to explain, nya! Grab the forest tile and swap it
+      with the desert tile to make a match, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520512
+    m_Localized: Well done, nya! When you match tiles like that, the matching habitat
+      gains one energy for each tile matched, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520513
+    m_Localized: Every time a habitat collects 3 energy, friends from that habitat
+      are summoned to fight the humans threatening the forest, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520514
+    m_Localized: You can watch your summoned friends fight the humans in the upper
+      part of the screen, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520515
+    m_Localized: You can move the camera to look around, or lock it onto the front
+      line, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520516
+    m_Localized: This time, swap the polar tile with the meadow tile to make a match,
+      nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520517
+    m_Localized: Matching 4 tiles at once created a Wind Tile, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520518
+    m_Localized: Click the Wind Tile to activate it, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520519
+    m_Localized: Clicking or moving a Wind Tile like you just did turns an entire
+      line of tiles into energy, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520520
+    m_Localized: Here's a chance to match 5 tiles, nya! Swap the polar tile with
+      the ocean tile to make a match, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520521
+    m_Localized: Matching 5 tiles creates a Sunlight Tile, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520522
+    m_Localized: Give the Sunlight Tile a try, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520523
+    m_Localized: Clicking or moving a Sunlight Tile also turns all the tiles in a
+      circular area around it into energy at once, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520524
+    m_Localized: Lucky you, a Tier 2 friend was summoned, nya! Matching tiles summons
+      a random friend from that habitat, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 90967021731520525
+    m_Localized: The humans are trying to make it harder for us to summon friends,
+      nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92801934655037440
+    m_Localized: End Tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92803728244285440
+    m_Localized: Would you like to end the tutorial?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92803728244285441
+    m_Localized: You can revisit the tutorial in Settings.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265498800128
+    m_Localized: Deer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265528160256
+    m_Localized: With long legs and sharp senses, it notices distant danger before
+      anyone else. Quiet, but never hesitates to protect the meadow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354560
+    m_Localized: Every 3 seconds, the humans stop a tile from moving or cover it
+      up, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354561
+    m_Localized: That tile just got locked, nya! Move another tile to include the
+      locked tile in a match, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354562
+    m_Localized: This time, they've completely disabled a tile, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354563
+    m_Localized: Make a match next to that tile to restore it, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95295265532354564
+    m_Localized: That covers the basics, nya! Join your friends, push back the humans,
+      and destroy the building at the far end to protect us, nya!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815744
+    m_Localized: Thanks to you, we can finally catch our breath, meow. Now I'll show
+      you what you need to know about the lobby, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815745
+    m_Localized: Here are the resources you'll need in the game, meow. From left
+      to right, they're Gold, Diamonds, and Stamina, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815746
+    m_Localized: This is Gold, meow. Use it to upgrade your animal friends or buy
+      items that help you in battle, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815747
+    m_Localized: These are Diamonds, meow. Use them to purchase special abilities
+      or Gold, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815748
+    m_Localized: This is Stamina, meow. You need it to play stages, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815749
+    m_Localized: You recover one Stamina every five minutes, up to a maximum of five,
+      meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815750
+    m_Localized: This shows your profile and the highest stage you've cleared, meow.
+      Give it a tap, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815751
+    m_Localized: Here you can see your profile picture, each habitat's upgrade level,
+      your highest cleared stages, and your clear times, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815752
+    m_Localized: You can also tap your profile picture or nickname to change them,
+      meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815753
+    m_Localized: This is the Animals tab, meow. Let's tap it and take a look, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815754
+    m_Localized: Here you can view information about your animal allies, grouped
+      by habitat, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815755
+    m_Localized: First, tap the first unlocked friend to view their information,
+      meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815756
+    m_Localized: Here you can learn more about your friend, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815757
+    m_Localized: You can also level them up to make them stronger, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815758
+    m_Localized: Now let's tap the locked friend next to them, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815759
+    m_Localized: Unlock these friends to have them join you in battle, meow. But
+      you'll need to unlock all the friends in the previous tier first, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815760
+    m_Localized: Next is the Shop tab, meow. Tap the icon in the bottom-right corner
+      to open it, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815761
+    m_Localized: Here you can spend Gold on helpful items or increase your building's
+      HP for battle, meow.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95585546374815762
+    m_Localized: That covers the basics, meow. Now please help us defend our home
+      against the invading humans, meow!
     m_Metadata:
       m_Items: []
   references:

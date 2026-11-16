@@ -30,6 +30,11 @@ public class StageManager : SingletonObject<StageManager>
     {
         get
         {
+            if (GameManager.Instance.isTestMode)
+            {
+                return 0;
+            }
+            
             if (HabitatModeManager.Instance != null &&
                 HabitatModeManager.Instance.IsHabitatBattle)
             {

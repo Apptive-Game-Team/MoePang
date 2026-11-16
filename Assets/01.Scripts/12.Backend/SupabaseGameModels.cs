@@ -104,4 +104,17 @@ namespace _01.Scripts._12.Backend
         [Column("level")]
         public int Level { get; set; }
     }
+
+    [Table("player_stamina")]
+    public class PlayerStaminaModel : BaseModel
+    {
+        [PrimaryKey("user_id", false)]
+        public string UserId { get; set; }
+        
+        [Column("stamina")]
+        public int Stamina { get; set; }
+        
+        [Column("last_saved_datetime")]
+        public DateTime LastSavedDateTime { get; set; }
+    }
 }

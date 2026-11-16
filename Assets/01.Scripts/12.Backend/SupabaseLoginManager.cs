@@ -134,7 +134,7 @@ namespace _01.Scripts._12.Backend
             Debug.Log("Game data loaded successfully.");
         }
         
-        public async Task LoginWithGoogle(string idToken, string nickname)
+        public async Task LoginWithGoogle(string idToken, string nickname, string imageUrl)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace _01.Scripts._12.Backend
                     Debug.Log("Profile does not exist. Creating profile...");
 
                     bool profileCreated =
-                        await ProfileRepository.CreateProfile(nickname);
+                        await ProfileRepository.CreateProfile(nickname, imageUrl);
 
                     if (!profileCreated)
                     {
@@ -183,6 +183,30 @@ namespace _01.Scripts._12.Backend
                 {
                     Debug.Log("Profile already exists. Skip profile creation.");
                 }
+                
+                profile = await ProfileRepository.GetProfile();
+
+                if (profile == null)
+                {
+                    throw new Exception(
+                        "Failed to load Google user profile."
+                    );
+                }
+
+                if (profile.GoogleAvatarUrl == null)
+                {
+                    await SupabaseManager.Instance.Client
+                        .From<Profile>()
+                        .Set(x => x.GoogleAvatarUrl, imageUrl)
+                        .Where(x => x.Id == userId)
+                        .Update();
+                    
+                    profile.GoogleAvatarUrl = imageUrl;
+                }
+
+                Debug.Log(
+                    $"Profile loaded. Nickname: {profile.Nickname}, AvatarId: {profile.AvatarId}"
+                );
 
                 await _dataRepository.CreateInitialGameData();
 
@@ -200,6 +224,41 @@ namespace _01.Scripts._12.Backend
 
                 throw;
             }
+        }
+        
+        public async Task LinkGoogleForLocalMigration(string idToken, string nickname, string imageUrl)
+        {
+            await SupabaseManager.Instance.InitializationTask;
+            
+            await _authRepository.LoginWithGoogle(idToken);
+
+            if (!_authRepository.IsLoggedIn())
+            {
+                throw new Exception("Google authentication failed.");
+            }
+
+            IsAuthenticated = true;
+            
+            bool profileExists = await ProfileRepository.Exists();
+
+            if (!profileExists)
+            {
+                bool created = await ProfileRepository.CreateProfile(nickname, imageUrl);
+
+                if (!created)
+                {
+                    throw new Exception("Failed to create Google profile.");
+                }
+            }
+            
+            profile = await ProfileRepository.GetProfile();
+
+            if (profile == null)
+            {
+                throw new Exception("Failed to load Google profile.");
+            }
+
+            Debug.Log($"Google authentication completed. UserId: {_authRepository.GetCurrentUserId()}");
         }
         
         public string GetCurrentUserId()

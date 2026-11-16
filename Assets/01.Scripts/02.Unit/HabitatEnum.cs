@@ -11,7 +11,7 @@ public enum UnitName
 {
     //Meadow
     Rat,
-    Dear,
+    Deer,
     Wolf,
     Giraffe,
     Tiger,
@@ -31,7 +31,7 @@ public enum UnitName
     Lion,
 
     //Forest
-    Flog,
+    Frog,
     Capybara,
     Anteater,
     Jaguar,

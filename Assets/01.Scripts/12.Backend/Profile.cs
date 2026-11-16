@@ -14,5 +14,11 @@ namespace _01.Scripts._12.Backend
         
         [Column("avatar_id")]
         public int AvatarId { get; set; }
+        
+        [Column("is_google_avatar")]
+        public bool IsGoogleAvatar { get; set; }
+        
+        [Column("google_avatar_url")]
+        public string GoogleAvatarUrl { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using NotImplementedException = System.NotImplementedException;
 
 namespace _01.Scripts._10.System.Constraint
 {
@@ -11,6 +12,11 @@ namespace _01.Scripts._10.System.Constraint
         {
             Debug.Log("FastObstacleSpawnConstraint");
             context.Puzzle.obstacleSpawnInterval -= obstacleSpawnDecrease;
+        }
+
+        public override void CancelConstraint(ConstraintContext context)
+        {
+            context.Puzzle.obstacleSpawnInterval += obstacleSpawnDecrease;
         }
     }
 }

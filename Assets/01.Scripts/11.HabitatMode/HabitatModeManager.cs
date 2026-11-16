@@ -5,6 +5,7 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace _01.Scripts._11.HabitatMode
 {
@@ -70,12 +71,16 @@ namespace _01.Scripts._11.HabitatMode
 
         private void OnDisable()
         {
+            ClearTestDebuff();
+            testDebuffMode = null;
             StopHabitatModeEffects();
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            ClearTestDebuff();
+            testDebuffMode = null;
             if (scene.name != SceneInfo.GetSceneName(SceneType.MatchAndBattle))
             {
                 return;
@@ -223,11 +228,11 @@ namespace _01.Scripts._11.HabitatMode
             Debug.Log("Apply Desert Mode effect.");
         }
         
-        private IEnumerator DesertPuzzleCoverRoutine()
+        private IEnumerator DesertPuzzleCoverRoutine(bool useNormalValues = false)
         {
             while (true)
             {
-                float coverInterval = IsHabitatModeEventDay(HabitatMode.DesertMode)
+                float coverInterval = useNormalValues ? 15f : IsHabitatModeEventDay(HabitatMode.DesertMode)
                     ? desertEventPuzzleCoverInterval
                     : desertPuzzleCoverInterval;
 
@@ -287,6 +292,112 @@ namespace _01.Scripts._11.HabitatMode
             );
             
             Debug.Log("Apply Polar Mode effect.");
+        }
+        // 테스트 디버프 순환: Meadow -> Ocean -> Desert -> Forest -> Polar -> 없음
+        private HabitatMode? testDebuffMode;
+        private readonly List<Buff> testBuffs = new();
+        private BuffManager testBuffManager;
+        private Coroutine testDesertCoroutine;
+        private Action restoreTestStacks;
+
+        private void Update()
+        {
+            if (GameManager.Instance == null || !GameManager.Instance.isTestMode)
+            {
+                if (testDebuffMode.HasValue)
+                {
+                    ClearTestDebuff();
+                    testDebuffMode = null;
+                }
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                CycleTestDebuff();
+            }
+        }
+
+        private void CycleTestDebuff()
+        {
+            spawnStackManager = FindFirstObjectByType<SpawnStackManager>();
+            puzzleGenerator = FindFirstObjectByType<PuzzleGenerator>();
+            if (spawnStackManager == null || puzzleGenerator == null || BuffManager.Instance == null)
+            {
+                Debug.LogWarning("[Habitat Test] 전투 씬에서만 디버프를 변경할 수 있습니다.");
+                return;
+            }
+
+            ClearTestDebuff();
+            switch (testDebuffMode)
+            {
+                case null:
+                    testDebuffMode = HabitatMode.MeadowMode;
+                    break;
+                case HabitatMode.MeadowMode:
+                    testDebuffMode = HabitatMode.OceanMode;
+                    break;
+                case HabitatMode.OceanMode:
+                    testDebuffMode = HabitatMode.DesertMode;
+                    break;
+                case HabitatMode.DesertMode:
+                    testDebuffMode = HabitatMode.ForestMode;
+                    break;
+                case HabitatMode.ForestMode:
+                    testDebuffMode = HabitatMode.PolarMode;
+                    break;
+                case HabitatMode.PolarMode:
+                    testDebuffMode = null;
+                    break;
+            }
+
+            testBuffManager = BuffManager.Instance;
+            switch (testDebuffMode)
+            {
+                case HabitatMode.MeadowMode:
+                    restoreTestStacks = spawnStackManager.CaptureStackMaxCounts();
+                    spawnStackManager.SetAllStackMaxCount(6);
+                    break;
+                case HabitatMode.OceanMode:
+                    testBuffs.Add(testBuffManager.ApplyEnemyBuff(StatType.AttackSpeed, 1.5f, float.PositiveInfinity));
+                    testBuffs.Add(testBuffManager.ApplyEnemyBuff(StatType.AttackDamage, 1.5f, float.PositiveInfinity));
+                    testBuffs.Add(testBuffManager.ApplyEnemyBuff(StatType.MoveSpeed, 1.5f, float.PositiveInfinity));
+                    break;
+                case HabitatMode.DesertMode:
+                    testDesertCoroutine = StartCoroutine(DesertPuzzleCoverRoutine(true));
+                    break;
+                case HabitatMode.ForestMode:
+                    testBuffManager.StartEnemyHealOverTime(15f, 15f);
+                    break;
+                case HabitatMode.PolarMode:
+                    testBuffs.Add(testBuffManager.ApplyAllyBuff(StatType.MoveSpeed, 0.75f, float.PositiveInfinity));
+                    testBuffs.Add(testBuffManager.ApplyAllyBuff(StatType.AttackSpeed, 0.75f, float.PositiveInfinity));
+                    break;
+            }
+            Debug.Log($"[Habitat Test] Debuff: {testDebuffMode?.ToString() ?? "None"}");
+        }
+
+        private void ClearTestDebuff()
+        {
+            if (testDesertCoroutine != null)
+            {
+                // 이미 진행 중인 가림 연출은 끝까지 재생하고 다음 발생만 중단한다.
+                StopCoroutine(testDesertCoroutine);
+                testDesertCoroutine = null;
+            }
+
+            if (testBuffManager != null)
+            {
+                if (testDebuffMode == HabitatMode.ForestMode)
+                    testBuffManager.StopEnemyHealOverTime();
+
+                foreach (Buff buff in testBuffs)
+                    testBuffManager.RemoveBuff(buff);
+            }
+            testBuffs.Clear();
+            testBuffManager = null;
+            restoreTestStacks?.Invoke();
+            restoreTestStacks = null;
         }
     }
 }

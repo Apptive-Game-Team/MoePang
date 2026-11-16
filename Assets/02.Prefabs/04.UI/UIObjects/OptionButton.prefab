@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3506116525395011731}
   - component: {fileID: 9124359897512035836}
   - component: {fileID: 5502316806320535811}
+  - component: {fileID: 4418891580600139215}
   m_Layer: 5
   m_Name: OptionButton
   m_TagString: Untagged
@@ -145,3 +146,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7996101f73330f14abc60bb8e1d2d98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4418891580600139215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3888938445370703709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371574805a54c5449949472c5bbde6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleAmount: 0.1

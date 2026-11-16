@@ -1,6 +1,10 @@
+using Supabase.Postgrest;
+using Supabase.Postgrest.Responses;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using Client = Supabase.Client;
 
 namespace _01.Scripts._12.Backend
 {
@@ -25,6 +29,31 @@ namespace _01.Scripts._12.Backend
             {
                 Debug.LogError($"Profile Create Failed\n{e}");
 
+                return false;
+            }
+        }
+        
+        public async Task<bool> CreateProfile(string nickname, string googleAvatarUrl)
+        {
+            try
+            {
+                await Client.Rpc(
+                    "create_user_profile_mobile",
+                    new
+                    {
+                        p_nickname = nickname,
+                        p_google_avatar_url = googleAvatarUrl
+                    }
+                );
+
+                Debug.Log("Profile Create Success via RPC!");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Profile Create Failed\n{e}");
+                
                 return false;
             }
         }
@@ -93,6 +122,39 @@ namespace _01.Scripts._12.Backend
                 return false;
             }
         }
+
+        public async Task<bool> UpdateAvatarMode(bool flag)
+        {
+            try
+            {
+                Supabase.Gotrue.User user = Client.Auth.CurrentUser;
+
+                if (user == null)
+                {
+                    Debug.LogError(
+                        "AvatarMode Failed - User is not logged in."
+                    );
+
+                    return false;
+                }
+
+                await Client
+                    .From<Profile>()
+                    .Set(x => x.IsGoogleAvatar, flag)
+                    .Where(x => x.Id == user.Id)
+                    .Update();
+
+                Debug.Log($"AvatarMode Update Success - {flag}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"AvatarMode Update Failed\n{e}");
+
+                return false;
+            }
+        }
         
         public async Task<bool> UpdateAvatar(int avatarId)
         {
@@ -126,6 +188,7 @@ namespace _01.Scripts._12.Backend
                 return false;
             }
         }
+        
 
         public async Task<bool> UpdateNickname(string nickname)
         {
@@ -158,6 +221,27 @@ namespace _01.Scripts._12.Backend
 
                 return false;
             }
+        }
+        
+        public async Task<int> GetMyMaxStage()
+        {
+            Client client = SupabaseManager.Instance.Client;
+            string userId = client.Auth.CurrentUser.Id;
+
+            ModeledResponse<PlayerProgressModel> result = await client
+                .From<PlayerProgressModel>()
+                .Filter("user_id", Constants.Operator.Equals, userId)
+                .Get();
+
+            if (result.Models.Count == 0)
+            {
+                Debug.LogWarning("PlayerProgress 데이터가 없습니다.");
+                return 0;
+            }
+
+            int maxStage = result.Models.Max(x => x.MaxStage);
+
+            return maxStage;
         }
     }
 }

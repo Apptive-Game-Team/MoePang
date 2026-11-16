@@ -30,6 +30,10 @@ namespace _01.Scripts._04.UI.InGame
         private float _targetZoom;
         private float _cameraBottomY;
         private bool _canDrag;
+        private bool _tutorialFocusActive;
+        private Vector3 _positionBeforeTutorialFocus;
+        private float _zoomBeforeTutorialFocus;
+        private float _targetZoomBeforeTutorialFocus;
 
         private void Awake()
         {
@@ -46,7 +50,7 @@ namespace _01.Scripts._04.UI.InGame
 
         private void Update()
         {
-            if (Time.timeScale == 0)
+            if (_tutorialFocusActive || Time.timeScale == 0)
             {
                 return;
             }
@@ -191,6 +195,38 @@ namespace _01.Scripts._04.UI.InGame
         {
             SetCameraLock(!isCameraLocked);
         }
+
+        // 카메라 고정 설정과 저장 데이터는 유지하고 대사 동안 시점만 빌려줍니다.
+        public void BeginTutorialFocus(Transform target)
+        {
+            if (target == null || _battleCam == null || _tutorialFocusActive)
+                return;
+
+            _positionBeforeTutorialFocus = transform.position;
+            _zoomBeforeTutorialFocus = _battleCam.orthographicSize;
+            _targetZoomBeforeTutorialFocus = _targetZoom;
+            _tutorialFocusActive = true;
+            _isDragging = false;
+            _canDrag = false;
+
+            Vector3 position = transform.position;
+            position.x = target.position.x;
+            transform.position = position;
+            ClampCameraInsideBackground();
+        }
+
+        public void EndTutorialFocus()
+        {
+            if (!_tutorialFocusActive)
+                return;
+
+            _tutorialFocusActive = false;
+            transform.position = _positionBeforeTutorialFocus;
+            _battleCam.orthographicSize = _zoomBeforeTutorialFocus;
+            _targetZoom = _targetZoomBeforeTutorialFocus;
+        }
+
+        private void OnDisable() => EndTutorialFocus();
 
         public void SetCameraLock(bool isOn)
         {

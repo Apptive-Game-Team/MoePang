@@ -1,6 +1,7 @@
 using _01.Scripts._01.ThreeMatch;
 using System.Collections;
 using UnityEngine;
+using NotImplementedException = System.NotImplementedException;
 
 namespace _01.Scripts._10.System.Constraint
 {
@@ -8,11 +9,18 @@ namespace _01.Scripts._10.System.Constraint
     public class RestartPuzzleConstraint : Constraint
     {
         [SerializeField] private float restartInterval;
+        private Coroutine _restartPuzzleCoroutine;
         
         public override void ApplyConstraint(ConstraintContext context)
         {
             Debug.Log("RestartPuzzleConstraint");
-            context.Puzzle.StartCoroutine(RestartPuzzle(context.Puzzle));
+            _restartPuzzleCoroutine = context.Puzzle.StartCoroutine(RestartPuzzle(context.Puzzle));
+        }
+
+        public override void CancelConstraint(ConstraintContext context)
+        {
+            context.Puzzle.StopCoroutine(_restartPuzzleCoroutine);
+            _restartPuzzleCoroutine = null;
         }
 
         private IEnumerator RestartPuzzle(PuzzleGenerator puzzle)

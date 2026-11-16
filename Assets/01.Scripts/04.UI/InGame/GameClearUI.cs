@@ -16,6 +16,9 @@ namespace _01.Scripts._04.UI.InGame
         [SerializeField] private TextMeshProUGUI diaText;
         [SerializeField] private Image comboUnlockedPopup;
         [SerializeField] private Sprite[] habitatSprites;
+        [Header("Clear Gold Animation")]
+        [SerializeField, Min(0)] private float goldCountDelay = 0.5f;
+        [SerializeField, Min(0.01f)] private float goldCountDuration = 0.9f;
 
         protected override void OnEnable()
         {
@@ -30,7 +33,9 @@ namespace _01.Scripts._04.UI.InGame
             float time = stageManager.CurrentTime;
             
             stageManager.StopStage();
+            int goldBeforeReward = goldManager.Gold;
             goldManager.AddStageClearedGold();
+            int goldAfterReward = goldManager.Gold;
             
             int diaAmount = 0;
             bool isHabitatBattle =
@@ -65,7 +70,9 @@ namespace _01.Scripts._04.UI.InGame
                 stageText.text = $"{protectedText} {habitatText} {stageManager.CurrentStage + 1}";
             }
             timeText.text = $"{minutes}:{seconds:00}";
-            coinText.text = $"{goldManager.Gold}";
+            var goldEffect = coinText.GetComponent<CurrencyAmountEffect>();
+            if (!goldEffect) goldEffect = coinText.gameObject.AddComponent<CurrencyAmountEffect>();
+            goldEffect.Play(coinText, goldBeforeReward, goldAfterReward, goldCountDelay, goldCountDuration);
             if (diaInfo != null)
             {
                 diaInfo.SetActive(isHabitatBattle);

@@ -69,6 +69,9 @@ namespace _01.Scripts._09.Item
 
         private bool CanUseItem()
         {
+            if (_generator != null && _generator.IsTutorialInputRestricted)
+                return false;
+
             return _usableAmount > 0 && _itemAmount > 0;
         }
 

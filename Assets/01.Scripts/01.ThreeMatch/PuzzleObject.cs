@@ -38,6 +38,14 @@ namespace _01.Scripts._01.ThreeMatch
         {
             _firstTouchPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             _isSwapped = false;
+            if (Generator != null)
+                Generator.NotifyPuzzlePointerDown(this);
+        }
+
+        protected virtual void OnMouseUp()
+        {
+            if (Generator != null)
+                Generator.NotifyPuzzlePointerUp(this);
         }
         
         private void OnMouseDrag()

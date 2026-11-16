@@ -1,3 +1,6 @@
+using _01.Scripts._00.Manager;
+using _01.Scripts._08.Utility;
+using _01.Scripts._12.Backend;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class OptionWindow : MonoBehaviour
@@ -20,6 +24,19 @@ public class OptionWindow : MonoBehaviour
     [Header("Language")]
     [SerializeField] private TMP_Dropdown languageDropdown;
     [SerializeField] public Button optionButton;//이 창을 생성하는 버튼을 생성 시 연결해줘야함
+
+    [Header("Login & Logout")] 
+    [SerializeField] private Button logoutButton;
+    [SerializeField] private Image googleLoginUI;
+    [SerializeField] private Button googleLoginButton;
+    [SerializeField] private Button googleConnectButton;
+    [SerializeField] private Button googleLoginCancelButton;
+    [SerializeField] private Image googleConnectMigrationUI;
+    [SerializeField] private Button googleConnectMigrationConfirmButton;
+    [SerializeField] private Button googleConnectMigrationRejectButton;
+    [SerializeField] private Button googleConnectMigrationCancelButton;
+    
+    
     /// <summary>
     /// 옵션 창 생성 시 초기화
     /// </summary>
@@ -44,6 +61,8 @@ public class OptionWindow : MonoBehaviour
         SFXSlider.onValueChanged.AddListener((float value) => { SoundManager.Instance.SFXSoundVolume = value; PlayerPrefs.SetFloat("SFXVolume", value); PlayerPrefs.Save(); });
 
         StartCoroutine(InitLanguageDropdown());
+
+        SetLogButtons();
     }
 
     private IEnumerator InitLanguageDropdown()
@@ -108,6 +127,56 @@ public class OptionWindow : MonoBehaviour
         }
 
         return languageDropdown;
+    }
+
+    private void SetLogButtons()
+    {
+        if (GameManager.Instance.isLoggedIn)
+        {
+            logoutButton.gameObject.SetActive(true);
+            logoutButton.onClick.AddListener(() =>
+            {
+                PlayerPrefs.SetInt("LoginType", 0);
+                PlayerPrefs.Save();
+                GoogleSignInTest.Instance.SignOut();
+            });
+        }
+        else
+        {
+            googleLoginButton.gameObject.SetActive(true);
+            googleLoginButton.onClick.AddListener(() =>
+            {
+                googleLoginUI.gameObject.SetActive(true);
+            });
+            googleConnectButton.onClick.AddListener(async () =>
+            {
+                if (await GameManager.Instance.HasInitialGameData())
+                {
+                    googleConnectMigrationConfirmButton.onClick.AddListener(async () =>
+                    {
+                        await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow(true, true);
+                    });
+                    googleConnectMigrationRejectButton.onClick.AddListener(async () =>
+                    {
+                        await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow();
+                        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+                    });
+                    googleConnectMigrationCancelButton.onClick.AddListener(() =>
+                    {
+                        googleConnectMigrationUI.gameObject.SetActive(false);
+                    });
+                    googleConnectMigrationUI.gameObject.SetActive(true);
+                }
+                else
+                {
+                    await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow(true);
+                }
+            });
+            googleLoginCancelButton.onClick.AddListener(() =>
+            {
+                googleLoginUI.gameObject.SetActive(false);
+            });
+        }
     }
 
     public void OnEndButton()
