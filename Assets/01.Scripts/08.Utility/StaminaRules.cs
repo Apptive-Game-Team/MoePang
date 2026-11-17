@@ -7,7 +7,7 @@ namespace _01.Scripts._08.Utility
     {
         public const int MaxStamina = 5;
         public const int NormalEntryCost = 1;
-        public const int HabitatEntryCost = 2;
+        public const int HabitatEntryCost = 1;
         public static readonly TimeSpan RecoveryInterval = TimeSpan.FromMinutes(5);
 
         public static DateTime ToUtc(DateTime value) => value.Kind == DateTimeKind.Local

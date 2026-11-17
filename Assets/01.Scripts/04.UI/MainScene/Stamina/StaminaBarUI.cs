@@ -19,6 +19,7 @@ namespace _01.Scripts._04.UI.MainScene.Stamina
         private readonly Coroutine[] _bounces = new Coroutine[5];
         private int _previous = -1;
         private int _previousExtra = -1;
+        private int _entryRecoveryIndex = -1;
         private StaminaManager _subscribedManager;
         private StaminaSpendEffect _spendEffect;
 
@@ -47,6 +48,8 @@ namespace _01.Scripts._04.UI.MainScene.Stamina
         {
             _previous = -1;
             _previousExtra = -1;
+            _entryRecoveryIndex = -1;
+
             SubscribeToConsumption();
         }
 
@@ -74,6 +77,11 @@ namespace _01.Scripts._04.UI.MainScene.Stamina
 
         private void PlaySpendEffect(int firstIndex, int count)
         {
+            if (_entryRecoveryIndex < 0 && _subscribedManager && _subscribedManager.IsEnteringStage)
+            {
+                _entryRecoveryIndex = Mathf.Clamp(firstIndex + count, 0, StaminaRules.MaxStamina);
+            }
+
             for (int i = firstIndex; i < firstIndex + count && i < apples.Length; i++)
             {
                 if (!apples[i])
@@ -109,6 +117,7 @@ namespace _01.Scripts._04.UI.MainScene.Stamina
             int count = Mathf.Clamp(game.staminaData.stamina, 0, StaminaRules.MaxStamina);
             float progress = ready ? manager.RecoveryProgress : 0f;
             int extra = Mathf.Max(0, game.staminaData.additionalStamina);
+            int recoveryIndex = _entryRecoveryIndex >= 0 ? _entryRecoveryIndex : count;
 
             if (additionalText && extra != _previousExtra)
             {
@@ -127,7 +136,7 @@ namespace _01.Scripts._04.UI.MainScene.Stamina
                 apples[i].material = full ? null : grayscaleMaterial;
                 apples[i].color = full ? _baseColors[i] : new Color(0.58f, 0.58f, 0.58f, _baseColors[i].a);
 
-                bool charging = ready && i == count && count < StaminaRules.MaxStamina;
+                bool charging = ready && i == recoveryIndex && count < StaminaRules.MaxStamina;
 
                 if (recoveryFills[i])
                 {
