@@ -24,6 +24,8 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
             }
         }
 
+        public Sprite ProfileSprite => profileImage.sprite;
+
         public void SetProfileImage(Sprite image)
         {
             if (!image)

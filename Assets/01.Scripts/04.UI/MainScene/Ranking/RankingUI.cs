@@ -93,6 +93,7 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                     RankingEntry entry = rankingList[i];
                     GameObject ranker = topRankingUsers[i];
                     Button button = ranker.GetComponent<Button>();
+                    button.onClick.RemoveAllListeners();
                     
                     Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
                     ranker.GetComponent<Image>().sprite = avatar;
@@ -134,6 +135,7 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
                     Sprite avatar = avatarDatabase.GetAvatar(entry.AvatarId);
 
                     userData.ProfileSetting((int)entry.Ranking, avatar, entry.Nickname, entry.MaxStage, entry.MinUsedTime);
+                    BindProfile(entry, userData);
                     
                     if (entry.IsGoogleAvatar && !string.IsNullOrEmpty(entry.GoogleAvatarUrl))
                     {
@@ -191,6 +193,19 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
             }
         }
         
+        private void BindProfile(RankingEntry entry, RankingUserData data)
+        {
+            var button = data.GetComponent<Button>() ?? data.gameObject.AddComponent<Button>();
+            button.targetGraphic = data.GetComponent<Graphic>() ?? data.GetComponentInChildren<Graphic>();
+            button.onClick.RemoveAllListeners();
+
+            button.onClick.AddListener(() =>
+            {
+                rankerUI.InitialSetting(entry, data.ProfileSprite);
+                rankerUI.gameObject.SetActive(true);
+            });
+        }
+
         private async Task ApplyGoogleAvatarAsync(string imageUrl, Action<Sprite> applySprite)
         {
             try

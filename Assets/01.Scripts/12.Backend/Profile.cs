@@ -9,6 +9,9 @@ namespace _01.Scripts._12.Backend
         [PrimaryKey("id")]
         public string Id { get; set; }
 
+        [Column("comment")]
+        public string Comment { get; set; }
+
         [Column("nickname")]
         public string Nickname { get; set; }
         
