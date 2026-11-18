@@ -46,19 +46,31 @@ public class MainButtonManager : MonoBehaviour
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
 
-        if (GameManager.Instance.staminaData.stamina <= 0)
+        if (StaminaManager.Instance == null)
         {
             return;
         }
 
-        StaminaManager.Instance.ConsumeStamina();
-        HabitatModeManager.Instance.IsHabitatBattle = false;
-        SceneManager.sceneLoaded += OnPlaySceneLoaded;
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+        StaminaManager.Instance.TryEnterStage(StaminaRules.NormalEntryCost, () =>
+        {
+            if (!this)
+            {
+                return;
+            }
+
+            HabitatModeManager.Instance.IsHabitatBattle = false;
+            SceneManager.sceneLoaded += OnPlaySceneLoaded;
+            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+        });
     }
 
     private void OnClickTestPlay()
     {
+        if (StaminaManager.Instance && StaminaManager.Instance.IsEnteringStage)
+        {
+            return;
+        }
+
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         GameManager.Instance.isTestMode = true;
         HabitatModeManager.Instance.IsHabitatBattle = false;

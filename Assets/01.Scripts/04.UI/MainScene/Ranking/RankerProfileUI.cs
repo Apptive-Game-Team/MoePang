@@ -14,6 +14,7 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
 
         public void InitialSetting(RankingEntry entry, Sprite sprite)
         {
+            GetComponent<RankerCommentDisplay>().Show(entry);
             rankerImage.sprite = sprite;
             rankerNickname.text = entry.Nickname;
             rankerMaxStage.text = $"stage {entry.MaxStage}";

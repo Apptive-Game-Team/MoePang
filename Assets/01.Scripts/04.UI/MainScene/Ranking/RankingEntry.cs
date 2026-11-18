@@ -14,6 +14,9 @@ namespace _01.Scripts._04.UI.MainScene.Ranking
         [JsonProperty("nickname")]
         public string Nickname { get; set; }
 
+        [JsonProperty("comment")]
+        public string Comment { get; set; }
+
         [JsonProperty("max_stage")]
         public int MaxStage { get; set; }
         
