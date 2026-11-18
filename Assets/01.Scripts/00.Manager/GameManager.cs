@@ -363,12 +363,22 @@ namespace _01.Scripts._00.Manager
 
         public bool isTestMode;
         public Sprite googleAvatarSprite;
-        [SerializeField] private bool isTutorial;
-        public bool Istutorial => isTutorial;
+        [Tooltip("스테이지 진입 시 매치/전투 튜토리얼을 활성화합니다.")]
+        [FormerlySerializedAs("isTutorial")]
+        [SerializeField] private bool isMatchTutorial;
+        [Tooltip("메인 화면, 동물 정보, 상점의 UI 튜토리얼을 활성화합니다.")]
+        [SerializeField] private bool isUiTutorial;
+        public bool IsMatchTutorial => isMatchTutorial;
+        public bool IsUiTutorial => isUiTutorial;
 
-        public void CompleteTutorial()
+        public void CompleteMatchTutorial()
         {
-            isTutorial = false;
+            isMatchTutorial = false;
+        }
+
+        public void CompleteUiTutorial()
+        {
+            isUiTutorial = false;
         }
 
         protected override void Awake()

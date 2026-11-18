@@ -17,7 +17,7 @@ public class HabitatManager : SingletonObject<HabitatManager>
     private Dictionary<FriendlyUnitData, bool> unlockDict = new();
     private readonly HashSet<FriendlyUnitData> tutorialUnlockedUnits = new();
 
-    private bool IsTutorialPreview => GameManager.Instance != null && GameManager.Instance.Istutorial;
+    private bool IsTutorialPreview => GameManager.Instance != null && GameManager.Instance.IsMatchTutorial;
 
     protected override void Awake()
     {

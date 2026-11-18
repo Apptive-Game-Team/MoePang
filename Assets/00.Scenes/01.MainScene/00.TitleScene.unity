@@ -2541,7 +2541,8 @@ MonoBehaviour:
   isLoggedIn: 1
   isTestMode: 0
   googleAvatarSprite: {fileID: 0}
-  isTutorial: 1
+  isMatchTutorial: 1
+  isUiTutorial: 1
 --- !u!4 &1168916410
 Transform:
   m_ObjectHideFlags: 0

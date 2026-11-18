@@ -88,6 +88,7 @@ public class TutorialManager : MonoBehaviour
 
     [Header("실행 방식")]
     [SerializeField] private bool autoStart = true;
+    [Tooltip("Use Battle Rules에 따라 GameManager의 IsMatchTutorial 또는 IsUiTutorial이 켜져 있어야 시작합니다.")]
     [SerializeField] private bool requireTutorialMode = true;
     [Tooltip("일반 UI 안내에서는 끄세요. 퍼즐, 전투 스탯, 소환 제어를 사용하지 않습니다.")]
     [SerializeField] private bool useBattleRules = true;
@@ -139,7 +140,7 @@ public class TutorialManager : MonoBehaviour
 
     private static bool HasActiveBattle => activeTutorial != null &&
         activeTutorial.isActiveAndEnabled && activeTutorial.sessionPrepared &&
-        activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.Istutorial;
+        activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.IsMatchTutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
     private int friendlyGradeOverride = 1;
 
@@ -298,7 +299,8 @@ public class TutorialManager : MonoBehaviour
     }
 
     private bool CanStartInCurrentMode => !requireTutorialMode ||
-        (GameManager.Instance != null && GameManager.Instance.Istutorial);
+        (GameManager.Instance != null && (useBattleRules
+            ? GameManager.Instance.IsMatchTutorial : GameManager.Instance.IsUiTutorial));
 
     private bool HasPendingRestart => pendingRestartScene == gameObject.scene.path &&
         pendingRestartOwner == name;
@@ -584,7 +586,10 @@ public class TutorialManager : MonoBehaviour
             if (step.finishTutorial)
             {
                 EndSession(false);
-                GameManager.Instance?.CompleteTutorial();
+                if (useBattleRules)
+                    GameManager.Instance?.CompleteMatchTutorial();
+                else
+                    GameManager.Instance?.CompleteUiTutorial();
                 IsInstructionComplete = true;
                 onCompleted?.Invoke();
                 yield break;
@@ -1546,7 +1551,7 @@ public class TutorialManager : MonoBehaviour
             return false;
         }
         if (useBattleRules && (puzzleGenerator == null || GameManager.Instance == null ||
-            !GameManager.Instance.Istutorial || StageManager.Instance == null))
+            !GameManager.Instance.IsMatchTutorial || StageManager.Instance == null))
         {
             Debug.LogError("TutorialManager: 전투 규칙에는 튜토리얼 모드, PuzzleGenerator와 StageManager가 필요합니다.", this);
             return false;
