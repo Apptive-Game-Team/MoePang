@@ -12283,7 +12283,7 @@ PrefabInstance:
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: steps.Array.data[6].actionButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1582017651}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: steps.Array.data[9].actionButton
       value: 
@@ -12699,11 +12699,11 @@ PrefabInstance:
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[1].highlightObjects.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 820000101}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[1].highlightObjects.Array.data[1]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 820000102}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[1].highlightObjects.Array.data[2]'
       value: 
@@ -12711,11 +12711,11 @@ PrefabInstance:
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[2].highlightObjects.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 820000101}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[3].highlightObjects.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 820000102}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[4].highlightObjects.Array.data[0]'
       value: 
@@ -12727,7 +12727,7 @@ PrefabInstance:
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[6].highlightObjects.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1617671735}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[7].highlightObjects.Array.data[0]'
       value: 
@@ -14025,6 +14025,16 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &820000101 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 820000101, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
+  m_PrefabInstance: {fileID: 5337188815740701228}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &820000102 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 820000102, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
+  m_PrefabInstance: {fileID: 5337188815740701228}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
