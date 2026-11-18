@@ -12287,7 +12287,7 @@ PrefabInstance:
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: steps.Array.data[9].actionButton
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 840000032}
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: steps.Array.data[1].dialogueIndex
       value: 0
@@ -12739,7 +12739,7 @@ PrefabInstance:
     - target: {fileID: -5830810380401093282, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: 'steps.Array.data[9].highlightObjects.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 840000031}
     - target: {fileID: 2519359150922562395, guid: 1bbd762f95a70544885ed8e6898a4ef9, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -14035,6 +14035,22 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 820000102, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
   m_PrefabInstance: {fileID: 5337188815740701228}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &840000031 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 840000003, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
+  m_PrefabInstance: {fileID: 5337188815740701228}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &840000032 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 840000004, guid: d2781a35f6840004c886fba2b6b7f756, type: 3}
+  m_PrefabInstance: {fileID: 5337188815740701228}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

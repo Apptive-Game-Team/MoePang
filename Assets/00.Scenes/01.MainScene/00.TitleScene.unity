@@ -2533,13 +2533,15 @@ MonoBehaviour:
     cameraLockEnabled: 1
   staminaData:
     stamina: 10
+    additionalStamina: 0
+    lastSavedUtc: 
   localProfileData:
     avatarId: 0
     nickname: localPlayer
   isLoggedIn: 1
   isTestMode: 0
   googleAvatarSprite: {fileID: 0}
-  isTutorial: 0
+  isTutorial: 1
 --- !u!4 &1168916410
 Transform:
   m_ObjectHideFlags: 0
