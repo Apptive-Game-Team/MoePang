@@ -1230,6 +1230,13 @@ public class TutorialManager : MonoBehaviour
 
     private void ApplyDialoguePlacement(TutorialStep step)
     {
+        // 유닛 상세 화면에서는 Inspector에 설정한 대사 패널 위치를 사용합니다.
+        if (gameObject.scene.name == "04.UnitDescription")
+        {
+            RestoreDialoguePlacement();
+            return;
+        }
+
         RectTransform panel = (step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel)
             ?.GetComponent<RectTransform>();
         if (step.dialogueAbove == null || positionedDialoguePanel != panel)
