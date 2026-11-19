@@ -135,6 +135,11 @@ public class StageManager : SingletonObject<StageManager>
 
     public void GameClear()
     {
+        // PauseUI.OnDisable이 시간 배율을 복구하므로 승리 패널을 켜기 전에 닫습니다.
+        PauseUI pauseUI = FindAnyObjectByType<PauseUI>();
+        if (pauseUI != null)
+            pauseUI.gameObject.SetActive(false);
+
         FindAnyObjectByType<GameClearUI>(FindObjectsInactive.Include).gameObject.SetActive(true);
     }
 
