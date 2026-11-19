@@ -2,6 +2,7 @@ using _01.Scripts._00.Manager;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Lock/Unlock 관리 클래스
@@ -13,21 +14,50 @@ public class HabitatManager : SingletonObject<HabitatManager>
     
     public FriendlyUnitData SelectedUnitData { get; private set; }
 
-    //참조
-    private Dictionary<FriendlyUnitData, bool> unlockDict = new();
+    // 저장 데이터가 로드되어 사전이 교체된 뒤에도 현재 해금 정보를 읽습니다.
+    private Dictionary<FriendlyUnitData, bool> unlockDict => GameManager.Instance.unitData.UnlockedUnits;
     private readonly HashSet<FriendlyUnitData> tutorialUnlockedUnits = new();
+    private bool tutorialPreviewActive;
+    public event Action UnlockPreviewChanged;
 
-    private bool IsTutorialPreview => GameManager.Instance != null && GameManager.Instance.IsMatchTutorial;
+    private bool IsTutorialPreview => tutorialPreviewActive &&
+        GameManager.Instance != null && GameManager.Instance.IsUiTutorial;
 
     protected override void Awake()
     {
         base.Awake();
-        Initialize();
+        if (IsDuplicate)
+            return;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
     }
 
-    private void Initialize()
+    private void OnDestroy() => SceneManager.sceneLoaded -= HandleSceneLoaded;
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        unlockDict = GameManager.Instance.unitData.UnlockedUnits;
+        if (!TutorialManager.HasActiveUiTutorial)
+            EndTutorialUnlockPreview();
+    }
+
+    public void BeginTutorialUnlockPreview()
+    {
+        if (tutorialPreviewActive || GameManager.Instance == null || !GameManager.Instance.IsUiTutorial)
+            return;
+
+        // 실제 해금 사전은 수정하지 않고, 튜토리얼 전용 표시 상태만 만듭니다.
+        tutorialUnlockedUnits.Clear();
+        tutorialPreviewActive = true;
+        UnlockPreviewChanged?.Invoke();
+    }
+
+    public void EndTutorialUnlockPreview()
+    {
+        if (!tutorialPreviewActive && tutorialUnlockedUnits.Count == 0)
+            return;
+
+        tutorialPreviewActive = false;
+        tutorialUnlockedUnits.Clear();
+        UnlockPreviewChanged?.Invoke();
     }
 
     /// <summary>
@@ -46,7 +76,6 @@ public class HabitatManager : SingletonObject<HabitatManager>
         if (IsTutorialPreview)
             return unit.UnitGrade == 1 || tutorialUnlockedUnits.Contains(unit);
 
-        tutorialUnlockedUnits.Clear();
         return IsUnlocked(unit);
     }
 

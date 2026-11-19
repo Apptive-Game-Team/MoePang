@@ -379,6 +379,7 @@ namespace _01.Scripts._00.Manager
         public void CompleteUiTutorial()
         {
             isUiTutorial = false;
+            HabitatManager.Instance?.EndTutorialUnlockPreview();
         }
 
         protected override void Awake()

@@ -141,6 +141,9 @@ public class TutorialManager : MonoBehaviour
     private static bool HasActiveBattle => activeTutorial != null &&
         activeTutorial.isActiveAndEnabled && activeTutorial.sessionPrepared &&
         activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.IsMatchTutorial;
+    public static bool HasActiveUiTutorial => activeTutorial != null &&
+        activeTutorial.isActiveAndEnabled && activeTutorial.sessionPrepared &&
+        !activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.IsUiTutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
     private int friendlyGradeOverride = 1;
 
@@ -314,7 +317,12 @@ public class TutorialManager : MonoBehaviour
         sessionPrepared = true;
         friendlyGradeOverride = initialFriendlyGrade;
         if (!useBattleRules)
+        {
+            HabitatManager.Instance?.BeginTutorialUnlockPreview();
             return;
+        }
+
+        HabitatManager.Instance?.EndTutorialUnlockPreview();
 
         stageManager = StageManager.Instance;
         if (applyTutorialStage && stageManager != null)
@@ -1663,6 +1671,9 @@ public class TutorialManager : MonoBehaviour
         ReleaseInputRestriction();
         RestoreTutorialTimeScale();
         RestoreSessionSettings();
+        // UI 안내를 이어가는 씬 이동에서는 임시 해금을 유지하고, 완료/중단 시 원래 표시로 복구합니다.
+        if (sessionPrepared && !useBattleRules && !sceneTransitionPending)
+            HabitatManager.Instance?.EndTutorialUnlockPreview();
         friendlySpawner = null;
         sessionPrepared = false;
         if (activeTutorial == this)
