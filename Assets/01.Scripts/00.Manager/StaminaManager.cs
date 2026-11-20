@@ -1,235 +1,313 @@
-using _01.Scripts._08.Utility;
 using System;
+using System.Collections;
 using System.Threading.Tasks;
-using UnityEngine;
 using _01.Scripts._12.Backend;
 using Newtonsoft.Json;
-using System.Collections;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using _01.Scripts._04.UI;
+using _01.Scripts._04.UI.MainScene.Stamina;
+using _01.Scripts._08.Utility;
 
 namespace _01.Scripts._00.Manager
 {
     public class StaminaManager : SingletonObject<StaminaManager>
     {
-        private const int MaxStamina = 100;
-        private const int RecoveryAmount = 5;
-        private const int ConsumeAmount = 1;
-
-        private static readonly TimeSpan RecoveryInterval = TimeSpan.FromMinutes(30);
+        public const int MaxStamina = StaminaRules.MaxStamina;
 
         private DateTime _serverTime;
+        private double _sampledAt;
+        private double _nextSync;
+        private Task _syncTask;
         private bool _isInitialized;
-        private bool _isFirstSceneLoad = true;
-        private Coroutine _staminaCoroutine;
+
+        public bool IsInitialized => _isInitialized;
+        public bool IsEnteringStage { get; private set; }
 
         public event Action OnStaminaChanged;
+        public event Action<int, int> OnNaturalStaminaConsumed;
 
-        protected async override void Awake()
+        private DateTime EstimatedServerTime => _serverTime.AddSeconds(
+            Math.Max(0, Time.realtimeSinceStartupAsDouble - _sampledAt));
+
+        private IEnumerator Start()
         {
-            base.Awake();
-
             if (IsDuplicate)
             {
-                return;
+                yield break;
             }
-            
-            await InitializeStamina();
-            
-            if (_isInitialized)
+
+            while (GameManager.Instance == null)
             {
-                StartCoroutine(StaminaRecoveryCoroutine());
+                yield return null;
             }
-        }
 
-        private async void OnEnable()
-        {
-            if (SceneManager.GetActiveScene().name != SceneInfo.GetSceneName(SceneType.Main))
+            if (!GameManager.Instance.IsDataLoaded)
             {
-                return;
+                Task load = GameManager.Instance.LoadData();
+                yield return new WaitUntil(() => load.IsCompleted);
+
+                if (load.IsFaulted)
+                {
+                    Debug.LogException(load.Exception);
+                }
             }
 
-            if (_isFirstSceneLoad)
-            {
-                _isFirstSceneLoad = false;
-                return;
-            }
-
-            await RecoverStamina();
-        }
-        
-        private async Task InitializeStamina()
-        {
-            try
-            {
-                StaminaData data = GameManager.Instance.staminaData;
-                
-                _serverTime = await GetServerTimeAsync();
-                
-                RecoverStaminaInternal(data, _serverTime);
-
-                _isInitialized = true;
-
-                Debug.Log($"Stamina Initialized : {data.stamina}/{MaxStamina}");
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Stamina Initialized Failed : {e}");
-            }
-        }
-        
-        private async Task<DateTime> GetServerTimeAsync()
-        {
-            var result = await SupabaseManager.Instance.Client.Rpc("get_server_time", new { });
-
-            return JsonConvert.DeserializeObject<DateTime>(result.Content).ToUniversalTime();
-        }
-        
-        private void RecoverStaminaInternal(StaminaData data, DateTime serverTime)
-        {
-            if (data.stamina >= MaxStamina)
-            {
-                data.stamina = MaxStamina;
-                data.lastSavedDateTime = serverTime;
-                return;
-            }
-
-            DateTime lastRecoveryTime = data.lastSavedDateTime.ToUniversalTime();
-            
-            if (serverTime.Kind != DateTimeKind.Utc)
-            {
-                serverTime = serverTime.ToUniversalTime();
-            }
-            
-            if (serverTime < lastRecoveryTime)
-            {
-                Debug.LogWarning("Server Time < Last Recovery Time. Fuck");
-
-                return;
-            }
-            
-            TimeSpan elapsed = serverTime - lastRecoveryTime;
-
-            int recoveryCount = (int)(elapsed.Ticks / RecoveryInterval.Ticks);
-
-            if (recoveryCount <= 0)
-            {
-                return;
-            }
-
-            int previousStamina = data.stamina;
-
-            data.stamina = Mathf.Min(data.stamina + recoveryCount * RecoveryAmount, MaxStamina);
-            
-            data.lastSavedDateTime = data.stamina >= MaxStamina 
-                ? serverTime 
-                : lastRecoveryTime.AddTicks(recoveryCount * RecoveryInterval.Ticks);
-
-            GameManager.Instance.SaveStaminaData();
-            
-            OnStaminaChanged?.Invoke();
-
-            if (data.stamina != previousStamina)
-            {
-                Debug.Log($"Stamina Recover: {previousStamina} -> {data.stamina}");
-            }
-        }
-        
-        public async Task RecoverStamina()
-        {
-            if (!_isInitialized)
-            {
-                return;
-            }
-
-            try
-            {
-                StaminaData data = GameManager.Instance.staminaData;
-
-                _serverTime = await GetServerTimeAsync();
-
-                RecoverStaminaInternal(data, _serverTime);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Stamina Recovery Failed : {e}");
-            }
-        }
-        
-        private IEnumerator StaminaRecoveryCoroutine()
-        {
             while (true)
             {
-                if (SceneManager.GetActiveScene().name != SceneInfo.GetSceneName(SceneType.Main))
+                if (Time.realtimeSinceStartupAsDouble >= _nextSync)
                 {
-                    yield return new WaitForSecondsRealtime(1f);
-                    continue;
+                    Task sync = RecoverStamina();
+                    yield return new WaitUntil(() => sync.IsCompleted);
                 }
-                
-                Task recoveryTask = RecoverStamina();
 
-                yield return new WaitUntil(() => recoveryTask.IsCompleted);
-                
-                TimeSpan remainingTime = GetRemainingRecoveryTime();
-
-                if (remainingTime <= TimeSpan.Zero)
+                if (_isInitialized)
                 {
-                    yield return null;
-                    continue;
+                    ApplyRecovery();
                 }
-                
-                Debug.Log($"Stamina Recovery Remaining Time : {remainingTime}");
-                
-                yield return new WaitForSecondsRealtime((float)remainingTime.TotalSeconds);
+
+                yield return new WaitForSecondsRealtime(0.25f);
             }
         }
-        
-        public bool ConsumeStamina()
+
+        public Task RecoverStamina()
         {
-            if (!_isInitialized)
+            if (_syncTask == null || _syncTask.IsCompleted)
             {
-                Debug.LogWarning("StaminaManager Not Initialized");
-                return false;
+                _syncTask = SyncServerTime();
             }
 
-            StaminaData data = GameManager.Instance.staminaData;
+            return _syncTask;
+        }
 
-            if (data.stamina < ConsumeAmount)
+        private async Task SyncServerTime()
+        {
+            try
             {
-                return false;
+                var response = await SupabaseManager.Instance.Client.Rpc("get_server_time", new { });
+                DateTime now = JsonConvert.DeserializeObject<DateTime>(response.Content).ToUniversalTime();
+
+                if (now == DateTime.MinValue)
+                {
+                    throw new InvalidOperationException("Empty server time.");
+                }
+
+                if (this == null)
+                {
+                    return;
+                }
+
+                _serverTime = now;
+                _sampledAt = Time.realtimeSinceStartupAsDouble;
+                _nextSync = _sampledAt + 60;
+
+                bool first = !_isInitialized;
+                _isInitialized = true;
+
+                ApplyRecovery();
+
+                if (first)
+                {
+                    OnStaminaChanged?.Invoke();
+                }
+            }
+            catch (Exception e)
+            {
+                if (this == null)
+                {
+                    return;
+                }
+
+                _nextSync = Time.realtimeSinceStartupAsDouble + 5;
+                Debug.LogWarning($"Stamina server time sync failed; retrying in 5 seconds. {e.Message}");
+            }
+        }
+
+        private void ApplyRecovery()
+        {
+            if (!StaminaRules.Recover(GameManager.Instance.staminaData, EstimatedServerTime))
+            {
+                return;
             }
 
-            data.stamina -= ConsumeAmount;
-            
-            if (data.stamina == MaxStamina - ConsumeAmount)
-            {
-                data.lastSavedDateTime = _serverTime;
-            }
-            
             GameManager.Instance.SaveStaminaData();
-            
+            OnStaminaChanged?.Invoke();
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (!paused && _isInitialized)
+            {
+                _nextSync = 0;
+            }
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (focused && _isInitialized)
+            {
+                _nextSync = 0;
+            }
+        }
+
+        public bool ConsumeStamina(int amount = StaminaRules.NormalEntryCost)
+        {
+            if (!_isInitialized || amount <= 0)
+            {
+                return false;
+            }
+
+            ApplyRecovery();
+            int previousNatural = GameManager.Instance.staminaData.stamina;
+
+            if (!StaminaRules.TryConsume(GameManager.Instance.staminaData, amount, EstimatedServerTime))
+            {
+                return false;
+            }
+
+            GameManager.Instance.SaveStaminaData();
+
+            int remainingNatural = GameManager.Instance.staminaData.stamina;
+
+            if (previousNatural > remainingNatural)
+            {
+                OnNaturalStaminaConsumed?.Invoke(remainingNatural, previousNatural - remainingNatural);
+            }
+
             OnStaminaChanged?.Invoke();
 
             return true;
         }
-        
-        public TimeSpan GetRemainingRecoveryTime()
-        {
-            StaminaData data = GameManager.Instance.staminaData;
 
-            if (data.stamina >= MaxStamina)
+        public bool TryEnterStage(int amount, Action enterStage)
+        {
+            if (IsEnteringStage || enterStage == null)
             {
-                return TimeSpan.Zero;
+                return false;
             }
 
-            DateTime serverTime = _serverTime.ToUniversalTime();
-            DateTime lastRecoveryTime = data.lastSavedDateTime.ToUniversalTime();
+            IsEnteringStage = true;
+            GameObject blocker = null;
 
-            TimeSpan elapsed = serverTime - lastRecoveryTime;
-            TimeSpan remaining = RecoveryInterval - elapsed;
+            try
+            {
+                var bar = FindFirstObjectByType<StaminaBarUI>();
 
-            return remaining > TimeSpan.Zero
-                ? remaining
-                : TimeSpan.Zero;
+                if (bar && !bar.isActiveAndEnabled)
+                {
+                    bar = null;
+                }
+
+                if (!ConsumeStamina(amount))
+                {
+                    IsEnteringStage = false;
+
+                    return false;
+                }
+
+                float duration = bar ? bar.SpendDuration : 0.45f;
+                blocker = CreateEntryInputBlocker();
+                StartCoroutine(FinishStageEntry(enterStage, bar, duration, blocker, SceneManager.GetActiveScene().handle));
+
+                return true;
+            }
+            catch
+            {
+                IsEnteringStage = false;
+
+                if (blocker)
+                {
+                    Destroy(blocker);
+                }
+
+                throw;
+            }
         }
+
+        private static GameObject CreateEntryInputBlocker()
+        {
+            var root = new GameObject("StaminaEntryInputBlocker", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster));
+            var canvas = root.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 32767;
+
+            var imageObject = new GameObject("BlockInput", typeof(RectTransform), typeof(Image), typeof(Button));
+            imageObject.transform.SetParent(root.transform, false);
+
+            var image = imageObject.GetComponent<Image>();
+            image.color = Color.clear;
+            image.raycastTarget = true;
+            image.rectTransform.anchorMin = Vector2.zero;
+            image.rectTransform.anchorMax = Vector2.one;
+            image.rectTransform.offsetMin = image.rectTransform.offsetMax = Vector2.zero;
+
+            var button = imageObject.GetComponent<Button>();
+            button.transition = Selectable.Transition.None;
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+
+            if (UnityEngine.EventSystems.EventSystem.current)
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(imageObject);
+            }
+
+            return root;
+        }
+
+        private IEnumerator FinishStageEntry(Action enterStage, StaminaBarUI bar, float duration, GameObject blocker, int sceneHandle)
+        {
+            try
+            {
+                yield return new WaitForSecondsRealtime(duration);
+
+                while (bar && bar.IsSpending)
+                {
+                    yield return null;
+                }
+
+                if (SceneManager.GetActiveScene().handle == sceneHandle)
+                {
+                    enterStage();
+                }
+            }
+            finally
+            {
+                IsEnteringStage = false;
+
+                if (blocker)
+                {
+                    blocker.SetActive(false);
+                    Destroy(blocker);
+                }
+            }
+        }
+
+        public bool AddAdditionalStamina(int amount)
+        {
+            if (!_isInitialized || amount <= 0)
+            {
+                return false;
+            }
+
+            var data = GameManager.Instance.staminaData;
+
+            if ((long)data.additionalStamina + amount > int.MaxValue - MaxStamina)
+            {
+                return false;
+            }
+
+            data.additionalStamina += amount;
+            GameManager.Instance.SaveStaminaData();
+            OnStaminaChanged?.Invoke();
+
+            return true;
+        }
+
+        public TimeSpan GetRemainingRecoveryTime() => !_isInitialized
+            ? StaminaRules.RecoveryInterval
+            : StaminaRules.Remaining(GameManager.Instance.staminaData, EstimatedServerTime);
+
+        public float RecoveryProgress => !_isInitialized || GameManager.Instance.staminaData.stamina >= MaxStamina
+            ? 0f : Mathf.Clamp01(1f - (float)(GetRemainingRecoveryTime().TotalSeconds / StaminaRules.RecoveryInterval.TotalSeconds));
     }
 }

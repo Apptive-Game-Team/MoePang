@@ -91,19 +91,31 @@ namespace _01.Scripts._04.UI.MainScene
             
             // fix : Onclick 매서드로 분리하여 사운드 책임 분할 요망
             SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-            HabitatModeManager.Instance.IsHabitatBattle = true;
-            HabitatModeManager.Instance.HabitatMode = selectedMode;
             
-            
-            StageManager.Instance.SetHabitatStage(
-                selectedMode,
-                StageManager.Instance.GetHabitatStage(selectedMode)
-            );
+            if (StaminaManager.Instance == null)
+            {
+                return;
+            }
 
-            SceneManager.sceneLoaded += OnHabitatPlaySceneLoaded;
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+            HabitatMode entryMode = selectedMode;
+            StaminaManager.Instance.TryEnterStage(StaminaRules.HabitatEntryCost, () =>
+            {
+                if (!this)
+                {
+                    return;
+                }
+
+                HabitatModeManager.Instance.IsHabitatBattle = true;
+                HabitatModeManager.Instance.HabitatMode = entryMode;
+                StageManager.Instance.SetHabitatStage(
+                    entryMode,
+                    StageManager.Instance.GetHabitatStage(entryMode)
+                );
+                SceneManager.sceneLoaded += OnHabitatPlaySceneLoaded;
+                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+            });
         }
-        
+
         private void OnHabitatPlaySceneLoaded(Scene scene, LoadSceneMode mode)
         {
             StageManager.Instance.StartStage();

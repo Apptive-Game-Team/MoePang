@@ -114,6 +114,9 @@ namespace _01.Scripts._12.Backend
         [Column("stamina")]
         public int Stamina { get; set; }
         
+        [Column("additional_stamina")]
+        public int AdditionalStamina { get; set; }
+
         [Column("last_saved_datetime")]
         public DateTime LastSavedDateTime { get; set; }
     }

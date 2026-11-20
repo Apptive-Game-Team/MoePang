@@ -223,6 +223,31 @@ namespace _01.Scripts._12.Backend
             }
         }
         
+        public async Task<bool> UpdateComment(string comment)
+        {
+            try
+            {
+                var user = Client.Auth.CurrentUser;
+
+                if (user == null)
+                {
+                    return false;
+                }
+
+                var result = await Client.From<Profile>()
+                    .Set(x => x.Comment, comment ?? string.Empty)
+                    .Where(x => x.Id == user.Id)
+                    .Update();
+
+                return result.Models != null && result.Models.Any(x => x.Id == user.Id);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("Comment update failed: " + e.Message);
+                return false;
+            }
+        }
+
         public async Task<int> GetMyMaxStage()
         {
             Client client = SupabaseManager.Instance.Client;

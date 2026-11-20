@@ -17,7 +17,6 @@ namespace _01.Scripts._00.Manager
         [Header("Text Setting")]
         private TextMeshProUGUI goldText;
         private TextMeshProUGUI diaText;
-        private TextMeshProUGUI staminaText;
 
         [Header("Button Settings")] 
         private Button _optionButton;
@@ -66,10 +65,7 @@ namespace _01.Scripts._00.Manager
                 GoldManager.Instance.OnDiaChanged += UpdateDiaUI;
             }
 
-            if (StaminaManager.Instance)
-            {
-                StaminaManager.Instance.OnStaminaChanged += UpdateStaminaUI;
-            }
+
         }
 
         private void OnDisable()
@@ -80,10 +76,7 @@ namespace _01.Scripts._00.Manager
                 GoldManager.Instance.OnDiaChanged -= UpdateDiaUI;
             }
             
-            if (StaminaManager.Instance)
-            {
-                StaminaManager.Instance.OnStaminaChanged -= UpdateStaminaUI;
-            }
+
         }
 
         /// <summary>
@@ -103,10 +96,7 @@ namespace _01.Scripts._00.Manager
                 {
                     diaText = textComp;
                 }
-                else if (textComp.gameObject.name == "StaminaCardText")
-                {
-                    staminaText = textComp;
-                }
+
             }
 
             if (goldText == null) Debug.LogWarning("[CommonCanvasManager] 'GoldCardText' 이름을 가진 오브젝트를 찾을 수 없습니다!");
@@ -120,7 +110,6 @@ namespace _01.Scripts._00.Manager
         {
             UpdateGoldUI();
             UpdateDiaUI();
-            UpdateStaminaUI();
         }
         
         private void UpdateGoldUI()
@@ -136,14 +125,6 @@ namespace _01.Scripts._00.Manager
             if (diaText)
             {
                 diaText.text = $"{GoldManager.Instance.Dia}";
-            }
-        }
-
-        private void UpdateStaminaUI()
-        {
-            if (staminaText)
-            {
-                staminaText.text = $"{GameManager.Instance.staminaData.stamina}/100";
             }
         }
 
