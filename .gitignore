@@ -98,9 +98,8 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
-# Google OAuth secrets/tokens (Unity Localization)
-Assets/**/Google Sheets Service.asset
-Assets/**/Google Sheets Service.asset.meta
+# Google OAuth credentials/tokens belong in ignored UserSettings/ or Library/.
+# Commit only the credential-free Google Sheets Service asset and its .meta.
 
 # Photoshop source files
 *.psd
