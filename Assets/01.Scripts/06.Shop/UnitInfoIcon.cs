@@ -26,6 +26,7 @@ public class UnitInfoIcon : MonoBehaviour
     private Material _highlightMaterial;
     private Image _targetAnimalImage;
     private bool _isHighlighted;
+    private HabitatManager habitatManager;
 
     //프로퍼티
     public FriendlyUnitData UnitData => unitData;
@@ -49,6 +50,22 @@ public class UnitInfoIcon : MonoBehaviour
     private void Start()
     {
         RefreshUnlockState();
+    }
+
+    private void OnEnable()
+    {
+        habitatManager = HabitatManager.Instance;
+        if (habitatManager == null)
+            return;
+        habitatManager.UnlockPreviewChanged += RefreshUnlockState;
+        RefreshUnlockState();
+    }
+
+    private void OnDisable()
+    {
+        if (habitatManager != null)
+            habitatManager.UnlockPreviewChanged -= RefreshUnlockState;
+        habitatManager = null;
     }
 
     /// <summary>

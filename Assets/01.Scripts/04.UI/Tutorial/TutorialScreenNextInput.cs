@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class TutorialScreenNextInput : Image, IPointerClickHandler
     private RectTransform endButtonRect;
     private RectTransform actionButtonRect;
     private RectTransform replayButtonRect;
+    private readonly List<ScrollRect> blockedScrollRects = new();
 
     public void Configure(TutorialManager owner, RectTransform endButton)
     {
@@ -22,8 +24,53 @@ public class TutorialScreenNextInput : Image, IPointerClickHandler
 
     public void SetAllowedButtons(RectTransform actionButton, RectTransform replayButton)
     {
-        actionButtonRect = actionButton;
+        if (actionButtonRect != actionButton)
+        {
+            RestoreScrolling();
+            actionButtonRect = actionButton;
+            if (IsActive())
+                BlockActionButtonScrolling();
+        }
         replayButtonRect = replayButton;
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        BlockActionButtonScrolling();
+    }
+
+    protected override void OnDisable()
+    {
+        RestoreScrolling();
+        base.OnDisable();
+    }
+
+    private void BlockActionButtonScrolling()
+    {
+        if (actionButtonRect == null)
+            return;
+
+        // 버튼은 클릭을 받되, 부모 ScrollRect가 드래그와 관성 이동을 처리하지 못하게 합니다.
+        foreach (ScrollRect scrollRect in actionButtonRect.GetComponentsInParent<ScrollRect>(true))
+        {
+            if (!scrollRect.enabled)
+                continue;
+
+            scrollRect.StopMovement();
+            scrollRect.enabled = false;
+            blockedScrollRects.Add(scrollRect);
+        }
+    }
+
+    private void RestoreScrolling()
+    {
+        foreach (ScrollRect scrollRect in blockedScrollRects)
+        {
+            if (scrollRect != null)
+                scrollRect.enabled = true;
+        }
+        blockedScrollRects.Clear();
     }
 
     public override bool Raycast(Vector2 screenPoint, Camera eventCamera)

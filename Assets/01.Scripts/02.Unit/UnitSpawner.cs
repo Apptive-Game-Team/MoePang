@@ -53,7 +53,7 @@ namespace _01.Scripts._02.Unit
             enemySpawnCount = 0;
             BuildUnlockedUnitDictionary();
 
-            if (GameManager.Instance.isTestMode || GameManager.Instance.Istutorial) return;
+            if (GameManager.Instance.isTestMode || GameManager.Instance.IsMatchTutorial) return;
             StartCoroutine(SpawnEnemyCoroutine());
         }
 
@@ -183,7 +183,7 @@ namespace _01.Scripts._02.Unit
 
         public void SpawnTutorialEnemy(int unitIndex)
         {
-            if (!GameManager.Instance.Istutorial)
+            if (!GameManager.Instance.IsMatchTutorial)
                 return;
 
             var list = enemyUnitList.GetUnits();

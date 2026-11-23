@@ -297,7 +297,7 @@ namespace _01.Scripts._01.ThreeMatch
         #region Start Puzzle
         public IEnumerator GenerateBoard()
         {
-            if (GameManager.Instance.Istutorial)
+            if (GameManager.Instance.IsMatchTutorial)
             {
                 if (tutorialPuzzleLayout == null)
                 {
@@ -416,7 +416,7 @@ namespace _01.Scripts._01.ThreeMatch
         private GameObject SetStartRandomPuzzle(int col, int row)
         {
             //튜토리얼이면 지정한 layout 생성
-            if (GameManager.Instance.Istutorial)
+            if (GameManager.Instance.IsMatchTutorial)
             {
                 Habitat tutorialType =
                     tutorialPuzzleLayout.GetInitialTile(col, row);
@@ -434,7 +434,7 @@ namespace _01.Scripts._01.ThreeMatch
             bool isObstacle = false;
             ObstaclePuzzleType obstacleType = ObstaclePuzzleType.DeActivated;
 
-            if (!GameManager.Instance.Istutorial)
+            if (!GameManager.Instance.IsMatchTutorial)
             {
                 int currentStage =
                     HabitatModeManager.Instance && HabitatModeManager.Instance.IsHabitatBattle
@@ -586,7 +586,7 @@ namespace _01.Scripts._01.ThreeMatch
 
         private GameObject SetRandomPuzzle(int col, int row, int spawnOrder)
         {
-            if (GameManager.Instance.Istutorial)
+            if (GameManager.Instance.IsMatchTutorial)
             {
                 Habitat tutorialType = GetTutorialRefillType(col);
 
@@ -2531,7 +2531,7 @@ namespace _01.Scripts._01.ThreeMatch
         {
             while (true)
             {
-                if (GameManager.Instance.Istutorial)
+                if (GameManager.Instance.IsMatchTutorial)
                     yield break;
                 
                 yield return TutorialPuzzleClock.WaitForSeconds(obstacleSpawnInterval);
@@ -2573,7 +2573,7 @@ namespace _01.Scripts._01.ThreeMatch
         // 튜토리얼에서는 랜덤 생성 대신 지정한 정상 타일의 서식지를 유지하여 교체한다.
         public bool TryCreateTutorialObstacle(Vector2Int position, ObstaclePuzzleType type)
         {
-            if (!GameManager.Instance.Istutorial || !IsBoardReady ||
+            if (!GameManager.Instance.IsMatchTutorial || !IsBoardReady ||
                 position.x < 0 || position.x >= x || position.y < 0 || position.y >= y ||
                 _puzzles[position.x, position.y] is not NormalPuzzleObject ||
                 (type != ObstaclePuzzleType.Fixed && type != ObstaclePuzzleType.DeActivated) ||
@@ -2593,7 +2593,7 @@ namespace _01.Scripts._01.ThreeMatch
         // 조작 전 설명을 다시 볼 때만, 장애물이 기억하는 원래 서식지의 정상 타일로 복원합니다.
         public bool TryRestoreTutorialObstacle(Vector2Int position, ObstaclePuzzleType expectedType)
         {
-            if (!GameManager.Instance.Istutorial || !IsBoardReady ||
+            if (!GameManager.Instance.IsMatchTutorial || !IsBoardReady ||
                 position.x < 0 || position.x >= x || position.y < 0 || position.y >= y ||
                 _puzzles[position.x, position.y] is not ObstaclePuzzleObject obstacle ||
                 obstacle.obstaclePuzzleType != expectedType ||

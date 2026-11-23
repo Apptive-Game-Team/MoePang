@@ -69,7 +69,7 @@ public class Castle : MonoBehaviour, IDamageable
     public void TakeDamage(float damage, Sprite hitSprite = null)
     {
         SoundManager.Instance.PlaySFX(SFX.SFX8_Hit);
-        currentHp -= damage;
+        currentHp = Mathf.Max(0f, currentHp - damage);
         UpdateHpText();
         StartCoroutine(PlayHitEffect(hitSprite));
 
@@ -93,7 +93,7 @@ public class Castle : MonoBehaviour, IDamageable
 
     private void UpdateHpText()
     {
-        hpText.text = currentHp + "/" + maxHp;
+        hpText.text = $"{Mathf.RoundToInt(currentHp)}/{Mathf.RoundToInt(maxHp)}";
     }
 
     private IEnumerator PlayHitEffect(Sprite hitSprite = null)

@@ -88,6 +88,7 @@ public class TutorialManager : MonoBehaviour
 
     [Header("실행 방식")]
     [SerializeField] private bool autoStart = true;
+    [Tooltip("Use Battle Rules에 따라 GameManager의 IsMatchTutorial 또는 IsUiTutorial이 켜져 있어야 시작합니다.")]
     [SerializeField] private bool requireTutorialMode = true;
     [Tooltip("일반 UI 안내에서는 끄세요. 퍼즐, 전투 스탯, 소환 제어를 사용하지 않습니다.")]
     [SerializeField] private bool useBattleRules = true;
@@ -139,7 +140,10 @@ public class TutorialManager : MonoBehaviour
 
     private static bool HasActiveBattle => activeTutorial != null &&
         activeTutorial.isActiveAndEnabled && activeTutorial.sessionPrepared &&
-        activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.Istutorial;
+        activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.IsMatchTutorial;
+    public static bool HasActiveUiTutorial => activeTutorial != null &&
+        activeTutorial.isActiveAndEnabled && activeTutorial.sessionPrepared &&
+        !activeTutorial.useBattleRules && GameManager.Instance != null && GameManager.Instance.IsUiTutorial;
     // 0: 기존 소환 규칙, 1: 햇빛 이전, 2: 햇빛 사용으로 발생하는 소환.
     private int friendlyGradeOverride = 1;
 
@@ -298,7 +302,8 @@ public class TutorialManager : MonoBehaviour
     }
 
     private bool CanStartInCurrentMode => !requireTutorialMode ||
-        (GameManager.Instance != null && GameManager.Instance.Istutorial);
+        (GameManager.Instance != null && (useBattleRules
+            ? GameManager.Instance.IsMatchTutorial : GameManager.Instance.IsUiTutorial));
 
     private bool HasPendingRestart => pendingRestartScene == gameObject.scene.path &&
         pendingRestartOwner == name;
@@ -312,7 +317,12 @@ public class TutorialManager : MonoBehaviour
         sessionPrepared = true;
         friendlyGradeOverride = initialFriendlyGrade;
         if (!useBattleRules)
+        {
+            HabitatManager.Instance?.BeginTutorialUnlockPreview();
             return;
+        }
+
+        HabitatManager.Instance?.EndTutorialUnlockPreview();
 
         stageManager = StageManager.Instance;
         if (applyTutorialStage && stageManager != null)
@@ -584,7 +594,10 @@ public class TutorialManager : MonoBehaviour
             if (step.finishTutorial)
             {
                 EndSession(false);
-                GameManager.Instance?.CompleteTutorial();
+                if (useBattleRules)
+                    GameManager.Instance?.CompleteMatchTutorial();
+                else
+                    GameManager.Instance?.CompleteUiTutorial();
                 IsInstructionComplete = true;
                 onCompleted?.Invoke();
                 yield break;
@@ -1225,6 +1238,13 @@ public class TutorialManager : MonoBehaviour
 
     private void ApplyDialoguePlacement(TutorialStep step)
     {
+        // 유닛 상세 화면에서는 Inspector에 설정한 대사 패널 위치를 사용합니다.
+        if (gameObject.scene.name == "04.UnitDescription")
+        {
+            RestoreDialoguePlacement();
+            return;
+        }
+
         RectTransform panel = (step.panel == PanelType.Under ? underTutorialPanel : tutorialPanel)
             ?.GetComponent<RectTransform>();
         if (step.dialogueAbove == null || positionedDialoguePanel != panel)
@@ -1546,7 +1566,7 @@ public class TutorialManager : MonoBehaviour
             return false;
         }
         if (useBattleRules && (puzzleGenerator == null || GameManager.Instance == null ||
-            !GameManager.Instance.Istutorial || StageManager.Instance == null))
+            !GameManager.Instance.IsMatchTutorial || StageManager.Instance == null))
         {
             Debug.LogError("TutorialManager: 전투 규칙에는 튜토리얼 모드, PuzzleGenerator와 StageManager가 필요합니다.", this);
             return false;
@@ -1651,6 +1671,9 @@ public class TutorialManager : MonoBehaviour
         ReleaseInputRestriction();
         RestoreTutorialTimeScale();
         RestoreSessionSettings();
+        // UI 안내를 이어가는 씬 이동에서는 임시 해금을 유지하고, 완료/중단 시 원래 표시로 복구합니다.
+        if (sessionPrepared && !useBattleRules && !sceneTransitionPending)
+            HabitatManager.Instance?.EndTutorialUnlockPreview();
         friendlySpawner = null;
         sessionPrepared = false;
         if (activeTutorial == this)
