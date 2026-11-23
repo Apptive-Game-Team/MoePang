@@ -60,6 +60,9 @@ public sealed class UnitEffectLibrary : ScriptableObject
     private static UnitEffectLibrary _loadedGradeTwo;
     private static UnitEffectLibrary _loadedEnemy;
     public const string EnemyResourcePath = "ScriptableObjects/00.Unit/02.UnitEffect/EnemyUnitEffects";
+    public const string EnemyHitReferencePath = "ScriptableObjects/00.Unit/00.FriendlyUnit/1Grade/00.Scorpion";
+    private static UnitData _enemyHitReference;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetCache()
     {
@@ -67,6 +70,7 @@ public sealed class UnitEffectLibrary : ScriptableObject
         _loadedGradeFour = null;
         _loadedGradeTwo = null;
         _loadedEnemy = null;
+        _enemyHitReference = null;
     }
 
     public static bool Supports(UnitData data)
@@ -126,17 +130,58 @@ public sealed class UnitEffectLibrary : ScriptableObject
         return _loadedEnemy ? _loadedEnemy.entries.Find(item => item != null && item.unitName == name && item.sheet) : null;
     }
 
-    public static bool Play(UnitName source, bool hit, Vector3 position, float direction, float referenceSize, SpriteRenderer sortingReference, Transform parent)
+    public static float GetHitWidth(UnitData source, float multiplier)
     {
-        Entry entry = Find(source) ?? FindEnemy(source);
-        Sprite[] frames = entry?.GetFrames(hit);
+        float referenceSize = source.UnitSize;
+        if (source.Team == TeamType.Enemy)
+        {
+            if (!_enemyHitReference)
+            {
+                _enemyHitReference = Resources.Load<UnitData>(EnemyHitReferencePath);
+            }
+
+            if (_enemyHitReference)
+            {
+                referenceSize = _enemyHitReference.UnitSize;
+            }
+        }
+
+        return Mathf.Max(0.1f, referenceSize) * multiplier;
+    }
+
+    public static Vector3 GetHitPosition(Transform receiver, Vector3 restScale, float receiverSize, float direction, Vector3 offset)
+    {
+        offset.x *= direction < 0f ? -1f : 1f;
+        Vector3 parentOffset = receiver.localRotation * Vector3.Scale(restScale, offset);
+        Vector3 worldOffset = receiver.parent ? receiver.parent.TransformVector(parentOffset) : parentOffset;
+        return receiver.position + Vector3.up * (receiverSize * 0.45f) + worldOffset;
+    }
+
+    public static bool PlayHit(UnitData source, float direction, float receiverSize, SpriteRenderer sortingReference, Transform receiver, Vector3 restScale)
+    {
+        Entry entry = Find(source.UnitName) ?? FindEnemy(source.UnitName);
+        Sprite[] frames = entry?.GetFrames(true);
         if (frames == null || frames.Length == 0)
         {
             return false;
         }
 
-        float width = Mathf.Max(0.1f, referenceSize) * (hit ? entry.hitWidthMultiplier : entry.attackWidthMultiplier);
-        UnitEffectPlayer.Play(frames, position, direction, width, hit ? entry.hitDuration : entry.attackDuration, sortingReference, parent, hit ? entry.hitPositionOffset : entry.attackPositionOffset);
+        Vector3 position = GetHitPosition(receiver, restScale, receiverSize, direction, entry.hitPositionOffset);
+        float width = GetHitWidth(source, entry.hitWidthMultiplier);
+        UnitEffectPlayer.Play(frames, position, direction, width, entry.hitDuration, sortingReference, receiver, Vector3.zero, true);
         return true;
+    }
+
+    public static void PlayAttack(UnitName source, Vector3 position, float direction, float referenceSize, SpriteRenderer sortingReference, Transform parent)
+    {
+        Entry entry = Find(source) ?? FindEnemy(source);
+        Sprite[] frames = entry?.GetFrames(false);
+        if (frames == null || frames.Length == 0)
+        {
+            return;
+        }
+
+        float width = Mathf.Max(0.1f, referenceSize) * entry.attackWidthMultiplier;
+        UnitEffectPlayer.Play(frames, position, direction, width, entry.attackDuration, sortingReference, parent, entry.attackPositionOffset);
     }
 }

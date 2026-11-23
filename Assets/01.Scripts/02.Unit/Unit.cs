@@ -475,12 +475,12 @@ public class Unit : MonoBehaviour, IDamageable
         {
             Vector2 boxCenter = GetAttackBoxCenter();
             Vector3 effectCenter = new(boxCenter.x, transform.position.y + unitSize * 0.45f, transform.position.z);
-            UnitEffectLibrary.Play(data.UnitName, false, effectCenter, direction, attackRange, spriteRenderer, transform);
+            UnitEffectLibrary.PlayAttack(data.UnitName, effectCenter, direction, attackRange, spriteRenderer, transform);
         }
 
         if (dedicatedEffect && target is Unit targetUnit)
         {
-            targetUnit.TakeUnitEffectDamage(attackDamage, data.UnitName, direction);
+            targetUnit.TakeUnitEffectDamage(attackDamage, data, direction);
         }
         else
         {
@@ -586,7 +586,7 @@ public class Unit : MonoBehaviour, IDamageable
         if (dedicatedEffect)
         {
             Vector3 effectCenter = new(boxCenter.x, transform.position.y + unitSize * 0.45f, transform.position.z);
-            UnitEffectLibrary.Play(data.UnitName, false, effectCenter, direction, attackRange, spriteRenderer, transform);
+            UnitEffectLibrary.PlayAttack(data.UnitName, effectCenter, direction, attackRange, spriteRenderer, transform);
         }
 
         foreach (Collider2D hit in hits)
@@ -604,7 +604,7 @@ public class Unit : MonoBehaviour, IDamageable
 
             if (dedicatedEffect && target is Unit targetUnit)
             {
-                targetUnit.TakeUnitEffectDamage(attackDamage, data.UnitName, direction);
+                targetUnit.TakeUnitEffectDamage(attackDamage, data, direction);
             }
             else
             {
@@ -637,13 +637,13 @@ public class Unit : MonoBehaviour, IDamageable
             {
                 Vector2 boxCenter = GetAttackBoxCenter();
                 Vector3 effectCenter = new(boxCenter.x, transform.position.y + unitSize * 0.45f, transform.position.z);
-                UnitEffectLibrary.Play(data.UnitName, false, effectCenter, direction, attackRange, spriteRenderer, transform);
+                UnitEffectLibrary.PlayAttack(data.UnitName, effectCenter, direction, attackRange, spriteRenderer, transform);
                 attackEffectPlayed = true;
             }
 
             if (dedicatedEffect && target is Unit targetUnit)
             {
-                targetUnit.TakeUnitEffectDamage(attackDamage, data.UnitName, direction);
+                targetUnit.TakeUnitEffectDamage(attackDamage, data, direction);
             }
             else
             {
@@ -810,16 +810,15 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
-    private void TakeUnitEffectDamage(float damage, UnitName source, float hitDirection)
+    private void TakeUnitEffectDamage(float damage, UnitData source, float hitDirection)
     {
         if (isDying || isDamaging)
         {
             return;
         }
 
-        Vector3 hitPosition = transform.position + Vector3.up * (unitSize * 0.45f);
         bool previousSuppression = suppressCommonHitEffect;
-        suppressCommonHitEffect = UnitEffectLibrary.Play(source, true, hitPosition, hitDirection, unitSize, spriteRenderer, transform);
+        suppressCommonHitEffect = UnitEffectLibrary.PlayHit(source, hitDirection, unitSize, spriteRenderer, transform, originalScale);
         try
         {
             TakeDamage(damage);

@@ -105,12 +105,7 @@ public class UnitVfxPreview : EditorWindow
             enemies.Sort((a, b) => a.UnitGrade.CompareTo(b.UnitGrade));
             _units = enemies.ToArray();
             _labels = Array.ConvertAll(_units, unit => $"{unit.UnitGrade}등급 / {unit.UnitName}");
-            var candidates = AssetDatabase.FindAssets("t:UnitData", new[] { UnitDataPath + "00.FriendlyUnit/1Grade" });
-            if (candidates.Length > 0)
-            {
-                Array.Sort(candidates, StringComparer.Ordinal);
-                _defaultTarget = AssetDatabase.LoadAssetAtPath<UnitData>(AssetDatabase.GUIDToAssetPath(candidates[0]));
-            }
+            _defaultTarget = Resources.Load<UnitData>(UnitEffectLibrary.EnemyHitReferencePath);
         }
         else
         {
@@ -583,7 +578,8 @@ public class UnitVfxPreview : EditorWindow
         _receiver.SetActive(_hit);
         _receiver.transform.position = Vector3.right * direction * unit.UnitSize;
         var targetPrefab = target.Team == TeamType.Enemy && _enemyPrefab ? _enemyPrefab : _unitPrefab;
-        _receiver.transform.localScale = targetPrefab ? targetPrefab.transform.localScale : _unitScale;
+        Vector3 receiverRestScale = targetPrefab ? targetPrefab.transform.localScale : _unitScale;
+        _receiver.transform.localScale = receiverRestScale;
         ApplyPrefabVisual(targetPrefab, _receiverSprite);
         var targetClip = _time >= TriggerTime && _targetDamage ? _targetDamage : _targetIdle;
         if (targetClip)
@@ -616,8 +612,13 @@ public class UnitVfxPreview : EditorWindow
         var offset = entry?.FindPropertyRelative(_hit ? "hitPositionOffset" : "attackPositionOffset").vector3Value ?? Vector3.zero;
         if (frames != null)
         {
-            float width = Mathf.Max(0.1f, _hit ? target.UnitSize : unit.UnitSize) * ReadFloat(_hit ? "hitWidthMultiplier" : "attackWidthMultiplier", 1f);
-            UnitEffectPlayer.ConfigureVisual(_effectSprite, frames, spawn, direction, width, _hit ? _receiverSprite : _attackerSprite, parent, offset);
+            float width = _hit
+                ? UnitEffectLibrary.GetHitWidth(unit, ReadFloat("hitWidthMultiplier", 1f))
+                : Mathf.Max(0.1f, unit.UnitSize) * ReadFloat("attackWidthMultiplier", 1f);
+            Vector3 position = _hit
+                ? UnitEffectLibrary.GetHitPosition(parent, receiverRestScale, target.UnitSize, direction, offset)
+                : spawn;
+            UnitEffectPlayer.ConfigureVisual(_effectSprite, frames, position, direction, width, _hit ? _receiverSprite : _attackerSprite, parent, _hit ? Vector3.zero : offset);
             UnitEffectPlayer.SampleVisual(_effectSprite, frames, effectTime, duration);
         }
 

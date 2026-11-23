@@ -6,7 +6,11 @@ public sealed class UnitEffectPlayer : MonoBehaviour
     private Sprite[] _frames;
     private float _elapsed;
     private float _duration;
-    public static void Play(Sprite[] frames, Vector3 position, float direction, float width, float duration, SpriteRenderer sortingReference, Transform parent, Vector3 localOffset)
+    private bool _keepWorldPose;
+    private Vector3 _worldOffset;
+    private Vector3 _worldScale;
+
+    public static void Play(Sprite[] frames, Vector3 position, float direction, float width, float duration, SpriteRenderer sortingReference, Transform parent, Vector3 localOffset, bool keepWorldPose = false)
     {
         GameObject instance = new("UnitVFX_" + frames[0].name)
         {
@@ -21,6 +25,12 @@ public sealed class UnitEffectPlayer : MonoBehaviour
         player._spriteRenderer = renderer;
         player._frames = frames;
         player._duration = Mathf.Max(0.04f, duration);
+        player._keepWorldPose = keepWorldPose;
+        if (keepWorldPose && parent)
+        {
+            player._worldOffset = position - parent.position;
+            player._worldScale = Vector3.one * (width / frames[0].bounds.size.x);
+        }
     }
 
     public static void ConfigureVisual(SpriteRenderer renderer, Sprite[] frames, Vector3 position, float direction, float width, SpriteRenderer sortingReference, Transform parent, Vector3 localOffset)
@@ -56,6 +66,23 @@ public sealed class UnitEffectPlayer : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (!_keepWorldPose || !transform.parent)
+        {
+            return;
+        }
+
+        Vector3 parentScale = transform.parent.lossyScale;
+        if (Mathf.Approximately(parentScale.x, 0f) || Mathf.Approximately(parentScale.y, 0f) || Mathf.Approximately(parentScale.z, 0f))
+        {
+            return;
+        }
+
+        transform.SetPositionAndRotation(transform.parent.position + _worldOffset, Quaternion.identity);
+        transform.localScale = new Vector3(_worldScale.x / parentScale.x, _worldScale.y / parentScale.y, _worldScale.z / parentScale.z);
     }
 
     private void Update()
