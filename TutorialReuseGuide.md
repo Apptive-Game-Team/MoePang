@@ -35,7 +35,7 @@ Event 대기 중에는 전체 화면의 대사 넘기기 입력을 끄므로 기
 
 1. 현재 TutorialManager의 컴포넌트 설정을 복사하고 대사 UI, 하이라이트 마스크, 퍼즐 생성기, 카메라, 소환 관련 씬 참조를 다시 연결합니다.
 2. 종료 팝업을 사용한다면 End Accept Button / End Close Button을 직접 연결합니다. 팝업 없이 종료 버튼만 쓰면 누르는 즉시 StopTutorial을 실행합니다.
-3. GameManager의 튜토리얼 모드를 씬 진입 전에 켜고, 기존과 같은 TutorialPuzzleLayout을 연결합니다.
+3. GameManager의 Is Match Tutorial을 씬 진입 전에 켜고, 기존과 같은 TutorialPuzzleLayout을 연결합니다.
 4. Auto Start / Require Tutorial Mode / Use Battle Rules를 켭니다.
 5. Apply Tutorial Stage, Tutorial Castle Hp, Initial Friendly Grade, 적 소환 인덱스는 해당 안내에 맞춰 지정합니다.
 
@@ -45,7 +45,7 @@ Event 대기 중에는 전체 화면의 대사 넘기기 입력을 끄므로 기
 ## 상점·강화 등 일반 UI 안내
 
 1. Canvas 안에 대사창과 TutorialManager를 준비하고 Tutorial Panel / Tutorial Text를 연결합니다.
-2. **Use Battle Rules와 Require Tutorial Mode를 끕니다.** 퍼즐·유닛·StageManager 없이 실행할 수 있습니다.
+2. **Use Battle Rules를 끄고 Require Tutorial Mode를 켭니다.** GameManager의 Is Ui Tutorial로 UI 안내를 활성화합니다. 퍼즐·유닛·StageManager 없이 실행할 수 있습니다. 튜토리얼 불값과 관계없이 실행할 일반 안내만 Require Tutorial Mode를 끕니다.
 3. Pause Gameplay로 안내 중 게임 시간을 멈출지 선택합니다. 시간을 멈추는 경우 필요한 UI 애니메이션은 unscaled time을 사용해야 합니다.
 4. Steps에 번역 키와 Highlight Objects 등을 지정합니다. 일반 안내에서는 Swap/Special Tile/장애물/소환 관련 설정을 사용하지 않습니다.
 5. 특정 버튼 입력을 기다릴 단계는 Wait Type을 Event로 두고, 해당 버튼의 On Click에 `CompleteCurrentAction()`을 연결합니다.
