@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3544425adba24c0d987bc9a6024e6c3d, type: 3}
+  m_Name: EnemyUnitEffects
+  m_EditorClassIdentifier: 
+  entries:
+  - unitName: 25
+    sheet: {fileID: 2800000, guid: e7e7b392676f4ad98b8bcf256f33332a, type: 3}
+    attackDuration: 0.12
+    hitDuration: 0.11
+    attackWidthMultiplier: 0.75
+    hitWidthMultiplier: 0.62
+    attackPositionOffset: {x: 0, y: -0.9, z: 0}
+    hitPositionOffset: {x: 0, y: -2.01, z: 0}
+  - unitName: 26
+    sheet: {fileID: 2800000, guid: 3443ae269b95416282c144311b75c413, type: 3}
+    attackDuration: 0.126
+    hitDuration: 0.115
+    attackWidthMultiplier: 0.425
+    hitWidthMultiplier: 0.38
+    attackPositionOffset: {x: -4.65, y: -3.5, z: 0}
+    hitPositionOffset: {x: 0, y: -1.86, z: 0}
+  - unitName: 27
+    sheet: {fileID: 2800000, guid: c3d5baba0b2340ac8028a35b6601428c, type: 3}
+    attackDuration: 0.132
+    hitDuration: 0.12
+    attackWidthMultiplier: 0.3167
+    hitWidthMultiplier: 0.67
+    attackPositionOffset: {x: -9.75, y: -8.9, z: 0}
+    hitPositionOffset: {x: 0, y: -1.33, z: 0}
+  - unitName: 28
+    sheet: {fileID: 2800000, guid: 42f9febb4b6b438390d096b8308d9872, type: 3}
+    attackDuration: 0.138
+    hitDuration: 0.125
+    attackWidthMultiplier: 0.7
+    hitWidthMultiplier: 0.62
+    attackPositionOffset: {x: -1.15, y: -3.35, z: 0}
+    hitPositionOffset: {x: 0, y: -1.4, z: 0}
+  - unitName: 29
+    sheet: {fileID: 2800000, guid: 17d5b18bf9a943d09d80425760b43fba, type: 3}
+    attackDuration: 0.144
+    hitDuration: 0.13
+    attackWidthMultiplier: 1.15
+    hitWidthMultiplier: 0.72
+    attackPositionOffset: {x: 1.35, y: 1.15, z: 0}
+    hitPositionOffset: {x: 0, y: -1.55, z: 0}
+  - unitName: 30
+    sheet: {fileID: 2800000, guid: bd91d6857aab4328bbcd9824c9da4a4c, type: 3}
+    attackDuration: 0.15
+    hitDuration: 0.135
+    attackWidthMultiplier: 0.4
+    hitWidthMultiplier: 0.745
+    attackPositionOffset: {x: -6.05, y: -5.35, z: 0}
+    hitPositionOffset: {x: 0, y: -1.13, z: 0}
+  - unitName: 31
+    sheet: {fileID: 2800000, guid: d3238ba1dfa84d818e02b4f1567b6e18, type: 3}
+    attackDuration: 0.156
+    hitDuration: 0.14
+    attackWidthMultiplier: 0.8667
+    hitWidthMultiplier: 0.77
+    attackPositionOffset: {x: 5.1, y: 5.15, z: 0}
+    hitPositionOffset: {x: 0, y: -1.37, z: 0}
+  - unitName: 32
+    sheet: {fileID: 2800000, guid: 48762cde859447e49dbaec0356578118, type: 3}
+    attackDuration: 0.162
+    hitDuration: 0.145
+    attackWidthMultiplier: 0.9333
+    hitWidthMultiplier: 0.795
+    attackPositionOffset: {x: 8.14, y: -4.23, z: 0}
+    hitPositionOffset: {x: 0, y: -1.31, z: 0}
