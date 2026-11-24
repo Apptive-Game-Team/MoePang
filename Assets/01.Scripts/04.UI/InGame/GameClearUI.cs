@@ -16,27 +16,29 @@ namespace _01.Scripts._04.UI.InGame
         [SerializeField] private TextMeshProUGUI diaText;
         [SerializeField] private Image comboUnlockedPopup;
         [SerializeField] private Sprite[] habitatSprites;
-        [Header("Clear Gold Animation")]
+        [Header("Clear Reward Animation")]
         [SerializeField, Min(0)] private float goldCountDelay = 0.5f;
         [SerializeField, Min(0.01f)] private float goldCountDuration = 0.9f;
+
+        private Vector2? _timeRowPosition;
+        private Vector2 _goldRowPosition;
 
         protected override void OnEnable()
         {
             DepthOfField.active = true;
             SoundManager.Instance.PlaySFX(SFX.SFX14_StageClear);
-            
-            // Save
+
             GameManager gameManager = GameManager.Instance;
             StageManager stageManager = StageManager.Instance;
             GoldManager goldManager = GoldManager.Instance;
             HabitatModeManager habitatModeManager = HabitatModeManager.Instance;
             float time = stageManager.CurrentTime;
-            
+
             stageManager.StopStage();
             int goldBeforeReward = goldManager.Gold;
             goldManager.AddStageClearedGold();
             int goldAfterReward = goldManager.Gold;
-            
+
             int diaAmount = 0;
             bool isHabitatBattle =
                 habitatModeManager != null &&
@@ -47,11 +49,10 @@ namespace _01.Scripts._04.UI.InGame
                 diaAmount = goldManager.AddStageClearedDia();
                 SetComboUnlockedPopup();
             }
-            
-            // UI
+
             int minutes = Mathf.FloorToInt(time / 60);
             int seconds = Mathf.FloorToInt(time % 60);
-            
+
             Time.timeScale = 0f;
             DepthOfField.active = true;
             string protectedText = LocalizationSettings.StringDatabase.GetLocalizedString("LocalizationDataTable", "GameClearUI_Protected");
@@ -70,22 +71,54 @@ namespace _01.Scripts._04.UI.InGame
                 stageText.text = $"{protectedText} {habitatText} {stageManager.CurrentStage + 1}";
             }
             timeText.text = $"{minutes}:{seconds:00}";
-            var goldEffect = coinText.GetComponent<CurrencyAmountEffect>();
-            if (!goldEffect) goldEffect = coinText.gameObject.AddComponent<CurrencyAmountEffect>();
-            goldEffect.Play(coinText, goldBeforeReward, goldAfterReward, goldCountDelay, goldCountDuration);
-            if (diaInfo != null)
+            SetRewardLayout(isHabitatBattle);
+            PlayAmountEffect(coinText, goldBeforeReward, goldAfterReward);
+
+            if (isHabitatBattle && diaText != null)
             {
-                diaInfo.SetActive(isHabitatBattle);
+                PlayAmountEffect(diaText, 0, diaAmount);
             }
 
-            if (diaText != null)
-            {
-                diaText.text = $"{diaAmount}";
-            }
-            
             gameManager.SavePlayData();
         }
-        
+
+        private void SetRewardLayout(bool showDia)
+        {
+            if (diaInfo == null)
+            {
+                return;
+            }
+
+            var timeRow = (RectTransform)timeText.transform.parent;
+            var goldRow = (RectTransform)coinText.transform.parent;
+            var diaRow = (RectTransform)diaInfo.transform;
+
+            if (!_timeRowPosition.HasValue)
+            {
+                _timeRowPosition = timeRow.anchoredPosition;
+                _goldRowPosition = goldRow.anchoredPosition;
+            }
+
+            Vector2 timePosition = _timeRowPosition.Value;
+            float offsetY = showDia ? 0f : (diaRow.anchoredPosition.y - _goldRowPosition.y) * 0.5f;
+            Vector2 offset = new Vector2(0f, offsetY);
+            timeRow.anchoredPosition = timePosition + offset;
+            goldRow.anchoredPosition = _goldRowPosition + offset;
+            diaInfo.SetActive(showDia);
+        }
+
+        private void PlayAmountEffect(TextMeshProUGUI amountText, int from, int to)
+        {
+            var effect = amountText.GetComponent<CurrencyAmountEffect>();
+
+            if (effect == null)
+            {
+                effect = amountText.gameObject.AddComponent<CurrencyAmountEffect>();
+            }
+
+            effect.Play(amountText, from, to, goldCountDelay, goldCountDuration);
+        }
+
         private string GetHabitatName(HabitatMode mode)
         {
             return mode switch
@@ -109,14 +142,14 @@ namespace _01.Scripts._04.UI.InGame
                 StageManager.Instance.GetHabitatStage(mode) == 4)
             {
                 habitatImage.sprite = habitatSprites[(int)mode];
-                
+
                 Button button = comboUnlockedPopup.GetComponentInChildren<Button>();
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(() =>
                 {
                     comboUnlockedPopup.gameObject.SetActive(false);
                 });
-                
+
                 comboUnlockedPopup.gameObject.SetActive(true);
             }
         }
