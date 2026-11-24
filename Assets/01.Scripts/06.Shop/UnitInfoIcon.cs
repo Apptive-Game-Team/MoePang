@@ -44,7 +44,7 @@ public class UnitInfoIcon : MonoBehaviour
             backgroundImageOriginScale = backgroundImage.transform.localScale;
         }
         
-        _targetAnimalImage = GetComponentInChildren<Image>(true);
+        _targetAnimalImage = backgroundImage.GetComponentInChildren<Image>(true);
     }
 
     private void Start()
@@ -140,7 +140,7 @@ public class UnitInfoIcon : MonoBehaviour
     {
         if (_targetAnimalImage == null)
         {
-            _targetAnimalImage = GetComponentInChildren<Image>(true);
+            _targetAnimalImage = backgroundImage.GetComponentInChildren<Image>(true);
         }
         
         if (material != null && _targetAnimalImage.material != material)
