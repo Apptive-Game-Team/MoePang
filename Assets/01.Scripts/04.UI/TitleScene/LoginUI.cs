@@ -4,7 +4,6 @@ using _01.Scripts._12.Backend;
 using Google;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace _01.Scripts._04.UI.TitleScene
 {
@@ -28,7 +27,7 @@ namespace _01.Scripts._04.UI.TitleScene
             
             await Task.Delay(1000);
 
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+            SceneFade.Load(SceneInfo.GetSceneName(SceneType.Main));
         }
 
         public async void LocalLogin()
@@ -39,7 +38,7 @@ namespace _01.Scripts._04.UI.TitleScene
             
             await Task.Delay(1000);
 
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+            SceneFade.Load(SceneInfo.GetSceneName(SceneType.Main));
         }
     }
 }

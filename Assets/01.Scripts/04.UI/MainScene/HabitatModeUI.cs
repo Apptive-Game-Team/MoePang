@@ -111,8 +111,7 @@ namespace _01.Scripts._04.UI.MainScene
                     entryMode,
                     StageManager.Instance.GetHabitatStage(entryMode)
                 );
-                SceneManager.sceneLoaded += OnHabitatPlaySceneLoaded;
-                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+                SceneFade.Load(SceneInfo.GetSceneName(SceneType.MatchAndBattle), OnHabitatPlaySceneLoaded);
             });
         }
 
@@ -120,7 +119,6 @@ namespace _01.Scripts._04.UI.MainScene
         {
             StageManager.Instance.StartStage();
             GameManager.Instance.PlayBattleBGM();
-            SceneManager.sceneLoaded -= OnHabitatPlaySceneLoaded;
         }
 
         public void ClosePanel()

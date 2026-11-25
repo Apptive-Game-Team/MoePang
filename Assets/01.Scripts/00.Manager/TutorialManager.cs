@@ -5,6 +5,7 @@ using _01.Scripts._00.Manager;
 using _01.Scripts._01.ThreeMatch;
 using _01.Scripts._02.Unit;
 using _01.Scripts._04.UI.InGame;
+using _01.Scripts._08.Utility;
 using _01.Scripts._11.HabitatMode;
 using TMPro;
 using UnityEngine;
@@ -475,8 +476,11 @@ public class TutorialManager : MonoBehaviour
     /// <summary>전투는 보드·유닛까지 초기화하도록 씬을 재로드하고, UI 안내는 현재 씬에서 재시작합니다.</summary>
     public void RestartTutorial()
     {
-        if (!isActiveAndEnabled || !CanStartInCurrentMode)
+        if (!isActiveAndEnabled || !CanStartInCurrentMode || SceneFade.IsTransitioning)
+        {
             return;
+        }
+
         if (useBattleRules)
         {
             string scenePath = gameObject.scene.path;
@@ -488,7 +492,7 @@ public class TutorialManager : MonoBehaviour
             pendingRestartScene = scenePath;
             pendingRestartOwner = name;
             StopTutorial();
-            SceneManager.LoadScene(scenePath);
+            SceneFade.Load(scenePath);
         }
         else
         {
@@ -511,6 +515,11 @@ public class TutorialManager : MonoBehaviour
     // 씬 로드가 완료될 때까지 현재 안내를 유지하여 밝아지는 중간 화면을 막습니다.
     public static void LoadScene(string sceneName, string startDialogueKey = null)
     {
+        if (SceneFade.IsTransitioning)
+        {
+            return;
+        }
+
         TutorialManager owner = activeTutorial;
         string previousEntryScene = pendingEntryScene;
         string previousEntryKey = pendingEntryDialogueKey;
@@ -521,11 +530,7 @@ public class TutorialManager : MonoBehaviour
             owner.sceneTransitionPending = true;
             owner.UpdateScreenNextInput();
         }
-        try
-        {
-            SceneManager.LoadScene(sceneName);
-        }
-        catch
+        void RestorePendingEntry()
         {
             pendingEntryScene = previousEntryScene;
             pendingEntryDialogueKey = previousEntryKey;
@@ -534,6 +539,15 @@ public class TutorialManager : MonoBehaviour
                 owner.sceneTransitionPending = false;
                 owner.UpdateScreenNextInput();
             }
+        }
+
+        try
+        {
+            SceneFade.Load(sceneName, onFailed: RestorePendingEntry);
+        }
+        catch
+        {
+            RestorePendingEntry();
             throw;
         }
     }

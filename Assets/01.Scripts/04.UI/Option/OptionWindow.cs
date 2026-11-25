@@ -8,7 +8,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -159,7 +158,7 @@ public class OptionWindow : MonoBehaviour
                     googleConnectMigrationRejectButton.onClick.AddListener(async () =>
                     {
                         await GoogleSignInTest.Instance.ExecuteGoogleLoginFlow();
-                        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+                        SceneFade.Load(SceneInfo.GetSceneName(SceneType.Main));
                     });
                     googleConnectMigrationCancelButton.onClick.AddListener(() =>
                     {
@@ -183,7 +182,7 @@ public class OptionWindow : MonoBehaviour
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         optionButton.interactable = true;
-        SceneManager.LoadScene(0);
+        SceneFade.Load(SceneInfo.GetSceneName(SceneType.Title));
     }
 
     public void ExitGame()//게임종료
@@ -205,6 +204,6 @@ public class OptionWindow : MonoBehaviour
     public void OnTitleButton()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-        SceneManager.LoadScene("00.TitleScene");
+        SceneFade.Load(SceneInfo.GetSceneName(SceneType.Title));
     }
 }

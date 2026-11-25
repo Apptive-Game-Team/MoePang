@@ -1,7 +1,6 @@
 using _01.Scripts._00.Manager;
 using _01.Scripts._08.Utility;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using _01.Scripts._11.HabitatMode;
 
 namespace _01.Scripts._04.UI.InGame
@@ -11,7 +10,7 @@ namespace _01.Scripts._04.UI.InGame
         public void HomeButton()
         {
             SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+            SceneFade.Load(SceneInfo.GetSceneName(SceneType.Main));
         }
         
         private void EnterAfterStaminaEffect(System.Action enterStage)
@@ -73,7 +72,7 @@ namespace _01.Scripts._04.UI.InGame
 
             StageManager.Instance.StartStage();
             GameManager.Instance.PlayBattleBGM();
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+            SceneFade.Load(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
         }
 
         public void RestartButton()
@@ -89,7 +88,7 @@ namespace _01.Scripts._04.UI.InGame
 
                 StageManager.Instance.StartStage();
                 GameManager.Instance.PlayBattleBGM();
-                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+                SceneFade.Load(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
             });
         }
     }

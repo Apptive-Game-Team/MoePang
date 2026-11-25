@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -284,6 +283,6 @@ public class TitleSceneEvent : MonoBehaviour
 
     private void MoveToNextScene()
     {
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Main));
+        SceneFade.Load(SceneInfo.GetSceneName(SceneType.Main));
     }
 }

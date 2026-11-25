@@ -4,7 +4,6 @@ using System;
 using System.Threading.Tasks;
 using Google;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace _01.Scripts._12.Backend
 {
@@ -104,7 +103,7 @@ namespace _01.Scripts._12.Backend
 
                     await GameManager.Instance.LoadData();
 
-                    SceneManager.LoadScene(
+                    SceneFade.Load(
                         SceneInfo.GetSceneName(SceneType.Main)
                     );
                 }
@@ -154,7 +153,7 @@ namespace _01.Scripts._12.Backend
             try
             {
                 await SupabaseLoginManager.Instance.Logout();
-                SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Title));
+                SceneFade.Load(SceneInfo.GetSceneName(SceneType.Title));
             }
             catch (Exception e)
             {

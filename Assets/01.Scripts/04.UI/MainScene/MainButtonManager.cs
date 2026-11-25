@@ -59,8 +59,7 @@ public class MainButtonManager : MonoBehaviour
             }
 
             HabitatModeManager.Instance.IsHabitatBattle = false;
-            SceneManager.sceneLoaded += OnPlaySceneLoaded;
-            SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+            SceneFade.Load(SceneInfo.GetSceneName(SceneType.MatchAndBattle), OnPlaySceneLoaded);
         });
     }
 
@@ -74,8 +73,7 @@ public class MainButtonManager : MonoBehaviour
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
         GameManager.Instance.isTestMode = true;
         HabitatModeManager.Instance.IsHabitatBattle = false;
-        SceneManager.sceneLoaded += OnPlaySceneLoaded;
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.MatchAndBattle));
+        SceneFade.Load(SceneInfo.GetSceneName(SceneType.MatchAndBattle), OnPlaySceneLoaded);
     }
 
     // 게임 플레이 시 시작돼야 할 사항들
@@ -83,14 +81,12 @@ public class MainButtonManager : MonoBehaviour
     {
         StageManager.Instance.StartStage();
         GameManager.Instance.PlayBattleBGM();
-        
-        SceneManager.sceneLoaded -= OnPlaySceneLoaded;
     }
 
     public void OnClickShop()
     {
         SoundManager.Instance.PlaySFX(SFX.SFX2_ButtonClick);
-        SceneManager.LoadScene(SceneInfo.GetSceneName(SceneType.Shop));
+        SceneFade.Load(SceneInfo.GetSceneName(SceneType.Shop));
     }
 
     /// <summary>
