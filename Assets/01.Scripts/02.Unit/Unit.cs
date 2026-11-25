@@ -119,12 +119,13 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void SetData(UnitData data)
     {
         this.data = data;
+        // Rebuild buffs from the manager when a pooled unit is initialized again.
+        _activeBuffs.Clear();
 
         SetBaseStat();
         SetVisual();
 
         UTQ.ResetAndInsert(this);
-        BuffManager.Instance.RegisterUnit(this);
 
         ChangeState(UnitState.Move, true);
     }
@@ -160,7 +161,7 @@ public class Unit : MonoBehaviour, IDamageable
         if (animator == null) animator = GetComponent<Animator>();
 
         originalScale = transform.localScale;
-        spriteRenderer.sortingOrder = GetSortingOrderByY();
+        UnitSortingManager.Register(spriteRenderer);
         animator.runtimeAnimatorController = data.AnimatorOverride;
 
         transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
@@ -173,12 +174,9 @@ public class Unit : MonoBehaviour, IDamageable
         }
     }
 
-    private int GetSortingOrderByY()
+    private void OnDisable()
     {
-        const int baseOrder = 1000;
-        const int precision = 100;
-
-        return baseOrder - Mathf.RoundToInt(transform.position.y * precision);
+        UnitSortingManager.Unregister(spriteRenderer);
     }
 
     /// <summary>
@@ -193,6 +191,9 @@ public class Unit : MonoBehaviour, IDamageable
         _originMoveSpeed = moveSpeed;
         _originAttackDamage = attackDamage;
         _originAttackSpeed = attackSpeed;
+
+        // Buffs must use the finalized, unbuffed stats, including on the first spawn.
+        BuffManager.Instance.RegisterUnit(this);
     }
 
     /// <summary>
