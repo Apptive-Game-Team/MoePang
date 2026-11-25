@@ -119,12 +119,13 @@ public class Unit : MonoBehaviour, IDamageable
     public virtual void SetData(UnitData data)
     {
         this.data = data;
+        // Rebuild buffs from the manager when a pooled unit is initialized again.
+        _activeBuffs.Clear();
 
         SetBaseStat();
         SetVisual();
 
         UTQ.ResetAndInsert(this);
-        BuffManager.Instance.RegisterUnit(this);
 
         ChangeState(UnitState.Move, true);
     }
@@ -193,6 +194,9 @@ public class Unit : MonoBehaviour, IDamageable
         _originMoveSpeed = moveSpeed;
         _originAttackDamage = attackDamage;
         _originAttackSpeed = attackSpeed;
+
+        // Buffs must use the finalized, unbuffed stats, including on the first spawn.
+        BuffManager.Instance.RegisterUnit(this);
     }
 
     /// <summary>
